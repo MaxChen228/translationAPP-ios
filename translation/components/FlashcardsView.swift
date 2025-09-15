@@ -21,9 +21,10 @@ final class FlashcardsStore: ObservableObject {
     @Published var index: Int = 0
     @Published var showBack: Bool = false
 
-    init(cards: [Flashcard] = FlashcardsStore.defaultCards) {
+    init(cards: [Flashcard] = FlashcardsStore.defaultCards, startIndex: Int = 0) {
         self.cards = cards
-        self.index = 0
+        let clamped = max(0, min(startIndex, max(0, cards.count - 1)))
+        self.index = clamped
     }
 
     var current: Flashcard? { cards.isEmpty ? nil : cards[index] }
@@ -64,8 +65,8 @@ struct FlashcardsView: View {
     @State private var errorText: String? = nil
     @State private var showDeleteConfirm: Bool = false
 
-    init(title: String = "單字卡", cards: [Flashcard] = FlashcardsStore.defaultCards, deckID: UUID? = nil) {
-        _store = StateObject(wrappedValue: FlashcardsStore(cards: cards))
+    init(title: String = "單字卡", cards: [Flashcard] = FlashcardsStore.defaultCards, deckID: UUID? = nil, startIndex: Int = 0) {
+        _store = StateObject(wrappedValue: FlashcardsStore(cards: cards, startIndex: startIndex))
         self.title = title
         self.deckID = deckID
     }

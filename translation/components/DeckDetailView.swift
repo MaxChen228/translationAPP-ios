@@ -40,9 +40,9 @@ struct DeckDetailView: View {
                     Text("詞語").dsType(DS.Font.section)
                     VStack(spacing: 10) {
                         ForEach(d.cards) { card in
+                            let idx = d.cards.firstIndex(where: { $0.id == card.id }) ?? 0
                             NavigationLink {
-                                // 進入學習頁，從該卡開始（簡化：目前直接進入整副，未定位 index）
-                                FlashcardsView(title: d.name, cards: d.cards, deckID: d.id)
+                                FlashcardsView(title: d.name, cards: d.cards, deckID: d.id, startIndex: idx)
                             } label: {
                                 CardPreviewRow(card: card)
                             }
@@ -96,12 +96,17 @@ private struct CardPreviewRow: View {
                     .dsType(DS.Font.section)
                     .foregroundStyle(.primary)
                     .lineLimit(1)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .multilineTextAlignment(.leading)
                 VariantPhraseView(card.back)
                     .dsType(DS.Font.body)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .multilineTextAlignment(.leading)
             }
         }
+        .contentShape(RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous))
     }
 }
 
@@ -111,4 +116,3 @@ private struct CardPreviewRow: View {
     return NavigationStack { DeckDetailView(deckID: deck.id) }
         .environmentObject(store)
 }
-
