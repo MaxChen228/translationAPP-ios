@@ -65,12 +65,13 @@ struct FlashcardsView: View {
     @State private var draft: Flashcard? = nil
     @State private var errorText: String? = nil
     @State private var showDeleteConfirm: Bool = false
-    // Review modes
-    enum ReviewMode: String, CaseIterable { case browse = "瀏覽", annotate = "標注" }
-    @State private var mode: ReviewMode = .browse
+    // Review mode from AppStorage
+    @AppStorage("flashcards.reviewMode") private var modeRaw: String = FlashcardsReviewMode.browse.rawValue
+    private var mode: FlashcardsReviewMode { get { FlashcardsReviewMode(rawValue: modeRaw) ?? .browse } set { modeRaw = newValue.rawValue } }
     // Swipe annotate state
     @State private var dragX: CGFloat = 0
     @State private var flashDelta: Int? = nil
+    @State private var showSettings = false
 
     init(title: String = "單字卡", cards: [Flashcard] = FlashcardsStore.defaultCards, deckID: UUID? = nil, startIndex: Int = 0) {
         _store = StateObject(wrappedValue: FlashcardsStore(cards: cards, startIndex: startIndex))
@@ -88,14 +89,9 @@ struct FlashcardsView: View {
                     accentMatchTitle: true
                 )
 
-                // 模式選擇 + 進度指示
+                // 進度指示（模式改到設定）
                 if !store.cards.isEmpty {
                     HStack {
-                        Picker("模式", selection: $mode) {
-                            Text(ReviewMode.browse.rawValue).tag(ReviewMode.browse)
-                            Text(ReviewMode.annotate.rawValue).tag(ReviewMode.annotate)
-                        }
-                        .pickerStyle(.segmented)
                         Spacer()
                         Text("\(store.index + 1) / \(store.cards.count)")
                             .dsType(DS.Font.caption)
@@ -204,10 +200,22 @@ struct FlashcardsView: View {
                     }
                 }
             }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showSettings = true
+                } label: {
+                    Image(systemName: "gearshape")
+                }
+                .accessibilityLabel("設定")
+            }
         }
         .alert("確定要刪除這張卡片嗎？", isPresented: $showDeleteConfirm) {
             Button("刪除", role: .destructive) { deleteCurrent() }
             Button("取消", role: .cancel) {}
+        }
+        .sheet(isPresented: $showSettings) {
+            FlashcardsSettingsSheet()
+                .presentationDetents([.height(220)])
         }
     }
 }
