@@ -176,9 +176,7 @@ struct FlashcardsView: View {
                         }
 
                         HStack(spacing: DS.Spacing.md) {
-                            Button {
-                                store.prev(); store.showBack = false
-                            } label: { Label("上一張", systemImage: "chevron.left") }
+                            Button { goToPreviousAnimated() } label: { Label("上一張", systemImage: "chevron.left") }
                             .buttonStyle(DSSecondaryButtonCompact())
 
                             Button {
@@ -312,6 +310,17 @@ private extension FlashcardsView {
         if delta > 0 { Haptics.success() } else { Haptics.warning() }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             withAnimation(.easeOut(duration: 0.2)) { flashDelta = nil }
+        }
+    }
+
+    func goToPreviousAnimated() {
+        guard !store.cards.isEmpty else { return }
+        let dir: CGFloat = 1 // toss right then bring previous from left
+        withAnimation(.easeOut(duration: 0.18)) { dragX = dir * 800 }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
+            store.prev(); store.showBack = false
+            dragX = -dir * 450
+            withAnimation(.spring(response: 0.42, dampingFraction: 0.85)) { dragX = 0 }
         }
     }
 }
