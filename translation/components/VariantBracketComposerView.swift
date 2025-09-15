@@ -12,7 +12,8 @@ struct VariantBracketComposerView: View {
     }
 
     var body: some View {
-        let parsed = VariantSyntaxParser.parse(standardizeSeparators(phrase))
+        let parsed0 = VariantSyntaxParser.parse(standardizeSeparators(phrase))
+        let parsed = transformByFactoring(parsed0)
         let groups = parsed.elements.enumerated().compactMap { (i, el) -> (idx: Int, opts: [String])? in
             if case .group(let g) = el { return (i, g) } else { return nil }
         }
@@ -93,14 +94,9 @@ private struct BracketOptionsColumn: View {
                         Text(options[idx])
                             .dsType(DS.Font.body)
                             .foregroundStyle(.primary)
-                            .padding(.vertical, 4)
-                            .padding(.horizontal, 8)
-                            .background(
-                                Capsule().fill(isSel ? DS.Palette.surface : .clear)
-                            )
-                            .overlay(
-                                Capsule().stroke(DS.Palette.border.opacity(isSel ? 0.45 : 0.18), lineWidth: isSel ? 1 : DS.Metrics.hairline)
-                            )
+                            .padding(.vertical, 2)
+                            .padding(.horizontal, 0)
+                            .underline(isSel, color: DS.Palette.border.opacity(0.6))
                     }
                     .buttonStyle(.plain)
                 }
@@ -123,6 +119,78 @@ private func standardizeSeparators(_ s: String) -> String {
 }
 
 private extension VariantBracketComposerView {
+    func transformByFactoring(_ parsed: VariantPhrase) -> VariantPhrase {
+        var out: [VariantElement] = []
+        for el in parsed.elements {
+            switch el {
+            case .text:
+                out.append(el)
+            case .group(let opts):
+                let trimmed = opts.map { $0.trimmingCharacters(in: .whitespaces) }
+                let cp = factoredCommonPrefix(trimmed)
+                let cs = factoredCommonSuffix(trimmed)
+                if !cp.isEmpty { out.append(.text(cp)) }
+                let core = trimmed.map { stripPrefixSuffix($0, prefix: cp, suffix: cs) }
+                out.append(.group(core))
+                if !cs.isEmpty { out.append(.text(cs)) }
+            }
+        }
+        return VariantPhrase(elements: mergeAdjacentText(out))
+    }
+
+    func factoredCommonPrefix(_ arr: [String]) -> String {
+        guard let first = arr.first, arr.count > 1 else { return "" }
+        var cp = first
+        for s in arr.dropFirst() {
+            cp = commonPrefix(cp, s)
+            if cp.isEmpty { break }
+        }
+        // 回退到詞邊界（最後一個空白或標點之後）
+        if let idx = cp.lastIndex(where: { $0.isWhitespace || ",.;:!?".contains($0) }) {
+            let end = cp.index(after: idx)
+            return String(cp[..<end])
+        }
+        return ""
+    }
+
+    func factoredCommonSuffix(_ arr: [String]) -> String {
+        guard let first = arr.first, arr.count > 1 else { return "" }
+        var cs = first
+        for s in arr.dropFirst() {
+            cs = commonSuffix(cs, s)
+            if cs.isEmpty { break }
+        }
+        // 取從第一個空白或標點開始的尾段，避免切在詞中間
+        if let i = cs.firstIndex(where: { $0.isWhitespace || ",.;:!?".contains($0) }) {
+            return String(cs[i...])
+        }
+        return ""
+    }
+
+    func commonPrefix(_ a: String, _ b: String) -> String {
+        let ac = Array(a), bc = Array(b)
+        var i = 0
+        while i < ac.count && i < bc.count && ac[i] == bc[i] { i += 1 }
+        return String(ac[0..<i])
+    }
+
+    func commonSuffix(_ a: String, _ b: String) -> String {
+        let ac = Array(a), bc = Array(b)
+        var ia = ac.count - 1, ib = bc.count - 1
+        var len = 0
+        while ia >= 0 && ib >= 0 && ac[ia] == bc[ib] { ia -= 1; ib -= 1; len += 1 }
+        if len == 0 { return "" }
+        return String(ac[(ac.count - len)...])
+    }
+
+    func stripPrefixSuffix(_ s: String, prefix: String, suffix: String) -> String {
+        var out = s
+        if !prefix.isEmpty, out.hasPrefix(prefix) { out.removeFirst(prefix.count) }
+        if !suffix.isEmpty, out.hasSuffix(suffix) { out.removeLast(suffix.count) }
+        return out.trimmingCharacters(in: .whitespaces)
+    }
+}
+
     func ensureSelection(groups: [(idx: Int, opts: [String])]) {
         for (i, g) in groups {
             if selected[i] == nil { selected[i] = 0 }
