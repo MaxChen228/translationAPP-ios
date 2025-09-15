@@ -178,8 +178,8 @@ private struct AddWorkspaceCard: View {
         .padding(DS.Spacing.md)
         .overlay(
             RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                .stroke(style: StrokeStyle(lineWidth: DS.Metrics.hairline, dash: [5, 4]))
-                .foregroundStyle(DS.Palette.border.opacity(0.35))
+                .stroke(style: StrokeStyle(lineWidth: 1, dash: [5, 4]))
+                .foregroundStyle(DS.Palette.border.opacity(0.45))
         )
         .contentShape(RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous))
     }
@@ -269,7 +269,7 @@ private struct StatusBadge: View {
         }
         .padding(.vertical, 4)
         .padding(.horizontal, 8)
-        .overlay(Capsule().stroke(DS.Palette.border.opacity(0.35), lineWidth: DS.Metrics.hairline))
+        .overlay(Capsule().stroke(DS.Palette.border.opacity(0.45), lineWidth: 1))
     }
 }
 

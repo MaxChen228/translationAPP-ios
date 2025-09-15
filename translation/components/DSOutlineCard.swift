@@ -20,8 +20,7 @@ struct DSOutlineCard<Content: View>: View {
         .background((fill ?? DS.Palette.background), in: RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                .strokeBorder(DS.Palette.border.opacity(0.28), lineWidth: DS.Metrics.hairline)
+                .strokeBorder(DS.Palette.border.opacity(0.45), lineWidth: 1)
         )
     }
 }
-
