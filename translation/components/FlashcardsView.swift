@@ -121,7 +121,7 @@ struct FlashcardsView: View {
                             }
                         } back: {
                             VStack(alignment: .leading, spacing: 10) {
-                                VariantPhraseView(card.back)
+                                VariantBracketComposerView(card.back)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                 if let note = card.backNote, !note.isEmpty {
                                     NoteText(text: note)
