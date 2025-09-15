@@ -98,7 +98,7 @@ private struct DeckItemLink: View {
     var onDelete: () -> Void
     var body: some View {
         NavigationLink {
-            FlashcardsView(title: deck.name, cards: deck.cards, deckID: deck.id)
+            DeckDetailView(deckID: deck.id)
         } label: {
             DeckCard(name: deck.name, count: deck.cards.count)
                 .contextMenu {
