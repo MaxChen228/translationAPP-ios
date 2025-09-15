@@ -133,8 +133,8 @@ struct FlashcardsView: View {
                             }
                             }
                             .onTapGesture { store.flip() }
-                            .offset(x: mode == .annotate ? dragX * 0.25 : 0)
-                            .rotationEffect(.degrees(mode == .annotate ? Double(dragX) * 0.02 : 0))
+                            .offset(x: dragX)
+                            .rotationEffect(.degrees(Double(max(-10, min(10, dragX * 0.06)))))
 
                             if mode == .annotate, let flash = flashDelta {
                                 Text(flash > 0 ? "+1" : "-1")
@@ -144,16 +144,27 @@ struct FlashcardsView: View {
                                     .overlay(Capsule().stroke((flash > 0 ? Color.green : Color.orange).opacity(0.5), lineWidth: 1))
                             }
                         }
-                        .gesture(mode == .annotate ? DragGesture(minimumDistance: 20)
-                                    .onChanged { v in dragX = v.translation.width }
-                                    .onEnded { v in
-                                        let t = v.translation.width
-                                        let threshold: CGFloat = 80
-                                        if t > threshold { adjustProficiency(+1) }
-                                        else if t < -threshold { adjustProficiency(-1) }
-                                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) { dragX = 0 }
+                        .gesture(DragGesture(minimumDistance: 20)
+                            .onChanged { v in dragX = v.translation.width }
+                            .onEnded { v in
+                                let t = v.translation.width
+                                let threshold: CGFloat = 80
+                                if abs(t) > threshold {
+                                    let dir: CGFloat = t > 0 ? 1 : -1
+                                    // Toss out
+                                    withAnimation(.easeOut(duration: 0.18)) { dragX = dir * 800 }
+                                    // Apply annotate if needed, then advance and animate in from opposite side
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
+                                        if mode == .annotate { adjustProficiency(dir > 0 ? +1 : -1) }
+                                        store.next()
+                                        store.showBack = false
+                                        dragX = -dir * 450
+                                        withAnimation(.spring(response: 0.42, dampingFraction: 0.85)) { dragX = 0 }
                                     }
-                                : nil)
+                                } else {
+                                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) { dragX = 0 }
+                                }
+                            })
 
                         if mode == .annotate, let deckID = deckID {
                             HStack {
@@ -170,19 +181,9 @@ struct FlashcardsView: View {
 
                         HStack(spacing: DS.Spacing.md) {
                             Button {
-                                store.prev()
-                            } label: { Label("上一張", systemImage: "chevron.left.circle.fill") }
-                            .buttonStyle(DSSecondaryButton())
-
-                            Button {
                                 store.flip()
                             } label: { Label(store.showBack ? "看正面" : "看背面", systemImage: "arrow.2.squarepath") }
                             .buttonStyle(DSPrimaryButton())
-
-                            Button {
-                                store.next()
-                            } label: { Label("下一張", systemImage: "chevron.right.circle.fill") }
-                            .buttonStyle(DSSecondaryButton())
                         }
                     }
                 } else {
