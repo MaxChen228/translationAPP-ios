@@ -16,5 +16,10 @@ enum Haptics {
         gen.notificationOccurred(.warning)
         #endif
     }
+    static func lightTick() {
+        #if os(iOS)
+        let gen = UIImpactFeedbackGenerator(style: .light)
+        gen.impactOccurred()
+        #endif
+    }
 }
-

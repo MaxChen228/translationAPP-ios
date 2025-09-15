@@ -3,15 +3,24 @@ import SwiftUI
 struct DeckDetailView: View {
     let deckID: UUID
     @EnvironmentObject private var decksStore: FlashcardDecksStore
+    @EnvironmentObject private var progressStore: FlashcardProgressStore
 
     private var deck: PersistedFlashcardDeck? {
         decksStore.decks.first(where: { $0.id == deckID })
     }
 
-    // Simple counters (v1): treat all as 未學習；後續接入進度資料再更新
+    // Counters based on progress levels
     private var counts: (new: Int, learning: Int, mastered: Int) {
-        let total = deck?.cards.count ?? 0
-        return (new: total, learning: 0, mastered: 0)
+        guard let d = deck else { return (0,0,0) }
+        let threshold = 3
+        var new = 0, learning = 0, mastered = 0
+        for c in d.cards {
+            let lvl = max(0, progressStore.level(deckID: d.id, cardID: c.id))
+            if lvl == 0 { new += 1 }
+            else if lvl >= threshold { mastered += 1 }
+            else { learning += 1 }
+        }
+        return (new, learning, mastered)
     }
 
     var body: some View {

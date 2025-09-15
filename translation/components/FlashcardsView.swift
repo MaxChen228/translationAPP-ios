@@ -177,6 +177,11 @@ struct FlashcardsView: View {
 
                         HStack(spacing: DS.Spacing.md) {
                             Button {
+                                store.prev(); store.showBack = false
+                            } label: { Label("上一張", systemImage: "chevron.left") }
+                            .buttonStyle(DSSecondaryButtonCompact())
+
+                            Button {
                                 store.flip()
                             } label: { Label(store.showBack ? "看正面" : "看背面", systemImage: "arrow.2.squarepath") }
                             .buttonStyle(DSPrimaryButton())

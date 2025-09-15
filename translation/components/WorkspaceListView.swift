@@ -15,6 +15,8 @@ struct WorkspaceListView: View {
     private var cols: [GridItem] { [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.lg)] }
     @State private var programmaticOpenVM: CorrectionViewModel? = nil
     @State private var openActive: Bool = false
+    // 拖曳中的項目（以 ID 辨識）。用於視覺提升與 DropDelegate 比對。
+    @State private var draggingID: UUID? = nil
 
     var body: some View {
         NavigationStack {
@@ -26,12 +28,10 @@ struct WorkspaceListView: View {
                     LazyVGrid(columns: cols, spacing: DS.Spacing.lg) {
 
                     ForEach(store.workspaces) { ws in
-                        WorkspaceItemLink(ws: ws, vm: store.vm(for: ws.id)) {
+                        WorkspaceItemLink(ws: ws, vm: store.vm(for: ws.id), store: store, draggingID: $draggingID) {
                             startRename(ws)
                         } onDelete: {
                             store.remove(ws.id)
-                        } onReorder: { dragged, target in
-                            store.moveWorkspace(dragged, before: target)
                         }
                         .environmentObject(savedStore)
                     }
@@ -42,6 +42,8 @@ struct WorkspaceListView: View {
                         AddWorkspaceCard()
                     }
                     .buttonStyle(.plain)
+                    // 允許拖到新增卡以移到清單尾端
+                    .onDrop(of: [.text], delegate: AddToEndDropDelegate(store: store, draggingID: $draggingID))
                     }
                 }
                 .padding(.horizontal, DS.Spacing.lg)
@@ -89,20 +91,58 @@ struct WorkspaceListView: View {
     }
 }
 
-// Drag payload for reordering
-private struct WorkspaceDragItem: Identifiable, Codable, Hashable, Transferable {
-    let id: UUID
-    static var transferRepresentation: some TransferRepresentation {
-        CodableRepresentation(contentType: .data)
+// MARK: - 拖曳重排 Delegate / 尾端 Drop Delegate
+
+private struct ReorderDropDelegate: DropDelegate {
+    let item: Workspace
+    let store: WorkspaceStore
+    @Binding var draggingID: UUID?
+
+    func validateDrop(info: DropInfo) -> Bool { true }
+    func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
+
+    func dropEntered(info: DropInfo) {
+        guard let draggingID, draggingID != item.id else { return }
+        guard let from = store.index(of: draggingID), let to = store.index(of: item.id) else { return }
+        if from != to {
+            withAnimation(.interactiveSpring(response: 0.26, dampingFraction: 0.86)) {
+                store.moveWorkspace(id: draggingID, to: to > from ? to + 1 : to)
+            }
+            Haptics.lightTick()
+        }
+    }
+
+    func performDrop(info: DropInfo) -> Bool {
+        draggingID = nil
+        Haptics.success()
+        return true
+    }
+}
+
+private struct AddToEndDropDelegate: DropDelegate {
+    let store: WorkspaceStore
+    @Binding var draggingID: UUID?
+    func validateDrop(info: DropInfo) -> Bool { true }
+    func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
+    func dropEntered(info: DropInfo) { /* 可選：即時移到尾端，先保守不動 */ }
+    func performDrop(info: DropInfo) -> Bool {
+        guard let draggingID else { return false }
+        withAnimation(.interactiveSpring(response: 0.26, dampingFraction: 0.86)) {
+            store.moveWorkspace(id: draggingID, to: store.workspaces.count)
+        }
+        self.draggingID = nil
+        Haptics.success()
+        return true
     }
 }
 
 private struct WorkspaceItemLink: View {
     let ws: Workspace
     @ObservedObject var vm: CorrectionViewModel
+    let store: WorkspaceStore
+    @Binding var draggingID: UUID?
     var onRename: () -> Void
     var onDelete: () -> Void
-    var onReorder: (_ draggedID: UUID, _ targetID: UUID) -> Void
     @EnvironmentObject private var savedStore: SavedErrorsStore
 
     var status: String {
@@ -129,15 +169,19 @@ private struct WorkspaceItemLink: View {
                     Button("重新命名") { onRename() }
                     Button("刪除", role: .destructive) { onDelete() }
                 }
-                .onLongPressGesture { onRename() }
+                // 移除長按手勢避免與拖曳啟動衝突（改由 context menu）
         }
         .buttonStyle(DSCardLinkStyle())
-        .draggable(WorkspaceDragItem(id: ws.id))
-        .dropDestination(for: WorkspaceDragItem.self) { items, location in
-            guard let first = items.first else { return false }
-            if first.id != ws.id { onReorder(first.id, ws.id) }
-            return true
+        .onDrag {
+            self.draggingID = ws.id
+            return NSItemProvider(object: ws.id.uuidString as NSString)
         }
+        .onDrop(of: [.text], delegate: ReorderDropDelegate(item: ws, store: store, draggingID: $draggingID))
+        // Lift 視覺：略為放大、加陰影、提高 zIndex；其他項目微降透明度
+        .scaleEffect(draggingID == ws.id ? 1.03 : 1.0)
+        .opacity(draggingID == nil || draggingID == ws.id ? 1.0 : 0.98)
+        .shadow(color: Color.black.opacity(draggingID == ws.id ? 0.12 : 0), radius: 10, x: 0, y: 6)
+        .zIndex(draggingID == ws.id ? 1 : 0)
     }
 }
 
