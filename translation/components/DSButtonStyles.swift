@@ -23,10 +23,10 @@ struct DSSecondaryButton: ButtonStyle {
             .foregroundStyle(DS.Palette.primary)
             .padding(.vertical, 10)
             .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
-                    .stroke(DS.Palette.primary.opacity(0.35), lineWidth: 1)
-            )
+        .background(
+            RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
+                .stroke(DS.Palette.primary.opacity(0.35), lineWidth: DS.BorderWidth.regular)
+        )
             .opacity(configuration.isPressed ? 0.9 : 1)
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
     }
@@ -40,10 +40,10 @@ struct DSSecondaryButtonCompact: ButtonStyle {
             .foregroundStyle(DS.Palette.primary)
             .padding(.vertical, 6)
             .padding(.horizontal, 10)
-            .background(
-                RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
-                    .stroke(DS.Palette.primary.opacity(0.35), lineWidth: 1)
-            )
+        .background(
+            RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
+                .stroke(DS.Palette.primary.opacity(0.35), lineWidth: DS.BorderWidth.regular)
+        )
             .opacity(configuration.isPressed ? 0.9 : 1)
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
     }
@@ -56,7 +56,7 @@ struct DSCardLinkStyle: ButtonStyle {
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
             .overlay(
                 RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                    .stroke(DS.Palette.primary.opacity(configuration.isPressed ? 0.45 : 0), lineWidth: 1)
+                    .stroke(DS.Palette.primary.opacity(configuration.isPressed ? 0.45 : 0), lineWidth: DS.BorderWidth.regular)
             )
             .animation(.spring(response: 0.28, dampingFraction: 0.9), value: configuration.isPressed)
     }

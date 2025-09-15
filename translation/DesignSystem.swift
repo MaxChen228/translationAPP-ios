@@ -4,8 +4,9 @@ import UIKit
 // Minimal, extensible design tokens for consistent UI
 enum DS {
     enum Metrics {
-        // 1 physical pixel regardless of scale
-        static var hairline: CGFloat { 1 / UIScreen.main.scale }
+        // Base hairline thickness; slightly thicker for better visibility on 3x
+        // Previously: 1 / UIScreen.main.scale (~0.33pt on 3x). Now ensure >= 0.5pt.
+        static var hairline: CGFloat { max(1 / UIScreen.main.scale, 0.5) }
     }
     enum Spacing {
         static let xs: CGFloat = 6
@@ -13,6 +14,16 @@ enum DS {
         static let md: CGFloat = 16
         static let lg: CGFloat = 24
         static let xl: CGFloat = 32
+    }
+
+    // Standardized border widths so we avoid magic numbers
+    enum BorderWidth {
+        // Hairline should reflect device pixel ratio; reuse Metrics.hairline
+        static var hairline: CGFloat { DS.Metrics.hairline }
+        // Thin cosmetic borders (chips, badges)
+        static let thin: CGFloat = 0.8
+        // Regular 1pt borders (inputs, buttons, outlines)
+        static let regular: CGFloat = 1.0
     }
 
     enum Radius {

@@ -101,7 +101,7 @@ struct BankBooksView: View {
                 .background(DS.Palette.surface, in: RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous))
                 .overlay(
                     RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                        .stroke(DS.Palette.border.opacity(0.3), lineWidth: 0.5)
+                        .stroke(DS.Palette.border.opacity(0.3), lineWidth: DS.BorderWidth.hairline)
                 )
             }
         }
@@ -198,7 +198,7 @@ private struct BankBookCard: View {
         .background(DS.Palette.surface, in: RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                .stroke(DS.Palette.border.opacity(0.3), lineWidth: 0.5)
+                .stroke(DS.Palette.border.opacity(0.3), lineWidth: DS.BorderWidth.hairline)
         )
         .dsCardShadow()
     }

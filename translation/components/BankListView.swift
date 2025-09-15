@@ -26,7 +26,7 @@ struct BankListView: View {
                             .padding(.horizontal, 12)
                             .background(
                                 RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
-                                    .stroke(DS.Palette.border.opacity(0.6), lineWidth: 1)
+                                    .stroke(DS.Palette.border.opacity(0.6), lineWidth: DS.BorderWidth.regular)
                                     .background(DS.Palette.surface.opacity(0.0001)) // keep hit testing sane
                             )
                         HStack(spacing: 8) {
@@ -79,7 +79,7 @@ struct BankListView: View {
                                             Capsule().fill(DS.Brand.scheme.peachQuartz.opacity(0.16))
                                         )
                                         .overlay(
-                                            Capsule().stroke(DS.Brand.scheme.peachQuartz.opacity(0.5), lineWidth: 0.8)
+                                            Capsule().stroke(DS.Brand.scheme.peachQuartz.opacity(0.5), lineWidth: DS.BorderWidth.thin)
                                         )
                                 }
                             }
@@ -123,7 +123,7 @@ private struct WrapChips: View {
                     .padding(.vertical, 6)
                     .padding(.horizontal, 10)
                     .background(Capsule().fill(chip.color.opacity(0.12)))
-                    .overlay(Capsule().stroke(chip.color.opacity(0.35), lineWidth: 0.8))
+                    .overlay(Capsule().stroke(chip.color.opacity(0.35), lineWidth: DS.BorderWidth.thin))
             }
         }
     }

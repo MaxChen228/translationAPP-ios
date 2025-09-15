@@ -87,7 +87,7 @@ private struct DeckCard: View {
         }
         .overlay(
             RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                .stroke(DS.Palette.border.opacity(0.18), lineWidth: 0.5)
+                .stroke(DS.Palette.border.opacity(0.18), lineWidth: DS.BorderWidth.hairline)
         )
     }
 }

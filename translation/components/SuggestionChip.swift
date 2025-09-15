@@ -14,8 +14,7 @@ struct SuggestionChip: View {
             )
             .overlay(
                 Capsule(style: .continuous)
-                    .stroke(color.opacity(0.35), lineWidth: 0.8)
+                    .stroke(color.opacity(0.35), lineWidth: DS.BorderWidth.thin)
             )
     }
 }
-

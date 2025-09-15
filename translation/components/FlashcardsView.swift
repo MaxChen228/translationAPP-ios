@@ -60,10 +60,17 @@ struct FlashcardsView: View {
     private let title: String
     private let deckID: UUID?
     @EnvironmentObject private var decksStore: FlashcardDecksStore
+    @EnvironmentObject private var progressStore: FlashcardProgressStore
     @State private var isEditing: Bool = false
     @State private var draft: Flashcard? = nil
     @State private var errorText: String? = nil
     @State private var showDeleteConfirm: Bool = false
+    // Review modes
+    enum ReviewMode: String, CaseIterable { case browse = "瀏覽", annotate = "標注" }
+    @State private var mode: ReviewMode = .browse
+    // Swipe annotate state
+    @State private var dragX: CGFloat = 0
+    @State private var flashDelta: Int? = nil
 
     init(title: String = "單字卡", cards: [Flashcard] = FlashcardsStore.defaultCards, deckID: UUID? = nil, startIndex: Int = 0) {
         _store = StateObject(wrappedValue: FlashcardsStore(cards: cards, startIndex: startIndex))
@@ -81,9 +88,14 @@ struct FlashcardsView: View {
                     accentMatchTitle: true
                 )
 
-                // 進度指示：第 n / m 張
+                // 模式選擇 + 進度指示
                 if !store.cards.isEmpty {
                     HStack {
+                        Picker("模式", selection: $mode) {
+                            Text(ReviewMode.browse.rawValue).tag(ReviewMode.browse)
+                            Text(ReviewMode.annotate.rawValue).tag(ReviewMode.annotate)
+                        }
+                        .pickerStyle(.segmented)
                         Spacer()
                         Text("\(store.index + 1) / \(store.cards.count)")
                             .dsType(DS.Font.caption)
@@ -102,7 +114,8 @@ struct FlashcardsView: View {
                             .disabled(validationError() != nil)
                         }
                     } else {
-                        FlipCard(isFlipped: store.showBack) {
+                        ZStack {
+                            FlipCard(isFlipped: store.showBack) {
                             VStack(alignment: .leading, spacing: 10) {
                                 MarkdownText(card.front)
                                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -118,8 +131,42 @@ struct FlashcardsView: View {
                                     NoteText(text: note)
                                 }
                             }
+                            }
+                            .onTapGesture { store.flip() }
+                            .offset(x: mode == .annotate ? dragX * 0.25 : 0)
+                            .rotationEffect(.degrees(mode == .annotate ? Double(dragX) * 0.02 : 0))
+
+                            if mode == .annotate, let flash = flashDelta {
+                                Text(flash > 0 ? "+1" : "-1")
+                                    .font(.title2).bold()
+                                    .padding(10)
+                                    .background(Capsule().fill((flash > 0 ? Color.green : Color.orange).opacity(0.15)))
+                                    .overlay(Capsule().stroke((flash > 0 ? Color.green : Color.orange).opacity(0.5), lineWidth: 1))
+                            }
                         }
-                        .onTapGesture { store.flip() }
+                        .gesture(mode == .annotate ? DragGesture(minimumDistance: 20)
+                                    .onChanged { v in dragX = v.translation.width }
+                                    .onEnded { v in
+                                        let t = v.translation.width
+                                        let threshold: CGFloat = 80
+                                        if t > threshold { adjustProficiency(+1) }
+                                        else if t < -threshold { adjustProficiency(-1) }
+                                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) { dragX = 0 }
+                                    }
+                                : nil)
+
+                        if mode == .annotate, let deckID = deckID {
+                            HStack {
+                                let level = progressStore.level(deckID: deckID, cardID: card.id)
+                                Text("精熟度 \(level)")
+                                    .dsType(DS.Font.caption)
+                                    .padding(.vertical, 6)
+                                    .padding(.horizontal, 10)
+                                    .background(Capsule().fill(DS.Palette.surface))
+                                    .overlay(Capsule().stroke(DS.Palette.border.opacity(0.45), lineWidth: 1))
+                                Spacer()
+                            }
+                        }
 
                         HStack(spacing: DS.Spacing.md) {
                             Button {
@@ -239,6 +286,19 @@ private extension FlashcardsView {
         if let deckID = deckID { decksStore.deleteCard(from: deckID, cardID: current.id) }
         // Exit edit mode
         cancelEdit()
+    }
+
+    func adjustProficiency(_ delta: Int) {
+        guard mode == .annotate else { return }
+        guard let deckID = deckID, let current = store.current else { return }
+        let _ = progressStore.adjust(deckID: deckID, cardID: current.id, delta: delta)
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+            flashDelta = delta
+        }
+        if delta > 0 { Haptics.success() } else { Haptics.warning() }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            withAnimation(.easeOut(duration: 0.2)) { flashDelta = nil }
+        }
     }
 }
 

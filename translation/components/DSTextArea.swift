@@ -35,7 +35,7 @@ struct DSTextArea: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
-                .stroke(isFocused ? DS.Palette.primary.opacity(0.45) : DS.Palette.border.opacity(0.35), lineWidth: 1)
+                .stroke(isFocused ? DS.Palette.primary.opacity(0.45) : DS.Palette.border.opacity(0.35), lineWidth: DS.BorderWidth.regular)
         )
         .animation(.easeInOut(duration: 0.2), value: isFocused)
     }
@@ -54,7 +54,7 @@ private struct DSLinedBackground: View {
                     y += step
                 }
             }
-            .stroke(color, lineWidth: max(DS.Metrics.hairline, 0.5))
+            .stroke(color, lineWidth: DS.BorderWidth.hairline)
         }
     }
 }

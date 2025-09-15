@@ -149,7 +149,7 @@ private struct WorkspaceCard: View {
         DSOutlineCard {
             VStack(alignment: .leading, spacing: DS.Spacing.md) {
                 Text(name)
-                    .dsType(DS.Font.section)
+                    .dsType(DS.Font.serifBody)
                     .fontWeight(.semibold)
 
                 DSSeparator(color: DS.Palette.border.opacity(0.12))
@@ -178,7 +178,7 @@ private struct AddWorkspaceCard: View {
         .padding(DS.Spacing.md)
         .overlay(
             RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                .stroke(style: StrokeStyle(lineWidth: 1, dash: [5, 4]))
+                .stroke(style: StrokeStyle(lineWidth: DS.BorderWidth.regular, dash: [5, 4]))
                 .foregroundStyle(DS.Palette.border.opacity(0.45))
         )
         .contentShape(RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous))
@@ -195,7 +195,7 @@ private struct FlashcardsEntryCard: View {
                         .foregroundStyle(DS.Brand.scheme.provence.opacity(0.85))
                         .frame(width: 28)
                     Text("單字卡")
-                        .dsType(DS.Font.section)
+                        .dsType(DS.Font.serifBody)
                         .fontWeight(.semibold)
                     Spacer()
                     Image(systemName: "chevron.right")
@@ -241,7 +241,7 @@ private struct BankBooksEntryCard: View {
                         .foregroundStyle(DS.Brand.scheme.stucco.opacity(0.85))
                         .frame(width: 28)
                     Text("題庫本")
-                        .dsType(DS.Font.section)
+                        .dsType(DS.Font.serifBody)
                         .fontWeight(.semibold)
                     Spacer()
                     Image(systemName: "chevron.right")
@@ -269,7 +269,7 @@ private struct StatusBadge: View {
         }
         .padding(.vertical, 4)
         .padding(.horizontal, 8)
-        .overlay(Capsule().stroke(DS.Palette.border.opacity(0.45), lineWidth: 1))
+        .overlay(Capsule().stroke(DS.Palette.border.opacity(0.45), lineWidth: DS.BorderWidth.regular))
     }
 }
 

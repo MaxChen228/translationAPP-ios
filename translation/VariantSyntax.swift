@@ -91,7 +91,7 @@ struct BracketGroupView: View {
                     p.move(to: CGPoint(x: x0, y: y1))
                     p.addLine(to: CGPoint(x: 1, y: y1))
                 }
-                .stroke(DS.Palette.primary.opacity(0.7), lineWidth: 1)
+                .stroke(DS.Palette.primary.opacity(0.7), lineWidth: DS.BorderWidth.regular)
             }
             .frame(width: 10)
 
@@ -154,7 +154,7 @@ private struct BracketListView<Content: View>: View {
                     p.move(to: CGPoint(x: x, y: y1))
                     p.addLine(to: CGPoint(x: 2, y: y1))
                 }
-                .stroke(DS.Brand.scheme.babyBlue.opacity(0.8), lineWidth: 1)
+                .stroke(DS.Brand.scheme.babyBlue.opacity(0.8), lineWidth: DS.BorderWidth.regular)
             }
             .frame(width: 12)
 

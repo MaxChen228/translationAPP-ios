@@ -62,7 +62,7 @@ struct HintListSection: View {
         .padding(DS.Spacing.md)
         .overlay(
             RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                .stroke(DS.Brand.scheme.babyBlue.opacity(0.45), lineWidth: 0.8)
+                .stroke(DS.Brand.scheme.babyBlue.opacity(0.45), lineWidth: DS.BorderWidth.thin)
         )
     }
 
@@ -92,7 +92,7 @@ struct TagLabel: View {
             .padding(.vertical, 3)
             .padding(.horizontal, 8)
             .background(Capsule().fill(color.opacity(0.12)))
-            .overlay(Capsule().stroke(color.opacity(0.35), lineWidth: 0.8))
+            .overlay(Capsule().stroke(color.opacity(0.35), lineWidth: DS.BorderWidth.thin))
             .foregroundStyle(color)
     }
 }
@@ -105,6 +105,6 @@ private struct CountBubble: View {
             .padding(.vertical, 2)
             .padding(.horizontal, 6)
             .background(Capsule().fill(DS.Brand.scheme.babyBlue.opacity(0.08)))
-            .overlay(Capsule().stroke(DS.Brand.scheme.babyBlue.opacity(0.35), lineWidth: 0.8))
+            .overlay(Capsule().stroke(DS.Brand.scheme.babyBlue.opacity(0.35), lineWidth: DS.BorderWidth.thin))
     }
 }
