@@ -1,0 +1,38 @@
+import SwiftUI
+
+struct ErrorDetailPopover: View {
+    var err: ErrorItem
+    var onApply: (() -> Void)?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 10) {
+                TagLabel(text: err.type.displayName, color: err.type.color)
+                Text(err.span)
+                    .dsType(DS.Font.bodyEmph)
+            }
+            Text(err.explainZh)
+                .foregroundStyle(.secondary)
+                .dsType(DS.Font.body)
+            if let s = err.suggestion, !s.isEmpty {
+                HStack(spacing: 8) {
+                    Text("建議")
+                        .foregroundStyle(.secondary)
+                        .dsType(DS.Font.caption)
+                    SuggestionChip(text: s, color: err.type.color)
+                }
+                if let onApply {
+                    Button {
+                        onApply()
+                    } label: {
+                        Label("套用建議", systemImage: "arrow.right.circle.fill")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(DSPrimaryButton())
+                }
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: 320)
+    }
+}
