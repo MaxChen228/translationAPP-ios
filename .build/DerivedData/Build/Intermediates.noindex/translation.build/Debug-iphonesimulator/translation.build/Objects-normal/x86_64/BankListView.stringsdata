@@ -1,0 +1,56 @@
+{
+  "source": "/Users/chenliangyu/Desktop/translation/translation/components/BankListView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "題庫",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 107
+        }
+      },
+      {
+        "comment": "",
+        "key": "進度",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 29
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld / %lld",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 36
+        }
+      },
+      {
+        "comment": "",
+        "key": "練習",
+        "location": {
+          "startingColumn": 43,
+          "startingLine": 83
+        }
+      },
+      {
+        "comment": "",
+        "key": "已完成",
+        "location": {
+          "startingColumn": 29,
+          "startingLine": 143
+        }
+      },
+      {
+        "comment": "",
+        "key": "已完成",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 131
+        }
+      }
+    ]
+  },
+  "version": 1
+}

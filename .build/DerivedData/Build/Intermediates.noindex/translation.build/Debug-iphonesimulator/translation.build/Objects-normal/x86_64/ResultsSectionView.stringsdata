@@ -1,0 +1,16 @@
+{
+  "source": "/Users/chenliangyu/Desktop/translation/translation/components/ResultsSectionView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "未偵測到錯誤。",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 35
+        }
+      }
+    ]
+  },
+  "version": 1
+}

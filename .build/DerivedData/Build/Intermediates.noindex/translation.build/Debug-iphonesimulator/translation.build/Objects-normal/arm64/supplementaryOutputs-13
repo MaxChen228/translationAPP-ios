@@ -1,0 +1,42 @@
+"/Users/chenliangyu/Desktop/translation/translation/AppNotifications.swift":
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AppNotifications.o"
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AppNotifications.d"
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AppNotifications.dia"
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AppNotifications.swiftconstvalues"
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AppNotifications.swiftdeps"
+"/Users/chenliangyu/Desktop/translation/translation/components/ScoreBarView.swift":
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ScoreBarView.swiftconstvalues"
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ScoreBarView.dia"
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ScoreBarView.d"
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ScoreBarView.o"
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ScoreBarView.swiftdeps"
+"/Users/chenliangyu/Desktop/translation/translation/components/BankBooksView.swift":
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankBooksView.d"
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankBooksView.swiftdeps"
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankBooksView.o"
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankBooksView.dia"
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankBooksView.swiftconstvalues"
+"/Users/chenliangyu/Desktop/translation/translation/components/ResultSwitcherCard.swift":
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultSwitcherCard.d"
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultSwitcherCard.swiftconstvalues"
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultSwitcherCard.o"
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultSwitcherCard.swiftdeps"
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultSwitcherCard.dia"
+"/Users/chenliangyu/Desktop/translation/translation/components/DSSeparators.swift":
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSeparators.swiftdeps"
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSeparators.o"
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSeparators.swiftconstvalues"
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSeparators.d"
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSeparators.dia"
+"/Users/chenliangyu/Desktop/translation/translation/Keychain.swift":
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Keychain.swiftdeps"
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Keychain.dia"
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Keychain.swiftconstvalues"
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Keychain.o"
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Keychain.d"
+"/Users/chenliangyu/Desktop/translation/translation/DesignSystem.swift":
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DesignSystem.swiftconstvalues"
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DesignSystem.o"
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DesignSystem.d"
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DesignSystem.swiftdeps"
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DesignSystem.dia"

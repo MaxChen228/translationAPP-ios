@@ -1,0 +1,48 @@
+{
+  "source": "/Users/chenliangyu/Desktop/translation/translation/components/DeckDetailView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "單字卡",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 70
+        }
+      },
+      {
+        "comment": "",
+        "key": "找不到卡片集",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 62
+        }
+      },
+      {
+        "comment": "",
+        "key": "詞語",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 49
+        }
+      },
+      {
+        "comment": "",
+        "key": "開始複習",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 43
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 83
+        }
+      }
+    ]
+  },
+  "version": 1
+}

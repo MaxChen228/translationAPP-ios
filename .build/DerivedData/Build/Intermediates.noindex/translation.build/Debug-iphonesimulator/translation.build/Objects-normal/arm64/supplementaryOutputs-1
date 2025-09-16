@@ -1,0 +1,42 @@
+"/Users/chenliangyu/Desktop/translation/translation/CorrectionViewModel.swift":
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/CorrectionViewModel.swiftdeps"
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/CorrectionViewModel.swiftconstvalues"
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/CorrectionViewModel.o"
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/CorrectionViewModel.dia"
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/CorrectionViewModel.d"
+"/Users/chenliangyu/Desktop/translation/translation/components/DSSectionHeader.swift":
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSectionHeader.swiftdeps"
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSectionHeader.dia"
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSectionHeader.swiftconstvalues"
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSectionHeader.o"
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSectionHeader.d"
+"/Users/chenliangyu/Desktop/translation/translation/DeckService.swift":
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckService.o"
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckService.d"
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckService.dia"
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckService.swiftconstvalues"
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckService.swiftdeps"
+"/Users/chenliangyu/Desktop/translation/translation/AnnotatedText.swift":
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AnnotatedText.dia"
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AnnotatedText.d"
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AnnotatedText.swiftconstvalues"
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AnnotatedText.swiftdeps"
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AnnotatedText.o"
+"/Users/chenliangyu/Desktop/translation/translation/components/AudioProgressRingView.swift":
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AudioProgressRingView.swiftconstvalues"
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AudioProgressRingView.o"
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AudioProgressRingView.dia"
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AudioProgressRingView.d"
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AudioProgressRingView.swiftdeps"
+"/Users/chenliangyu/Desktop/translation/translation/components/MorphingAnnotatedText.swift":
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/MorphingAnnotatedText.swiftconstvalues"
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/MorphingAnnotatedText.o"
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/MorphingAnnotatedText.dia"
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/MorphingAnnotatedText.swiftdeps"
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/MorphingAnnotatedText.d"
+"/Users/chenliangyu/Desktop/translation/translation/WorkspaceStore.swift":
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/WorkspaceStore.dia"
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/WorkspaceStore.swiftconstvalues"
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/WorkspaceStore.o"
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/WorkspaceStore.d"
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/WorkspaceStore.swiftdeps"

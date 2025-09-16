@@ -1,0 +1,708 @@
+{
+  "" : {
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/translation-master.dia",
+    "emit-module-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/translation-master-emit-module.d",
+    "emit-module-diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/translation-master-emit-module.dia",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/translation-master.swiftdeps"
+  },
+  "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/GeneratedAssetSymbols.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/GeneratedAssetSymbols.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/GeneratedAssetSymbols~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/AIService.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AIService.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AIService.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AIService.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AIService.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AIService.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AIService.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AIService.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AIService~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/AnnotatedText.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AnnotatedText.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AnnotatedText.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AnnotatedText.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AnnotatedText.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AnnotatedText.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AnnotatedText.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AnnotatedText.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AnnotatedText~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/AppNotifications.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AppNotifications.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AppNotifications.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AppNotifications.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AppNotifications.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AppNotifications.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AppNotifications.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AppNotifications.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AppNotifications~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/BankBooksOrderStore.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankBooksOrderStore.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankBooksOrderStore.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankBooksOrderStore.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankBooksOrderStore.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankBooksOrderStore.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankBooksOrderStore.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankBooksOrderStore.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankBooksOrderStore~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/BankFoldersStore.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankFoldersStore.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankFoldersStore.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankFoldersStore.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankFoldersStore.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankFoldersStore.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankFoldersStore.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankFoldersStore.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankFoldersStore~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/BankService.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankService.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankService.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankService.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankService.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankService.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankService.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankService.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankService~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/BannerCenter.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BannerCenter.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BannerCenter.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BannerCenter.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BannerCenter.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BannerCenter.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BannerCenter.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BannerCenter.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BannerCenter~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/ContentView.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ContentView.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ContentView.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ContentView.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ContentView.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ContentView.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ContentView.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ContentView.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ContentView~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/CorrectionViewModel.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/CorrectionViewModel.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/CorrectionViewModel.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/CorrectionViewModel.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/CorrectionViewModel.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/CorrectionViewModel.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/CorrectionViewModel.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/CorrectionViewModel.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/CorrectionViewModel~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/DeckFoldersStore.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckFoldersStore.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckFoldersStore.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckFoldersStore.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckFoldersStore.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckFoldersStore.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckFoldersStore.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckFoldersStore.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckFoldersStore~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/DeckRootOrderStore.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckRootOrderStore.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckRootOrderStore.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckRootOrderStore.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckRootOrderStore.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckRootOrderStore.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckRootOrderStore.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckRootOrderStore.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckRootOrderStore~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/DeckService.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckService.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckService.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckService.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckService.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckService.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckService.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckService.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckService~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/DesignSystem.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DesignSystem.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DesignSystem.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DesignSystem.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DesignSystem.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DesignSystem.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DesignSystem.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DesignSystem.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DesignSystem~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/DeviceID.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeviceID.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeviceID.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeviceID.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeviceID.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeviceID.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeviceID.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeviceID.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeviceID~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/ErrorTheme.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ErrorTheme.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ErrorTheme.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ErrorTheme.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ErrorTheme.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ErrorTheme.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ErrorTheme.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ErrorTheme.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ErrorTheme~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/FlashcardDecksStore.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardDecksStore.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardDecksStore.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardDecksStore.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardDecksStore.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardDecksStore.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardDecksStore.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardDecksStore.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardDecksStore~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/FlashcardProgressStore.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardProgressStore.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardProgressStore.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardProgressStore.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardProgressStore.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardProgressStore.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardProgressStore.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardProgressStore.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardProgressStore~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/FlashcardsReviewMode.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsReviewMode.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsReviewMode.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsReviewMode.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsReviewMode.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsReviewMode.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsReviewMode.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsReviewMode.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsReviewMode~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/FontLoader.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FontLoader.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FontLoader.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FontLoader.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FontLoader.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FontLoader.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FontLoader.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FontLoader.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FontLoader~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/Haptics.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Haptics.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Haptics.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Haptics.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Haptics.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Haptics.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Haptics.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Haptics.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Haptics~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/Highlighter.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Highlighter.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Highlighter.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Highlighter.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Highlighter.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Highlighter.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Highlighter.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Highlighter.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Highlighter~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/Keychain.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Keychain.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Keychain.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Keychain.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Keychain.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Keychain.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Keychain.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Keychain.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Keychain~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/Logging.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Logging.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Logging.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Logging.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Logging.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Logging.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Logging.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Logging.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Logging~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/Models.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Models.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Models.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Models.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Models.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Models.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Models.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Models.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Models~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/PlaybackBuilder.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/PlaybackBuilder.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/PlaybackBuilder.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/PlaybackBuilder.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/PlaybackBuilder.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/PlaybackBuilder.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/PlaybackBuilder.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/PlaybackBuilder.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/PlaybackBuilder~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/RouterStore.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/RouterStore.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/RouterStore.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/RouterStore.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/RouterStore.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/RouterStore.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/RouterStore.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/RouterStore.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/RouterStore~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/SavedErrorsStore.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SavedErrorsStore.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SavedErrorsStore.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SavedErrorsStore.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SavedErrorsStore.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SavedErrorsStore.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SavedErrorsStore.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SavedErrorsStore.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SavedErrorsStore~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/SpeechEngine.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SpeechEngine.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SpeechEngine.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SpeechEngine.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SpeechEngine.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SpeechEngine.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SpeechEngine.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SpeechEngine.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SpeechEngine~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/TTSSettings.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/TTSSettings.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/TTSSettings.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/TTSSettings.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/TTSSettings.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/TTSSettings.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/TTSSettings.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/TTSSettings.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/TTSSettings~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/VariantSyntax.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/VariantSyntax.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/VariantSyntax.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/VariantSyntax.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/VariantSyntax.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/VariantSyntax.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/VariantSyntax.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/VariantSyntax.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/VariantSyntax~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/WorkspaceStore.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/WorkspaceStore.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/WorkspaceStore.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/WorkspaceStore.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/WorkspaceStore.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/WorkspaceStore.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/WorkspaceStore.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/WorkspaceStore.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/WorkspaceStore~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/AudioMiniPlayerView.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AudioMiniPlayerView.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AudioMiniPlayerView.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AudioMiniPlayerView.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AudioMiniPlayerView.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AudioMiniPlayerView.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AudioMiniPlayerView.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AudioMiniPlayerView.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AudioMiniPlayerView~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/AudioProgressRingView.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AudioProgressRingView.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AudioProgressRingView.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AudioProgressRingView.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AudioProgressRingView.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AudioProgressRingView.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AudioProgressRingView.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AudioProgressRingView.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/AudioProgressRingView~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/BankBooksView.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankBooksView.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankBooksView.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankBooksView.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankBooksView.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankBooksView.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankBooksView.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankBooksView.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankBooksView~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/BankFolderViews.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankFolderViews.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankFolderViews.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankFolderViews.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankFolderViews.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankFolderViews.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankFolderViews.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankFolderViews.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankFolderViews~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/BankListView.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankListView.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankListView.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankListView.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankListView.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankListView.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankListView.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankListView.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/BankListView~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/ChinesePromptView.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ChinesePromptView.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ChinesePromptView.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ChinesePromptView.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ChinesePromptView.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ChinesePromptView.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ChinesePromptView.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ChinesePromptView.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ChinesePromptView~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/DSButtonStyles.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSButtonStyles.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSButtonStyles.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSButtonStyles.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSButtonStyles.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSButtonStyles.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSButtonStyles.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSButtonStyles.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSButtonStyles~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/DSCard.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSCard.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSCard.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSCard.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSCard.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSCard.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSCard.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSCard.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSCard~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/DSOutlineCard.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSOutlineCard.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSOutlineCard.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSOutlineCard.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSOutlineCard.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSOutlineCard.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSOutlineCard.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSOutlineCard.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSOutlineCard~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/DSSectionHeader.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSectionHeader.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSectionHeader.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSectionHeader.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSectionHeader.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSectionHeader.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSectionHeader.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSectionHeader.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSectionHeader~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/DSSeparators.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSeparators.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSeparators.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSeparators.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSeparators.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSeparators.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSeparators.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSeparators.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSSeparators~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/DSTextArea.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSTextArea.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSTextArea.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSTextArea.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSTextArea.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSTextArea.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSTextArea.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSTextArea.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSTextArea~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/DeckDetailView.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckDetailView.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckDetailView.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckDetailView.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckDetailView.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckDetailView.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckDetailView.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckDetailView.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckDetailView~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/DeckFolderViews.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckFolderViews.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckFolderViews.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckFolderViews.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckFolderViews.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckFolderViews.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckFolderViews.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckFolderViews.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckFolderViews~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/ErrorDetailPopover.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ErrorDetailPopover.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ErrorDetailPopover.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ErrorDetailPopover.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ErrorDetailPopover.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ErrorDetailPopover.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ErrorDetailPopover.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ErrorDetailPopover.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ErrorDetailPopover~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/ErrorItemRow.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ErrorItemRow.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ErrorItemRow.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ErrorItemRow.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ErrorItemRow.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ErrorItemRow.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ErrorItemRow.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ErrorItemRow.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ErrorItemRow~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/FlashcardDecksView.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardDecksView.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardDecksView.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardDecksView.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardDecksView.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardDecksView.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardDecksView.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardDecksView.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardDecksView~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/FlashcardsAudioSettingsSheet.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsAudioSettingsSheet.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsAudioSettingsSheet.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsAudioSettingsSheet.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsAudioSettingsSheet.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsAudioSettingsSheet.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsAudioSettingsSheet.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsAudioSettingsSheet.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsAudioSettingsSheet~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/FlashcardsSettingsSheet.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsSettingsSheet.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsSettingsSheet.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsSettingsSheet.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsSettingsSheet.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsSettingsSheet.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsSettingsSheet.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsSettingsSheet.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsSettingsSheet~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/FlashcardsView.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsView.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsView.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsView.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsView.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsView.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsView.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsView.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsView~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/HintViews.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/HintViews.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/HintViews.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/HintViews.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/HintViews.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/HintViews.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/HintViews.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/HintViews.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/HintViews~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/LoadingOverlay.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/LoadingOverlay.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/LoadingOverlay.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/LoadingOverlay.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/LoadingOverlay.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/LoadingOverlay.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/LoadingOverlay.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/LoadingOverlay.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/LoadingOverlay~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/MorphingAnnotatedText.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/MorphingAnnotatedText.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/MorphingAnnotatedText.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/MorphingAnnotatedText.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/MorphingAnnotatedText.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/MorphingAnnotatedText.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/MorphingAnnotatedText.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/MorphingAnnotatedText.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/MorphingAnnotatedText~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/ResultSummaryCard.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultSummaryCard.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultSummaryCard.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultSummaryCard.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultSummaryCard.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultSummaryCard.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultSummaryCard.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultSummaryCard.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultSummaryCard~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/ResultSwitcherCard.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultSwitcherCard.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultSwitcherCard.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultSwitcherCard.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultSwitcherCard.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultSwitcherCard.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultSwitcherCard.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultSwitcherCard.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultSwitcherCard~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/ResultsSectionView.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultsSectionView.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultsSectionView.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultsSectionView.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultsSectionView.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultsSectionView.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultsSectionView.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultsSectionView.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultsSectionView~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/SavedJSONListSheet.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SavedJSONListSheet.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SavedJSONListSheet.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SavedJSONListSheet.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SavedJSONListSheet.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SavedJSONListSheet.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SavedJSONListSheet.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SavedJSONListSheet.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SavedJSONListSheet~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/ScoreBarView.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ScoreBarView.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ScoreBarView.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ScoreBarView.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ScoreBarView.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ScoreBarView.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ScoreBarView.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ScoreBarView.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ScoreBarView~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/ScoreRingView.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ScoreRingView.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ScoreRingView.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ScoreRingView.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ScoreRingView.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ScoreRingView.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ScoreRingView.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ScoreRingView.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ScoreRingView~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/SuggestionChip.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SuggestionChip.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SuggestionChip.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SuggestionChip.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SuggestionChip.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SuggestionChip.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SuggestionChip.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SuggestionChip.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/SuggestionChip~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/TypeChipsView.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/TypeChipsView.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/TypeChipsView.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/TypeChipsView.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/TypeChipsView.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/TypeChipsView.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/TypeChipsView.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/TypeChipsView.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/TypeChipsView~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/VariantBracketComposerView.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/VariantBracketComposerView.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/VariantBracketComposerView.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/VariantBracketComposerView.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/VariantBracketComposerView.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/VariantBracketComposerView.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/VariantBracketComposerView.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/VariantBracketComposerView.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/VariantBracketComposerView~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/WorkspaceListView.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/WorkspaceListView.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/WorkspaceListView.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/WorkspaceListView.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/WorkspaceListView.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/WorkspaceListView.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/WorkspaceListView.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/WorkspaceListView.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/WorkspaceListView~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/shelf/RenameSheet.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/RenameSheet.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/RenameSheet.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/RenameSheet.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/RenameSheet.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/RenameSheet.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/RenameSheet.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/RenameSheet.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/RenameSheet~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/shelf/ShelfDropHelpers.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfDropHelpers.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfDropHelpers.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfDropHelpers.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfDropHelpers.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfDropHelpers.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfDropHelpers.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfDropHelpers.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfDropHelpers~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/shelf/ShelfGrid.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfGrid.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfGrid.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfGrid.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfGrid.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfGrid.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfGrid.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfGrid.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfGrid~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/components/shelf/ShelfTileCard.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfTileCard.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfTileCard.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfTileCard.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfTileCard.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfTileCard.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfTileCard.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfTileCard.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfTileCard~partial.swiftmodule"
+  },
+  "/Users/chenliangyu/Desktop/translation/translation/translationApp.swift" : {
+    "const-values" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/translationApp.swiftconstvalues",
+    "dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/translationApp.d",
+    "diagnostics" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/translationApp.dia",
+    "index-unit-output-path" : "/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/translationApp.o",
+    "llvm-bc" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/translationApp.bc",
+    "object" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/translationApp.o",
+    "swift-dependencies" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/translationApp.swiftdeps",
+    "swiftmodule" : "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/translationApp~partial.swiftmodule"
+  }
+}

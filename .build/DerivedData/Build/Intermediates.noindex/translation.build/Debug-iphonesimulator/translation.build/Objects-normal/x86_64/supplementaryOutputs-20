@@ -1,0 +1,42 @@
+"/Users/chenliangyu/Desktop/translation/translation/components/BankListView.swift":
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/BankListView.dia"
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/BankListView.swiftconstvalues"
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/BankListView.d"
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/BankListView.swiftdeps"
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/BankListView.o"
+"/Users/chenliangyu/Desktop/translation/translation/Models.swift":
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/Models.swiftdeps"
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/Models.dia"
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/Models.o"
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/Models.d"
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/Models.swiftconstvalues"
+"/Users/chenliangyu/Desktop/translation/translation/components/ErrorDetailPopover.swift":
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/ErrorDetailPopover.swiftdeps"
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/ErrorDetailPopover.d"
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/ErrorDetailPopover.o"
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/ErrorDetailPopover.swiftconstvalues"
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/ErrorDetailPopover.dia"
+"/Users/chenliangyu/Desktop/translation/translation/BankBooksOrderStore.swift":
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/BankBooksOrderStore.d"
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/BankBooksOrderStore.o"
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/BankBooksOrderStore.swiftconstvalues"
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/BankBooksOrderStore.dia"
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/BankBooksOrderStore.swiftdeps"
+"/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/DerivedSources/GeneratedAssetSymbols.swift":
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/GeneratedAssetSymbols.swiftconstvalues"
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/GeneratedAssetSymbols.o"
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/GeneratedAssetSymbols.swiftdeps"
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/GeneratedAssetSymbols.dia"
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/GeneratedAssetSymbols.d"
+"/Users/chenliangyu/Desktop/translation/translation/components/SuggestionChip.swift":
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/SuggestionChip.swiftdeps"
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/SuggestionChip.o"
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/SuggestionChip.d"
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/SuggestionChip.dia"
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/SuggestionChip.swiftconstvalues"
+"/Users/chenliangyu/Desktop/translation/translation/components/SavedJSONListSheet.swift":
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/SavedJSONListSheet.dia"
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/SavedJSONListSheet.swiftconstvalues"
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/SavedJSONListSheet.d"
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/SavedJSONListSheet.swiftdeps"
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/x86_64/SavedJSONListSheet.o"

@@ -1,0 +1,42 @@
+"/Users/chenliangyu/Desktop/translation/translation/components/shelf/ShelfTileCard.swift":
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfTileCard.swiftdeps"
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfTileCard.dia"
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfTileCard.o"
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfTileCard.d"
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ShelfTileCard.swiftconstvalues"
+"/Users/chenliangyu/Desktop/translation/translation/TTSSettings.swift":
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/TTSSettings.swiftconstvalues"
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/TTSSettings.d"
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/TTSSettings.o"
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/TTSSettings.dia"
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/TTSSettings.swiftdeps"
+"/Users/chenliangyu/Desktop/translation/translation/components/DSOutlineCard.swift":
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSOutlineCard.o"
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSOutlineCard.swiftdeps"
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSOutlineCard.d"
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSOutlineCard.dia"
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DSOutlineCard.swiftconstvalues"
+"/Users/chenliangyu/Desktop/translation/translation/Haptics.swift":
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Haptics.swiftconstvalues"
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Haptics.dia"
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Haptics.swiftdeps"
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Haptics.d"
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/Haptics.o"
+"/Users/chenliangyu/Desktop/translation/translation/DeckFoldersStore.swift":
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckFoldersStore.swiftconstvalues"
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckFoldersStore.dia"
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckFoldersStore.d"
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckFoldersStore.o"
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/DeckFoldersStore.swiftdeps"
+"/Users/chenliangyu/Desktop/translation/translation/components/FlashcardsView.swift":
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsView.o"
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsView.d"
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsView.swiftdeps"
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsView.dia"
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/FlashcardsView.swiftconstvalues"
+"/Users/chenliangyu/Desktop/translation/translation/components/ResultsSectionView.swift":
+  swift-dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultsSectionView.swiftdeps"
+  dependencies: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultsSectionView.d"
+  object: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultsSectionView.o"
+  const-values: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultsSectionView.swiftconstvalues"
+  diagnostics: "/Users/chenliangyu/Desktop/translation/.build/DerivedData/Build/Intermediates.noindex/translation.build/Debug-iphonesimulator/translation.build/Objects-normal/arm64/ResultsSectionView.dia"

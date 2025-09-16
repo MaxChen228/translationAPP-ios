@@ -6,26 +6,31 @@ struct WorkspaceListView: View {
     @EnvironmentObject private var savedStore: SavedErrorsStore
     @EnvironmentObject private var router: RouterStore
     @EnvironmentObject private var bannerCenter: BannerCenter
-    @State private var showSavedSheet = false
+    @State private var showSavedSheet = false // legacy: replaced by NavigationLink
 
     // Rename state
     @State private var renaming: Workspace? = nil
     @State private var newName: String = ""
 
     private var cols: [GridItem] { [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.lg)] }
-    @State private var programmaticOpenVM: CorrectionViewModel? = nil
-    @State private var openActive: Bool = false
+    // Navigation via typed routes to avoid off-stage pushes
+    private enum Route: Hashable { case workspace(UUID) }
+    @State private var path: [Route] = []
     // 拖曳中的項目（以 ID 辨識）。供重排使用。
     @State private var draggingID: UUID? = nil
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             ScrollView {
                 VStack(alignment: .leading, spacing: DS.Spacing.lg) {
-                    // Quick actions row (visual separation,減少混雜感)
+                    // 快速功能保留 Row 形式，但使用一致的區塊標題
                     QuickActionsRow(store: store)
 
-                    LazyVGrid(columns: cols, spacing: DS.Spacing.lg) {
+                    // 快速功能與 Workspaces 間加上 hairline 分隔
+                    DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.border))
+                        .padding(.vertical, DS.Spacing.sm)
+
+                    ShelfGrid(title: "Workspaces", columns: cols) {
 
                     ForEach(store.workspaces) { ws in
                         WorkspaceItemLink(ws: ws, vm: store.vm(for: ws.id), store: store, draggingID: $draggingID) {
@@ -55,23 +60,20 @@ struct WorkspaceListView: View {
             .onDrop(of: [.text], delegate: ClearDragStateDropDelegate(draggingID: $draggingID))
             .background(DS.Palette.background)
             .navigationTitle("Workspace")
-            .background(
-                NavigationLink(isActive: $openActive) {
-                    if let vm = programmaticOpenVM { ContentView(vm: vm).environmentObject(savedStore) }
-                } label: { EmptyView() }
-                .opacity(0)
-            )
+            .navigationDestination(for: Route.self) { route in
+                switch route {
+                case .workspace(let id):
+                    ContentView(vm: store.vm(for: id)).environmentObject(savedStore)
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showSavedSheet = true
+                    NavigationLink {
+                        SavedJSONListSheet().environmentObject(savedStore)
                     } label: {
                         Image(systemName: "tray.full")
                     }
                 }
-            }
-            .sheet(isPresented: $showSavedSheet) {
-                SavedJSONListSheet().environmentObject(savedStore)
             }
             .sheet(item: $renaming) { ws in
                 RenameWorkspaceSheet(name: ws.name) { new in
@@ -85,8 +87,7 @@ struct WorkspaceListView: View {
         // banner 監聽已移到 App root，這裡只處理 Router 指令
         .onReceive(router.$openWorkspaceID) { id in
             guard let id else { return }
-            programmaticOpenVM = store.vm(for: id)
-            openActive = true
+            path.append(.workspace(id))
             router.openWorkspaceID = nil
         }
     }
@@ -268,7 +269,7 @@ private struct QuickActionsRow: View {
     @EnvironmentObject private var router: RouterStore
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("快速功能").dsType(DS.Font.section).foregroundStyle(.secondary)
+            DSSectionHeader(title: "快速功能", subtitle: nil, accentUnderline: true)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
                     NavigationLink { FlashcardDecksView() } label: { FlashcardsEntryCard().frame(width: 220) }
@@ -324,13 +325,15 @@ private struct StatusBadge: View {
     var text: String
     var color: Color
     var body: some View {
-        HStack(spacing: 6) {
-            Circle().fill(color).frame(width: 6, height: 6)
+        HStack(spacing: 8) {
+            Circle().fill(color).frame(width: 8, height: 8)
             Text(text).dsType(DS.Font.caption).foregroundStyle(.secondary)
         }
-        .padding(.vertical, 4)
-        .padding(.horizontal, 8)
-        .overlay(Capsule().stroke(DS.Palette.border.opacity(0.45), lineWidth: DS.BorderWidth.regular))
+        .padding(.vertical, 6)
+        .padding(.horizontal, 10)
+        .overlay(
+            Capsule().stroke(color.opacity(DS.Opacity.strong), lineWidth: 1.6)
+        )
     }
 }
 

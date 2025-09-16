@@ -20,15 +20,13 @@ struct BankBooksView: View {
     @EnvironmentObject private var bankOrder: BankBooksOrderStore
     @State private var renamingFolder: BankFolder? = nil
     @State private var draggingBookName: String? = nil
+    // 書本完成度（0...1），key 為書名
+    @State private var bookProgress: [String: Double] = [:]
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: DS.Spacing.lg) {
-                DSSectionHeader(
-                    title: "題庫本",
-                    subtitle: "選擇一個書本開始練習",
-                    accentUnderline: true
-                )
+                // 移除頂部大標題，避免與下方區塊重複
                 if let error {
                     DSCard {
                         HStack(spacing: 8) {
@@ -43,39 +41,27 @@ struct BankBooksView: View {
 
                 if isLoading {
                     placeholderCard
-                } else if books.isEmpty {
-                    DSCard {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("目前沒有題庫本")
-                                .dsType(DS.Font.bodyEmph)
-                            Text("下拉以重新整理，或稍後再試。")
-                                .dsType(DS.Font.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
                 } else {
-                    // 資料夾區
-                    if !bankFolders.folders.isEmpty {
-                        let cols = [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.sm2)]
-                        ShelfGrid(title: "資料夾", columns: cols) {
-                            ForEach(bankFolders.folders) { folder in
-                                NavigationLink { BankFolderDetailView(folderID: folder.id) } label: {
-                                    ShelfTileCard(title: folder.name, subtitle: nil, countText: "共 \(folder.bookNames.count) 本", iconSystemName: "folder", accentColor: DS.Brand.scheme.stucco, showChevron: true)
-                                }
-                                .buttonStyle(DSCardLinkStyle())
-                                .contextMenu {
-                                    Button("重新命名") { renamingFolder = folder }
-                                    Button("刪除", role: .destructive) { _ = bankFolders.removeFolder(folder.id) }
-                                }
-                                .onDrop(of: [.text], delegate: BookIntoFolderDropDelegate(folderID: folder.id, folders: bankFolders, draggingName: $draggingBookName))
+                    // 資料夾區：即使為 0 也顯示新增卡
+                    let folderCols = [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.sm2)]
+                    ShelfGrid(title: "資料夾", columns: folderCols) {
+                        ForEach(bankFolders.folders) { folder in
+                            NavigationLink { BankFolderDetailView(folderID: folder.id) } label: {
+                                ShelfTileCard(title: folder.name, subtitle: nil, countText: "共 \(folder.bookNames.count) 本", iconSystemName: "folder", accentColor: DS.Brand.scheme.stucco, showChevron: true)
                             }
-                            Button { _ = bankFolders.addFolder() } label: { NewBankFolderCard() }
-                                .buttonStyle(.plain)
+                            .buttonStyle(DSCardLinkStyle())
+                            .contextMenu {
+                                Button("重新命名") { renamingFolder = folder }
+                                Button("刪除", role: .destructive) { _ = bankFolders.removeFolder(folder.id) }
+                            }
+                            .onDrop(of: [.text], delegate: BookIntoFolderDropDelegate(folderID: folder.id, folders: bankFolders, draggingName: $draggingBookName))
                         }
-                        DSSeparator(color: DS.Palette.border.opacity(0.2))
+                        Button { _ = bankFolders.addFolder() } label: { NewBankFolderCard() }
+                            .buttonStyle(.plain)
                     }
+                    DSSeparator(color: DS.Palette.border.opacity(0.2))
 
-                    // 根層書本（未分到資料夾）＋ 依自訂順序排序
+                    // 根層書本（未分到資料夾）＋ 依自訂順序排序；若為空仍顯示為空狀態
                     let rootBooks = books.filter { !bankFolders.isInAnyFolder($0.name) }
                     let rootNames = rootBooks.map { $0.name }
                     let orderedNames = bankOrder.currentRootOrder(root: rootNames)
@@ -84,10 +70,28 @@ struct BankBooksView: View {
                     ShelfGrid(title: "題庫本", columns: cols) {
                         ForEach(orderedRootBooks) { book in
                             NavigationLink {
-                                BankListView(vm: vm, tag: book.name, onPractice: { item, tag in
-                                    if let onPractice { onPractice(item, tag) }
-                                    dismiss()
-                                })
+                                // 只有在外部有提供 onPractice（首頁快捷入口）時才傳入；
+                                // 否則讓 BankListView 走預設 vm.startPractice(with:) 邏輯。
+                                let handler: ((BankItem, String?) -> Void)? = {
+                                    if let external = self.onPractice {
+                                        return { item, tag in
+                                            // 首頁快捷入口：先關閉書本頁，再延遲導向新 Workspace，避免競態。
+                                            dismiss()
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                                                external(item, tag)
+                                            }
+                                        }
+                                    } else {
+                                        // 內容頁情境：把題目寫回當前 Workspace，並在列表自行 dismiss 後，稍後再關閉書本頁，回到同一 Workspace。
+                                        return { item, tag in
+                                            vm.startPractice(with: item, tag: tag)
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                                                dismiss()
+                                            }
+                                        }
+                                    }
+                                }()
+                                BankListView(vm: vm, tag: book.name, onPractice: handler)
                             } label: {
                                 ShelfTileCard(
                                     title: book.name.capitalized,
@@ -95,7 +99,8 @@ struct BankBooksView: View {
                                     countText: "共 \(book.count) 題",
                                     iconSystemName: nil,
                                     accentColor: DS.Palette.primary,
-                                    showChevron: true
+                                    showChevron: true,
+                                    progress: bookProgress[book.name]
                                 )
                             }
                             .buttonStyle(DSCardLinkStyle())
@@ -121,6 +126,14 @@ struct BankBooksView: View {
                         }
                     }
                     .dsAnimation(DS.AnimationToken.reorder, value: bankOrder.order)
+                    if books.isEmpty {
+                        DSCard {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("目前沒有題庫本").dsType(DS.Font.bodyEmph)
+                                Text("下拉以重新整理，或稍後再試。").dsType(DS.Font.caption).foregroundStyle(.secondary)
+                            }
+                        }
+                    }
                 }
             }
             .padding(.horizontal, DS.Spacing.lg)
@@ -131,11 +144,8 @@ struct BankBooksView: View {
         .navigationTitle("題庫本")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                HStack(spacing: 12) {
-                    Button { _ = bankFolders.addFolder() } label: { Label("新資料夾", systemImage: "folder.badge.plus") }
-                    Button { Task { await importFromClipboard() } } label: { Label("匯入", systemImage: "doc.on.clipboard") }
-                        .disabled(isLoading || isImporting)
-                }
+                Button { Task { await importFromClipboard() } } label: { Label("匯入", systemImage: "doc.on.clipboard") }
+                    .disabled(isLoading || isImporting)
             }
         }
         .onDrop(of: [.text], delegate: ClearBookDragStateDropDelegate(draggingName: $draggingBookName))
@@ -178,8 +188,37 @@ struct BankBooksView: View {
     private func load() async {
         isLoading = true
         error = nil
-        do { books = try await service.fetchBooks() } catch { self.error = (error as NSError).localizedDescription }
+        do {
+            books = try await service.fetchBooks()
+            await loadBookProgress()
+        } catch {
+            self.error = (error as NSError).localizedDescription
+        }
         isLoading = false
+    }
+
+    private func loadBookProgress() async {
+        guard AppConfig.backendURL != nil else { return }
+        let bookList = books
+        await withTaskGroup(of: (String, Double)?.self) { group in
+            for b in bookList {
+                group.addTask {
+                    do {
+                        let items = try await service.fetchItems(limit: max(b.count, 50), offset: 0, difficulty: nil, tag: b.name)
+                        if items.isEmpty { return (b.name, 0) }
+                        let done = items.filter { $0.completed == true }.count
+                        return (b.name, Double(done) / Double(items.count))
+                    } catch {
+                        return nil
+                    }
+                }
+            }
+            var map: [String: Double] = [:]
+            for await res in group {
+                if let (name, ratio) = res { map[name] = min(max(ratio, 0), 1) }
+            }
+            await MainActor.run { self.bookProgress = map }
+        }
     }
 
     private func importFromClipboard() async {

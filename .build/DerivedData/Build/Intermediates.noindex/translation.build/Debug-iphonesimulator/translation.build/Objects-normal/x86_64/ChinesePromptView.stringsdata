@@ -1,0 +1,16 @@
+{
+  "source": "/Users/chenliangyu/Desktop/translation/translation/components/ChinesePromptView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "尚未選擇題目",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 9
+        }
+      }
+    ]
+  },
+  "version": 1
+}

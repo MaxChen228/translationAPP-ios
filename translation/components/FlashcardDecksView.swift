@@ -1,18 +1,10 @@
 import SwiftUI
 
-struct FlashcardDeck: Identifiable, Equatable {
-    let id: UUID
-    var name: String
-    var cards: [Flashcard]
-    init(id: UUID = UUID(), name: String, cards: [Flashcard]) {
-        self.id = id; self.name = name; self.cards = cards
-    }
-}
-
 struct FlashcardDecksView: View {
     @EnvironmentObject private var decksStore: FlashcardDecksStore
     @EnvironmentObject private var deckFolders: DeckFoldersStore
     @EnvironmentObject private var deckOrder: DeckRootOrderStore
+    @EnvironmentObject private var progressStore: FlashcardProgressStore
     private var cols: [GridItem] { [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.sm2)] }
     @State private var renaming: PersistedFlashcardDeck? = nil
     @State private var renamingFolder: DeckFolder? = nil
@@ -21,32 +13,25 @@ struct FlashcardDecksView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: DS.Spacing.lg) {
-                Text("單字卡集")
-                    .dsType(DS.Font.section)
-                    .fontWeight(.semibold)
-                Text("選擇一個卡片集開始練習")
-                    .dsType(DS.Font.caption)
-                    .foregroundStyle(.secondary)
+                // 頂部大標移除，避免與下方區塊標題重複
 
-                // 資料夾區（外觀與題庫本一致）
-                if !deckFolders.folders.isEmpty {
-                    ShelfGrid(title: "資料夾", columns: cols) {
-                        ForEach(deckFolders.folders) { folder in
-                            NavigationLink { DeckFolderDetailView(folderID: folder.id) } label: {
-                                ShelfTileCard(title: folder.name, subtitle: nil, countText: "共 \(folder.deckIDs.count) 個", iconSystemName: "folder", accentColor: DS.Brand.scheme.monument, showChevron: true)
-                            }
-                            .buttonStyle(DSCardLinkStyle())
-                            .contextMenu {
-                                Button("重新命名") { renamingFolder = folder }
-                                Button("刪除", role: .destructive) { _ = deckFolders.removeFolder(folder.id) }
-                            }
-                            .onDrop(of: [.text], delegate: DeckIntoFolderDropDelegate(folderID: folder.id, folders: deckFolders, draggingDeckID: $draggingDeckID))
+                // 資料夾區（外觀與題庫本一致）—即使為 0 也顯示新增卡
+                ShelfGrid(title: "資料夾", columns: cols) {
+                    ForEach(deckFolders.folders) { folder in
+                        NavigationLink { DeckFolderDetailView(folderID: folder.id) } label: {
+                            ShelfTileCard(title: folder.name, subtitle: nil, countText: "共 \(folder.deckIDs.count) 個", iconSystemName: "folder", accentColor: DS.Brand.scheme.monument, showChevron: true)
                         }
-                        Button { _ = deckFolders.addFolder() } label: { NewDeckFolderCard() }
-                            .buttonStyle(.plain)
+                        .buttonStyle(DSCardLinkStyle())
+                        .contextMenu {
+                            Button("重新命名") { renamingFolder = folder }
+                            Button("刪除", role: .destructive) { _ = deckFolders.removeFolder(folder.id) }
+                        }
+                        .onDrop(of: [.text], delegate: DeckIntoFolderDropDelegate(folderID: folder.id, folders: deckFolders, draggingDeckID: $draggingDeckID))
                     }
-                    DSSeparator(color: DS.Palette.border.opacity(0.2))
+                    Button { _ = deckFolders.addFolder() } label: { NewDeckFolderCard() }
+                        .buttonStyle(.plain)
                 }
+                DSSeparator(color: DS.Palette.border.opacity(0.2))
 
                 // 根層單字卡集（未分到資料夾）＋ 依自訂順序排序（與題庫本相同模式）
                 let rootDecks: [PersistedFlashcardDeck] = decksStore.decks.filter { !deckFolders.isInAnyFolder($0.id) }
@@ -66,7 +51,8 @@ struct FlashcardDecksView: View {
                                 countText: "共 \(deck.cards.count) 張",
                                 iconSystemName: nil,
                                 accentColor: DS.Palette.primary,
-                                showChevron: true
+                                showChevron: true,
+                                progress: deckProgress(deck)
                             )
                         }
                         .buttonStyle(DSCardLinkStyle())
@@ -78,6 +64,15 @@ struct FlashcardDecksView: View {
                             }
                         }
                         .onDrag { draggingDeckID = deck.id; return DeckDragPayload.provider(for: deck.id) }
+                        .onDrop(of: [.text], delegate: RootDeckReorderDropDelegate(
+                            overDeckID: deck.id,
+                            rootIDsProvider: {
+                                let r = decksStore.decks.filter { !deckFolders.isInAnyFolder($0.id) }.map { "deck:\($0.id.uuidString)" }
+                                return deckOrder.currentOrder(rootIDs: r)
+                            },
+                            move: { id, to, root in deckOrder.move(id: id, to: to, rootIDs: root) },
+                            draggingDeckID: $draggingDeckID
+                        ))
                     }
                 }
             }
@@ -87,11 +82,7 @@ struct FlashcardDecksView: View {
         }
         .background(DS.Palette.background)
         .navigationTitle("單字卡")
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button { _ = deckFolders.addFolder() } label: { Label("新資料夾", systemImage: "folder.badge.plus") }
-            }
-        }
+        .toolbar { }
         .onDrop(of: [.text], delegate: ClearDeckDragStateDropDelegate(draggingDeckID: $draggingDeckID))
         .sheet(item: $renaming) { dk in
             RenameSheet(name: dk.name) { new in decksStore.rename(dk.id, to: new) }
@@ -138,6 +129,31 @@ private struct ClearDeckDragStateDropDelegate: DropDelegate {
 
 // DeckDragPayload is defined in DeckFolderViews.swift and reused here.
 
+// Root 層簡易換位：拖曳 deck 到另一個 deck 上方即移動到該索引。
+private struct RootDeckReorderDropDelegate: DropDelegate {
+    let overDeckID: UUID
+    let rootIDsProvider: () -> [String]
+    let move: (String, Int, [String]) -> Void
+    @Binding var draggingDeckID: UUID?
+
+    func validateDrop(info: DropInfo) -> Bool { true }
+    func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
+
+    func dropEntered(info: DropInfo) {
+        guard let dragging = draggingDeckID else { return }
+        let dragKey = "deck:\(dragging.uuidString)"
+        let targetKey = "deck:\(overDeckID.uuidString)"
+        let root = rootIDsProvider()
+        guard let from = root.firstIndex(of: dragKey), let to = root.firstIndex(of: targetKey) else { return }
+        if from != to {
+            move(dragKey, to, root)
+            Haptics.lightTick()
+        }
+    }
+
+    func performDrop(info: DropInfo) -> Bool { draggingDeckID = nil; return true }
+}
+
 private struct DeckCard: View {
     let name: String
     let count: Int
@@ -146,3 +162,18 @@ private struct DeckCard: View {
     }
 }
 
+// MARK: - Progress helpers
+
+extension FlashcardDecksView {
+    // 整體精熟度：以每張卡的等級 0...3 做平均並正規化到 0...1
+    private func deckProgress(_ deck: PersistedFlashcardDeck) -> Double {
+        let maxLevel = 3.0
+        guard !deck.cards.isEmpty else { return 0 }
+        var total: Double = 0
+        for c in deck.cards {
+            let lvl = Double(max(0, progressStore.level(deckID: deck.id, cardID: c.id)))
+            total += min(lvl, maxLevel)
+        }
+        return max(0, min(1, total / (Double(deck.cards.count) * maxLevel)))
+    }
+}

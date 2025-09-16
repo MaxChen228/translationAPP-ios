@@ -1,0 +1,24 @@
+{
+  "source": "/Users/chenliangyu/Desktop/translation/translation/components/ErrorDetailPopover.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "建議",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 19
+        }
+      },
+      {
+        "comment": "",
+        "key": "套用建議",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 28
+        }
+      }
+    ]
+  },
+  "version": 1
+}

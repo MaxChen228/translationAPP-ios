@@ -4,6 +4,7 @@ struct SavedJSONListSheet: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var store: SavedErrorsStore
     @EnvironmentObject var decksStore: FlashcardDecksStore
+    @EnvironmentObject private var bannerCenter: BannerCenter
     @State private var showSaveDeckSheet = false
     @State private var proposedName: String = "未命名"
     @State private var isSaving = false
@@ -15,7 +16,6 @@ struct SavedJSONListSheet: View {
     @State private var expanded: Set<UUID> = []
 
     var body: some View {
-        NavigationStack {
             Group {
                 if decoded.isEmpty {
                     VStack(spacing: 12) {
@@ -29,6 +29,19 @@ struct SavedJSONListSheet: View {
                     .background(DS.Palette.background)
                 } else {
                     ScrollView {
+                        // 操作列：使用設計系統的簡約匡線按鈕
+                        HStack(spacing: DS.Spacing.md) {
+                            Button("清空", role: .destructive) { store.clearAll() }
+                                .buttonStyle(DSSecondaryButtonCompact())
+                                .disabled(isSaving)
+                            Spacer(minLength: 0)
+                            Button("儲存單字卡") { proposedName = "未命名"; showSaveDeckSheet = true }
+                                .buttonStyle(DSSecondaryButtonCompact())
+                                .disabled(isSaving || store.items.isEmpty)
+                        }
+                        .padding(.horizontal, DS.Spacing.lg)
+                        .padding(.top, DS.Spacing.lg)
+
                         LazyVStack(alignment: .leading, spacing: DS.Spacing.md) {
                             ForEach(decoded) { row in
                                 SavedErrorRowCard(
@@ -46,28 +59,13 @@ struct SavedJSONListSheet: View {
                             }
                         }
                         .padding(.horizontal, DS.Spacing.lg)
-                        .padding(.top, DS.Spacing.lg)
+                        .padding(.top, DS.Spacing.md)
                         .padding(.bottom, DS.Spacing.lg)
                     }
                 }
             }
             .navigationTitle("已儲存 JSON")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    HStack {
-                        if !store.items.isEmpty {
-                            Button("儲存單字卡") { proposedName = "未命名"; showSaveDeckSheet = true }
-                                .disabled(isSaving)
-                        }
-                        Button("關閉") { dismiss() }
-                    }
-                }
-                ToolbarItem(placement: .topBarLeading) {
-                    if !store.items.isEmpty {
-                        Button("清空", role: .destructive) { store.clearAll() }
-                    }
-                }
-            }
+            .navigationBarBackButtonHidden(isSaving)
             .sheet(isPresented: $showSaveDeckSheet) {
                 SaveDeckNameSheet(name: proposedName, count: store.items.count, isSaving: isSaving) { action in
                     switch action {
@@ -80,7 +78,14 @@ struct SavedJSONListSheet: View {
                 .presentationDetents([.height(220)])
             }
             .alert(saveError ?? "", isPresented: Binding(get: { saveError != nil }, set: { _ in saveError = nil })) {}
-        }
+            // 進行中轉圈圈（不會被中斷）；顯示在本 sheet 之上
+            .overlay(alignment: .center) {
+                if isSaving { LoadingOverlay(text: "製作中…") }
+            }
+            // 橫幅位階最高：在本 sheet 也疊一層 BannerHost
+            .overlay(alignment: .bottomTrailing) {
+                BannerHost().environmentObject(bannerCenter)
+            }
         .onAppear { rebuildDecoded() }
         .onChange(of: store.items, initial: false) { _, _ in rebuildDecoded() }
     }
@@ -101,6 +106,9 @@ struct SavedJSONListSheet: View {
             let (resolvedName, cards) = try await deckService.makeDeck(name: effectiveName, from: payloads)
             _ = decksStore.add(name: resolvedName, cards: cards)
             showSaveDeckSheet = false
+            // Show confirmation banner (bottom-right, via BannerHost)
+            let subtitle = "\(resolvedName) • \(cards.count) 張"
+            bannerCenter.show(title: "已儲存單字卡", subtitle: subtitle)
         } catch {
             saveError = (error as NSError).localizedDescription
         }
@@ -220,7 +228,7 @@ private struct SavedErrorRowCard: View {
                                 Button("取消", role: .cancel) {}
                             }
                         }
-                        .transition(.move(edge: .top).combined(with: .opacity))
+                        .transition(.opacity)
                     } else {
                         // Fallback: show raw JSON (monospace) when parse fails
                         ScrollView(.horizontal, showsIndicators: true) {
@@ -247,13 +255,15 @@ private struct SavedErrorRowCard: View {
                             }
                         }
                         .padding(.top, 2)
-                        .transition(.move(edge: .top).combined(with: .opacity))
+                        .transition(.opacity)
                         .confirmationDialog("確定要刪除這筆紀錄嗎？", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
                             Button("刪除", role: .destructive) { onDelete(); Haptics.warning() }
                             Button("取消", role: .cancel) {}
-                        }
-                    }
-                }
+        }
+        .zIndex(expanded ? 1 : 0)
+        .animation(DS.AnimationToken.subtle, value: expanded)
+    }
+}
             }
         }
     }

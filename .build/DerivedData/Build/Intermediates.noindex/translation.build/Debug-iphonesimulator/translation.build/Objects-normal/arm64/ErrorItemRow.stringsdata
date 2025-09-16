@@ -1,0 +1,32 @@
+{
+  "source": "/Users/chenliangyu/Desktop/translation/translation/components/ErrorItemRow.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "建議",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 23
+        }
+      },
+      {
+        "comment": "",
+        "key": "已儲存",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 69
+        }
+      },
+      {
+        "comment": "",
+        "key": "儲存",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 71
+        }
+      }
+    ]
+  },
+  "version": 1
+}

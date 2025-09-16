@@ -1,0 +1,24 @@
+{
+  "source": "/Users/chenliangyu/Desktop/translation/translation/components/VariantBracketComposerView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "複製目前組合",
+        "location": {
+          "startingColumn": 37,
+          "startingLine": 55
+        }
+      },
+      {
+        "comment": "",
+        "key": "…",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 255
+        }
+      }
+    ]
+  },
+  "version": 1
+}

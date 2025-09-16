@@ -1,0 +1,120 @@
+{
+  "source": "/Users/chenliangyu/Desktop/translation/translation/components/FlashcardsAudioSettingsSheet.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "順序",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 16
+        }
+      },
+      {
+        "comment": "",
+        "key": "順序",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 17
+        }
+      },
+      {
+        "comment": "",
+        "key": "Front",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 18
+        }
+      },
+      {
+        "comment": "",
+        "key": "Back",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 19
+        }
+      },
+      {
+        "comment": "",
+        "key": "Front→Back",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 20
+        }
+      },
+      {
+        "comment": "",
+        "key": "Back→Front",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 21
+        }
+      },
+      {
+        "comment": "",
+        "key": "語速",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 31
+        }
+      },
+      {
+        "comment": "",
+        "key": "段間隔",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 41
+        }
+      },
+      {
+        "comment": "",
+        "key": "卡間隔",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 48
+        }
+      },
+      {
+        "comment": "",
+        "key": "變體補位",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 57
+        }
+      },
+      {
+        "comment": "",
+        "key": "補位",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 58
+        }
+      },
+      {
+        "comment": "",
+        "key": "隨機",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 59
+        }
+      },
+      {
+        "comment": "",
+        "key": "循環",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 60
+        }
+      },
+      {
+        "comment": "",
+        "key": "開始播放",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 69
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -1,0 +1,64 @@
+{
+  "source": "/Users/chenliangyu/Desktop/translation/translation/components/DeckFolderViews.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "共 %lld 個",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 23
+        }
+      },
+      {
+        "comment": "",
+        "key": "新資料夾",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 36
+        }
+      },
+      {
+        "comment": "",
+        "key": "資料夾內尚無單字卡集",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 86
+        }
+      },
+      {
+        "comment": "",
+        "key": "從根清單拖曳卡片到此資料夾即可收納。",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 87
+        }
+      },
+      {
+        "comment": "",
+        "key": "重新命名",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 116
+        }
+      },
+      {
+        "comment": "",
+        "key": "刪除",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 117
+        }
+      },
+      {
+        "comment": "",
+        "key": "共 %lld 張",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 143
+        }
+      }
+    ]
+  },
+  "version": 1
+}

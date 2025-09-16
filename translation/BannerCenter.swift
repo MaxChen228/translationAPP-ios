@@ -24,7 +24,7 @@ struct BannerItem: Identifiable {
 struct BannerHost: View {
     @EnvironmentObject var center: BannerCenter
     var body: some View {
-        VStack {
+        ZStack(alignment: .bottomTrailing) {
             if let item = center.banner {
                 HStack(spacing: 12) {
                     Image(systemName: "checkmark.seal.fill").foregroundStyle(DS.Palette.primary)
@@ -32,8 +32,8 @@ struct BannerHost: View {
                         Text(item.title).font(.headline)
                         if let s = item.subtitle { Text(s).font(.subheadline).foregroundStyle(.secondary) }
                     }
-                    Spacer()
                     if let t = item.actionTitle {
+                        Spacer(minLength: 8)
                         Button(t) { item.action?(); withAnimation(DS.AnimationToken.subtle) { center.banner = nil } }
                             .buttonStyle(DSSecondaryButtonCompact())
                     }
@@ -41,13 +41,16 @@ struct BannerHost: View {
                 .padding(.horizontal, DS.Spacing.md2)
                 .padding(.vertical, DS.Spacing.sm)
                 .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: DS.Radius.md2, style: .continuous))
-                .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 6)
-                .padding(.horizontal, DS.Spacing.sm2)
-                .padding(.top, DS.Spacing.xs)
-                .transition(.move(edge: .top).combined(with: .opacity))
+                .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 6)
+                // keep it off the edges (bottom-right corner)
+                .padding(.trailing, DS.Spacing.lg)
+                .padding(.bottom, DS.Spacing.lg)
+                .transition(.move(edge: .trailing).combined(with: .opacity))
+                .frame(maxWidth: 360, alignment: .trailing)
             }
-            Spacer(minLength: 0)
         }
+        // Ensure the host fills the available screen so bottomTrailing alignment works
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
         .allowsHitTesting(center.banner != nil)
         .dsAnimation(DS.AnimationToken.snappy, value: center.banner != nil)
     }

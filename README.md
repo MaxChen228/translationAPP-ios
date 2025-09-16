@@ -56,11 +56,15 @@ App 以 `AppConfig` 讀取 Info.plist 或環境變數：
 ## 本機後端（開發用）
 本庫提供兩套可選後端：
 - 簡易 HTTP 伺服器：`python3 backend/server.py`（`127.0.0.1:8080`）。
-- FastAPI 伺服器（可串 OpenAI）：
+- FastAPI 伺服器（Gemini）：
   1. `python3 -m venv .venv && source .venv/bin/activate && pip install -r backend/requirements.txt`
-  2. 複製 `backend/.env.example` → `backend/.env`，設定 `OPENAI_API_KEY`（可選 `OPENAI_MODEL`、`HOST`、`PORT`）。
+  2. 複製 `backend/.env.example` → `backend/.env`，設定：
+     - 金鑰：`GEMINI_API_KEY` 或 `GOOGLE_API_KEY`
+     - 模型：`LLM_MODEL`（或 `GEMINI_MODEL`）預設 `gemini-2.5-flash`
+     - 伺服器位址：`HOST`、`PORT`
   3. 啟動：`python3 backend/main.py`（支援 `PORT=8080` 覆寫）。
   4. 若 API 失敗想退回規則式結果，設 `ALLOW_FALLBACK_ON_FAILURE=1`。
+  5. 健康檢查：`GET /healthz` 回 `{status, provider, model}`。
 
 ### 批改 API（/correct）
 ```

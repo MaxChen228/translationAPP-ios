@@ -7,6 +7,8 @@ struct ShelfTileCard: View {
     var iconSystemName: String? = nil
     var accentColor: Color = DS.Palette.primary
     var showChevron: Bool = true
+    // Optional linear progress (0...1). When provided, renders a small progress bar at bottom.
+    var progress: Double? = nil
 
     var body: some View {
         DSOutlineCard {
@@ -36,9 +38,16 @@ struct ShelfTileCard: View {
                     if let countText { Text(countText).dsType(DS.Font.caption).foregroundStyle(.secondary) }
                     Spacer(minLength: 0)
                 }
+
+                if let p = progress {
+                    // Thin linear progress bar
+                    ProgressView(value: min(max(p, 0), 1))
+                        .progressViewStyle(.linear)
+                        .tint(accentColor)
+                        .padding(.top, 2)
+                }
             }
             .frame(minHeight: 104)
         }
     }
 }
-

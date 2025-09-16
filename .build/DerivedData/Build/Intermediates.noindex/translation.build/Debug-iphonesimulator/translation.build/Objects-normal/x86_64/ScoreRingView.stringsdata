@@ -1,0 +1,32 @@
+{
+  "source": "/Users/chenliangyu/Desktop/translation/translation/components/ScoreRingView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "分數 %lld 分",
+        "location": {
+          "startingColumn": 29,
+          "startingLine": 26
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 16
+        }
+      },
+      {
+        "comment": "",
+        "key": "分",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 18
+        }
+      }
+    ]
+  },
+  "version": 1
+}

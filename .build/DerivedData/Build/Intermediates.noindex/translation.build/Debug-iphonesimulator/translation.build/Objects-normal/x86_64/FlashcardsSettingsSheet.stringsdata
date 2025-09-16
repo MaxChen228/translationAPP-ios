@@ -1,0 +1,40 @@
+{
+  "source": "/Users/chenliangyu/Desktop/translation/translation/components/FlashcardsSettingsSheet.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "設定",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 9
+        }
+      },
+      {
+        "comment": "",
+        "key": "複習模式",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 11
+        }
+      },
+      {
+        "comment": "",
+        "key": "複習模式",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 12
+        }
+      },
+      {
+        "comment": "",
+        "key": "完成",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 22
+        }
+      }
+    ]
+  },
+  "version": 1
+}

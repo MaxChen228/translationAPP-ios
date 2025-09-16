@@ -61,7 +61,6 @@ struct TranslationApp: App {
                     .environmentObject(router)
                 BannerHost()
                     .environmentObject(bannerCenter)
-                    .ignoresSafeArea(edges: .top)
             }
                 .environmentObject(savedStore)
                 .environmentObject(decksStore)

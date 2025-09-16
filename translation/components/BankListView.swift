@@ -19,13 +19,33 @@ struct BankListView: View {
             LazyVStack(alignment: .leading, spacing: 16) {
                 if isLoading { ProgressView().frame(maxWidth: .infinity, alignment: .center) }
                 if let error { Text(error).foregroundStyle(.secondary) }
+
+                // 頂部進度摘要：顯示「已完成 / 題數」
+                if !items.isEmpty {
+                    let done = items.filter { $0.completed == true }.count
+                    let total = items.count
+                    DSOutlineCard {
+                        HStack(alignment: .center) {
+                            Text("進度")
+                                .dsType(DS.Font.caption)
+                                .foregroundStyle(.secondary)
+                            ProgressView(value: Double(done), total: Double(max(total, 1)))
+                                .tint(DS.Palette.primary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.horizontal, 8)
+                            Text("\(done) / \(total)")
+                                .dsType(DS.Font.caption)
+                        }
+                        .padding(.vertical, 2)
+                    }
+                }
                 ForEach(items.indices, id: \.self) { i in
                     if i > 0 {
                         DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.border))
                             .padding(.vertical, DS.Spacing.sm)
                     }
                     let item = items[i]
-                    VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 10) {
                         // 題目：加大字體並以細邊框凸顯
                         Text(item.zh)
                             .dsType(DS.Font.serifTitle, lineSpacing: 6, tracking: 0.1)
@@ -36,41 +56,34 @@ struct BankListView: View {
                                     .stroke(DS.Palette.border.opacity(DS.Opacity.muted), lineWidth: DS.BorderWidth.regular)
                                     .background(DS.Palette.surface.opacity(0.0001)) // keep hit testing sane
                             )
-                        HStack(spacing: 8) {
-                            // difficulty dots
-                            HStack(spacing: 4) {
-                                ForEach(1...5, id: \.self) { i in
-                                    Circle().fill(i <= item.difficulty ? DS.Palette.primary.opacity(0.8) : DS.Palette.border.opacity(DS.Opacity.border))
-                                        .frame(width: 6, height: 6)
+                        HStack(alignment: .center, spacing: 8) {
+                            // difficulty dots + tags（左側群組）
+                            HStack(spacing: 8) {
+                                HStack(spacing: 4) {
+                                    ForEach(1...5, id: \.self) { i in
+                                        Circle().fill(i <= item.difficulty ? DS.Palette.primary.opacity(0.8) : DS.Palette.border.opacity(DS.Opacity.border))
+                                            .frame(width: 6, height: 6)
+                                    }
                                 }
-                            }
-                            if let tags = item.tags, !tags.isEmpty {
-                                Text(tags.joined(separator: ", "))
-                                    .dsType(DS.Font.caption)
-                                    .foregroundStyle(.secondary)
+                                if let tags = item.tags, !tags.isEmpty {
+                                    Text(tags.joined(separator: ", "))
+                                        .dsType(DS.Font.caption)
+                                        .foregroundStyle(.secondary)
+                                }
                             }
                             Spacer(minLength: 0)
-                        }
-                        HStack {
-                            Spacer()
-                            Button {
-                                guard item.completed != true else { return }
-                                if let onPractice {
-                                    onPractice(item, tag)
-                                } else {
-                                    vm.startPractice(with: item, tag: tag)
-                                }
-                                // Always pop back to book list after choosing a practice item
-                                dismiss()
-                            } label: {
-                                if item.completed == true {
-                                    Label("已完成", systemImage: "checkmark.seal.fill")
-                                } else {
+                            // 右側狀態/操作
+                            if item.completed == true {
+                                CompletionBadge()
+                            } else {
+                                Button {
+                                    if let onPractice { onPractice(item, tag) } else { vm.startPractice(with: item, tag: tag) }
+                                    dismiss()
+                                } label: {
                                     Label("練習", systemImage: "play.fill")
                                 }
+                                .buttonStyle(DSSecondaryButtonCompact())
                             }
-                            .buttonStyle(DSSecondaryButtonCompact())
-                            .disabled(item.completed == true)
                         }
                         HintListSection(
                             hints: item.hints,
@@ -109,6 +122,27 @@ struct BankListView: View {
 }
 
 private struct ChipModel: Identifiable { let id = UUID(); let text: String; let color: Color }
+
+// 醒目的「已完成」徽章（綠底白字）
+private struct CompletionBadge: View {
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "checkmark.seal.fill")
+            Text("已完成")
+        }
+        .font(.subheadline)
+        .foregroundStyle(DS.Palette.primary)
+        .padding(.vertical, 6)
+        .padding(.horizontal, 10)
+        .background(
+            Capsule().fill(Color.clear)
+        )
+        .overlay(
+            Capsule().stroke(DS.Palette.primary.opacity(DS.Opacity.strong), lineWidth: DS.BorderWidth.regular)
+        )
+        .accessibilityLabel("已完成")
+    }
+}
 
 private struct WrapChips: View {
     var chips: [ChipModel]

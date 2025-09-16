@@ -1,0 +1,16 @@
+{
+  "source": "/Users/chenliangyu/Desktop/translation/translation/components/AudioMiniPlayerView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "%lld/%lld",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 41
+        }
+      }
+    ]
+  },
+  "version": 1
+}

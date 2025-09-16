@@ -18,7 +18,7 @@ struct ContentView: View {
     }
     @FocusState private var focused: Field?
     enum Field { case zh, en }
-    @State private var showSavedSheet: Bool = false
+    @State private var showSavedSheet: Bool = false // legacy; replaced by NavigationLink
 
     var body: some View {
         ScrollView {
@@ -139,8 +139,9 @@ struct ContentView: View {
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showSavedSheet = true
+                    NavigationLink {
+                        SavedJSONListSheet()
+                            .environmentObject(savedStore)
                     } label: {
                         Image(systemName: "tray.full")
                     }
@@ -150,10 +151,7 @@ struct ContentView: View {
         .overlay(alignment: .center) {
             if vm.isLoading { LoadingOverlay() }
         }
-        .sheet(isPresented: $showSavedSheet) {
-            SavedJSONListSheet()
-                .environmentObject(savedStore)
-        }
+        // legacy sheet removed; now navigates to a page via NavigationLink
     }
 }
 
