@@ -122,6 +122,6 @@ private struct CardPreviewRow: View {
 #Preview {
     let store = FlashcardDecksStore()
     let deck = store.add(name: "示例卡集", cards: SampleDecks.gratitudeAndChoices.cards)
-    return NavigationStack { DeckDetailView(deckID: deck.id) }
+    NavigationStack { DeckDetailView(deckID: deck.id) }
         .environmentObject(store)
 }

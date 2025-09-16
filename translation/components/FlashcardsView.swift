@@ -610,6 +610,4 @@ private struct NoteText: View {
     }
 }
 
-#Preview {
-    NavigationStack { FlashcardsView() }
-}
+#Preview { NavigationStack { FlashcardsView() } }
