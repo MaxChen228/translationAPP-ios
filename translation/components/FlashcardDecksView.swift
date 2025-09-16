@@ -11,24 +11,59 @@ struct FlashcardDeck: Identifiable, Equatable {
 
 struct FlashcardDecksView: View {
     @EnvironmentObject private var decksStore: FlashcardDecksStore
+    @EnvironmentObject private var deckFolders: DeckFoldersStore
     private var cols: [GridItem] { [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.sm2)] }
     @State private var renaming: PersistedFlashcardDeck? = nil
+    @State private var renamingFolder: DeckFolder? = nil
+    @State private var draggingDeckID: UUID? = nil
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: DS.Spacing.lg) {
                 DSSectionHeader(title: "單字卡集", subtitle: "選擇一個卡片集開始練習", accentUnderline: true)
 
-                if !decksStore.decks.isEmpty {
+                // 資料夾區
+                if !deckFolders.folders.isEmpty {
+                    Text("資料夾").dsType(DS.Font.section).foregroundStyle(.secondary)
                     LazyVGrid(columns: cols, spacing: DS.Spacing.sm2) {
-                        ForEach(decksStore.decks) { deck in
+                        ForEach(deckFolders.folders) { folder in
+                            NavigationLink { DeckFolderDetailView(folderID: folder.id) } label: {
+                                DeckFolderCard(folder: folder)
+                            }
+                            .buttonStyle(DSCardLinkStyle())
+                            .contextMenu {
+                                Button("重新命名") { renamingFolder = folder }
+                                Button("刪除", role: .destructive) {
+                                    _ = deckFolders.removeFolder(folder.id)
+                                }
+                            }
+                            .onDrop(of: [.text], delegate: DeckIntoFolderDropDelegate(folderID: folder.id, folders: deckFolders, draggingID: $draggingDeckID))
+                        }
+                        // 新增資料夾
+                        Button { _ = deckFolders.addFolder() } label: { NewDeckFolderCard() }
+                            .buttonStyle(.plain)
+                    }
+                }
+
+                // 根層單字卡區
+                let rootDecks: [PersistedFlashcardDeck] = decksStore.decks.filter { !deckFolders.isInAnyFolder($0.id) }
+                if !rootDecks.isEmpty {
+                    if !deckFolders.folders.isEmpty { DSSeparator(color: DS.Palette.border.opacity(0.2)) }
+                    Text("單字卡").dsType(DS.Font.section).foregroundStyle(.secondary)
+                    LazyVGrid(columns: cols, spacing: DS.Spacing.sm2) {
+                        ForEach(rootDecks) { deck in
                             DeckItemLink(deck: deck) {
                                 renaming = deck
                             } onDelete: {
+                                // 刪除前清理資料夾引用
+                                deckFolders.remove(deckID: deck.id)
                                 decksStore.remove(deck.id)
                             }
+                            .onDrag { draggingDeckID = deck.id; return DeckDragPayload.provider(for: deck.id) }
+                            .onDrop(of: [.text], delegate: DeckReorderDropDelegate(item: deck, store: decksStore, draggingID: $draggingDeckID))
                         }
                     }
+                    .dsAnimation(DS.AnimationToken.reorder, value: decksStore.decks)
                 }
 
                 // 示例卡集：在沒有自訂卡集時提供
@@ -54,10 +89,18 @@ struct FlashcardDecksView: View {
             .padding(.bottom, DS.Spacing.lg)
         }
         .background(DS.Palette.background)
+        // 後備 drop：把項目拖到空白處或邊緣放下時清除 dragging 狀態
+        .onDrop(of: [.text], delegate: ClearDragStateDropDelegate(draggingID: $draggingDeckID))
         .navigationTitle("單字卡")
         .sheet(item: $renaming) { dk in
             RenameDeckSheet(name: dk.name) { new in
                 decksStore.rename(dk.id, to: new)
+            }
+            .presentationDetents([.height(180)])
+        }
+        .sheet(item: $renamingFolder) { f in
+            RenameFolderSheet(name: f.name) { new in
+                deckFolders.rename(f.id, to: new)
             }
             .presentationDetents([.height(180)])
         }
@@ -109,6 +152,62 @@ private struct DeckItemLink: View {
         }
         .buttonStyle(DSCardLinkStyle())
     }
+}
+
+// MARK: - Drag/Drop Helpers (root reordering, folder drop)
+
+private struct DeckReorderDropDelegate: DropDelegate {
+    let item: PersistedFlashcardDeck
+    let store: FlashcardDecksStore
+    @Binding var draggingID: UUID?
+
+    func validateDrop(info: DropInfo) -> Bool { true }
+    func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
+
+    func dropEntered(info: DropInfo) {
+        guard let draggingID, draggingID != item.id else { return }
+        guard let from = store.index(of: draggingID), let to = store.index(of: item.id) else { return }
+        if from != to {
+            store.moveDeck(id: draggingID, to: to > from ? to + 1 : to)
+            Haptics.lightTick()
+        }
+    }
+
+    func performDrop(info: DropInfo) -> Bool {
+        draggingID = nil
+        Haptics.success()
+        return true
+    }
+}
+
+private struct DeckIntoFolderDropDelegate: DropDelegate {
+    let folderID: UUID
+    let folders: DeckFoldersStore
+    @Binding var draggingID: UUID?
+
+    func validateDrop(info: DropInfo) -> Bool { true }
+    func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
+
+    func performDrop(info: DropInfo) -> Bool {
+        let providers = info.itemProviders(for: [.text])
+        guard let p = providers.first else { draggingID = nil; return false }
+        var handled = false
+        let _ = p.loadObject(ofClass: NSString.self) { obj, _ in
+            if let s = obj as String?, let id = DeckDragPayload.decodeDeckID(s) {
+                Task { @MainActor in folders.add(deckID: id, to: folderID); Haptics.success() }
+                handled = true
+            }
+        }
+        draggingID = nil
+        return handled
+    }
+}
+
+private struct ClearDragStateDropDelegate: DropDelegate {
+    @Binding var draggingID: UUID?
+    func validateDrop(info: DropInfo) -> Bool { true }
+    func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
+    func performDrop(info: DropInfo) -> Bool { draggingID = nil; return true }
 }
 
 private struct RenameDeckSheet: View {

@@ -73,4 +73,16 @@ final class FlashcardDecksStore: ObservableObject {
             // ignore persist errors
         }
     }
+
+    // MARK: - Root-level ordering for decks
+    func index(of id: UUID) -> Int? { decks.firstIndex(where: { $0.id == id }) }
+
+    func moveDeck(id: UUID, to newIndex: Int) {
+        guard let from = index(of: id) else { return }
+        var to = newIndex
+        let item = decks.remove(at: from)
+        if from < to { to -= 1 }
+        to = max(0, min(to, decks.count))
+        decks.insert(item, at: to)
+    }
 }
