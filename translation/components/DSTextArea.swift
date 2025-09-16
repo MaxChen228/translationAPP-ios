@@ -37,7 +37,7 @@ struct DSTextArea: View {
             RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
                 .stroke(isFocused ? DS.Palette.primary.opacity(0.45) : DS.Palette.border.opacity(0.35), lineWidth: DS.BorderWidth.regular)
         )
-        .animation(.easeInOut(duration: 0.2), value: isFocused)
+        .animation(DS.AnimationToken.subtle, value: isFocused)
     }
 }
 

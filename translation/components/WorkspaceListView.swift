@@ -15,7 +15,7 @@ struct WorkspaceListView: View {
     private var cols: [GridItem] { [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.lg)] }
     @State private var programmaticOpenVM: CorrectionViewModel? = nil
     @State private var openActive: Bool = false
-    // 拖曳中的項目（以 ID 辨識）。用於視覺提升與 DropDelegate 比對。
+    // 拖曳中的項目（以 ID 辨識）。供重排使用。
     @State private var draggingID: UUID? = nil
 
     var body: some View {
@@ -35,6 +35,8 @@ struct WorkspaceListView: View {
                         }
                         .environmentObject(savedStore)
                     }
+                    // 將重排的動畫收斂到容器層，避免在 delegate 內多次觸發動畫
+                    .animation(DS.AnimationToken.reorder, value: store.workspaces)
 
                     Button {
                         _ = store.addWorkspace()
@@ -49,6 +51,8 @@ struct WorkspaceListView: View {
                 .padding(.horizontal, DS.Spacing.lg)
                 .padding(.top, DS.Spacing.lg)
             }
+            // 後備 drop：若使用者把項目拖到空白處或邊緣放下，確保 draggingID 能被清除
+            .onDrop(of: [.text], delegate: ClearDragStateDropDelegate(draggingID: $draggingID))
             .background(DS.Palette.background)
             .navigationTitle("Workspace")
             .background(
@@ -75,7 +79,9 @@ struct WorkspaceListView: View {
                 }
                 .presentationDetents([.height(180)])
             }
+            .onAppear { draggingID = nil }
         }
+        // 只在 ScrollView 範圍處理後備 drop；避免多層干擾
         // banner 監聽已移到 App root，這裡只處理 Router 指令
         .onReceive(router.$openWorkspaceID) { id in
             guard let id else { return }
@@ -105,9 +111,7 @@ private struct ReorderDropDelegate: DropDelegate {
         guard let draggingID, draggingID != item.id else { return }
         guard let from = store.index(of: draggingID), let to = store.index(of: item.id) else { return }
         if from != to {
-            withAnimation(.interactiveSpring(response: 0.26, dampingFraction: 0.86)) {
-                store.moveWorkspace(id: draggingID, to: to > from ? to + 1 : to)
-            }
+            store.moveWorkspace(id: draggingID, to: to > from ? to + 1 : to)
             Haptics.lightTick()
         }
     }
@@ -124,7 +128,7 @@ private struct AddToEndDropDelegate: DropDelegate {
     @Binding var draggingID: UUID?
     func validateDrop(info: DropInfo) -> Bool { true }
     func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
-    func dropEntered(info: DropInfo) { /* 可選：即時移到尾端，先保守不動 */ }
+    func dropEntered(info: DropInfo) { }
     func performDrop(info: DropInfo) -> Bool {
         guard let draggingID else { return false }
         withAnimation(.interactiveSpring(response: 0.26, dampingFraction: 0.86)) {
@@ -135,6 +139,17 @@ private struct AddToEndDropDelegate: DropDelegate {
         return true
     }
 }
+
+private struct ClearDragStateDropDelegate: DropDelegate {
+    @Binding var draggingID: UUID?
+    func validateDrop(info: DropInfo) -> Bool { true }
+    // 使用 .move 以確保 performDrop 會被呼叫（部分情境下 .cancel 可能不觸發 performDrop）
+    func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
+    func performDrop(info: DropInfo) -> Bool { AppLog.uiDebug("[drag] clear-drop performDrop (fallback)"); draggingID = nil; return true }
+}
+
+// 以 isTargeted 監控拖放生命週期，會話結束時確保清理狀態
+// removed watcher overlay; simplified drag lifecycle
 
 private struct WorkspaceItemLink: View {
     let ws: Workspace
@@ -177,11 +192,6 @@ private struct WorkspaceItemLink: View {
             return NSItemProvider(object: ws.id.uuidString as NSString)
         }
         .onDrop(of: [.text], delegate: ReorderDropDelegate(item: ws, store: store, draggingID: $draggingID))
-        // Lift 視覺：略為放大、加陰影、提高 zIndex；其他項目微降透明度
-        .scaleEffect(draggingID == ws.id ? 1.03 : 1.0)
-        .opacity(draggingID == nil || draggingID == ws.id ? 1.0 : 0.98)
-        .shadow(color: Color.black.opacity(draggingID == ws.id ? 0.12 : 0), radius: 10, x: 0, y: 6)
-        .zIndex(draggingID == ws.id ? 1 : 0)
     }
 }
 

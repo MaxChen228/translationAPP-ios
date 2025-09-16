@@ -58,6 +58,6 @@ struct DSCardLinkStyle: ButtonStyle {
                 RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
                     .stroke(DS.Palette.primary.opacity(configuration.isPressed ? 0.45 : 0), lineWidth: DS.BorderWidth.regular)
             )
-            .animation(.spring(response: 0.28, dampingFraction: 0.9), value: configuration.isPressed)
+            .animation(DS.AnimationToken.snappy, value: configuration.isPressed)
     }
 }

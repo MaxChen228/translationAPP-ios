@@ -3,12 +3,12 @@ import SwiftUI
 final class BannerCenter: ObservableObject {
     @Published var banner: BannerItem? = nil
     func show(title: String, subtitle: String? = nil, actionTitle: String? = nil, action: (() -> Void)? = nil) {
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
+        withAnimation(DS.AnimationToken.snappy) {
             banner = BannerItem(title: title, subtitle: subtitle, actionTitle: actionTitle, action: action)
         }
         // Auto dismiss after 2 seconds if no interaction
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
-            withAnimation(.easeInOut) { self?.banner = nil }
+            withAnimation(DS.AnimationToken.subtle) { self?.banner = nil }
         }
     }
 }
@@ -34,7 +34,7 @@ struct BannerHost: View {
                     }
                     Spacer()
                     if let t = item.actionTitle {
-                        Button(t) { item.action?(); withAnimation { center.banner = nil } }
+                        Button(t) { item.action?(); withAnimation(DS.AnimationToken.subtle) { center.banner = nil } }
                             .buttonStyle(DSSecondaryButtonCompact())
                     }
                 }
@@ -49,7 +49,6 @@ struct BannerHost: View {
             Spacer(minLength: 0)
         }
         .allowsHitTesting(center.banner != nil)
-        .animation(.spring(response: 0.3, dampingFraction: 0.9), value: center.banner != nil)
+        .animation(DS.AnimationToken.snappy, value: center.banner != nil)
     }
 }
-

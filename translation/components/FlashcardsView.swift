@@ -31,7 +31,7 @@ final class FlashcardsStore: ObservableObject {
 
     func next() { guard !cards.isEmpty else { return }; index = (index + 1) % cards.count; showBack = false }
     func prev() { guard !cards.isEmpty else { return }; index = (index - 1 + cards.count) % cards.count; showBack = false }
-    func flip() { withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { showBack.toggle() } }
+    func flip() { showBack.toggle() }
 
     static var defaultCards: [Flashcard] = [
         Flashcard(
@@ -61,6 +61,8 @@ struct FlashcardsView: View {
     private let deckID: UUID?
     @EnvironmentObject private var decksStore: FlashcardDecksStore
     @EnvironmentObject private var progressStore: FlashcardProgressStore
+    @StateObject private var speech = SpeechEngine()
+    @StateObject private var ttsStore = TTSSettingsStore()
     @State private var isEditing: Bool = false
     @State private var draft: Flashcard? = nil
     @State private var errorText: String? = nil
@@ -72,6 +74,7 @@ struct FlashcardsView: View {
     @State private var dragX: CGFloat = 0
     @State private var flashDelta: Int? = nil
     @State private var showSettings = false
+    @State private var showAudioSheet = false
 
     init(title: String = "單字卡", cards: [Flashcard] = FlashcardsStore.defaultCards, deckID: UUID? = nil, startIndex: Int = 0) {
         _store = StateObject(wrappedValue: FlashcardsStore(cards: cards, startIndex: startIndex))
@@ -211,6 +214,14 @@ struct FlashcardsView: View {
                 }
                 .accessibilityLabel("設定")
             }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showAudioSheet = true
+                } label: {
+                    Image(systemName: "speaker.wave.2")
+                }
+                .accessibilityLabel("播音設定")
+            }
         }
         .alert("確定要刪除這張卡片嗎？", isPresented: $showDeleteConfirm) {
             Button("刪除", role: .destructive) { deleteCurrent() }
@@ -219,6 +230,12 @@ struct FlashcardsView: View {
         .sheet(isPresented: $showSettings) {
             FlashcardsSettingsSheet()
                 .presentationDetents([.height(220)])
+        }
+        .sheet(isPresented: $showAudioSheet) {
+            FlashcardsAudioSettingsSheet(store: ttsStore) { settings in
+                startTTS(with: settings)
+            }
+            .presentationDetents([.height(360)])
         }
     }
 }
@@ -323,6 +340,12 @@ private extension FlashcardsView {
             withAnimation(.spring(response: 0.42, dampingFraction: 0.85)) { dragX = 0 }
         }
     }
+
+    // MARK: - TTS
+    func startTTS(with settings: TTSSettings) {
+        let queue = PlaybackBuilder.buildQueue(cards: store.cards, startIndex: store.index, settings: settings)
+        speech.play(queue: queue)
+    }
 }
 
 private struct EmptyState: View {
@@ -374,7 +397,7 @@ private struct FlipCard<Front: View, Back: View>: View {
             .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0), perspective: 0.8)
             .opacity(isFlipped ? 1 : 0)
         }
-        .animation(.easeInOut(duration: 0.32), value: isFlipped)
+        .animation(DS.AnimationToken.flip, value: isFlipped)
     }
 }
 

@@ -43,6 +43,22 @@ enum DS {
         let y: CGFloat
     }
 
+    // Centralized animation tokens to keep motion consistent
+    enum AnimationToken {
+        // Snappy movement for small layout changes (e.g., reordering)
+        static var snappy: Animation { .interactiveSpring(response: 0.26, dampingFraction: 0.86) }
+        // Bouncy card-like motion (e.g., flipping, card return)
+        static var bouncy: Animation { .spring(response: 0.42, dampingFraction: 0.85) }
+        // Quick fade/slide for subtle UI state transitions
+        static var subtle: Animation { .easeInOut(duration: 0.2) }
+        // Flip timing
+        static var flip: Animation { .easeInOut(duration: 0.32) }
+        // Reorder list/grid items
+        static var reorder: Animation { snappy }
+        // Toss a card out quickly
+        static var tossOut: Animation { .easeOut(duration: 0.18) }
+    }
+
     // Brand color scheme (easy to swap for theming)
     struct BrandScheme {
         let classicBlue: Color   // 19-4052

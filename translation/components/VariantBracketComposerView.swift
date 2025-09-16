@@ -20,7 +20,7 @@ struct VariantBracketComposerView: View {
 
         VStack(alignment: .leading, spacing: 10) {
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(alignment: .top, spacing: 14) {
+                HStack(alignment: .top, spacing: 10) {
                     ForEach(parsed.elements.indices, id: \.self) { i in
                         switch parsed.elements[i] {
                         case .text(let t):
@@ -93,10 +93,16 @@ private struct BracketOptionsColumn: View {
                     } label: {
                         Text(options[idx])
                             .dsType(DS.Font.body)
+                            .fontWeight(isSel ? .semibold : .regular)
                             .foregroundStyle(.primary)
-                            .padding(.vertical, 2)
-                            .padding(.horizontal, 0)
-                            .underline(isSel, color: DS.Palette.border.opacity(0.6))
+                            .padding(.vertical, 3)
+                            .padding(.horizontal, 6)
+                            .background(
+                                Capsule().fill(DS.Palette.surface.opacity(isSel ? 0.06 : 0))
+                            )
+                            .overlay(
+                                Capsule().stroke(DS.Palette.border.opacity(isSel ? 0.45 : 0.18), lineWidth: isSel ? DS.BorderWidth.regular : DS.BorderWidth.hairline)
+                            )
                     }
                     .buttonStyle(.plain)
                 }
@@ -135,7 +141,7 @@ private extension VariantBracketComposerView {
                 if !cs.isEmpty { out.append(.text(cs)) }
             }
         }
-        return VariantPhrase(elements: mergeAdjacentText(out))
+        return VariantPhrase(elements: mergeAdjacentTextElements(out))
     }
 
     func factoredCommonPrefix(_ arr: [String]) -> String {
@@ -189,8 +195,22 @@ private extension VariantBracketComposerView {
         if !suffix.isEmpty, out.hasSuffix(suffix) { out.removeLast(suffix.count) }
         return out.trimmingCharacters(in: .whitespaces)
     }
+    
+    func mergeAdjacentTextElements(_ arr: [VariantElement]) -> [VariantElement] {
+        var out: [VariantElement] = []
+        for el in arr {
+            if case .text(let s) = el, case .text(let last)? = out.last {
+                out.removeLast()
+                out.append(.text(last + s))
+            } else {
+                out.append(el)
+            }
+        }
+        return out
+    }
 }
 
+private extension VariantBracketComposerView {
     func ensureSelection(groups: [(idx: Int, opts: [String])]) {
         for (i, g) in groups {
             if selected[i] == nil { selected[i] = 0 }
@@ -204,23 +224,30 @@ private struct ThinBracketContainer<Content: View>: View {
     let content: () -> Content
     init(@ViewBuilder content: @escaping () -> Content) { self.content = content }
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .top, spacing: 8) {
             GeometryReader { geo in
                 let h = max(geo.size.height, 20)
-                let x: CGFloat = 8
-                let y0: CGFloat = 4
-                let y1: CGFloat = max(h - 4, y0 + 12)
-                Path { p in
-                    p.move(to: CGPoint(x: x, y: y0))
-                    p.addLine(to: CGPoint(x: 2, y: y0))
-                    p.move(to: CGPoint(x: x, y: y0))
-                    p.addLine(to: CGPoint(x: x, y: y1))
-                    p.move(to: CGPoint(x: x, y: y1))
-                    p.addLine(to: CGPoint(x: 2, y: y1))
+                let x: CGFloat = 7
+                let y0: CGFloat = 3
+                let y1: CGFloat = max(h - 3, y0 + 12)
+                ZStack(alignment: .topLeading) {
+                    Path { p in
+                        p.move(to: CGPoint(x: x, y: y0))
+                        p.addLine(to: CGPoint(x: 2, y: y0))
+                        p.move(to: CGPoint(x: x, y: y0))
+                        p.addLine(to: CGPoint(x: x, y: y1))
+                        p.move(to: CGPoint(x: x, y: y1))
+                        p.addLine(to: CGPoint(x: 2, y: y1))
+                    }
+                    .stroke(DS.Brand.scheme.babyBlue.opacity(0.35), lineWidth: DS.BorderWidth.thin)
+
+                    Text("…")
+                        .font(.system(size: 9))
+                        .foregroundStyle(DS.Palette.border.opacity(0.45))
+                        .offset(x: 1, y: -2)
                 }
-                .stroke(DS.Brand.scheme.babyBlue.opacity(0.8), lineWidth: 1)
             }
-            .frame(width: 12)
+            .frame(width: 10)
 
             content()
         }
