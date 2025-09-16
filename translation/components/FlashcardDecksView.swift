@@ -68,7 +68,7 @@ struct FlashcardDecksView: View {
                                             deckOrder.removeFromOrder("deck:\(deck.id.uuidString)")
                                         }
                                     }
-                                    .gesture(deckDragGesture(for: deck))
+                                    .highPriorityGesture(deckDragGesture(for: deck))
                                 )
                             }
                         }
@@ -102,23 +102,29 @@ struct FlashcardDecksView: View {
 
     // MARK: - Drag logic
     private func deckDragGesture(for deck: PersistedFlashcardDeck) -> some Gesture {
+        let key = "deck:\(deck.id.uuidString)"
         let longPress = LongPressGesture(minimumDuration: 0.5)
             .onEnded { _ in
+                let frame = tileFrames[key] ?? .zero
                 withAnimation(DS.AnimationToken.snappy) {
                     dragState.isDragging = true
                     dragState.itemID = .deck(deck.id)
                     dragState.preview = DragPreview(
                         view: AnyView(ShelfTileCard(title: deck.name, subtitle: nil, countText: "共 \(deck.cards.count) 張", iconSystemName: nil, accentColor: DS.Palette.primary, showChevron: false)
                             .shadow(radius: 8).opacity(0.98)),
-                        size: CGSize(width: 160, height: 104)
+                        size: CGSize(width: max(1, frame.width), height: max(1, frame.height))
                     )
+                    dragState.location = CGPoint(x: frame.midX, y: frame.midY)
                 }
                 Haptics.lightTick()
             }
         let drag = DragGesture(minimumDistance: 1)
-            .onChanged { v in dragState.location = v.location }
-            .onEnded { v in
-                finalizeDrop(at: v.location)
+            .onChanged { v in
+                let base = tileFrames[key] ?? .zero
+                dragState.location = CGPoint(x: base.minX + v.location.x, y: base.minY + v.location.y)
+            }
+            .onEnded { _ in
+                finalizeDrop(at: dragState.location)
                 withAnimation(DS.AnimationToken.subtle) { dragState.reset() }
             }
         return longPress.sequenced(before: drag)
@@ -249,4 +255,3 @@ enum SampleDecks {
 }
 
 #Preview { NavigationStack { FlashcardDecksView() } }
-
