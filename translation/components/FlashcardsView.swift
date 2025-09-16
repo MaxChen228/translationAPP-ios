@@ -135,7 +135,7 @@ struct FlashcardsView: View {
                                     }
                                 }
                             }
-                            .onTapGesture { store.flip() }
+                            .onTapGesture { flipTapped() }
                             .offset(x: dragX)
                             .rotationEffect(.degrees(Double(max(-10, min(10, dragX * 0.06)))))
                             .overlay(alignment: .bottomTrailing) {
@@ -199,9 +199,7 @@ struct FlashcardsView: View {
                             Button { prevButtonTapped() } label: { Label("上一張", systemImage: "chevron.left") }
                                 .buttonStyle(DSSecondaryButtonCompact())
 
-                            Button {
-                                store.flip()
-                            } label: { Label(store.showBack ? "看正面" : "看背面", systemImage: "arrow.2.squarepath") }
+                            Button { flipTapped() } label: { Label(store.showBack ? "看正面" : "看背面", systemImage: "arrow.2.squarepath") }
                             .buttonStyle(DSPrimaryButton())
                         }
                     }
@@ -403,6 +401,19 @@ private extension FlashcardsView {
 
     func prevButtonTapped() {
         goToPreviousAnimated(restartAudio: isAudioActive)
+    }
+
+    func flipTapped() {
+        store.flip()
+        guard let card = store.current, isAudioActive else { return }
+        // Stop current queue and immediately read the face now shown
+        speech.stop()
+        if store.showBack {
+            let text = currentBackComposed.isEmpty ? card.back : currentBackComposed
+            speakOne(text: text, lang: ttsStore.settings.backLang)
+        } else {
+            speakOne(text: card.front, lang: ttsStore.settings.frontLang)
+        }
     }
 
     // MARK: - TTS
