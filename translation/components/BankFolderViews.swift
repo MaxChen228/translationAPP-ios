@@ -84,25 +84,22 @@ struct BankFolderDetailView: View {
                 LazyVGrid(columns: cols, spacing: DS.Spacing.sm2) {
                     ForEach(booksInFolder) { book in
                         NavigationLink { BankListView(vm: CorrectionViewModel(), tag: book.name) } label: {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text(book.name.capitalized)
-                                    .dsType(DS.Font.section)
-                                    .foregroundStyle(.primary)
-                                HStack(spacing: 8) {
-                                    Text("共 \(book.count) 題").dsType(DS.Font.caption).foregroundStyle(.secondary)
-                                    Spacer(minLength: 0)
-                                    Image(systemName: "chevron.right").foregroundStyle(.tertiary)
-                                }
-                            }
-                            .padding(DS.Spacing.md2)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(DS.Palette.surface, in: RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                                    .stroke(DS.Palette.border.opacity(0.3), lineWidth: DS.BorderWidth.hairline)
+                            ShelfTileCard(
+                                title: book.name.capitalized,
+                                subtitle: "難度 \\(book.difficultyMin)-\\(book.difficultyMax)",
+                                countText: "共 \\(book.count) 題",
+                                iconSystemName: nil,
+                                accentColor: DS.Palette.primary,
+                                showChevron: true
                             )
                         }
                         .buttonStyle(DSCardLinkStyle())
+                        .contextMenu {
+                            Button("移出到根") { folders.remove(bookName: book.name) }
+                            #if canImport(UIKit)
+                            Button("複製名稱") { UIPasteboard.general.string = book.name }
+                            #endif
+                        }
                         .onDrag { draggingBookName = book.name; return BookDragPayload.provider(for: book.name) }
                     }
                 }
@@ -122,7 +119,7 @@ struct BankFolderDetailView: View {
             }
         }
         .sheet(isPresented: $showRenameSheet) {
-            RenameFolderSheet(name: folder?.name ?? "") { new in folders.rename(folderID, to: new) }
+            RenameSheet(name: folder?.name ?? "") { new in folders.rename(folderID, to: new) }
                 .presentationDetents([.height(180)])
         }
         .task { await load() }
@@ -144,4 +141,3 @@ enum BookDragPayload {
         return String(s.dropFirst("book:".count))
     }
 }
-

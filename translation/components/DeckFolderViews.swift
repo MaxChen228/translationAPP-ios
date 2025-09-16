@@ -121,7 +121,7 @@ struct DeckFolderDetailView: View {
             }
         }
         .sheet(isPresented: $showRenameSheet) {
-            RenameFolderSheet(name: folder?.name ?? "") { new in
+            RenameSheet(name: folder?.name ?? "") { new in
                 folders.rename(folderID, to: new)
             }
             .presentationDetents([.height(180)])
@@ -153,37 +153,7 @@ private struct FolderDeckCard: View {
     }
 }
 
-// MARK: - Rename Folder Sheet
-
-struct RenameFolderSheet: View {
-    @Environment(\.dismiss) private var dismiss
-    @State private var text: String
-    let onDone: (String) -> Void
-    init(name: String, onDone: @escaping (String) -> Void) {
-        self._text = State(initialValue: name)
-        self.onDone = onDone
-    }
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("重新命名").dsType(DS.Font.section)
-            TextField("名稱", text: $text)
-                .textFieldStyle(.roundedBorder)
-            HStack {
-                Spacer()
-                Button("取消") { dismiss() }
-                Button("完成") {
-                    let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-                    if !trimmed.isEmpty { onDone(trimmed) }
-                    dismiss()
-                }
-                .buttonStyle(DSPrimaryButton())
-                .frame(width: 120)
-            }
-        }
-        .padding(16)
-        .background(DS.Palette.background)
-    }
-}
+// MARK: - Rename Sheet moved to components/shelf/RenameSheet.swift
 
 // MARK: - Root Drop Area (Move out)
 

@@ -17,6 +17,7 @@ struct BankBooksView: View {
     @State private var showImportAlert: Bool = false
     private let service = BankService()
     @EnvironmentObject private var bankFolders: BankFoldersStore
+    @EnvironmentObject private var bankOrder: BankBooksOrderStore
     @State private var renamingFolder: BankFolder? = nil
     @State private var draggingBookName: String? = nil
 
@@ -55,12 +56,11 @@ struct BankBooksView: View {
                 } else {
                     // 資料夾區
                     if !bankFolders.folders.isEmpty {
-                        Text("資料夾").dsType(DS.Font.section).foregroundStyle(.secondary)
                         let cols = [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.sm2)]
-                        LazyVGrid(columns: cols, spacing: DS.Spacing.sm2) {
+                        ShelfGrid(title: "資料夾", columns: cols) {
                             ForEach(bankFolders.folders) { folder in
                                 NavigationLink { BankFolderDetailView(folderID: folder.id) } label: {
-                                    BankFolderCard(folder: folder)
+                                    ShelfTileCard(title: folder.name, subtitle: nil, countText: "共 \(folder.bookNames.count) 本", iconSystemName: "folder", accentColor: DS.Brand.scheme.stucco, showChevron: true)
                                 }
                                 .buttonStyle(DSCardLinkStyle())
                                 .contextMenu {
@@ -75,23 +75,52 @@ struct BankBooksView: View {
                         DSSeparator(color: DS.Palette.border.opacity(0.2))
                     }
 
-                    // 根層書本（未分到資料夾）
+                    // 根層書本（未分到資料夾）＋ 依自訂順序排序
                     let rootBooks = books.filter { !bankFolders.isInAnyFolder($0.name) }
+                    let rootNames = rootBooks.map { $0.name }
+                    let orderedNames = bankOrder.currentRootOrder(root: rootNames)
+                    let orderedRootBooks: [BankService.BankBook] = orderedNames.compactMap { nm in rootBooks.first(where: { $0.name == nm }) }
                     let cols = [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.sm2)]
-                    LazyVGrid(columns: cols, spacing: DS.Spacing.sm2) {
-                        ForEach(rootBooks) { book in
+                    ShelfGrid(title: "題庫本", columns: cols) {
+                        ForEach(orderedRootBooks) { book in
                             NavigationLink {
                                 BankListView(vm: vm, tag: book.name, onPractice: { item, tag in
                                     if let onPractice { onPractice(item, tag) }
                                     dismiss()
                                 })
                             } label: {
-                                BankBookCard(book: book)
+                                ShelfTileCard(
+                                    title: book.name.capitalized,
+                                    subtitle: "難度 \(book.difficultyMin)-\(book.difficultyMax)",
+                                    countText: "共 \(book.count) 題",
+                                    iconSystemName: nil,
+                                    accentColor: DS.Palette.primary,
+                                    showChevron: true
+                                )
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(DSCardLinkStyle())
+                            .contextMenu {
+                                if bankFolders.folders.isEmpty {
+                                    Text("尚無資料夾").foregroundStyle(.secondary)
+                                } else {
+                                    ForEach(bankFolders.folders) { folder in
+                                        Button("加入 \(folder.name)") { bankFolders.add(bookName: book.name, to: folder.id) }
+                                    }
+                                }
+                                #if canImport(UIKit)
+                                Button("複製名稱") { UIPasteboard.general.string = book.name }
+                                #endif
+                            }
                             .onDrag { draggingBookName = book.name; return BookDragPayload.provider(for: book.name) }
+                            .onDrop(of: [.text], delegate: ShelfReorderDropDelegate(
+                                overItemID: book.name,
+                                draggingID: $draggingBookName,
+                                indexOf: { name in bankOrder.indexInRoot(name, root: orderedRootBooks.map { $0.name }) },
+                                move: { id, to in bankOrder.moveInRoot(id: id, to: to, root: orderedRootBooks.map { $0.name }) }
+                            ))
                         }
                     }
+                    .dsAnimation(DS.AnimationToken.reorder, value: bankOrder.order)
                 }
             }
             .padding(.horizontal, DS.Spacing.lg)
@@ -101,13 +130,12 @@ struct BankBooksView: View {
         .background(DS.Palette.background)
         .navigationTitle("題庫本")
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    Task { await importFromClipboard() }
-                } label: {
-                    Label("匯入", systemImage: "doc.on.clipboard")
+            ToolbarItem(placement: .topBarTrailing) {
+                HStack(spacing: 12) {
+                    Button { _ = bankFolders.addFolder() } label: { Label("新資料夾", systemImage: "folder.badge.plus") }
+                    Button { Task { await importFromClipboard() } } label: { Label("匯入", systemImage: "doc.on.clipboard") }
+                        .disabled(isLoading || isImporting)
                 }
-                .disabled(isLoading || isImporting)
             }
         }
         .onDrop(of: [.text], delegate: ClearBookDragStateDropDelegate(draggingName: $draggingBookName))
@@ -118,7 +146,7 @@ struct BankBooksView: View {
             Button("好") { showImportAlert = false; importMessage = nil }
         }
         .sheet(item: $renamingFolder) { f in
-            RenameFolderSheet(name: f.name) { new in bankFolders.rename(f.id, to: new) }
+            RenameSheet(name: f.name) { new in bankFolders.rename(f.id, to: new) }
                 .presentationDetents([.height(180)])
         }
     }

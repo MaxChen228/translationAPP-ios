@@ -85,7 +85,7 @@ struct FlashcardsView: View {
     }
 
     var body: some View {
-        ScrollView {
+        GeometryReader { geo in
             VStack(alignment: .leading, spacing: DS.Spacing.lg) {
                 DSSectionHeader(
                     title: "單字卡",
@@ -106,43 +106,50 @@ struct FlashcardsView: View {
 
                 if let card = store.current {
                     if isEditing {
-                        CardEditor(draft: $draft, errorText: $errorText, onDelete: { showDeleteConfirm = true })
-                        HStack(spacing: DS.Spacing.md) {
-                            Button("取消") { cancelEdit() }
-                            .buttonStyle(DSSecondaryButton())
-                            Button("儲存") { saveEdit() }
-                            .buttonStyle(DSPrimaryButton())
-                            .disabled(validationError() != nil)
+                        ScrollView {
+                            CardEditor(draft: $draft, errorText: $errorText, onDelete: { showDeleteConfirm = true })
+                            HStack(spacing: DS.Spacing.md) {
+                                Button("取消") { cancelEdit() }
+                                .buttonStyle(DSSecondaryButton())
+                                Button("儲存") { saveEdit() }
+                                .buttonStyle(DSPrimaryButton())
+                                .disabled(validationError() != nil)
+                            }
                         }
                     } else {
                         ZStack {
                             FlipCard(isFlipped: store.showBack) {
-                            VStack(alignment: .leading, spacing: 10) {
-                                MarkdownText(card.front)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                if let note = card.frontNote, !note.isEmpty {
-                                    NoteText(text: note)
+                                VStack(alignment: .leading, spacing: 10) {
+                                    MarkdownText(card.front)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                    if let note = card.frontNote, !note.isEmpty {
+                                        NoteText(text: note)
+                                    }
                                 }
-                            }
-                            .overlay(alignment: .bottomTrailing) {
-                                PlaySideButton(style: .outline, diameter: 28) { speakOne(text: card.front, lang: ttsStore.settings.frontLang) }
-                            }
-                        } back: {
-                            VStack(alignment: .leading, spacing: 10) {
-                                VariantBracketComposerView(card.back, onComposedChange: { s in currentBackComposed = s })
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                if let note = card.backNote, !note.isEmpty {
-                                    NoteText(text: note)
+                            } back: {
+                                VStack(alignment: .leading, spacing: 10) {
+                                    VariantBracketComposerView(card.back, onComposedChange: { s in currentBackComposed = s })
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                    if let note = card.backNote, !note.isEmpty {
+                                        NoteText(text: note)
+                                    }
                                 }
-                            }
-                            .overlay(alignment: .bottomTrailing) {
-                                PlaySideButton(style: .outline, diameter: 28) { speakOne(text: currentBackComposed.isEmpty ? card.back : currentBackComposed, lang: ttsStore.settings.backLang) }
-                            }
                             }
                             .onTapGesture { store.flip() }
                             .offset(x: dragX)
                             .rotationEffect(.degrees(Double(max(-10, min(10, dragX * 0.06)))))
-
+                            .overlay(alignment: .bottomTrailing) {
+                                PlaySideButton(style: .outline, diameter: 28) {
+                                    if store.showBack {
+                                        speakOne(text: currentBackComposed.isEmpty ? card.back : currentBackComposed, lang: ttsStore.settings.backLang)
+                                    } else {
+                                        speakOne(text: card.front, lang: ttsStore.settings.frontLang)
+                                    }
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                            .frame(minHeight: 260)
+                            .frame(maxHeight: .infinity)
                             if mode == .annotate, let flash = flashDelta {
                                 Text(flash > 0 ? "+1" : "-1")
                                     .font(.title2).bold()
@@ -185,17 +192,17 @@ struct FlashcardsView: View {
                                 Spacer()
                             }
                         }
+                        Spacer(minLength: DS.Spacing.md)
 
-                        if !(speech.isPlaying || speech.isPaused) {
-                            HStack(spacing: DS.Spacing.md) {
-                                Button { goToPreviousAnimated() } label: { Label("上一張", systemImage: "chevron.left") }
+                        // 底部控制列：在播音模式也顯示（由 safeAreaInset 自動把內容往上推）
+                        HStack(spacing: DS.Spacing.md) {
+                            Button { prevButtonTapped() } label: { Label("上一張", systemImage: "chevron.left") }
                                 .buttonStyle(DSSecondaryButtonCompact())
 
-                                Button {
-                                    store.flip()
-                                } label: { Label(store.showBack ? "看正面" : "看背面", systemImage: "arrow.2.squarepath") }
-                                .buttonStyle(DSPrimaryButton())
-                            }
+                            Button {
+                                store.flip()
+                            } label: { Label(store.showBack ? "看正面" : "看背面", systemImage: "arrow.2.squarepath") }
+                            .buttonStyle(DSPrimaryButton())
                         }
                     }
                 } else {
@@ -204,9 +211,11 @@ struct FlashcardsView: View {
             }
             .padding(.horizontal, DS.Spacing.lg)
             .padding(.top, DS.Spacing.lg)
-            .padding(.bottom, DS.Spacing.xl)
+            .padding(.bottom, (speech.isPlaying || speech.isPaused) ? DS.Spacing.xl : DS.Spacing.lg)
+            .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
+            .background(DS.Palette.background)
+            .animation(DS.AnimationToken.subtle, value: (speech.isPlaying || speech.isPaused))
         }
-        .background(DS.Palette.background)
         .navigationTitle(title)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -286,6 +295,7 @@ struct FlashcardsView: View {
 }
 
 private extension FlashcardsView {
+    var isAudioActive: Bool { speech.isPlaying || speech.isPaused }
     func beginEdit() {
         guard let card = store.current else { return }
         draft = card
@@ -375,7 +385,7 @@ private extension FlashcardsView {
         }
     }
 
-    func goToPreviousAnimated() {
+    func goToPreviousAnimated(restartAudio: Bool = false) {
         guard !store.cards.isEmpty else { return }
         let dir: CGFloat = 1 // toss right then bring previous from left
         withAnimation(DS.AnimationToken.tossOut) { dragX = dir * 800 }
@@ -383,7 +393,16 @@ private extension FlashcardsView {
             store.prev(); store.showBack = false
             dragX = -dir * 450
             withAnimation(DS.AnimationToken.bouncy) { dragX = 0 }
+            if restartAudio {
+                let s = lastTTSSettings ?? ttsStore.settings
+                speech.stop()
+                startTTS(with: s)
+            }
         }
+    }
+
+    func prevButtonTapped() {
+        goToPreviousAnimated(restartAudio: isAudioActive)
     }
 
     // MARK: - TTS
@@ -411,14 +430,20 @@ private extension FlashcardsView {
         guard !store.cards.isEmpty else { return }
         store.next()
         store.showBack = false
-        if let s = lastTTSSettings { startTTS(with: s) }
+        if let s = lastTTSSettings {
+            speech.stop()
+            startTTS(with: s)
+        }
     }
 
     func ttsPrevCard() {
         guard !store.cards.isEmpty else { return }
         store.prev()
         store.showBack = false
-        if let s = lastTTSSettings { startTTS(with: s) }
+        if let s = lastTTSSettings {
+            speech.stop()
+            startTTS(with: s)
+        }
     }
 
     // Sync UI to speech progress
@@ -486,19 +511,35 @@ private struct FlipCard<Front: View, Back: View>: View {
         ZStack {
             // Front face
             DSCard(padding: DS.Spacing.lg) {
-                front
-                    .dsType(DS.Font.body)
+                // Vertically center content while keeping leading alignment
+                VStack(spacing: 0) {
+                    Spacer(minLength: 0)
+                    front
+                        .dsType(DS.Font.body)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Spacer(minLength: 0)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .frame(minHeight: 220)
+            .frame(maxHeight: .infinity)
             .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0), perspective: 0.8)
             .opacity(isFlipped ? 0 : 1)
 
             // Back face (counter-rotated to render readable)
             DSCard(padding: DS.Spacing.lg) {
-                back
-                    .dsType(DS.Font.body)
+                // Vertically center content while keeping leading alignment
+                VStack(spacing: 0) {
+                    Spacer(minLength: 0)
+                    back
+                        .dsType(DS.Font.body)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Spacer(minLength: 0)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .frame(minHeight: 220)
+            .frame(maxHeight: .infinity)
             .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0), perspective: 0.8)
             .opacity(isFlipped ? 1 : 0)
         }

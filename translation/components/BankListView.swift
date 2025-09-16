@@ -19,7 +19,12 @@ struct BankListView: View {
             LazyVStack(alignment: .leading, spacing: 16) {
                 if isLoading { ProgressView().frame(maxWidth: .infinity, alignment: .center) }
                 if let error { Text(error).foregroundStyle(.secondary) }
-                ForEach(items) { item in
+                ForEach(items.indices, id: \.self) { i in
+                    if i > 0 {
+                        DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.border))
+                            .padding(.vertical, DS.Spacing.sm)
+                    }
+                    let item = items[i]
                     VStack(alignment: .leading, spacing: 12) {
                         // 題目：加大字體並以細邊框凸顯
                         Text(item.zh)
@@ -49,6 +54,7 @@ struct BankListView: View {
                         HStack {
                             Spacer()
                             Button {
+                                guard item.completed != true else { return }
                                 if let onPractice {
                                     onPractice(item, tag)
                                 } else {
@@ -57,9 +63,14 @@ struct BankListView: View {
                                 // Always pop back to book list after choosing a practice item
                                 dismiss()
                             } label: {
-                                Label("練習", systemImage: "play.fill")
+                                if item.completed == true {
+                                    Label("已完成", systemImage: "checkmark.seal.fill")
+                                } else {
+                                    Label("練習", systemImage: "play.fill")
+                                }
                             }
                             .buttonStyle(DSSecondaryButtonCompact())
+                            .disabled(item.completed == true)
                         }
                         HintListSection(
                             hints: item.hints,
@@ -70,26 +81,7 @@ struct BankListView: View {
                                 }
                             )
                         )
-                        // 狀態區：以髮絲線與提示區塊分隔，右下角顯示已完成徽章
-                        VStack(spacing: 6) {
-                            DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.border))
-                            HStack {
-                                Spacer()
-                                if item.completed == true {
-                                    Label("已完成", systemImage: "checkmark.seal.fill")
-                                        .labelStyle(.titleAndIcon)
-                                        .dsType(DS.Font.caption)
-                                        .padding(.vertical, 4)
-                                        .padding(.horizontal, 8)
-                                        .background(
-                                            Capsule().fill(DS.Brand.scheme.peachQuartz.opacity(0.16))
-                                        )
-                                        .overlay(
-                                            Capsule().stroke(DS.Brand.scheme.peachQuartz.opacity(0.5), lineWidth: DS.BorderWidth.thin)
-                                        )
-                                }
-                            }
-                        }
+                        // 取消底部狀態區，避免視覺雜訊；完成狀態已整合到右上的按鈕
                     }
                     .padding(.vertical, 6)
                 }
