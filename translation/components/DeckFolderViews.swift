@@ -210,7 +210,7 @@ struct RootDropArea: View {
             _ = onEnter()
             guard let p = providers.first else { return false }
             _ = p.loadObject(ofClass: NSString.self) { obj, _ in
-                if let s = obj as String? { _ = onPerform(s) }
+                if let ns = obj as? NSString { _ = onPerform(ns as String) }
             }
             return true
         }

@@ -16,6 +16,9 @@ struct BankBooksView: View {
     @State private var importMessage: String? = nil
     @State private var showImportAlert: Bool = false
     private let service = BankService()
+    @EnvironmentObject private var bankFolders: BankFoldersStore
+    @State private var renamingFolder: BankFolder? = nil
+    @State private var draggingBookName: String? = nil
 
     var body: some View {
         ScrollView {
@@ -50,19 +53,43 @@ struct BankBooksView: View {
                         }
                     }
                 } else {
+                    // 資料夾區
+                    if !bankFolders.folders.isEmpty {
+                        Text("資料夾").dsType(DS.Font.section).foregroundStyle(.secondary)
+                        let cols = [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.sm2)]
+                        LazyVGrid(columns: cols, spacing: DS.Spacing.sm2) {
+                            ForEach(bankFolders.folders) { folder in
+                                NavigationLink { BankFolderDetailView(folderID: folder.id) } label: {
+                                    BankFolderCard(folder: folder)
+                                }
+                                .buttonStyle(DSCardLinkStyle())
+                                .contextMenu {
+                                    Button("重新命名") { renamingFolder = folder }
+                                    Button("刪除", role: .destructive) { _ = bankFolders.removeFolder(folder.id) }
+                                }
+                                .onDrop(of: [.text], delegate: BookIntoFolderDropDelegate(folderID: folder.id, folders: bankFolders, draggingName: $draggingBookName))
+                            }
+                            Button { _ = bankFolders.addFolder() } label: { NewBankFolderCard() }
+                                .buttonStyle(.plain)
+                        }
+                        DSSeparator(color: DS.Palette.border.opacity(0.2))
+                    }
+
+                    // 根層書本（未分到資料夾）
+                    let rootBooks = books.filter { !bankFolders.isInAnyFolder($0.name) }
                     let cols = [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.sm2)]
                     LazyVGrid(columns: cols, spacing: DS.Spacing.sm2) {
-                        ForEach(books) { book in
+                        ForEach(rootBooks) { book in
                             NavigationLink {
                                 BankListView(vm: vm, tag: book.name, onPractice: { item, tag in
                                     if let onPractice { onPractice(item, tag) }
-                                    // After picking one, also dismiss the books page to return to the root
                                     dismiss()
                                 })
                             } label: {
                                 BankBookCard(book: book)
                             }
                             .buttonStyle(.plain)
+                            .onDrag { draggingBookName = book.name; return BookDragPayload.provider(for: book.name) }
                         }
                     }
                 }
@@ -83,11 +110,16 @@ struct BankBooksView: View {
                 .disabled(isLoading || isImporting)
             }
         }
+        .onDrop(of: [.text], delegate: ClearBookDragStateDropDelegate(draggingName: $draggingBookName))
         .task { await load() }
         .refreshable { await load() }
         .onAppear { AppLog.uiInfo("[books] appear count=\(books.count)") }
         .alert(importMessage ?? "", isPresented: $showImportAlert) {
             Button("好") { showImportAlert = false; importMessage = nil }
+        }
+        .sheet(item: $renamingFolder) { f in
+            RenameFolderSheet(name: f.name) { new in bankFolders.rename(f.id, to: new) }
+                .presentationDetents([.height(180)])
         }
     }
 
@@ -148,6 +180,38 @@ struct BankBooksView: View {
             }
         }
     }
+}
+
+// MARK: - Drag/Drop helpers
+
+private struct BookIntoFolderDropDelegate: DropDelegate {
+    let folderID: UUID
+    let folders: BankFoldersStore
+    @Binding var draggingName: String?
+
+    func validateDrop(info: DropInfo) -> Bool { true }
+    func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
+
+    func performDrop(info: DropInfo) -> Bool {
+        let providers = info.itemProviders(for: [.text])
+        guard let p = providers.first else { draggingName = nil; return false }
+        var handled = false
+        _ = p.loadObject(ofClass: NSString.self) { obj, _ in
+            if let ns = obj as? NSString, let name = BookDragPayload.decode(ns as String) {
+                Task { @MainActor in folders.add(bookName: name, to: folderID); Haptics.success() }
+                handled = true
+            }
+        }
+        draggingName = nil
+        return handled
+    }
+}
+
+private struct ClearBookDragStateDropDelegate: DropDelegate {
+    @Binding var draggingName: String?
+    func validateDrop(info: DropInfo) -> Bool { true }
+    func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
+    func performDrop(info: DropInfo) -> Bool { draggingName = nil; return true }
 }
 
 private struct BankBookRow: View {

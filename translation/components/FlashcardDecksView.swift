@@ -193,7 +193,7 @@ private struct DeckIntoFolderDropDelegate: DropDelegate {
         guard let p = providers.first else { draggingID = nil; return false }
         var handled = false
         let _ = p.loadObject(ofClass: NSString.self) { obj, _ in
-            if let s = obj as String?, let id = DeckDragPayload.decodeDeckID(s) {
+            if let ns = obj as? NSString, let id = DeckDragPayload.decodeDeckID(ns as String) {
                 Task { @MainActor in folders.add(deckID: id, to: folderID); Haptics.success() }
                 handled = true
             }
