@@ -27,7 +27,7 @@ struct ErrorItemRow: View {
                 }
             }
         }
-        .padding(14)
+        .padding(DS.Spacing.md2)
         .background(
             RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
                 .fill(DS.Palette.surface)

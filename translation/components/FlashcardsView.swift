@@ -76,6 +76,7 @@ struct FlashcardsView: View {
     @State private var showSettings = false
     @State private var showAudioSheet = false
     @State private var lastTTSSettings: TTSSettings? = nil
+    @State private var currentBackComposed: String = ""
 
     init(title: String = "單字卡", cards: [Flashcard] = FlashcardsStore.defaultCards, deckID: UUID? = nil, startIndex: Int = 0) {
         _store = StateObject(wrappedValue: FlashcardsStore(cards: cards, startIndex: startIndex))
@@ -123,13 +124,19 @@ struct FlashcardsView: View {
                                     NoteText(text: note)
                                 }
                             }
+                            .overlay(alignment: .bottomTrailing) {
+                                PlaySideButton(style: .outline, diameter: 28) { speakOne(text: card.front, lang: ttsStore.settings.frontLang) }
+                            }
                         } back: {
                             VStack(alignment: .leading, spacing: 10) {
-                                VariantBracketComposerView(card.back)
+                                VariantBracketComposerView(card.back, onComposedChange: { s in currentBackComposed = s })
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                 if let note = card.backNote, !note.isEmpty {
                                     NoteText(text: note)
                                 }
+                            }
+                            .overlay(alignment: .bottomTrailing) {
+                                PlaySideButton(style: .outline, diameter: 28) { speakOne(text: currentBackComposed.isEmpty ? card.back : currentBackComposed, lang: ttsStore.settings.backLang) }
                             }
                             }
                             .onTapGesture { store.flip() }
@@ -141,7 +148,7 @@ struct FlashcardsView: View {
                                     .font(.title2).bold()
                                     .padding(10)
                                     .background(Capsule().fill((flash > 0 ? Color.green : Color.orange).opacity(0.15)))
-                                    .overlay(Capsule().stroke((flash > 0 ? Color.green : Color.orange).opacity(0.5), lineWidth: 1))
+                                    .overlay(Capsule().stroke((flash > 0 ? Color.green : Color.orange).opacity(0.5), lineWidth: DS.BorderWidth.regular))
                             }
                         }
                         .gesture(DragGesture(minimumDistance: 20)
@@ -174,7 +181,7 @@ struct FlashcardsView: View {
                                     .padding(.vertical, 6)
                                     .padding(.horizontal, 10)
                                     .background(Capsule().fill(DS.Palette.surface))
-                                    .overlay(Capsule().stroke(DS.Palette.border.opacity(0.45), lineWidth: 1))
+                                    .overlay(Capsule().stroke(DS.Palette.border.opacity(0.45), lineWidth: DS.BorderWidth.regular))
                                 Spacer()
                             }
                         }
@@ -248,6 +255,8 @@ struct FlashcardsView: View {
                     total: max(1, store.cards.count),
                     isPlaying: speech.isPlaying,
                     isPaused: speech.isPaused,
+                    progress: (speech.totalItems > 0 ? Double(speech.currentIndex) / Double(max(1, speech.totalItems)) : 0),
+                    level: speech.level,
                     onPrev: { ttsPrevCard() },
                     onToggle: { ttsToggle() },
                     onNext: { ttsNextCard() },
@@ -255,20 +264,20 @@ struct FlashcardsView: View {
                 )
             }
         }
-        .onChange(of: speech.currentCardIndex) { v in
-            if let v, v >= 0, v < store.cards.count {
-                withAnimation(.easeInOut(duration: 0.2)) {
+        .onChange(of: speech.currentCardIndex, initial: false) { _, newValue in
+            if let v = newValue, v >= 0, v < store.cards.count {
+                withAnimation(DS.AnimationToken.subtle) {
                     store.index = v
                     store.showBack = false
                 }
             }
         }
-        .onChange(of: speech.currentFace) { face in
+        .onChange(of: speech.currentFace, initial: false) { _, face in
             switch face {
             case .front?:
-                withAnimation(.easeInOut(duration: 0.2)) { store.showBack = false }
+                withAnimation(DS.AnimationToken.subtle) { store.showBack = false }
             case .back?:
-                withAnimation(.easeInOut(duration: 0.2)) { store.showBack = true }
+                withAnimation(DS.AnimationToken.subtle) { store.showBack = true }
             default:
                 break
             }
@@ -384,6 +393,13 @@ private extension FlashcardsView {
         lastTTSSettings = settings
     }
 
+    func speakOne(text: String, lang: String) {
+        let rate = ttsStore.settings.rate
+        let item = SpeechItem(text: text, langCode: lang, rate: rate, preDelay: 0, postDelay: 0, cardIndex: store.index, face: store.showBack ? .back : .front)
+        speech.play(queue: [item])
+        lastTTSSettings = ttsStore.settings
+    }
+
     func ttsToggle() {
         if speech.isPlaying && !speech.isPaused { speech.pause(); return }
         if speech.isPlaying && speech.isPaused { speech.resume(); return }
@@ -412,6 +428,29 @@ private extension FlashcardsView {
 extension FlashcardsView {
     @MainActor
     func bindSpeechSync() -> some View { EmptyView() }
+}
+
+private struct PlaySideButton: View {
+    enum Style { case filled, outline }
+    var style: Style = .filled
+    var diameter: CGFloat = 28
+    var action: () -> Void
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "speaker.wave.2.fill")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(style == .filled ? Color.white : DS.Palette.primary)
+        }
+        .buttonStyle(style == .filled ? AnyButtonStyle(DSPrimaryCircleButton(diameter: diameter)) : AnyButtonStyle(DSOutlineCircleButton(diameter: diameter)))
+        .padding(6)
+    }
+}
+
+// Helper to erase generic ButtonStyle type for conditional usage
+private struct AnyButtonStyle: ButtonStyle {
+    private let _makeBody: (Configuration) -> AnyView
+    init<S: ButtonStyle>(_ style: S) { _makeBody = { AnyView(style.makeBody(configuration: $0)) } }
+    func makeBody(configuration: Configuration) -> some View { _makeBody(configuration) }
 }
 
 private struct EmptyState: View {

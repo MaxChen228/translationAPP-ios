@@ -5,6 +5,9 @@ import UIKit
 
 struct BankBooksView: View {
     @ObservedObject var vm: CorrectionViewModel
+    // When provided, pressing "練習" in a list will call this instead of writing into `vm`.
+    // Typical use: create a new workspace and route to it from the home quick action.
+    var onPractice: ((BankItem, String?) -> Void)? = nil
     @Environment(\.dismiss) private var dismiss
     @State private var books: [BankService.BankBook] = []
     @State private var isLoading = false
@@ -47,11 +50,15 @@ struct BankBooksView: View {
                         }
                     }
                 } else {
-                    let cols = [GridItem(.adaptive(minimum: 160), spacing: 12)]
-                    LazyVGrid(columns: cols, spacing: 12) {
+                    let cols = [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.sm2)]
+                    LazyVGrid(columns: cols, spacing: DS.Spacing.sm2) {
                         ForEach(books) { book in
                             NavigationLink {
-                                BankListView(vm: vm, tag: book.name, onPractice: { dismiss() })
+                                BankListView(vm: vm, tag: book.name, onPractice: { item, tag in
+                                    if let onPractice { onPractice(item, tag) }
+                                    // After picking one, also dismiss the books page to return to the root
+                                    dismiss()
+                                })
                             } label: {
                                 BankBookCard(book: book)
                             }
@@ -85,18 +92,18 @@ struct BankBooksView: View {
     }
 
     private var placeholderCard: some View {
-        let cols = [GridItem(.adaptive(minimum: 160), spacing: 12)]
-        return LazyVGrid(columns: cols, spacing: 12) {
+        let cols = [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.sm2)]
+        return LazyVGrid(columns: cols, spacing: DS.Spacing.sm2) {
             ForEach(0..<4, id: \.self) { _ in
                 VStack(alignment: .leading, spacing: 8) {
-                    RoundedRectangle(cornerRadius: 6).fill(DS.Palette.border.opacity(0.35)).frame(width: 100, height: 16)
+                    RoundedRectangle(cornerRadius: DS.Radius.xs, style: .continuous).fill(DS.Palette.border.opacity(0.35)).frame(width: 100, height: 16)
                     HStack(spacing: 8) {
-                        RoundedRectangle(cornerRadius: 6).fill(DS.Palette.border.opacity(0.25)).frame(width: 60, height: 12)
-                        RoundedRectangle(cornerRadius: 6).fill(DS.Palette.border.opacity(0.25)).frame(width: 90, height: 12)
+                        RoundedRectangle(cornerRadius: DS.Radius.xs, style: .continuous).fill(DS.Palette.border.opacity(0.25)).frame(width: 60, height: 12)
+                        RoundedRectangle(cornerRadius: DS.Radius.xs, style: .continuous).fill(DS.Palette.border.opacity(0.25)).frame(width: 90, height: 12)
                         Spacer(minLength: 0)
                     }
                 }
-                .padding(14)
+                .padding(DS.Spacing.md2)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(DS.Palette.surface, in: RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous))
                 .overlay(
@@ -163,7 +170,7 @@ private struct BankBookRow: View {
 
             Spacer(minLength: 0)
             Image(systemName: "chevron.right")
-                .font(.system(size: 14, weight: .semibold))
+                .font(.system(size: DS.IconSize.chevronMd, weight: .semibold))
                 .foregroundStyle(.tertiary)
         }
         .padding(.horizontal, 16)
@@ -189,11 +196,11 @@ private struct BankBookCard: View {
 
                 Spacer(minLength: 0)
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: DS.IconSize.chevronSm, weight: .semibold))
                     .foregroundStyle(.tertiary)
             }
         }
-        .padding(14)
+        .padding(DS.Spacing.md2)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(DS.Palette.surface, in: RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous))
         .overlay(

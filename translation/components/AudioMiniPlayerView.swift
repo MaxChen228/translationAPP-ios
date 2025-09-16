@@ -6,6 +6,8 @@ struct AudioMiniPlayerView: View {
     var total: Int
     var isPlaying: Bool
     var isPaused: Bool
+    var progress: Double = 0
+    var level: Double = 0
     var onPrev: () -> Void
     var onToggle: () -> Void
     var onNext: () -> Void
@@ -13,16 +15,19 @@ struct AudioMiniPlayerView: View {
 
     var body: some View {
         HStack(spacing: DS.Spacing.md) {
+            // Combined ring + play/pause circle button
+            ZStack {
+                AudioProgressRingView(progress: progress, size: 40)
+                Button(action: onToggle) {
+                    Image(systemName: (isPlaying && !isPaused) ? "pause.fill" : "play.fill")
+                }
+                .buttonStyle(DSPrimaryCircleButton(diameter: 30))
+            }
+
             Button(action: onPrev) {
                 Image(systemName: "backward.fill")
             }
             .buttonStyle(DSSecondaryButtonCompact())
-
-            Button(action: onToggle) {
-                Image(systemName: (isPlaying && !isPaused) ? "pause.fill" : "play.fill")
-                Text((isPlaying && !isPaused) ? "暫停" : "播放")
-            }
-            .buttonStyle(DSPrimaryButton())
 
             Button(action: onNext) {
                 Image(systemName: "forward.fill")

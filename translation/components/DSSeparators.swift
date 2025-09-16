@@ -5,7 +5,7 @@ struct DSSeparator: View {
     enum Axis { case horizontal, vertical }
 
     var axis: Axis = .horizontal
-    var color: Color = DS.Palette.border.opacity(0.35)
+    var color: Color = DS.Palette.border.opacity(DS.Opacity.border)
 
     var body: some View {
         Rectangle()
@@ -17,16 +17,15 @@ struct DSSeparator: View {
 }
 
 extension View {
-    func dsTopHairline(color: Color = DS.Palette.border.opacity(0.35)) -> some View {
+    func dsTopHairline(color: Color = DS.Palette.border.opacity(DS.Opacity.border)) -> some View {
         overlay(alignment: .top) {
             DSSeparator(color: color)
         }
     }
 
-    func dsBottomHairline(color: Color = DS.Palette.border.opacity(0.35)) -> some View {
+    func dsBottomHairline(color: Color = DS.Palette.border.opacity(DS.Opacity.border)) -> some View {
         overlay(alignment: .bottom) {
             DSSeparator(color: color)
         }
     }
 }
-

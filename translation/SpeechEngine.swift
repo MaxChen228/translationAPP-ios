@@ -21,9 +21,12 @@ final class SpeechEngine: NSObject, ObservableObject, AVSpeechSynthesizerDelegat
     @Published private(set) var currentIndex: Int = 0
     @Published private(set) var currentCardIndex: Int? = nil
     @Published private(set) var currentFace: SpeechFace? = nil
+    @Published private(set) var totalItems: Int = 0
+    @Published private(set) var level: Double = 0 // 0...1, real-time RMS approx
 
     private var queue: [SpeechItem] = []
     private let synth = AVSpeechSynthesizer()
+    private let meterSynth = AVSpeechSynthesizer()
     private var pendingWork: DispatchWorkItem?
 
     override init() {
@@ -35,6 +38,7 @@ final class SpeechEngine: NSObject, ObservableObject, AVSpeechSynthesizerDelegat
         stop()
         self.queue = queue
         self.currentIndex = 0
+        self.totalItems = queue.count
         configureAudioSession()
         isPlaying = true
         isPaused = false
@@ -61,6 +65,7 @@ final class SpeechEngine: NSObject, ObservableObject, AVSpeechSynthesizerDelegat
         synth.stopSpeaking(at: .immediate)
         queue = []
         currentIndex = 0
+        totalItems = 0
         isPlaying = false
         isPaused = false
     }
@@ -101,11 +106,36 @@ final class SpeechEngine: NSObject, ObservableObject, AVSpeechSynthesizerDelegat
             utt.voice = AVSpeechSynthesisVoice(language: item.langCode)
             utt.rate = item.rate
             self.synth.speak(utt)
+
+            // Parallel metering: synthesize to buffers to compute RMS (no playback)
+            let meterUtt = AVSpeechUtterance(string: item.text)
+            meterUtt.voice = AVSpeechSynthesisVoice(language: item.langCode)
+            meterUtt.rate = item.rate
+            self.meterSynth.write(meterUtt) { [weak self] abuf in
+                guard let self else { return }
+                guard let pcm = abuf as? AVAudioPCMBuffer,
+                      let ch = pcm.floatChannelData else { return }
+                let frames = Int(pcm.frameLength)
+                let chans = Int(pcm.format.channelCount)
+                if frames == 0 || chans == 0 { return }
+                var acc: Double = 0
+                for c in 0..<chans {
+                    let ptr = ch[c]
+                    var sum: Double = 0
+                    for i in 0..<frames { sum += Double(abs(ptr[i])) }
+                    acc += sum / Double(frames)
+                }
+                let avg = acc / Double(chans)
+                // Smooth to 0..1
+                let newLevel = max(0, min(1, avg))
+                DispatchQueue.main.async { self.level = self.level * 0.85 + newLevel * 0.15 }
+            }
         }
     }
 
     private func advance() {
         currentIndex += 1
+        level = 0
         if currentIndex < queue.count {
             playCurrent()
         } else {

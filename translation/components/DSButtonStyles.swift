@@ -13,6 +13,7 @@ struct DSPrimaryButton: ButtonStyle {
             )
             .opacity(configuration.isPressed ? 0.9 : 1)
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .animation(DS.AnimationToken.snappy, value: configuration.isPressed)
     }
 }
 
@@ -25,10 +26,11 @@ struct DSSecondaryButton: ButtonStyle {
             .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
-                .stroke(DS.Palette.primary.opacity(0.35), lineWidth: DS.BorderWidth.regular)
+                .stroke(DS.Palette.primary.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.regular)
         )
             .opacity(configuration.isPressed ? 0.9 : 1)
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .animation(DS.AnimationToken.snappy, value: configuration.isPressed)
     }
 }
 
@@ -42,10 +44,59 @@ struct DSSecondaryButtonCompact: ButtonStyle {
             .padding(.horizontal, 10)
         .background(
             RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
-                .stroke(DS.Palette.primary.opacity(0.35), lineWidth: DS.BorderWidth.regular)
+                .stroke(DS.Palette.primary.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.regular)
         )
             .opacity(configuration.isPressed ? 0.9 : 1)
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .animation(DS.AnimationToken.snappy, value: configuration.isPressed)
+    }
+}
+
+// 小型主按鈕：用於迷你播放器等場景，不佔滿寬度
+struct DSPrimaryButtonCompact: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.subheadline)
+            .foregroundStyle(Color.white)
+            .padding(.vertical, 6)
+            .padding(.horizontal, 10)
+            .background(
+                RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
+                    .fill(DS.Palette.primaryGradient)
+            )
+            .opacity(configuration.isPressed ? 0.9 : 1)
+            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+    }
+}
+
+struct DSPrimaryCircleButton: ButtonStyle {
+    var diameter: CGFloat = 32
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.subheadline)
+            .foregroundStyle(Color.white)
+            .frame(width: diameter, height: diameter)
+            .background(Circle().fill(DS.Palette.primaryGradient))
+            .scaleEffect(configuration.isPressed ? 0.96 : 1)
+            .opacity(configuration.isPressed ? 0.9 : 1)
+    }
+}
+
+// Outline-only circular button (no fill), brand-colored border and icon.
+struct DSOutlineCircleButton: ButtonStyle {
+    var diameter: CGFloat = 28
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.subheadline)
+            .foregroundStyle(DS.Palette.primary)
+            .frame(width: diameter, height: diameter)
+            .background(Circle().fill(Color.clear))
+            .overlay(
+                Circle().stroke(DS.Palette.primary.opacity(0.55), lineWidth: DS.BorderWidth.regular)
+            )
+            .scaleEffect(configuration.isPressed ? 0.96 : 1)
+            .opacity(configuration.isPressed ? 0.9 : 1)
+            .contentShape(Circle())
     }
 }
 
@@ -56,7 +107,7 @@ struct DSCardLinkStyle: ButtonStyle {
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
             .overlay(
                 RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                    .stroke(DS.Palette.primary.opacity(configuration.isPressed ? 0.45 : 0), lineWidth: DS.BorderWidth.regular)
+                    .stroke(DS.Palette.primary.opacity(configuration.isPressed ? DS.Opacity.strong : 0), lineWidth: DS.BorderWidth.regular)
             )
             .animation(DS.AnimationToken.snappy, value: configuration.isPressed)
     }

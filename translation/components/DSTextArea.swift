@@ -35,7 +35,7 @@ struct DSTextArea: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
-                .stroke(isFocused ? DS.Palette.primary.opacity(0.45) : DS.Palette.border.opacity(0.35), lineWidth: DS.BorderWidth.regular)
+                .stroke(isFocused ? DS.Palette.primary.opacity(DS.Opacity.strong) : DS.Palette.border.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.regular)
         )
         .dsAnimation(DS.AnimationToken.subtle, value: isFocused)
     }
@@ -45,7 +45,7 @@ private struct DSLinedBackground: View {
     var body: some View {
         GeometryReader { geo in
             let step = DS.DSUIFont.body().lineHeight + 8
-            let color = DS.Brand.scheme.babyBlue.opacity(0.18)
+            let color = DS.Brand.scheme.babyBlue.opacity(DS.Opacity.hairline)
             Path { path in
                 var y: CGFloat = 0
                 while y <= geo.size.height {

@@ -10,7 +10,10 @@ enum DS {
     }
     enum Spacing {
         static let xs: CGFloat = 6
+        static let xs2: CGFloat = 8
         static let sm: CGFloat = 10
+        static let sm2: CGFloat = 12
+        static let md2: CGFloat = 14
         static let md: CGFloat = 16
         static let lg: CGFloat = 24
         static let xl: CGFloat = 32
@@ -27,8 +30,10 @@ enum DS {
     }
 
     enum Radius {
+        static let xs: CGFloat = 6
         static let sm: CGFloat = 8
         static let md: CGFloat = 12
+        static let md2: CGFloat = 14
         static let lg: CGFloat = 16
     }
 
@@ -69,6 +74,17 @@ enum DS {
         let peachQuartz: Color   // 13-1125
         let cornhusk: Color      // 12-0714
     }
+
+    // Opacity tokens (avoid magic numbers sprinkled around)
+    enum Opacity {
+        static let fill: Double = 0.12      // chip/card subtle fills
+        static let hairline: Double = 0.18  // hairline borders
+        static let border: Double = 0.35    // default outlines/separators
+        static let strong: Double = 0.45    // emphasized outlines/highlight
+        static let muted: Double = 0.60     // subdued foregrounds/status
+        static let accentLight: Double = 0.28 // accent separators/light tints
+    }
+
 
     enum Brand {
         // Convert hex like "0F4C81" to Color
@@ -150,6 +166,8 @@ enum DS {
         static let body = customOrSystemCandidates(FontFamily.avenirCandidates, size: 17, relativeTo: .body)
         static let bodyEmph = customOrSystemCandidates(FontFamily.avenirCandidates, size: 17, relativeTo: .body)
         static let caption = customOrSystemCandidates(FontFamily.avenirCandidates, size: 12, relativeTo: .caption2)
+        static let labelMd = customOrSystemCandidates(FontFamily.avenirCandidates, size: 14, relativeTo: .footnote)
+        static let labelSm = customOrSystemCandidates(FontFamily.avenirCandidates, size: 13, relativeTo: .footnote)
 
         // Serif = Songti
         static let serifTitle = customOrSystemCandidates(FontFamily.songtiCandidates, size: 22, relativeTo: .title2)
@@ -157,6 +175,14 @@ enum DS {
 
         // Monospace-like usage still use Avenir per requirement
         static let mono = customOrSystemCandidates(FontFamily.avenirCandidates, size: 15, relativeTo: .callout)
+        // Additional tokens for small labels and monospace snippets
+        static let monoSmall: SwiftUI.Font = .system(size: 12, design: .monospaced)
+        static let tiny: SwiftUI.Font = .system(size: 9)
+    }
+
+    enum IconSize {
+        static let chevronSm: CGFloat = 13
+        static let chevronMd: CGFloat = 14
     }
 
     // UIKit font helpers for measurement/layout parity

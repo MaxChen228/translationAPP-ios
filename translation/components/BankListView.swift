@@ -3,7 +3,9 @@ import SwiftUI
 struct BankListView: View {
     @ObservedObject var vm: CorrectionViewModel
     var tag: String? = nil
-    var onPractice: (() -> Void)? = nil
+    // Optional override: when provided, caller controls where the practice item goes
+    // (e.g., create a new workspace and route to it). Defaults to writing into `vm`.
+    var onPractice: ((BankItem, String?) -> Void)? = nil
     @Environment(\.dismiss) private var dismiss
     @State private var items: [BankItem] = []
     @State private var isLoading = false
@@ -26,14 +28,14 @@ struct BankListView: View {
                             .padding(.horizontal, 12)
                             .background(
                                 RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
-                                    .stroke(DS.Palette.border.opacity(0.6), lineWidth: DS.BorderWidth.regular)
+                                    .stroke(DS.Palette.border.opacity(DS.Opacity.muted), lineWidth: DS.BorderWidth.regular)
                                     .background(DS.Palette.surface.opacity(0.0001)) // keep hit testing sane
                             )
                         HStack(spacing: 8) {
                             // difficulty dots
                             HStack(spacing: 4) {
                                 ForEach(1...5, id: \.self) { i in
-                                    Circle().fill(i <= item.difficulty ? DS.Palette.primary.opacity(0.8) : DS.Palette.border.opacity(0.35))
+                                    Circle().fill(i <= item.difficulty ? DS.Palette.primary.opacity(0.8) : DS.Palette.border.opacity(DS.Opacity.border))
                                         .frame(width: 6, height: 6)
                                 }
                             }
@@ -47,9 +49,13 @@ struct BankListView: View {
                         HStack {
                             Spacer()
                             Button {
-                                vm.startPractice(with: item, tag: tag)
+                                if let onPractice {
+                                    onPractice(item, tag)
+                                } else {
+                                    vm.startPractice(with: item, tag: tag)
+                                }
+                                // Always pop back to book list after choosing a practice item
                                 dismiss()
-                                if let onPractice { onPractice() }
                             } label: {
                                 Label("練習", systemImage: "play.fill")
                             }
@@ -66,7 +72,7 @@ struct BankListView: View {
                         )
                         // 狀態區：以髮絲線與提示區塊分隔，右下角顯示已完成徽章
                         VStack(spacing: 6) {
-                            DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(0.35))
+                            DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.border))
                             HStack {
                                 Spacer()
                                 if item.completed == true {
@@ -122,8 +128,8 @@ private struct WrapChips: View {
                     .dsType(DS.Font.caption)
                     .padding(.vertical, 6)
                     .padding(.horizontal, 10)
-                    .background(Capsule().fill(chip.color.opacity(0.12)))
-                    .overlay(Capsule().stroke(chip.color.opacity(0.35), lineWidth: DS.BorderWidth.thin))
+                    .background(Capsule().fill(chip.color.opacity(DS.Opacity.fill)))
+                    .overlay(Capsule().stroke(chip.color.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.thin))
             }
         }
     }

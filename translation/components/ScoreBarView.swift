@@ -12,7 +12,7 @@ struct ScoreBarView: View {
         HStack(spacing: 12) {
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
-                    Capsule().fill(Color.gray.opacity(0.18))
+                    Capsule().fill(Color.gray.opacity(DS.Opacity.hairline))
                     Capsule()
                         .fill(DS.Palette.scoreGradient)
                         .frame(width: geo.size.width * progress)

@@ -6,9 +6,12 @@ struct VariantBracketComposerView: View {
     let phrase: String
     @State private var selected: [Int: Int] = [:]
     @State private var normalized: String = ""
+    var onComposedChange: ((String) -> Void)? = nil
+    @EnvironmentObject private var bannerCenter: BannerCenter
 
-    init(_ phrase: String) {
+    init(_ phrase: String, onComposedChange: ((String) -> Void)? = nil) {
         self.phrase = phrase
+        self.onComposedChange = onComposedChange
     }
 
     var body: some View {
@@ -31,7 +34,11 @@ struct VariantBracketComposerView: View {
                         case .group(let options):
                             BracketOptionsColumn(options: options, selection: Binding(
                                 get: { selected[i] ?? 0 },
-                                set: { selected[i] = $0 }
+                                set: { newVal in
+                                    selected[i] = newVal
+                                    let text = currentCombinedText(elements: parsed.elements)
+                                    onComposedChange?(text)
+                                }
                             ))
                         }
                     }
@@ -39,28 +46,32 @@ struct VariantBracketComposerView: View {
                 .padding(.horizontal, 2)
             }
 
-            // Current composed line + copy
-            HStack(spacing: 8) {
-                Text(currentCombinedText(elements: parsed.elements))
-                    .dsType(DS.Font.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
-                Spacer()
+            // Current composed line + copy (左側排版，避免與播放鍵重疊)
+            HStack(spacing: 10) {
                 Button { copyCurrent(parsed.elements) } label: {
                     Image(systemName: "doc.on.doc")
                 }
                 .buttonStyle(DSSecondaryButtonCompact())
                 .accessibilityLabel("複製目前組合")
+
+                Text(currentCombinedText(elements: parsed.elements))
+                    .dsType(DS.Font.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
-        .onAppear { ensureSelection(groups: groups) }
-        .onChange(of: phrase) { _ in ensureSelection(groups: groups) }
+        .onAppear { ensureSelection(groups: groups); onComposedChange?(currentCombinedText(elements: parsed.elements)) }
+        .onChange(of: phrase) { _ in ensureSelection(groups: groups); onComposedChange?(currentCombinedText(elements: parsed.elements)) }
+        .padding(.bottom, 52) // 預留右下角播放鍵空間，避免重疊
     }
 
     private func copyCurrent(_ elements: [VariantElement]) {
         #if canImport(UIKit)
         let str = currentCombinedText(elements: elements)
         UIPasteboard.general.string = str
+        Haptics.success()
+        bannerCenter.show(title: "已複製", subtitle: str)
         #endif
     }
 
@@ -239,11 +250,11 @@ private struct ThinBracketContainer<Content: View>: View {
                         p.move(to: CGPoint(x: x, y: y1))
                         p.addLine(to: CGPoint(x: 2, y: y1))
                     }
-                    .stroke(DS.Brand.scheme.babyBlue.opacity(0.35), lineWidth: DS.BorderWidth.thin)
+                    .stroke(DS.Brand.scheme.babyBlue.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.thin)
 
                     Text("…")
-                        .font(.system(size: 9))
-                        .foregroundStyle(DS.Palette.border.opacity(0.45))
+                        .font(DS.Font.tiny)
+                        .foregroundStyle(DS.Palette.border.opacity(DS.Opacity.strong))
                         .offset(x: 1, y: -2)
                 }
             }

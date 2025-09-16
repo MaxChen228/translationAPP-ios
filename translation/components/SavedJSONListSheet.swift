@@ -34,7 +34,12 @@ struct SavedJSONListSheet: View {
                                 SavedErrorRowCard(
                                     row: row,
                                     expanded: expanded.contains(row.id),
-                                    onToggle: { if expanded.contains(row.id) { expanded.remove(row.id) } else { expanded.insert(row.id) } },
+                                    onToggle: {
+                                        DSMotion.run(DS.AnimationToken.subtle) {
+                                            if expanded.contains(row.id) { expanded.remove(row.id) }
+                                            else { expanded.insert(row.id) }
+                                        }
+                                    },
                                     onCopy: { copyJSON(row.rawJSON) },
                                     onDelete: { deleteRow(row.id) }
                                 )
@@ -77,7 +82,7 @@ struct SavedJSONListSheet: View {
             .alert(saveError ?? "", isPresented: Binding(get: { saveError != nil }, set: { _ in saveError = nil })) {}
         }
         .onAppear { rebuildDecoded() }
-        .onChange(of: store.items) { _ in rebuildDecoded() }
+        .onChange(of: store.items, initial: false) { _, _ in rebuildDecoded() }
     }
 
     private func saveDeck(named name: String) async {
@@ -166,7 +171,10 @@ private struct SavedErrorRowCard: View {
                             .foregroundStyle(.secondary)
                     }
                     Spacer(minLength: 0)
-                    Image(systemName: expanded ? "chevron.up" : "chevron.down").foregroundStyle(.tertiary)
+                    Image(systemName: "chevron.down")
+                        .rotationEffect(.degrees(expanded ? 180 : 0))
+                        .foregroundStyle(.tertiary)
+                        .dsAnimation(DS.AnimationToken.subtle, value: expanded)
                 }
                 .contentShape(Rectangle())
                 .onTapGesture { onToggle() }
@@ -191,7 +199,7 @@ private struct SavedErrorRowCard: View {
 
                             // Footer actions
                             VStack(spacing: 6) {
-                                DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(0.28))
+                                DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.accentLight))
                                 HStack {
                                     Spacer()
                                     Button {
@@ -212,17 +220,18 @@ private struct SavedErrorRowCard: View {
                                 Button("取消", role: .cancel) {}
                             }
                         }
+                        .transition(.move(edge: .top).combined(with: .opacity))
                     } else {
                         // Fallback: show raw JSON (monospace) when parse fails
                         ScrollView(.horizontal, showsIndicators: true) {
                             Text(row.rawJSON)
-                                .font(.system(size: 12, design: .monospaced))
+                                .font(DS.Font.monoSmall)
                                 .textSelection(.enabled)
                                 .multilineTextAlignment(.leading)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                         VStack(spacing: 6) {
-                            DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(0.28))
+                            DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.accentLight))
                             HStack {
                                 Spacer()
                                 Button {
@@ -238,6 +247,7 @@ private struct SavedErrorRowCard: View {
                             }
                         }
                         .padding(.top, 2)
+                        .transition(.move(edge: .top).combined(with: .opacity))
                         .confirmationDialog("確定要刪除這筆紀錄嗎？", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
                             Button("刪除", role: .destructive) { onDelete(); Haptics.warning() }
                             Button("取消", role: .cancel) {}

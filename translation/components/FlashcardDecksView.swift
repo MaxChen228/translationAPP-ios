@@ -11,7 +11,7 @@ struct FlashcardDeck: Identifiable, Equatable {
 
 struct FlashcardDecksView: View {
     @EnvironmentObject private var decksStore: FlashcardDecksStore
-    private var cols: [GridItem] { [GridItem(.adaptive(minimum: 160), spacing: 12)] }
+    private var cols: [GridItem] { [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.sm2)] }
     @State private var renaming: PersistedFlashcardDeck? = nil
 
     var body: some View {
@@ -20,7 +20,7 @@ struct FlashcardDecksView: View {
                 DSSectionHeader(title: "單字卡集", subtitle: "選擇一個卡片集開始練習", accentUnderline: true)
 
                 if !decksStore.decks.isEmpty {
-                    LazyVGrid(columns: cols, spacing: 12) {
+                    LazyVGrid(columns: cols, spacing: DS.Spacing.sm2) {
                         ForEach(decksStore.decks) { deck in
                             DeckItemLink(deck: deck) {
                                 renaming = deck
@@ -37,7 +37,7 @@ struct FlashcardDecksView: View {
                     Text("示例")
                         .dsType(DS.Font.section)
                         .foregroundStyle(.secondary)
-                    LazyVGrid(columns: cols, spacing: 12) {
+                    LazyVGrid(columns: cols, spacing: DS.Spacing.sm2) {
                         ForEach(SampleDecks.all) { deck in
                             NavigationLink {
                                 FlashcardsView(title: deck.name, cards: deck.cards)
@@ -80,7 +80,7 @@ private struct DeckCard: View {
                         .foregroundStyle(.secondary)
                     Spacer(minLength: 0)
                     Image(systemName: "chevron.right")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.system(size: DS.IconSize.chevronSm, weight: .semibold))
                         .foregroundStyle(.tertiary)
                 }
             }

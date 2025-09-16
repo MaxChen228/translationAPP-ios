@@ -37,7 +37,7 @@ struct ContentView: View {
                     ChinesePromptView(text: vm.inputZh)
 
                     // Subtle separator to structure the page（以淡藍髮絲線）
-                    DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(0.35))
+                    DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.border))
 
                     HintListSection(hints: vm.practicedHints, isExpanded: $vm.showPracticedHints)
 
@@ -48,7 +48,7 @@ struct ContentView: View {
                     }
 
                     // Separate inputs from results visually（以淡藍髮絲線）
-                    DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(0.35))
+                    DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.border))
 
                     if let res = vm.response {
                         ResultsSectionView(
@@ -123,7 +123,7 @@ struct ContentView: View {
                     .buttonStyle(DSPrimaryButton())
                     .disabled(vm.isLoading)
 
-                    // 下一題（略過已完成）：需有題庫關聯與 BANK_BASE_URL
+                    // 下一題（略過已完成）：需有題庫關聯與 BACKEND_URL
                     Button {
                         Task { await vm.loadNextPractice() }
                         focused = .en
@@ -133,7 +133,7 @@ struct ContentView: View {
                             .minimumScaleFactor(0.9)
                     }
                     .buttonStyle(DSSecondaryButton())
-                    .disabled(vm.isLoading || vm.currentBankItemId == nil || AppConfig.bankBaseURL == nil)
+                    .disabled(vm.isLoading || vm.currentBankItemId == nil || AppConfig.backendURL == nil)
 
                     Button(role: .destructive) {
                         vm.reset()
@@ -148,7 +148,7 @@ struct ContentView: View {
                 .padding(.horizontal, DS.Spacing.lg)
                 .padding(.vertical, DS.Spacing.md)
                 .background(.ultraThinMaterial)
-                .dsTopHairline(color: DS.Brand.scheme.babyBlue.opacity(0.35)) // Hairline on top of sticky bar
+                .dsTopHairline(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.border)) // Hairline on top of sticky bar
                 .disabled(vm.isLoading)
         }
         .overlay(alignment: .center) {

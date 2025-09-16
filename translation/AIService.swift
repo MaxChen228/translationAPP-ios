@@ -33,22 +33,19 @@ enum AIServiceFactory {
 // MARK: - App Config
 
 enum AppConfig {
-    // Preferred: Info.plist key "TRANSLATION_CORRECT_URL" (full URL)
-    // Fallback: environment variable "TRANSLATION_CORRECT_URL"
-    static var correctAPIURL: URL? {
-        if let s = Bundle.main.object(forInfoDictionaryKey: "TRANSLATION_CORRECT_URL") as? String,
+    // Single source of truth: BACKEND_URL
+    static var backendURL: URL? {
+        if let s = Bundle.main.object(forInfoDictionaryKey: "BACKEND_URL") as? String,
            let u = URL(string: s), !s.isEmpty { return u }
-        if let s = ProcessInfo.processInfo.environment["TRANSLATION_CORRECT_URL"],
+        if let s = ProcessInfo.processInfo.environment["BACKEND_URL"],
            let u = URL(string: s), !s.isEmpty { return u }
         return nil
     }
 
-    static var bankBaseURL: URL? {
-        if let s = Bundle.main.object(forInfoDictionaryKey: "BANK_BASE_URL") as? String,
-           let u = URL(string: s), !s.isEmpty { return u }
-        if let s = ProcessInfo.processInfo.environment["BANK_BASE_URL"],
-           let u = URL(string: s), !s.isEmpty { return u }
-        return nil
+    // All service endpoints derive from BACKEND_URL
+    static var correctAPIURL: URL? {
+        guard let base = backendURL else { return nil }
+        return base.appendingPathComponent("correct")
     }
 }
 

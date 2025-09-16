@@ -44,10 +44,10 @@ struct TranslationApp: App {
         UINavigationBar.appearance().standardAppearance = nav
         UINavigationBar.appearance().scrollEdgeAppearance = nav
         UINavigationBar.appearance().compactAppearance = nav
-        if let url = AppConfig.bankBaseURL {
-            AppLog.uiInfo("BANK_BASE_URL=\(url.absoluteString)")
+        if let url = AppConfig.backendURL {
+            AppLog.uiInfo("BACKEND_URL=\(url.absoluteString)")
         } else {
-            AppLog.uiError("BANK_BASE_URL missing")
+            AppLog.uiError("BACKEND_URL missing")
         }
     }
     var body: some Scene {

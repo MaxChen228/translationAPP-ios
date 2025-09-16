@@ -38,12 +38,12 @@ struct BannerHost: View {
                             .buttonStyle(DSSecondaryButtonCompact())
                     }
                 }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .padding(.horizontal, DS.Spacing.md2)
+                .padding(.vertical, DS.Spacing.sm)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: DS.Radius.md2, style: .continuous))
                 .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 6)
-                .padding(.horizontal, 12)
-                .padding(.top, 8)
+                .padding(.horizontal, DS.Spacing.sm2)
+                .padding(.top, DS.Spacing.xs)
                 .transition(.move(edge: .top).combined(with: .opacity))
             }
             Spacer(minLength: 0)

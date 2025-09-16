@@ -131,9 +131,7 @@ private struct AddToEndDropDelegate: DropDelegate {
     func dropEntered(info: DropInfo) { }
     func performDrop(info: DropInfo) -> Bool {
         guard let draggingID else { return false }
-        withAnimation(.interactiveSpring(response: 0.26, dampingFraction: 0.86)) {
-            store.moveWorkspace(id: draggingID, to: store.workspaces.count)
-        }
+        store.moveWorkspace(id: draggingID, to: store.workspaces.count)
         self.draggingID = nil
         Haptics.success()
         return true
@@ -172,7 +170,7 @@ private struct WorkspaceItemLink: View {
         if vm.isLoading { return DS.Palette.primary }
         if vm.response != nil { return DS.Brand.scheme.cornhusk }
         if !(vm.inputZh.isEmpty && vm.inputEn.isEmpty) { return DS.Brand.scheme.monument }
-        return DS.Palette.border.opacity(0.6)
+        return DS.Palette.border.opacity(DS.Opacity.muted)
     }
 
     var body: some View {
@@ -267,6 +265,7 @@ private struct FlashcardsEntryCard: View {
 
 private struct QuickActionsRow: View {
     @ObservedObject var store: WorkspaceStore
+    @EnvironmentObject private var router: RouterStore
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("快速功能").dsType(DS.Font.section).foregroundStyle(.secondary)
@@ -275,7 +274,15 @@ private struct QuickActionsRow: View {
                     NavigationLink { FlashcardDecksView() } label: { FlashcardsEntryCard().frame(width: 220) }
                         .buttonStyle(DSCardLinkStyle())
                     if let first = store.workspaces.first {
-                        NavigationLink { BankBooksView(vm: store.vm(for: first.id)) } label: { BankBooksEntryCard().frame(width: 220) }
+                        NavigationLink {
+                            // Home-level entry to Bank -> when picking a practice item, create a new workspace
+                            BankBooksView(vm: store.vm(for: first.id), onPractice: { item, tag in
+                                let newWS = store.addWorkspace()
+                                let newVM = store.vm(for: newWS.id)
+                                newVM.startPractice(with: item, tag: tag)
+                                router.open(workspaceID: newWS.id)
+                            })
+                        } label: { BankBooksEntryCard().frame(width: 220) }
                             .buttonStyle(DSCardLinkStyle())
                     }
                 }

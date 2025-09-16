@@ -163,8 +163,8 @@ final class CorrectionViewModel: ObservableObject {
 
     // 抽下一題（略過已完成），依目前練習標籤
     func loadNextPractice() async {
-        guard AppConfig.bankBaseURL != nil else {
-            await MainActor.run { self.errorMessage = "BANK_BASE_URL 未設定" }
+        guard AppConfig.backendURL != nil else {
+            await MainActor.run { self.errorMessage = "BACKEND_URL 未設定" }
             return
         }
         let service = BankService()
