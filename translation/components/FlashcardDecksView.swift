@@ -16,133 +16,142 @@ struct FlashcardDecksView: View {
     private var cols: [GridItem] { [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.sm2)] }
     @State private var renaming: PersistedFlashcardDeck? = nil
     @State private var renamingFolder: DeckFolder? = nil
-    @State private var draggingTileID: String? = nil
-    @State private var insertionIndex: Int? = nil
+
+    // Overlay drag state
+    @StateObject private var dragState = DragState()
+    @State private var tileFrames: [String: CGRect] = [:]
+    private let coordName = "deckGridSpace"
 
     var body: some View {
-        // Precompute merged ordering outside result builder to avoid type inference ambiguity
+        // Compose IDs
         let rootDecks: [PersistedFlashcardDeck] = decksStore.decks.filter { !deckFolders.isInAnyFolder($0.id) }
         let folderIDs = deckFolders.folders.map { "folder:\($0.id.uuidString)" }
         let deckIDs = rootDecks.map { "deck:\($0.id.uuidString)" }
         let rootIDs = folderIDs + deckIDs
-        var orderedIDs = deckOrder.currentOrder(rootIDs: rootIDs)
-        if let ins = insertionIndex, ins >= 0, ins <= orderedIDs.count { orderedIDs.insert("__placeholder__", at: ins) }
+        let orderedIDs = deckOrder.currentOrder(rootIDs: rootIDs)
 
-        return ScrollView {
-            VStack(alignment: .leading, spacing: DS.Spacing.lg) {
-                Text("單字卡集")
-                    .dsType(DS.Font.section)
-                    .fontWeight(.semibold)
-                Text("選擇一個卡片集開始練習")
-                    .dsType(DS.Font.caption)
-                    .foregroundStyle(.secondary)
+        return DragLayer(state: dragState) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: DS.Spacing.lg) {
+                    Text("單字卡集")
+                        .dsType(DS.Font.section)
+                        .fontWeight(.semibold)
+                    Text("選擇一個卡片集開始練習")
+                        .dsType(DS.Font.caption)
+                        .foregroundStyle(.secondary)
 
-                ShelfGrid {
-                    ForEach(orderedIDs, id: \.self) { tid in
-                        if tid == "__placeholder__" {
-                            AnyView(
-                                RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                                    .stroke(DS.Palette.border.opacity(0.25), style: StrokeStyle(lineWidth: DS.BorderWidth.regular, dash: [6,4]))
-                                    .frame(minHeight: 104)
-                                    .overlay(Text("放在這裡").dsType(DS.Font.caption).foregroundStyle(.secondary))
-                            )
-                        } else if tid.hasPrefix("folder:"), let fid = UUID(uuidString: String(tid.dropFirst(7))), let folder = deckFolders.folders.first(where: { $0.id == fid }) {
-                            AnyView(
-                                NavigationLink { DeckFolderDetailView(folderID: folder.id) } label: {
-                                    ShelfTileCard(title: folder.name, subtitle: nil, countText: "共 \(folder.deckIDs.count) 個", iconSystemName: "folder", accentColor: DS.Brand.scheme.monument, showChevron: true)
-                                }
-                                .buttonStyle(DSCardLinkStyle())
-                                .contextMenu {
-                                    Button("重新命名") { renamingFolder = folder }
-                                    Button("刪除", role: .destructive) { _ = deckFolders.removeFolder(folder.id); deckOrder.removeFromOrder("folder:\(folder.id.uuidString)") }
-                                }
-                                .onDrag {
-                                    draggingTileID = tid
-                                    insertionIndex = deckOrder.indexInRoot(tid, rootIDs: rootIDs) ?? nil
-                                    return NSItemProvider(object: tid as NSString)
-                                }
-                                .onDrop(of: [.text], delegate: DeckRootTileDropDelegate(
-                                    overID: tid,
-                                    overKind: .folder(folder.id),
-                                    draggingID: $draggingTileID,
-                                    rootIDsProvider: { deckFolders.folders.map { "folder:\($0.id.uuidString)" } + decksStore.decks.filter { !deckFolders.isInAnyFolder($0.id) }.map { "deck:\($0.id.uuidString)" } },
-                                    move: { id, to, root in deckOrder.move(id: id, to: to, rootIDs: root) },
-                                    addDeckToFolder: { deckID, folderID in deckFolders.add(deckID: deckID, to: folderID); deckOrder.removeFromOrder("deck:\(deckID.uuidString)") },
-                                    createFolderFromDecks: { _, _, _ in },
-                                    updateInsertionIndex: { insertionIndex = $0 },
-                                    clearInsertionIndex: { insertionIndex = nil }
-                                ))
-                            )
-                        } else if tid.hasPrefix("deck:"), let did = UUID(uuidString: String(tid.dropFirst(5))), let deck = rootDecks.first(where: { $0.id == did }) {
-                            AnyView(
-                                NavigationLink { DeckDetailView(deckID: deck.id) } label: {
-                                    DeckCard(name: deck.name, count: deck.cards.count)
-                                }
-                                .buttonStyle(DSCardLinkStyle())
-                                .contextMenu {
-                                    Button("重新命名") { renaming = deck }
-                                    Button("刪除", role: .destructive) { deckFolders.remove(deckID: deck.id); decksStore.remove(deck.id); deckOrder.removeFromOrder("deck:\(deck.id.uuidString)") }
-                                }
-                                .onDrag {
-                                    draggingTileID = tid
-                                    insertionIndex = deckOrder.indexInRoot(tid, rootIDs: rootIDs) ?? nil
-                                    return NSItemProvider(object: tid as NSString)
-                                }
-                                .onDrop(of: [.text], delegate: DeckRootTileDropDelegate(
-                                    overID: tid,
-                                    overKind: .deck(deck.id),
-                                    draggingID: $draggingTileID,
-                                    rootIDsProvider: { deckFolders.folders.map { "folder:\($0.id.uuidString)" } + decksStore.decks.filter { !deckFolders.isInAnyFolder($0.id) }.map { "deck:\($0.id.uuidString)" } },
-                                    move: { id, to, root in deckOrder.move(id: id, to: to, rootIDs: root) },
-                                    addDeckToFolder: { deckID, folderID in deckFolders.add(deckID: deckID, to: folderID); deckOrder.removeFromOrder("deck:\(deckID.uuidString)") },
-                                    createFolderFromDecks: { a, b, insertAt in
-                                        let folder = deckFolders.addFolder()
-                                        deckFolders.add(deckID: a, to: folder.id)
-                                        deckFolders.add(deckID: b, to: folder.id)
-                                        deckOrder.removeFromOrder("deck:\(a.uuidString)")
-                                        deckOrder.removeFromOrder("deck:\(b.uuidString)")
-                                        let current = deckFolders.folders.map { "folder:\($0.id.uuidString)" } + decksStore.decks.filter { !deckFolders.isInAnyFolder($0.id) }.map { "deck:\($0.id.uuidString)" }
-                                        deckOrder.insertIntoOrder("folder:\(folder.id.uuidString)", at: insertAt, rootIDs: current)
-                                        renamingFolder = folder
-                                    },
-                                    updateInsertionIndex: { insertionIndex = $0 },
-                                    clearInsertionIndex: { insertionIndex = nil }
-                                ))
-                            )
-                        } else {
-                            AnyView(EmptyView().frame(minHeight: 104))
+                    ShelfGrid(columns: cols) {
+                        ForEach(orderedIDs, id: \.self) { tid in
+                            if tid.hasPrefix("folder:"), let fid = UUID(uuidString: String(tid.dropFirst(7))), let folder = deckFolders.folders.first(where: { $0.id == fid }) {
+                                AnyView(
+                                    NavigationLink { DeckFolderDetailView(folderID: folder.id) } label: {
+                                        ShelfTileCard(title: folder.name, subtitle: nil, countText: "共 \(folder.deckIDs.count) 個", iconSystemName: "folder", accentColor: DS.Brand.scheme.monument, showChevron: true)
+                                    }
+                                    .reportTileFrame(id: "folder:\(folder.id.uuidString)", in: .named(coordName))
+                                    .buttonStyle(DSCardLinkStyle())
+                                    .contextMenu {
+                                        Button("重新命名") { renamingFolder = folder }
+                                        Button("刪除", role: .destructive) { _ = deckFolders.removeFolder(folder.id); deckOrder.removeFromOrder("folder:\(folder.id.uuidString)") }
+                                    }
+                                )
+                            } else if tid.hasPrefix("deck:"), let did = UUID(uuidString: String(tid.dropFirst(5))), let deck = rootDecks.first(where: { $0.id == did }) {
+                                AnyView(
+                                    NavigationLink { DeckDetailView(deckID: deck.id) } label: {
+                                        ShelfTileCard(title: deck.name, subtitle: nil, countText: "共 \(deck.cards.count) 張", iconSystemName: nil, accentColor: DS.Palette.primary, showChevron: true)
+                                    }
+                                    .reportTileFrame(id: "deck:\(deck.id.uuidString)", in: .named(coordName))
+                                    .buttonStyle(DSCardLinkStyle())
+                                    .contextMenu {
+                                        Button("重新命名") { renaming = deck }
+                                        Button("刪除", role: .destructive) {
+                                            decksStore.remove(deck.id)
+                                            deckOrder.removeFromOrder("deck:\(deck.id.uuidString)")
+                                        }
+                                    }
+                                    .gesture(deckDragGesture(for: deck))
+                                )
+                            }
                         }
                     }
-                    .dsAnimation(DS.AnimationToken.reorder, value: deckOrder.order)
-                }
 
-                // 新資料夾 tile 放在末端
-                ShelfGrid { Button { _ = deckFolders.addFolder() } label: { NewDeckFolderCard() }.buttonStyle(.plain) }
+                    // Add folder tile
+                    ShelfGrid(columns: cols) {
+                        Button { _ = deckFolders.addFolder() } label: { NewDeckFolderCard() }
+                            .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, DS.Spacing.lg)
+                .padding(.top, DS.Spacing.lg)
             }
-            .padding(.horizontal, DS.Spacing.lg)
-            .padding(.top, DS.Spacing.lg)
-            .padding(.bottom, DS.Spacing.lg)
         }
         .background(DS.Palette.background)
-        // 後備 drop：把項目拖到空白處或邊緣放下時清除 dragging 狀態
-        .onDrop(of: [.text], delegate: ShelfClearDragStateDrop(draggingID: $draggingTileID))
         .navigationTitle("單字卡")
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button { _ = deckFolders.addFolder() } label: { Label("新資料夾", systemImage: "folder.badge.plus") }
-            }
-        }
+        .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { _ = deckFolders.addFolder() } label: { Label("新資料夾", systemImage: "folder.badge.plus") } } }
         .sheet(item: $renaming) { dk in
-            RenameSheet(name: dk.name) { new in
-                decksStore.rename(dk.id, to: new)
-            }
-            .presentationDetents([.height(180)])
+            RenameSheet(name: dk.name) { new in decksStore.rename(dk.id, to: new) }
+                .presentationDetents([.height(180)])
         }
         .sheet(item: $renamingFolder) { f in
-            RenameSheet(name: f.name) { new in
-                deckFolders.rename(f.id, to: new)
+            RenameSheet(name: f.name) { new in deckFolders.rename(f.id, to: new) }
+                .presentationDetents([.height(180)])
+        }
+        .coordinateSpace(name: coordName)
+        .onPreferenceChange(TileFrameKey.self) { frames in self.tileFrames = frames }
+        .onChange(of: dragState.location) { _ in handleDragMove() }
+    }
+
+    // MARK: - Drag logic
+    private func deckDragGesture(for deck: PersistedFlashcardDeck) -> some Gesture {
+        let longPress = LongPressGesture(minimumDuration: 0.5)
+            .onEnded { _ in
+                withAnimation(DS.AnimationToken.snappy) {
+                    dragState.isDragging = true
+                    dragState.itemID = .deck(deck.id)
+                    dragState.preview = DragPreview(
+                        view: AnyView(ShelfTileCard(title: deck.name, subtitle: nil, countText: "共 \(deck.cards.count) 張", iconSystemName: nil, accentColor: DS.Palette.primary, showChevron: false)
+                            .shadow(radius: 8).opacity(0.98)),
+                        size: CGSize(width: 160, height: 104)
+                    )
+                }
+                Haptics.lightTick()
             }
-            .presentationDetents([.height(180)])
+        let drag = DragGesture(minimumDistance: 1)
+            .onChanged { v in dragState.location = v.location }
+            .onEnded { v in
+                finalizeDrop(at: v.location)
+                withAnimation(DS.AnimationToken.subtle) { dragState.reset() }
+            }
+        return longPress.sequenced(before: drag)
+    }
+
+    private func handleDragMove() {
+        guard dragState.isDragging, case .deck(let did)? = dragState.itemID else { return }
+        let rootDecks: [PersistedFlashcardDeck] = decksStore.decks.filter { !deckFolders.isInAnyFolder($0.id) }
+        let rootIDs = rootDecks.map { "deck:\($0.id.uuidString)" }
+        let loc = dragState.location
+        var nearestKey: String? = nil
+        var best: CGFloat = .infinity
+        for (key, frame) in tileFrames where key.hasPrefix("deck:") {
+            let d = hypot(CGFloat(frame.midX - loc.x), CGFloat(frame.midY - loc.y))
+            if d < best { best = d; nearestKey = key }
+        }
+        guard let targetKey = nearestKey else { return }
+        let currentKey = "deck:\(did.uuidString)"
+        if let cur = rootIDs.firstIndex(of: currentKey), let tgt = rootIDs.firstIndex(of: targetKey), cur != tgt {
+            let folderIDs = deckFolders.folders.map { "folder:\($0.id.uuidString)" }
+            deckOrder.move(id: currentKey, to: tgt, rootIDs: folderIDs + rootIDs)
+        }
+    }
+
+    private func finalizeDrop(at point: CGPoint) {
+        guard let item = dragState.itemID else { return }
+        for (key, frame) in tileFrames where key.hasPrefix("folder:") {
+            if frame.contains(point), case .deck(let did) = item, let fid = UUID(uuidString: String(key.dropFirst(7))) {
+                deckFolders.add(deckID: did, to: fid)
+                deckOrder.removeFromOrder("deck:\(did.uuidString)")
+                Haptics.success()
+                return
+            }
         }
     }
 }
@@ -160,9 +169,7 @@ private struct DeckItemLink: View {
     var onRename: () -> Void
     var onDelete: () -> Void
     var body: some View {
-        NavigationLink {
-            DeckDetailView(deckID: deck.id)
-        } label: {
+        NavigationLink { DeckDetailView(deckID: deck.id) } label: {
             DeckCard(name: deck.name, count: deck.cards.count)
                 .contextMenu {
                     Button("重新命名") { onRename() }
@@ -170,81 +177,6 @@ private struct DeckItemLink: View {
                 }
         }
         .buttonStyle(DSCardLinkStyle())
-    }
-}
-
-// MARK: - Drag/Drop Helpers (root reordering, folder drop)
-
-private enum RootTileKind { case folder(UUID), deck(UUID) }
-
-fileprivate var _deckReorderLastTS: TimeInterval = 0
-fileprivate var _deckSpringWork: [String: DispatchWorkItem] = [:]
-
-private struct DeckRootTileDropDelegate: DropDelegate {
-    let overID: String
-    let overKind: RootTileKind
-    @Binding var draggingID: String?
-    let rootIDsProvider: () -> [String]
-    let move: (String, Int, [String]) -> Void
-    let addDeckToFolder: (UUID, UUID) -> Void
-    let createFolderFromDecks: (UUID, UUID, Int) -> Void
-    let updateInsertionIndex: (Int?) -> Void
-    let clearInsertionIndex: () -> Void
-
-    func validateDrop(info: DropInfo) -> Bool { true }
-    func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
-
-    func dropEntered(info: DropInfo) {
-        guard let draggingID, draggingID != overID else { return }
-        let root = rootIDsProvider()
-        guard let from = root.firstIndex(of: draggingID), let to = root.firstIndex(of: overID) else { return }
-        // throttle reorders to reduce jitter
-        let now = Date().timeIntervalSince1970
-        updateInsertionIndex(to)
-        if now - _deckReorderLastTS > 0.08 {
-            move(draggingID, to > from ? to + 1 : to, root)
-            _deckReorderLastTS = now
-        }
-        Haptics.lightTick()
-        // spring-load: hover deck over deck to form folder after delay
-        if case .deck(let target) = overKind, draggingID.hasPrefix("deck:"), let src = UUID(uuidString: String(draggingID.dropFirst(5))), src != target {
-            _deckSpringWork[overID]?.cancel()
-            let work = DispatchWorkItem { let root2 = rootIDsProvider(); let insertAt = root2.firstIndex(of: overID) ?? 0; createFolderFromDecks(src, target, insertAt) }
-            _deckSpringWork[overID] = work
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35, execute: work)
-        } else {
-            _deckSpringWork[overID]?.cancel(); _deckSpringWork[overID] = nil
-        }
-    }
-
-    func performDrop(info: DropInfo) -> Bool {
-        let providers = info.itemProviders(for: [.text])
-        guard let p = providers.first else { draggingID = nil; return false }
-        var handled = false
-        _ = p.loadObject(ofClass: NSString.self) { obj, _ in
-            guard let s = obj as? NSString else { return }
-            let str = s as String
-            if str.hasPrefix("deck:") {
-                let raw = String(str.dropFirst(5))
-                if let deckID = UUID(uuidString: raw) {
-                    switch overKind {
-                    case .folder(let fid):
-                        addDeckToFolder(deckID, fid)
-                        handled = true
-                    case .deck(let targetID):
-                        // 若 spring-load 已觸發則視為已處理
-                        if _deckSpringWork[overID] != nil {
-                            handled = true
-                        }
-                    }
-                }
-            }
-        }
-        draggingID = nil
-        clearInsertionIndex()
-        _deckSpringWork[overID]?.cancel(); _deckSpringWork[overID] = nil
-        if handled { Haptics.success() }
-        return handled
     }
 }
 
@@ -316,6 +248,5 @@ enum SampleDecks {
     static let all: [FlashcardDeck] = [gre1, toefl, gratitudeAndChoices]
 }
 
-#Preview {
-    NavigationStack { FlashcardDecksView() }
-}
+#Preview { NavigationStack { FlashcardDecksView() } }
+

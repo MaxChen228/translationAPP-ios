@@ -47,10 +47,10 @@ struct ContentView: View {
                             .focused($focused, equals: .en)
                     }
 
-                    // Separate inputs from results visually（以淡藍髮絲線）
-                    DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.border))
-
                     if let res = vm.response {
+                        // Separate inputs from results visually（以淡藍髮絲線）
+                        DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.border))
+
                         ResultsSectionView(
                             res: res,
                             inputZh: vm.inputZh,
@@ -75,10 +75,56 @@ struct ContentView: View {
                             }
                         )
                     }
+
+                    // 內嵌於頁面底部的操作列（不再懸浮）
+                    HStack(spacing: DS.Spacing.md) {
+                        Button {
+                            Task { await vm.runCorrection() }
+                            focused = nil
+                        } label: {
+                            Group {
+                                if vm.isLoading {
+                                    HStack(spacing: 8) {
+                                        ProgressView()
+                                            .tint(.white)
+                                        Text("批改中…")
+                                    }
+                                } else {
+                                    Label("批改", systemImage: "checkmark.seal.fill")
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(DSPrimaryButton())
+                        .disabled(vm.isLoading)
+
+                        // 下一題（略過已完成）：需有題庫關聯與 BACKEND_URL
+                        Button {
+                            Task { await vm.loadNextPractice() }
+                            focused = .en
+                        } label: {
+                            Label("下一題", systemImage: "arrow.right.circle.fill")
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.9)
+                        }
+                        .buttonStyle(DSSecondaryButton())
+                        .disabled(vm.isLoading || vm.currentBankItemId == nil || AppConfig.backendURL == nil)
+
+                        Button(role: .destructive) {
+                            vm.reset()
+                        } label: {
+                            Image(systemName: "trash")
+                                .frame(width: 44, height: 44)
+                        }
+                        .buttonStyle(DSSecondaryButton())
+                        .frame(width: 64)
+                        .disabled(vm.isLoading)
+                    }
+                    .padding(.top, DS.Spacing.md)
                 }
                 .padding(.horizontal, DS.Spacing.lg)
                 .padding(.top, DS.Spacing.lg)
-                .padding(.bottom, 100) // leave space for sticky bar
+                .padding(.bottom, DS.Spacing.lg)
             }
             .disabled(vm.isLoading)
             .background(DS.Palette.background)
@@ -101,56 +147,6 @@ struct ContentView: View {
                     .accessibilityLabel("查看已儲存的錯誤 JSON")
                 }
             }
-                .safeAreaInset(edge: .bottom) {
-                HStack(spacing: DS.Spacing.md) {
-                    Button {
-                        Task { await vm.runCorrection() }
-                        focused = nil
-                    } label: {
-                        Group {
-                            if vm.isLoading {
-                                HStack(spacing: 8) {
-                                    ProgressView()
-                                        .tint(.white)
-                                    Text("批改中…")
-                                }
-                            } else {
-                                Label("批改", systemImage: "checkmark.seal.fill")
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(DSPrimaryButton())
-                    .disabled(vm.isLoading)
-
-                    // 下一題（略過已完成）：需有題庫關聯與 BACKEND_URL
-                    Button {
-                        Task { await vm.loadNextPractice() }
-                        focused = .en
-                    } label: {
-                        Label("下一題", systemImage: "arrow.right.circle.fill")
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.9)
-                    }
-                    .buttonStyle(DSSecondaryButton())
-                    .disabled(vm.isLoading || vm.currentBankItemId == nil || AppConfig.backendURL == nil)
-
-                    Button(role: .destructive) {
-                        vm.reset()
-                    } label: {
-                        Image(systemName: "trash")
-                            .frame(width: 44, height: 44)
-                    }
-                    .buttonStyle(DSSecondaryButton())
-                    .frame(width: 64)
-                    .disabled(vm.isLoading)
-                }
-                .padding(.horizontal, DS.Spacing.lg)
-                .padding(.vertical, DS.Spacing.md)
-                .background(.ultraThinMaterial)
-                .dsTopHairline(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.border)) // Hairline on top of sticky bar
-                .disabled(vm.isLoading)
-        }
         .overlay(alignment: .center) {
             if vm.isLoading { LoadingOverlay() }
         }
