@@ -192,6 +192,28 @@ extension View {
     }
 }
 
+// MARK: - Motion helpers (respect Reduce Motion)
+enum DSMotion {
+    static func run(_ animation: Animation, _ body: () -> Void) {
+        #if os(iOS)
+        if UIAccessibility.isReduceMotionEnabled { body(); return }
+        #endif
+        withAnimation(animation, body)
+    }
+}
+
+extension View {
+    @ViewBuilder
+    func dsAnimation<V: Equatable>(_ animation: Animation, value: V) -> some View {
+        #if os(iOS)
+        if UIAccessibility.isReduceMotionEnabled { self.animation(nil, value: value) }
+        else { self.animation(animation, value: value) }
+        #else
+        self.animation(animation, value: value)
+        #endif
+    }
+}
+
 struct DSTypography: ViewModifier {
     var font: SwiftUI.Font
     var lineSpacing: CGFloat = 4

@@ -47,9 +47,9 @@ struct ResultSummaryCard: View {
                 UIPasteboard.general.string = corrected
                 let generator = UINotificationFeedbackGenerator()
                 generator.notificationOccurred(.success)
-                withAnimation(.spring(duration: 0.3)) { showCopied = true }
+                withAnimation(DS.AnimationToken.snappy) { showCopied = true }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-                    withAnimation(.easeOut) { showCopied = false }
+                    withAnimation(DS.AnimationToken.subtle) { showCopied = false }
                 }
             } label: {
                 Image(systemName: "doc.on.doc")

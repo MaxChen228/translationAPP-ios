@@ -36,7 +36,7 @@ struct WorkspaceListView: View {
                         .environmentObject(savedStore)
                     }
                     // 將重排的動畫收斂到容器層，避免在 delegate 內多次觸發動畫
-                    .animation(DS.AnimationToken.reorder, value: store.workspaces)
+                    .dsAnimation(DS.AnimationToken.reorder, value: store.workspaces)
 
                     Button {
                         _ = store.addWorkspace()

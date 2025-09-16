@@ -49,6 +49,6 @@ struct BannerHost: View {
             Spacer(minLength: 0)
         }
         .allowsHitTesting(center.banner != nil)
-        .animation(DS.AnimationToken.snappy, value: center.banner != nil)
+        .dsAnimation(DS.AnimationToken.snappy, value: center.banner != nil)
     }
 }

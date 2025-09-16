@@ -195,7 +195,7 @@ private struct SavedErrorRowCard: View {
                                 HStack {
                                     Spacer()
                                     Button {
-                                        onCopy(); Haptics.success(); withAnimation(.easeInOut(duration: 0.2)) { didCopy = true }
+                                        onCopy(); Haptics.success(); withAnimation(DS.AnimationToken.subtle) { didCopy = true }
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { withAnimation { didCopy = false } }
                                     } label: {
                                         if didCopy { Label("已複製", systemImage: "checkmark.seal.fill") }
@@ -226,7 +226,7 @@ private struct SavedErrorRowCard: View {
                             HStack {
                                 Spacer()
                                 Button {
-                                    onCopy(); Haptics.success(); withAnimation(.easeInOut(duration: 0.2)) { didCopy = true }
+                                    onCopy(); Haptics.success(); withAnimation(DS.AnimationToken.subtle) { didCopy = true }
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { withAnimation { didCopy = false } }
                                 } label: {
                                     if didCopy { Label("已複製", systemImage: "checkmark.seal.fill") }

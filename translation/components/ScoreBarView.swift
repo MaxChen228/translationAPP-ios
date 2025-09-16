@@ -27,7 +27,7 @@ struct ScoreBarView: View {
             .frame(minWidth: 40)
         }
         .frame(maxWidth: .infinity)
-        .animation(.spring(response: 0.6, dampingFraction: 0.8), value: score)
+        .dsAnimation(DS.AnimationToken.bouncy, value: score)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("分數 \(score) 分")
     }

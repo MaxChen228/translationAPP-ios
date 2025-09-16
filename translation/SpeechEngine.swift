@@ -2,6 +2,8 @@ import Foundation
 import AVFoundation
 import SwiftUI
 
+enum SpeechFace: String, Codable { case front, back }
+
 struct SpeechItem: Identifiable {
     let id = UUID()
     let text: String
@@ -9,12 +11,16 @@ struct SpeechItem: Identifiable {
     let rate: Float
     let preDelay: TimeInterval
     let postDelay: TimeInterval
+    let cardIndex: Int?
+    let face: SpeechFace?
 }
 
 final class SpeechEngine: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
     @Published private(set) var isPlaying: Bool = false
     @Published private(set) var isPaused: Bool = false
     @Published private(set) var currentIndex: Int = 0
+    @Published private(set) var currentCardIndex: Int? = nil
+    @Published private(set) var currentFace: SpeechFace? = nil
 
     private var queue: [SpeechItem] = []
     private let synth = AVSpeechSynthesizer()
@@ -79,6 +85,9 @@ final class SpeechEngine: NSObject, ObservableObject, AVSpeechSynthesizerDelegat
         guard isPlaying else { return }
         guard currentIndex < queue.count else { stop(); return }
         let item = queue[currentIndex]
+        // publish card/face immediately for UI sync
+        if let ci = item.cardIndex { currentCardIndex = ci }
+        currentFace = item.face
         schedule(delay: item.preDelay) { [weak self] in
             guard let self else { return }
             if item.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -122,4 +131,3 @@ final class SpeechEngine: NSObject, ObservableObject, AVSpeechSynthesizerDelegat
         #endif
     }
 }
-

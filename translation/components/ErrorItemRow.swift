@@ -63,7 +63,7 @@ private struct SaveActionBar: ViewModifier {
                         Spacer()
                         Button {
                             onSave(err)
-                            withAnimation(.easeInOut(duration: 0.2)) { didSave = true }
+                            withAnimation(DS.AnimationToken.subtle) { didSave = true }
                         } label: {
                             if didSave {
                                 Label("已儲存", systemImage: "checkmark.seal.fill")

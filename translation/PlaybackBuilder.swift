@@ -15,12 +15,12 @@ enum PlaybackBuilder {
             let backLines = buildBackLines(card.back, fill: settings.variantFill)
 
             func addFront() {
-                queue.append(SpeechItem(text: frontText, langCode: settings.frontLang, rate: rate, preDelay: 0, postDelay: sGap))
+                queue.append(SpeechItem(text: frontText, langCode: settings.frontLang, rate: rate, preDelay: 0, postDelay: sGap, cardIndex: idx, face: .front))
             }
             func addBack() {
                 for (i, line) in backLines.enumerated() {
                     let post = (i == backLines.count - 1) ? 0 : sGap
-                    queue.append(SpeechItem(text: line, langCode: settings.backLang, rate: rate, preDelay: i == 0 ? 0 : 0, postDelay: post))
+                    queue.append(SpeechItem(text: line, langCode: settings.backLang, rate: rate, preDelay: i == 0 ? 0 : 0, postDelay: post, cardIndex: (i == 0 && settings.readOrder == .backOnly) ? idx : (i == 0 && settings.readOrder == .backThenFront ? idx : idx), face: .back))
                 }
             }
 
@@ -28,11 +28,11 @@ enum PlaybackBuilder {
             case .frontOnly: addFront()
             case .backOnly: addBack()
             case .frontThenBack: addFront(); addBack()
-            case .backThenFront: addBack(); queue.append(SpeechItem(text: frontText, langCode: settings.frontLang, rate: rate, preDelay: sGap, postDelay: 0))
+            case .backThenFront: addBack(); queue.append(SpeechItem(text: frontText, langCode: settings.frontLang, rate: rate, preDelay: sGap, postDelay: 0, cardIndex: idx, face: .front))
             }
             // card gap
             if idx != cards.count - 1 {
-                queue.append(SpeechItem(text: "", langCode: settings.backLang, rate: rate, preDelay: cGap, postDelay: 0))
+                queue.append(SpeechItem(text: "", langCode: settings.backLang, rate: rate, preDelay: cGap, postDelay: 0, cardIndex: nil, face: nil))
             }
         }
         return queue
@@ -96,4 +96,3 @@ enum PlaybackBuilder {
         s.replacingOccurrences(of: "  ", with: " ").trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
-

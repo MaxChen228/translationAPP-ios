@@ -75,6 +75,7 @@ struct FlashcardsView: View {
     @State private var flashDelta: Int? = nil
     @State private var showSettings = false
     @State private var showAudioSheet = false
+    @State private var lastTTSSettings: TTSSettings? = nil
 
     init(title: String = "單字卡", cards: [Flashcard] = FlashcardsStore.defaultCards, deckID: UUID? = nil, startIndex: Int = 0) {
         _store = StateObject(wrappedValue: FlashcardsStore(cards: cards, startIndex: startIndex))
@@ -151,17 +152,17 @@ struct FlashcardsView: View {
                                 if abs(t) > threshold {
                                     let dir: CGFloat = t > 0 ? 1 : -1
                                     // Toss out
-                                    withAnimation(.easeOut(duration: 0.18)) { dragX = dir * 800 }
+                                    withAnimation(DS.AnimationToken.tossOut) { dragX = dir * 800 }
                                     // Apply annotate if needed, then advance and animate in from opposite side
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
                                         if mode == .annotate { adjustProficiency(dir > 0 ? +1 : -1) }
                                         store.next()
                                         store.showBack = false
                                         dragX = -dir * 450
-                                        withAnimation(.spring(response: 0.42, dampingFraction: 0.85)) { dragX = 0 }
+                                        withAnimation(DS.AnimationToken.bouncy) { dragX = 0 }
                                     }
                                 } else {
-                                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) { dragX = 0 }
+                                    withAnimation(DS.AnimationToken.bouncy) { dragX = 0 }
                                 }
                             })
 
@@ -178,14 +179,16 @@ struct FlashcardsView: View {
                             }
                         }
 
-                        HStack(spacing: DS.Spacing.md) {
-                            Button { goToPreviousAnimated() } label: { Label("上一張", systemImage: "chevron.left") }
-                            .buttonStyle(DSSecondaryButtonCompact())
+                        if !(speech.isPlaying || speech.isPaused) {
+                            HStack(spacing: DS.Spacing.md) {
+                                Button { goToPreviousAnimated() } label: { Label("上一張", systemImage: "chevron.left") }
+                                .buttonStyle(DSSecondaryButtonCompact())
 
-                            Button {
-                                store.flip()
-                            } label: { Label(store.showBack ? "看正面" : "看背面", systemImage: "arrow.2.squarepath") }
-                            .buttonStyle(DSPrimaryButton())
+                                Button {
+                                    store.flip()
+                                } label: { Label(store.showBack ? "看正面" : "看背面", systemImage: "arrow.2.squarepath") }
+                                .buttonStyle(DSPrimaryButton())
+                            }
                         }
                     }
                 } else {
@@ -236,6 +239,39 @@ struct FlashcardsView: View {
                 startTTS(with: settings)
             }
             .presentationDetents([.height(360)])
+        }
+        .safeAreaInset(edge: .bottom) {
+            if speech.isPlaying || speech.isPaused {
+                AudioMiniPlayerView(
+                    title: title,
+                    index: store.index + 1,
+                    total: max(1, store.cards.count),
+                    isPlaying: speech.isPlaying,
+                    isPaused: speech.isPaused,
+                    onPrev: { ttsPrevCard() },
+                    onToggle: { ttsToggle() },
+                    onNext: { ttsNextCard() },
+                    onStop: { speech.stop() }
+                )
+            }
+        }
+        .onChange(of: speech.currentCardIndex) { v in
+            if let v, v >= 0, v < store.cards.count {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    store.index = v
+                    store.showBack = false
+                }
+            }
+        }
+        .onChange(of: speech.currentFace) { face in
+            switch face {
+            case .front?:
+                withAnimation(.easeInOut(duration: 0.2)) { store.showBack = false }
+            case .back?:
+                withAnimation(.easeInOut(duration: 0.2)) { store.showBack = true }
+            default:
+                break
+            }
         }
     }
 }
@@ -321,23 +357,23 @@ private extension FlashcardsView {
         guard mode == .annotate else { return }
         guard let deckID = deckID, let current = store.current else { return }
         let _ = progressStore.adjust(deckID: deckID, cardID: current.id, delta: delta)
-        withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+        withAnimation(DS.AnimationToken.snappy) {
             flashDelta = delta
         }
         if delta > 0 { Haptics.success() } else { Haptics.warning() }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-            withAnimation(.easeOut(duration: 0.2)) { flashDelta = nil }
+            withAnimation(DS.AnimationToken.subtle) { flashDelta = nil }
         }
     }
 
     func goToPreviousAnimated() {
         guard !store.cards.isEmpty else { return }
         let dir: CGFloat = 1 // toss right then bring previous from left
-        withAnimation(.easeOut(duration: 0.18)) { dragX = dir * 800 }
+        withAnimation(DS.AnimationToken.tossOut) { dragX = dir * 800 }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
             store.prev(); store.showBack = false
             dragX = -dir * 450
-            withAnimation(.spring(response: 0.42, dampingFraction: 0.85)) { dragX = 0 }
+            withAnimation(DS.AnimationToken.bouncy) { dragX = 0 }
         }
     }
 
@@ -345,7 +381,37 @@ private extension FlashcardsView {
     func startTTS(with settings: TTSSettings) {
         let queue = PlaybackBuilder.buildQueue(cards: store.cards, startIndex: store.index, settings: settings)
         speech.play(queue: queue)
+        lastTTSSettings = settings
     }
+
+    func ttsToggle() {
+        if speech.isPlaying && !speech.isPaused { speech.pause(); return }
+        if speech.isPlaying && speech.isPaused { speech.resume(); return }
+        // Not playing: start with last settings or default
+        startTTS(with: lastTTSSettings ?? ttsStore.settings)
+    }
+
+    func ttsNextCard() {
+        guard !store.cards.isEmpty else { return }
+        store.next()
+        store.showBack = false
+        if let s = lastTTSSettings { startTTS(with: s) }
+    }
+
+    func ttsPrevCard() {
+        guard !store.cards.isEmpty else { return }
+        store.prev()
+        store.showBack = false
+        if let s = lastTTSSettings { startTTS(with: s) }
+    }
+
+    // Sync UI to speech progress
+    nonisolated func _noop() {}
+}
+
+extension FlashcardsView {
+    @MainActor
+    func bindSpeechSync() -> some View { EmptyView() }
 }
 
 private struct EmptyState: View {
@@ -397,7 +463,7 @@ private struct FlipCard<Front: View, Back: View>: View {
             .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0), perspective: 0.8)
             .opacity(isFlipped ? 1 : 0)
         }
-        .animation(DS.AnimationToken.flip, value: isFlipped)
+        .dsAnimation(DS.AnimationToken.flip, value: isFlipped)
     }
 }
 
