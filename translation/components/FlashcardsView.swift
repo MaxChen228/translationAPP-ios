@@ -59,6 +59,7 @@ struct FlashcardsView: View {
     @StateObject private var store: FlashcardsStore
     private let title: String
     private let deckID: UUID?
+    private let startEditingOnAppear: Bool
     @EnvironmentObject private var decksStore: FlashcardDecksStore
     @EnvironmentObject private var progressStore: FlashcardProgressStore
     @StateObject private var speech = SpeechEngine()
@@ -67,6 +68,7 @@ struct FlashcardsView: View {
     @State private var draft: Flashcard? = nil
     @State private var errorText: String? = nil
     @State private var showDeleteConfirm: Bool = false
+    @State private var didAutoStartEditing: Bool = false
     // Review mode from AppStorage
     @AppStorage("flashcards.reviewMode") private var modeRaw: String = FlashcardsReviewMode.browse.rawValue
     private var mode: FlashcardsReviewMode { get { FlashcardsReviewMode(rawValue: modeRaw) ?? .browse } set { modeRaw = newValue.rawValue } }
@@ -78,10 +80,11 @@ struct FlashcardsView: View {
     @State private var lastTTSSettings: TTSSettings? = nil
     @State private var currentBackComposed: String = ""
 
-    init(title: String = "單字卡", cards: [Flashcard] = FlashcardsStore.defaultCards, deckID: UUID? = nil, startIndex: Int = 0) {
+    init(title: String = "單字卡", cards: [Flashcard] = FlashcardsStore.defaultCards, deckID: UUID? = nil, startIndex: Int = 0, startEditing: Bool = false) {
         _store = StateObject(wrappedValue: FlashcardsStore(cards: cards, startIndex: startIndex))
         self.title = title
         self.deckID = deckID
+        self.startEditingOnAppear = startEditing
     }
 
     var body: some View {
@@ -238,6 +241,13 @@ struct FlashcardsView: View {
                     Image(systemName: "speaker.wave.2")
                 }
                 .accessibilityLabel("播音設定")
+            }
+        }
+        .onAppear {
+            if startEditingOnAppear, !didAutoStartEditing {
+                didAutoStartEditing = true
+                // Ensure there's a current card then open editor
+                if store.current != nil { beginEdit() }
             }
         }
         .alert("確定要刪除這張卡片嗎？", isPresented: $showDeleteConfirm) {

@@ -43,6 +43,13 @@ struct FlashcardDecksView: View {
                 }
 
                 ShelfGrid(title: "單字卡集", columns: cols) {
+                    // New deck tile (similar look to NewDeckFolderCard)
+                    Button {
+                        let deck = decksStore.add(name: "未命名", cards: [])
+                        renaming = deck
+                    } label: { NewDeckCard() }
+                    .buttonStyle(.plain)
+
                     ForEach(orderedRootDecks) { deck in
                         NavigationLink { DeckDetailView(deckID: deck.id) } label: {
                             ShelfTileCard(
@@ -159,6 +166,25 @@ private struct DeckCard: View {
     let count: Int
     var body: some View {
         ShelfTileCard(title: name, subtitle: nil, countText: "共 \(count) 張", iconSystemName: nil, accentColor: DS.Palette.primary, showChevron: true)
+    }
+}
+
+// A dashed-outline card to create a new deck, visually consistent with NewDeckFolderCard.
+private struct NewDeckCard: View {
+    var body: some View {
+        VStack(spacing: 8) {
+            Image(systemName: "doc.badge.plus").font(.title3)
+            Text("新單字卡集").dsType(DS.Font.caption).foregroundStyle(.secondary)
+        }
+        .frame(minHeight: 96)
+        .frame(maxWidth: .infinity)
+        .padding(DS.Spacing.md)
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
+                .stroke(style: StrokeStyle(lineWidth: DS.BorderWidth.regular, dash: [5, 4]))
+                .foregroundStyle(DS.Palette.border.opacity(0.45))
+        )
+        .contentShape(RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous))
     }
 }
 

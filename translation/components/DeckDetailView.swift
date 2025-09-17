@@ -4,6 +4,8 @@ struct DeckDetailView: View {
     let deckID: UUID
     @EnvironmentObject private var decksStore: FlashcardDecksStore
     @EnvironmentObject private var progressStore: FlashcardProgressStore
+    @State private var navigateToNewEditor: Bool = false
+    @State private var newCardStartIndex: Int = 0
 
     private var deck: PersistedFlashcardDeck? {
         decksStore.decks.first(where: { $0.id == deckID })
@@ -29,12 +31,8 @@ struct DeckDetailView: View {
                 if let d = deck {
                     DSSectionHeader(title: d.name, subtitle: "單字卡集詳情", accentUnderline: true)
 
-                    // 上：三個狀態卡（先展示統計）
-                    VStack(spacing: 10) {
-                        StatusCard(title: "未學習", count: counts.new, color: DS.Brand.scheme.provence)
-                        StatusCard(title: "仍在學習", count: counts.learning, color: DS.Brand.scheme.peachQuartz)
-                        StatusCard(title: "已精通", count: counts.mastered, color: DS.Brand.scheme.monument)
-                    }
+                    // 上：高質感圓環摘要（壓縮且資訊清晰）
+                    DeckSummaryRings(new: counts.new, learning: counts.learning, mastered: counts.mastered)
 
                     // 中：行動區（開始複習 → 直接進入整副卡片）
                     NavigationLink {
@@ -45,7 +43,12 @@ struct DeckDetailView: View {
                     }
                     .buttonStyle(DSPrimaryButton())
 
-                    // 下：卡片簡略列表
+                    // 隱藏導頁器：新增卡片後直接進入編輯
+                    NavigationLink(isActive: $navigateToNewEditor) {
+                        FlashcardsView(title: d.name, cards: d.cards, deckID: d.id, startIndex: newCardStartIndex, startEditing: true)
+                    } label: { EmptyView() }
+
+                    // 下：卡片簡略列表（新增改為懸浮按鈕，避免擁擠）
                     Text("詞語").dsType(DS.Font.section)
                     VStack(spacing: 10) {
                         ForEach(d.cards) { card in
@@ -67,31 +70,69 @@ struct DeckDetailView: View {
             .padding(.bottom, DS.Spacing.lg)
         }
         .background(DS.Palette.background)
+        // 右下懸浮新增按鈕（FAB）：降低視覺干擾且隨時可用
+        .safeAreaInset(edge: .bottom, alignment: .trailing) {
+            if deck != nil {
+                HStack { Spacer() }
+                    .overlay(alignment: .trailing) {
+                        Button { addNewCardAndEdit() } label: {
+                            Image(systemName: "plus")
+                                .font(.system(size: 16, weight: .semibold))
+                        }
+                        .buttonStyle(DSPrimaryCircleButton(diameter: 44))
+                        .padding(.trailing, DS.Spacing.lg)
+                        .padding(.bottom, DS.Spacing.lg)
+                        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 6)
+                        .accessibilityLabel("新增卡片")
+                    }
+            }
+        }
         .navigationTitle("單字卡")
     }
 }
 
-private struct StatusCard: View {
-    let title: String
-    let count: Int
-    let color: Color
+// 高質感圓環摘要：以 3 欄圓環 + 標題呈現，節省高度且資訊清晰
+private struct DeckSummaryRings: View {
+    let new: Int
+    let learning: Int
+    let mastered: Int
+    var total: Int { max(1, new + learning + mastered) }
     var body: some View {
-        DSOutlineCard {
-            HStack(spacing: 12) {
+        DSCard {
+            HStack(spacing: 0) {
+                SummaryRing(title: "未學習", count: new, total: total, color: DS.Brand.scheme.provence)
+                Divider().frame(height: 42).opacity(0.15)
+                SummaryRing(title: "仍在學習", count: learning, total: total, color: DS.Brand.scheme.peachQuartz)
+                Divider().frame(height: 42).opacity(0.15)
+                SummaryRing(title: "已精通", count: mastered, total: total, color: DS.Brand.scheme.monument)
+            }
+            .frame(maxWidth: .infinity)
+        }
+    }
+    private struct SummaryRing: View {
+        let title: String
+        let count: Int
+        let total: Int
+        let color: Color
+        var progress: Double { min(1, Double(count) / Double(max(1, total))) }
+        var body: some View {
+            VStack(spacing: 6) {
                 ZStack {
-                    Circle().stroke(DS.Palette.border.opacity(0.25), lineWidth: 10)
+                    Circle().stroke(DS.Palette.border.opacity(0.2), lineWidth: 8)
+                    Circle()
+                        .trim(from: 0, to: progress)
+                        .stroke(color.gradient, style: StrokeStyle(lineWidth: 8, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
                     Text("\(count)")
                         .font(.headline)
                         .foregroundStyle(color)
                 }
-                .frame(width: 52, height: 52)
-
+                .frame(width: 48, height: 48)
                 Text(title)
-                    .dsType(DS.Font.section)
-                    .foregroundStyle(.primary)
-                Spacer()
-                Image(systemName: "chevron.right").foregroundStyle(.tertiary)
+                    .dsType(DS.Font.caption)
+                    .foregroundStyle(.secondary)
             }
+            .frame(maxWidth: .infinity)
         }
     }
 }
@@ -116,6 +157,20 @@ private struct CardPreviewRow: View {
             }
         }
         .contentShape(RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous))
+    }
+}
+
+private extension DeckDetailView {
+    func addNewCardAndEdit() {
+        guard let d = deck else { return }
+        let insertionIndex = d.cards.count
+        let card = Flashcard(front: "", back: "")
+        decksStore.addCard(to: d.id, card: card)
+        newCardStartIndex = insertionIndex
+        // 小延遲以等待列表刷新（避免同幀 push 導致資料未更新）
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            navigateToNewEditor = true
+        }
     }
 }
 
