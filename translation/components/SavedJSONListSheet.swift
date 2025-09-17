@@ -31,7 +31,7 @@ struct SavedJSONListSheet: View {
                                 Button { DSMotion.run(DS.AnimationToken.bouncy) { activeStash = .left } } label: { Image(systemName: "chevron.left") }
                                     .buttonStyle(DSOutlineCircleButton())
                                     .disabled(activeStash == .left)
-                                Text("\(store.count(in: .left)) / \(store.count(in: .right))")
+                                Text("\(currentCount) / \(otherCount)")
                                     .dsType(DS.Font.caption)
                                     .foregroundStyle(.secondary)
                                 Button { DSMotion.run(DS.AnimationToken.bouncy) { activeStash = .right } } label: { Image(systemName: "chevron.right") }
@@ -58,7 +58,7 @@ struct SavedJSONListSheet: View {
                         }
                         .dsAnimation(DS.AnimationToken.snappy, value: activeStash)
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                     .background(DS.Palette.background)
                 } else {
                     ScrollView {
@@ -75,7 +75,7 @@ struct SavedJSONListSheet: View {
                                 }
                                 .buttonStyle(DSOutlineCircleButton())
                                 .disabled(activeStash == .left)
-                                Text("\(store.count(in: .left)) / \(store.count(in: .right))")
+                                Text("\(currentCount) / \(otherCount)")
                                     .dsType(DS.Font.caption)
                                     .foregroundStyle(.secondary)
                                 Button { withAnimation { activeStash = .right } } label: {
@@ -195,6 +195,8 @@ private extension SavedJSONListSheet {
 
     var filteredDecoded: [DecodedRecord] { decoded.filter { $0.stash == activeStash } }
     var emptyText: String { activeStash == .left ? "左暫存尚未儲存任何錯誤" : "右暫存尚未儲存任何錯誤" }
+    var currentCount: Int { store.count(in: activeStash) }
+    var otherCount: Int { store.count(in: activeStash == .left ? .right : .left) }
 
     @ViewBuilder
     func stashSection(for stash: SavedStash) -> some View {

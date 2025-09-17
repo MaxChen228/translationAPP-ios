@@ -35,9 +35,10 @@ enum AIServiceFactory {
 enum AppConfig {
     // Single source of truth: BACKEND_URL
     static var backendURL: URL? {
-        if let s = Bundle.main.object(forInfoDictionaryKey: "BACKEND_URL") as? String,
-           let u = URL(string: s), !s.isEmpty { return u }
+        // Prefer runtime environment for easy override when running on device via Xcode.
         if let s = ProcessInfo.processInfo.environment["BACKEND_URL"],
+           let u = URL(string: s), !s.isEmpty { return u }
+        if let s = Bundle.main.object(forInfoDictionaryKey: "BACKEND_URL") as? String,
            let u = URL(string: s), !s.isEmpty { return u }
         return nil
     }

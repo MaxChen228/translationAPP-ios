@@ -86,17 +86,28 @@ struct DSPrimaryCircleButton: ButtonStyle {
 struct DSOutlineCircleButton: ButtonStyle {
     var diameter: CGFloat = 28
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(.subheadline)
-            .foregroundStyle(DS.Palette.primary)
-            .frame(width: diameter, height: diameter)
-            .background(Circle().fill(Color.clear))
-            .overlay(
-                Circle().stroke(DS.Palette.primary.opacity(0.55), lineWidth: DS.BorderWidth.regular)
-            )
-            .scaleEffect(configuration.isPressed ? 0.96 : 1)
-            .opacity(configuration.isPressed ? 0.9 : 1)
-            .contentShape(Circle())
+        DSOutlineCircleButtonView(configuration: configuration, diameter: diameter)
+    }
+
+    private struct DSOutlineCircleButtonView: View {
+        let configuration: Configuration
+        var diameter: CGFloat
+        @Environment(\.isEnabled) private var isEnabled
+        var body: some View {
+            let baseColor = DS.Palette.primary
+            let fg = isEnabled ? baseColor : baseColor.opacity(0.35)
+            configuration.label
+                .font(.subheadline)
+                .foregroundStyle(fg)
+                .frame(width: diameter, height: diameter)
+                .background(Circle().fill(Color.clear))
+                .overlay(
+                    Circle().stroke(fg.opacity(0.55), lineWidth: DS.BorderWidth.regular)
+                )
+                .scaleEffect(configuration.isPressed ? 0.96 : 1)
+                .opacity(configuration.isPressed ? 0.9 : 1)
+                .contentShape(Circle())
+        }
     }
 }
 
