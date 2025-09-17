@@ -8,12 +8,13 @@ struct SwipeableRow<Content: View>: View {
     @ViewBuilder var content: () -> Content
 
     @State private var offsetX: CGFloat = 0
-    private let threshold: CGFloat = 80
-    private let maxOffset: CGFloat = 140
+    private let threshold: CGFloat = 72
+    private let maxOffset: CGFloat = 180
 
     var body: some View {
         content()
             .offset(x: offsetX)
+            .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 10, coordinateSpace: .local)
                     .onChanged { value in
@@ -26,23 +27,22 @@ struct SwipeableRow<Content: View>: View {
                     }
                     .onEnded { _ in
                         if offsetX > threshold, allowRight {
-                            withAnimation(DS.AnimationToken.snappy) { offsetX = maxOffset }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                            withAnimation(DS.AnimationToken.tossOut) { offsetX = maxOffset }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
                                 onTriggerRight()
-                                withAnimation(DS.AnimationToken.subtle) { offsetX = 0 }
+                                withAnimation(DS.AnimationToken.bouncy) { offsetX = 0 }
                             }
                         } else if offsetX < -threshold, allowLeft {
-                            withAnimation(DS.AnimationToken.snappy) { offsetX = -maxOffset }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                            withAnimation(DS.AnimationToken.tossOut) { offsetX = -maxOffset }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
                                 onTriggerLeft()
-                                withAnimation(DS.AnimationToken.subtle) { offsetX = 0 }
+                                withAnimation(DS.AnimationToken.bouncy) { offsetX = 0 }
                             }
                         } else {
-                            withAnimation(DS.AnimationToken.subtle) { offsetX = 0 }
+                            withAnimation(DS.AnimationToken.bouncy) { offsetX = 0 }
                         }
                     }
             )
             .zIndex(offsetX == 0 ? 0 : 2)
     }
 }
-

@@ -29,7 +29,7 @@ struct SavedJSONListSheet: View {
                             Spacer(minLength: 0)
                             // Stash switcher with counts
                             HStack(spacing: 8) {
-                                Button { withAnimation { activeStash = .left } } label: {
+                                Button { DSMotion.run(DS.AnimationToken.bouncy) { activeStash = .left } } label: {
                                     Image(systemName: "chevron.left")
                                 }
                                 .buttonStyle(DSOutlineCircleButton())
@@ -37,7 +37,7 @@ struct SavedJSONListSheet: View {
                                 Text("\(store.count(in: .left)) / \(store.count(in: .right))")
                                     .dsType(DS.Font.caption)
                                     .foregroundStyle(.secondary)
-                                Button { withAnimation { activeStash = .right } } label: {
+                                Button { DSMotion.run(DS.AnimationToken.bouncy) { activeStash = .right } } label: {
                                     Image(systemName: "chevron.right")
                                 }
                                 .buttonStyle(DSOutlineCircleButton())
@@ -94,8 +94,8 @@ struct SavedJSONListSheet: View {
                         .padding(.horizontal, DS.Spacing.lg)
                         .padding(.top, DS.Spacing.lg)
 
-                        LazyVStack(alignment: .leading, spacing: DS.Spacing.md) {
-                            ForEach(filteredDecoded) { row in
+                    LazyVStack(alignment: .leading, spacing: DS.Spacing.md) {
+                        ForEach(filteredDecoded) { row in
                                 SwipeableRow(
                                     allowLeft: activeStash == .right,
                                     allowRight: activeStash == .left,
@@ -104,13 +104,12 @@ struct SavedJSONListSheet: View {
                                         store.move(row.id, to: .left)
                                         Haptics.success()
                                     },
-                                    onTriggerRight: {
-                                        // Move to right and switch to right stash
-                                        store.move(row.id, to: .right)
-                                        Haptics.success()
-                                        withAnimation { activeStash = .right }
-                                    }
-                                ) {
+                                onTriggerRight: {
+                                    // Move to right, but do not auto-switch view
+                                    store.move(row.id, to: .right)
+                                    Haptics.success()
+                                }
+                            ) {
                                     SavedErrorRowCard(
                                         row: row,
                                         expanded: expanded.contains(row.id),
@@ -125,12 +124,13 @@ struct SavedJSONListSheet: View {
                                     )
                                 }
                             }
-                        }
-                        .padding(.horizontal, DS.Spacing.lg)
-                        .padding(.top, DS.Spacing.md)
-                        .padding(.bottom, DS.Spacing.lg)
                     }
+                    .dsAnimation(DS.AnimationToken.reorder, value: filteredDecoded.map { $0.id })
+                    .padding(.horizontal, DS.Spacing.lg)
+                    .padding(.top, DS.Spacing.md)
+                    .padding(.bottom, DS.Spacing.lg)
                 }
+            }
             }
             .navigationTitle("已儲存 JSON")
             .navigationBarBackButtonHidden(isSaving)
