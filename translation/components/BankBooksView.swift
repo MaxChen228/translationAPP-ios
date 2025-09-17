@@ -28,15 +28,7 @@ struct BankBooksView: View {
             VStack(alignment: .leading, spacing: DS.Spacing.lg) {
                 // 移除頂部大標題，避免與下方區塊重複
                 if let error {
-                    DSCard {
-                        HStack(spacing: 8) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundStyle(.yellow)
-                            Text(error)
-                                .dsType(DS.Font.body)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
+                    ErrorStateCard(title: error)
                 }
 
                 if isLoading {
@@ -126,13 +118,12 @@ struct BankBooksView: View {
                         }
                     }
                     .dsAnimation(DS.AnimationToken.reorder, value: bankOrder.order)
-                    if books.isEmpty {
-                        DSCard {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("目前沒有題庫本").dsType(DS.Font.bodyEmph)
-                                Text("下拉以重新整理，或稍後再試。").dsType(DS.Font.caption).foregroundStyle(.secondary)
-                            }
-                        }
+                    if books.isEmpty && error == nil {
+                        EmptyStateCard(
+                            title: "目前沒有題庫本",
+                            subtitle: "下拉以重新整理，或稍後再試。",
+                            iconSystemName: "books.vertical"
+                        )
                     }
                 }
             }

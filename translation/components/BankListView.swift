@@ -18,7 +18,7 @@ struct BankListView: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 16) {
                 if isLoading { ProgressView().frame(maxWidth: .infinity, alignment: .center) }
-                if let error { Text(error).foregroundStyle(.secondary) }
+                if let error { ErrorStateCard(title: error) }
 
                 // 頂部進度摘要：顯示「已完成 / 題數」
                 if !items.isEmpty {
@@ -38,6 +38,14 @@ struct BankListView: View {
                         }
                         .padding(.vertical, 2)
                     }
+                }
+
+                if !isLoading && error == nil && items.isEmpty {
+                    EmptyStateCard(
+                        title: "目前沒有題目",
+                        subtitle: "換個題庫本或稍後再試。",
+                        iconSystemName: "text.book.closed"
+                    )
                 }
                 ForEach(items.indices, id: \.self) { i in
                     if i > 0 {
