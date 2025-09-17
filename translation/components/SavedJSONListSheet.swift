@@ -27,21 +27,16 @@ struct SavedJSONListSheet: View {
                                 .buttonStyle(DSSecondaryButtonCompact())
                                 .disabled(isSaving)
                             Spacer(minLength: 0)
-                            // Stash switcher with counts
                             HStack(spacing: 8) {
-                                Button { DSMotion.run(DS.AnimationToken.bouncy) { activeStash = .left } } label: {
-                                    Image(systemName: "chevron.left")
-                                }
-                                .buttonStyle(DSOutlineCircleButton())
-                                .disabled(activeStash == .left)
+                                Button { DSMotion.run(DS.AnimationToken.bouncy) { activeStash = .left } } label: { Image(systemName: "chevron.left") }
+                                    .buttonStyle(DSOutlineCircleButton())
+                                    .disabled(activeStash == .left)
                                 Text("\(store.count(in: .left)) / \(store.count(in: .right))")
                                     .dsType(DS.Font.caption)
                                     .foregroundStyle(.secondary)
-                                Button { DSMotion.run(DS.AnimationToken.bouncy) { activeStash = .right } } label: {
-                                    Image(systemName: "chevron.right")
-                                }
-                                .buttonStyle(DSOutlineCircleButton())
-                                .disabled(activeStash == .right)
+                                Button { DSMotion.run(DS.AnimationToken.bouncy) { activeStash = .right } } label: { Image(systemName: "chevron.right") }
+                                    .buttonStyle(DSOutlineCircleButton())
+                                    .disabled(activeStash == .right)
                             }
                             Spacer(minLength: 0)
                             Button("儲存單字卡") { proposedName = "未命名"; showSaveDeckSheet = true }
@@ -51,14 +46,17 @@ struct SavedJSONListSheet: View {
                         .padding(.horizontal, DS.Spacing.lg)
                         .padding(.top, DS.Spacing.lg)
 
-                        Spacer(minLength: DS.Spacing.lg)
-
-                        Image(systemName: "tray")
-                            .font(.largeTitle)
-                            .foregroundStyle(.secondary)
-                        Text(emptyText)
-                            .foregroundStyle(.secondary)
-                        Spacer(minLength: 0)
+                        // 用同一套欄位呈現，支援滑入滑出
+                        ZStack(alignment: .top) {
+                            if activeStash == .left {
+                                stashSection(for: .left)
+                                    .transition(.asymmetric(insertion: .move(edge: .leading), removal: .move(edge: .trailing)))
+                            } else {
+                                stashSection(for: .right)
+                                    .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+                            }
+                        }
+                        .dsAnimation(DS.AnimationToken.snappy, value: activeStash)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(DS.Palette.background)
@@ -94,41 +92,16 @@ struct SavedJSONListSheet: View {
                         .padding(.horizontal, DS.Spacing.lg)
                         .padding(.top, DS.Spacing.lg)
 
-                    LazyVStack(alignment: .leading, spacing: DS.Spacing.md) {
-                        ForEach(filteredDecoded) { row in
-                                SwipeableRow(
-                                    allowLeft: activeStash == .right,
-                                    allowRight: activeStash == .left,
-                                    onTriggerLeft: {
-                                        // Move back to left but stay on right stash
-                                        store.move(row.id, to: .left)
-                                        Haptics.success()
-                                    },
-                                onTriggerRight: {
-                                    // Move to right, but do not auto-switch view
-                                    store.move(row.id, to: .right)
-                                    Haptics.success()
-                                }
-                            ) {
-                                    SavedErrorRowCard(
-                                        row: row,
-                                        expanded: expanded.contains(row.id),
-                                        onToggle: {
-                                            DSMotion.run(DS.AnimationToken.subtle) {
-                                                if expanded.contains(row.id) { expanded.remove(row.id) }
-                                                else { expanded.insert(row.id) }
-                                            }
-                                        },
-                                        onCopy: { copyJSON(row.rawJSON) },
-                                        onDelete: { deleteRow(row.id) }
-                                    )
-                                }
+                        ZStack(alignment: .top) {
+                            if activeStash == .left {
+                                stashSection(for: .left)
+                                    .transition(.asymmetric(insertion: .move(edge: .leading), removal: .move(edge: .trailing)))
+                            } else {
+                                stashSection(for: .right)
+                                    .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
                             }
-                    }
-                    .dsAnimation(DS.AnimationToken.reorder, value: filteredDecoded.map { $0.id })
-                    .padding(.horizontal, DS.Spacing.lg)
-                    .padding(.top, DS.Spacing.md)
-                    .padding(.bottom, DS.Spacing.lg)
+                        }
+                        .dsAnimation(DS.AnimationToken.snappy, value: activeStash)
                 }
             }
             }
@@ -222,6 +195,52 @@ private extension SavedJSONListSheet {
 
     var filteredDecoded: [DecodedRecord] { decoded.filter { $0.stash == activeStash } }
     var emptyText: String { activeStash == .left ? "左暫存尚未儲存任何錯誤" : "右暫存尚未儲存任何錯誤" }
+
+    @ViewBuilder
+    func stashSection(for stash: SavedStash) -> some View {
+        let rows = decoded.filter { $0.stash == stash }
+        if rows.isEmpty {
+            VStack(spacing: 12) {
+                Image(systemName: "tray").font(.largeTitle).foregroundStyle(.secondary)
+                Text(stash == .left ? "左暫存尚未儲存任何錯誤" : "右暫存尚未儲存任何錯誤").foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, minHeight: 300)
+        } else {
+            LazyVStack(alignment: .leading, spacing: DS.Spacing.md) {
+                ForEach(rows) { row in
+                    SwipeableRow(
+                        allowLeft: stash == .right,
+                        allowRight: stash == .left,
+                        onTriggerLeft: {
+                            store.move(row.id, to: .left)
+                            Haptics.success()
+                        },
+                        onTriggerRight: {
+                            store.move(row.id, to: .right)
+                            Haptics.success()
+                        }
+                    ) {
+                        SavedErrorRowCard(
+                            row: row,
+                            expanded: expanded.contains(row.id),
+                            onToggle: {
+                                DSMotion.run(DS.AnimationToken.subtle) {
+                                    if expanded.contains(row.id) { expanded.remove(row.id) }
+                                    else { expanded.insert(row.id) }
+                                }
+                            },
+                            onCopy: { copyJSON(row.rawJSON) },
+                            onDelete: { deleteRow(row.id) }
+                        )
+                    }
+                }
+            }
+            .padding(.horizontal, DS.Spacing.lg)
+            .padding(.top, DS.Spacing.md)
+            .padding(.bottom, DS.Spacing.lg)
+            .dsAnimation(DS.AnimationToken.reorder, value: rows.map { $0.id })
+        }
+    }
 }
 
 // MARK: - Row Card
