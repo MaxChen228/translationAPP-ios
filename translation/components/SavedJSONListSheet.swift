@@ -21,11 +21,44 @@ struct SavedJSONListSheet: View {
             Group {
                 if filteredDecoded.isEmpty {
                     VStack(spacing: 12) {
+                        // 操作列：左右切換 + 清空/儲存（空狀態也顯示，方便切換）
+                        HStack(spacing: DS.Spacing.md) {
+                            Button("清空", role: .destructive) { store.clear(activeStash) }
+                                .buttonStyle(DSSecondaryButtonCompact())
+                                .disabled(isSaving)
+                            Spacer(minLength: 0)
+                            // Stash switcher with counts
+                            HStack(spacing: 8) {
+                                Button { withAnimation { activeStash = .left } } label: {
+                                    Image(systemName: "chevron.left")
+                                }
+                                .buttonStyle(DSOutlineCircleButton())
+                                .disabled(activeStash == .left)
+                                Text("\(store.count(in: .left)) / \(store.count(in: .right))")
+                                    .dsType(DS.Font.caption)
+                                    .foregroundStyle(.secondary)
+                                Button { withAnimation { activeStash = .right } } label: {
+                                    Image(systemName: "chevron.right")
+                                }
+                                .buttonStyle(DSOutlineCircleButton())
+                                .disabled(activeStash == .right)
+                            }
+                            Spacer(minLength: 0)
+                            Button("儲存單字卡") { proposedName = "未命名"; showSaveDeckSheet = true }
+                                .buttonStyle(DSSecondaryButtonCompact())
+                                .disabled(isSaving || filteredDecoded.isEmpty)
+                        }
+                        .padding(.horizontal, DS.Spacing.lg)
+                        .padding(.top, DS.Spacing.lg)
+
+                        Spacer(minLength: DS.Spacing.lg)
+
                         Image(systemName: "tray")
                             .font(.largeTitle)
                             .foregroundStyle(.secondary)
                         Text(emptyText)
                             .foregroundStyle(.secondary)
+                        Spacer(minLength: 0)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(DS.Palette.background)
