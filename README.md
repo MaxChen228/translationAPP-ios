@@ -21,8 +21,9 @@
   - 下方「結果切換卡」支援原文/修正版切換與滑動；兩側高亮可對位到同一筆錯誤。
   - 「錯誤列表」支援依五大類型篩選、點擊聚焦對應高亮、對單筆錯誤進行「儲存 JSON」。
   - 底部懸浮工具列提供「批改」、「下一題（題庫）」、「重設」。
-- 題庫本/題庫（`BankBooksView` → `BankListView`）
-  - `GET /bank/books` 取得主題書本；內頁以 `GET /bank/items` 顯示題目與提示，並可直接「練習」回填到當前 Workspace。
+- 題庫本（本機；`BankBooksView` → `LocalBankListView`）
+  - 以本機題庫本為主，離線可用；支援進度摘要、已完成徽章、按「練習」回填到當前 Workspace 並導回。
+  - 可透過「瀏覽雲端題庫」從 `/cloud/books` 複製精選書本到本機；複製後即可離線使用與進度統計。
   - 題目採宋體大字 + 細邊框凸顯；提示區塊上方使用髮絲線分隔；已完成題目會顯示徽章。
 - 已儲存 JSON 清單（`SavedJSONListSheet`）
   - 檢視、複製或刪除先前儲存的錯誤樣本 JSON。
@@ -37,7 +38,7 @@
 - 批改與高亮：回傳分數、修正版與錯誤清單（Mock 或 HTTP）；原文/修正版兩側高亮對位。
 - 錯誤列表：顯示錯誤類型、片段、中文說明與建議；支援類型篩選與點擊聚焦。
 - Workspace：多工編輯、拖曳重排、重新命名；批改完成時顯示頂端 Banner 並可一鍵返回該 Workspace。
-- 題庫：主題書本、題目清單、難度點與標籤展示；支援從剪貼簿批次匯入；可依裝置進度標示完成與抽「下一題」。
+- 題庫本（本機）：題目清單、難度點與標籤展示；本機完成度與進度摘要；支援離線「下一題」。
 - 已儲存 JSON：將單筆錯誤及三段文字序列化為 JSON 存入 `UserDefaults`，可檢視/複製/刪除，並整理成單字卡集。
 - 單字卡與 TTS：支援卡片編輯、進度標注（右滑 +1、左滑 −1）、TTS 播音（順序/語速/間隔/語言設定）與迷你播放器。
 
@@ -140,7 +141,8 @@ POST /make_deck
   - 進入點：`translationApp.swift`（導航列字型套用、Banner 驗證、Router）。
   - Workspace：`WorkspaceStore.swift`、`components/WorkspaceListView.swift`。
   - 翻譯批改：`ContentView.swift`、`CorrectionViewModel.swift`、`Highlighter.swift`。
-  - 題庫：`BankService.swift`、`components/BankBooksView.swift`、`components/BankListView.swift`。
+- 題庫本（本機）：`components/BankBooksView.swift`、`components/LocalBankListView.swift`、`LocalBankStore.swift`、`LocalBankProgressStore.swift`。
+- 雲端瀏覽：`CloudLibraryService.swift`、`components/CloudBankLibraryView.swift`。
   - 已儲存 JSON 與單字卡：`SavedErrorsStore.swift`、`components/SavedJSONListSheet.swift`、
     `FlashcardDecksStore.swift`、`components/FlashcardDecksView.swift`、`components/DeckDetailView.swift`、`components/FlashcardsView.swift`。
   - TTS 與音訊：`SpeechEngine.swift`、`TTSSettings.swift`、`components/FlashcardsAudioSettingsSheet.swift`、`components/AudioMiniPlayerView.swift`、`PlaybackBuilder.swift`。
@@ -163,7 +165,7 @@ POST /make_deck
   - 動畫 Token：`DS.AnimationToken`（flip/reorder/tossOut…），會在開啟「降低動作」時自動降級。
 
 常見自訂：
-- 題庫卡片外框粗細：`BankListView` 的 `stroke(..., lineWidth: DS.BorderWidth.regular)`。
+- 題庫卡片外框粗細：`LocalBankListView` 題目卡採細邊框 `DS.BorderWidth.regular`。
 - 次要按鈕大小：`DSSecondaryButtonCompact` 的字級與 padding。
 - Sticky Bar 上緣髮絲線：`View.dsTopHairline(...)`。
 
@@ -190,7 +192,7 @@ POST /make_deck
 
 ## 疑難排解
 - 沒有批改結果：確認已設定 `BACKEND_URL` 或使用 Mock（未設定時預設走 Mock）。
-- 題庫無資料：先啟動 FastAPI 後端，或用「匯入」從剪貼簿加入題目。
+- 題庫無資料：請到「題庫本」頁點「瀏覽雲端題庫」，將精選內容複製到本機。
 - 字型未生效：確認字型檔已加入 app bundle；`FontLoader` 啟動時會自動註冊。
 - 高亮與預期不符：盡量提供 `originalRange` / `correctedRange`；或在錯誤 `hints` 帶入 `before/after/occurrence` 提升匹配準確度。
 

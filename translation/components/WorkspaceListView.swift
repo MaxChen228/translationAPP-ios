@@ -311,7 +311,7 @@ private struct BankBooksEntryCard: View {
                         .foregroundStyle(.tertiary)
                 }
                 DSSeparator(color: DS.Palette.border.opacity(0.12))
-                Text("主題書本 / 練習題庫")
+                Text("本機題庫（離線）／雲端瀏覽複製")
                     .dsType(DS.Font.caption)
                     .foregroundStyle(.secondary)
             }
