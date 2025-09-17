@@ -77,6 +77,25 @@ App 以 `AppConfig` 讀取 Info.plist 或環境變數：
 
 註：此簡易後端已內建少量假資料，方便開發；若 `BACKEND_URL` 未設定，App 也會自動改用 Mock 來源顯示示例。
 
+內容來源（JSON，可選）：
+- 預設會嘗試讀取 `backend/data/` 目錄；可用環境變數 `CONTENT_DIR` 覆蓋（例如 `CONTENT_DIR=/path/to/data`）。
+- 結構：
+  - `data/decks/<id>.json`
+    ```json
+    { "id": "starter-phrases", "name": "Starter Phrases", "cards": [
+      { "front": "Hello!", "back": "你好！" },
+      { "front": "How are you?", "back": "你最近好嗎？" }
+    ]}
+    ```
+    卡片 `id` 可省略，伺服器會以 `<deck-id>:<index>` 生成穩定 UUID。
+  - `data/books/<id>.json`
+    ```json
+    { "id": "daily-conversations", "name": "Daily Conversations", "items": [
+      { "id": "conv-greet", "zh": "跟陌生人打招呼", "hints": [], "suggestions": [], "tags": ["daily"], "difficulty": 1 }
+    ]}
+    ```
+    `completed` 不在內容檔內（屬於個人進度）。若資料夾不存在或為空，後端會回退到內建示例。
+
 ### 批改 API（/correct）
 ```
 POST /correct
@@ -90,36 +109,9 @@ POST /correct
 - 提供 `*Range`（UTF‑16 偏移）可提升高亮精準度；若無則前端回退字串搜尋。
 - 離線測試：`FORCE_SIMPLE_CORRECT=1` 直接走規則式 `_simple_analyze`。
 
-### 題庫 API（/bank/*）
-- `GET /bank/books`
-- `GET /bank/items?limit&offset&difficulty&tag&deviceId`
-  - 回傳物件含 `completed: Bool`（若帶入 `deviceId`，會依該裝置進度標示完成）。
-- `GET /bank/random?difficulty&tag&deviceId&skipCompleted`
-  - 支援 `skipCompleted=1` 略過已完成題目。
-- `POST /bank/import`（從剪貼簿批次匯入）
-- 進度：
-  - `GET /bank/progress?deviceId` → `{ deviceId, completedIds, records[] }`
-  - `POST /bank/progress/complete` → `{"itemId":"...","deviceId":"...?","score":85,"completed":true}`
-
-匯入請求範例：
-```json
-{ "text": "...clipboard text...", "defaultTag": "Daily", "replace": false }
-```
-固定格式（區塊以空行分隔；鍵名中英皆可）：
-```
-ZH: 我昨天去商店買水果。
-難度: 2
-標籤: Daily, Shopping
-提示:
-- grammar: 使用過去式
-- usage: shop 在此情境常改為 store
-
-中文: 我每天都跑步。
-DIFF: 1
-TAGS: Daily, Exercise
-HINTS:
-- collocation: go for a run 是常見搭配
-```
+### 題庫（本機 + 雲端瀏覽）
+- 題庫本以「本機資料」為主，離線可用；進度與練習流程皆在 App 端處理。
+- 雲端瀏覽：`/cloud/books`、`/cloud/books/{name}` 提供唯讀精選書本，App 可「複製到本機」。
 
 ### 單字卡 API（/make_deck）
 ```
