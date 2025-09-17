@@ -60,6 +60,20 @@ final class BankFoldersStore: ObservableObject {
         for i in folders.indices { folders[i].bookNames.removeAll { $0 == bookName } }
     }
 
+    // Replace a book name across all folders to keep membership consistent after rename.
+    func replaceBookName(old: String, with new: String) {
+        for i in folders.indices {
+            if let idx = folders[i].bookNames.firstIndex(of: old) {
+                if !folders[i].bookNames.contains(new) {
+                    folders[i].bookNames[idx] = new
+                } else {
+                    // Avoid duplicates: if new already exists, just remove the old one
+                    folders[i].bookNames.remove(at: idx)
+                }
+            }
+        }
+    }
+
     func isInAnyFolder(_ bookName: String) -> Bool {
         return folders.contains { $0.bookNames.contains(bookName) }
     }
@@ -78,4 +92,3 @@ final class BankFoldersStore: ObservableObject {
         }
     }
 }
-

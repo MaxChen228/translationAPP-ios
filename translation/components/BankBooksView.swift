@@ -15,6 +15,9 @@ struct BankBooksView: View {
     @EnvironmentObject private var localBank: LocalBankStore
     @EnvironmentObject private var localProgress: LocalBankProgressStore
     @State private var renamingFolder: BankFolder? = nil
+    @State private var renamingBook: LocalBankBook? = nil
+    @State private var deletingBookName: String? = nil
+    @State private var showDeleteConfirm: Bool = false
     @State private var draggingBookName: String? = nil
 
     var body: some View {
@@ -96,6 +99,8 @@ struct BankBooksView: View {
                                     Button("加入 \(folder.name)") { bankFolders.add(bookName: b.name, to: folder.id) }
                                 }
                             }
+                            Button("重新命名") { renamingBook = b }
+                            Button("刪除", role: .destructive) { deletingBookName = b.name; showDeleteConfirm = true }
                             #if canImport(UIKit)
                             Button("複製名稱") { UIPasteboard.general.string = b.name }
                             #endif
@@ -129,6 +134,27 @@ struct BankBooksView: View {
         .sheet(item: $renamingFolder) { f in
             RenameSheet(name: f.name) { new in bankFolders.rename(f.id, to: new) }
                 .presentationDetents([.height(180)])
+        }
+        .sheet(item: $renamingBook) { book in
+            RenameSheet(name: book.name) { new in
+                let trimmed = new.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !trimmed.isEmpty, trimmed != book.name else { return }
+                localBank.rename(book.name, to: trimmed)
+                bankFolders.replaceBookName(old: book.name, with: trimmed)
+                localProgress.renameBook(from: book.name, to: trimmed)
+            }
+            .presentationDetents([.height(180)])
+        }
+        .confirmationDialog("確定要刪除這本題庫嗎？", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
+            Button("刪除", role: .destructive) {
+                if let name = deletingBookName {
+                    localBank.remove(name)
+                    bankFolders.remove(bookName: name)
+                    localProgress.removeBook(name)
+                }
+                deletingBookName = nil
+            }
+            Button("取消", role: .cancel) { deletingBookName = nil }
         }
     }
 }

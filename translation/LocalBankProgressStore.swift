@@ -46,5 +46,17 @@ final class LocalBankProgressStore: ObservableObject {
     private func persist() {
         if let data = try? JSONEncoder().encode(map) { UserDefaults.standard.set(data, forKey: key) }
     }
-}
 
+    // MARK: - Maintenance
+    func removeBook(_ name: String) {
+        map[name] = nil
+    }
+
+    func renameBook(from old: String, to new: String) {
+        guard old != new else { return }
+        let src = map[old] ?? [:]
+        if map[new] == nil { map[new] = [:] }
+        for (k, v) in src { map[new]?[k] = v }
+        map[old] = nil
+    }
+}

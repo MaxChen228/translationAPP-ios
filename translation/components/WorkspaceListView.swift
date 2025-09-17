@@ -267,6 +267,8 @@ private struct FlashcardsEntryCard: View {
 private struct QuickActionsRow: View {
     @ObservedObject var store: WorkspaceStore
     @EnvironmentObject private var router: RouterStore
+    @EnvironmentObject private var localBank: LocalBankStore
+    @EnvironmentObject private var localProgress: LocalBankProgressStore
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             DSSectionHeader(title: "快速功能", subtitle: nil, accentUnderline: true)
@@ -280,7 +282,8 @@ private struct QuickActionsRow: View {
                             BankBooksView(vm: store.vm(for: first.id), onPracticeLocal: { bookName, item, tag in
                                 let newWS = store.addWorkspace()
                                 let newVM = store.vm(for: newWS.id)
-                                // Local practice: Bind stores inside BankBooksView before invoking this closure
+                                // Local practice: ensure VM has local stores for completion/next
+                                newVM.bindLocalBankStores(localBank: localBank, progress: localProgress)
                                 newVM.startLocalPractice(bookName: bookName, item: item, tag: tag)
                                 router.open(workspaceID: newWS.id)
                             })
