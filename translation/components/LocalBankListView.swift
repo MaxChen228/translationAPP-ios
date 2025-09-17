@@ -3,13 +3,36 @@ import SwiftUI
 struct LocalBankListView: View {
     @ObservedObject var vm: CorrectionViewModel
     let bookName: String
+    // Optional override: when provided, caller controls where the practice item goes
+    var onPractice: ((BankItem, String?) -> Void)? = nil
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var localBank: LocalBankStore
+    @EnvironmentObject private var localProgress: LocalBankProgressStore
     @State private var expanded: Set<String> = []
 
     var body: some View {
         let items = localBank.items(in: bookName)
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 16) {
+                // 頂部進度摘要：顯示「已完成 / 題數」
+                if !items.isEmpty {
+                    let done = items.filter { localProgress.isCompleted(book: bookName, itemId: $0.id) }.count
+                    let total = items.count
+                    DSOutlineCard {
+                        HStack(alignment: .center) {
+                            Text("進度")
+                                .dsType(DS.Font.caption)
+                                .foregroundStyle(.secondary)
+                            ProgressView(value: Double(done), total: Double(max(total, 1)))
+                                .tint(DS.Palette.primary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.horizontal, 8)
+                            Text("\(done) / \(total)")
+                                .dsType(DS.Font.caption)
+                        }
+                        .padding(.vertical, 2)
+                    }
+                }
                 if items.isEmpty {
                     EmptyStateCard(title: "本機書本為空", subtitle: "請從雲端瀏覽並複製題庫到本機。", iconSystemName: "text.book.closed")
                 }
@@ -43,10 +66,20 @@ struct LocalBankListView: View {
                                 }
                             }
                             Spacer(minLength: 0)
-                            Button {
-                                vm.startPractice(with: item, tag: item.tags?.first)
-                            } label: { Label("練習", systemImage: "play.fill") }
-                                .buttonStyle(DSSecondaryButtonCompact())
+                            if localProgress.isCompleted(book: bookName, itemId: item.id) {
+                                CompletionBadge()
+                            } else {
+                                Button {
+                                    if let onPractice {
+                                        onPractice(item, item.tags?.first)
+                                    } else {
+                                        vm.bindLocalBankStores(localBank: localBank, progress: localProgress)
+                                        vm.startLocalPractice(bookName: bookName, item: item, tag: item.tags?.first)
+                                        dismiss()
+                                    }
+                                } label: { Label("練習", systemImage: "play.fill") }
+                                    .buttonStyle(DSSecondaryButtonCompact())
+                            }
                         }
                         HintListSection(
                             hints: item.hints,
@@ -68,3 +101,19 @@ struct LocalBankListView: View {
     }
 }
 
+// 重用遠端清單的完成徽章樣式
+private struct CompletionBadge: View {
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "checkmark.seal.fill")
+            Text("已完成")
+        }
+        .font(.subheadline)
+        .foregroundStyle(DS.Palette.primary)
+        .padding(.vertical, 6)
+        .padding(.horizontal, 10)
+        .background(Capsule().fill(Color.clear))
+        .overlay(Capsule().stroke(DS.Palette.primary.opacity(DS.Opacity.strong), lineWidth: DS.BorderWidth.regular))
+        .accessibilityLabel("已完成")
+    }
+}

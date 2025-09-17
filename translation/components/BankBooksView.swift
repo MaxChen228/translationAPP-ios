@@ -60,7 +60,27 @@ struct BankBooksView: View {
                         let myCols = [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.sm2)]
                         ShelfGrid(title: "本機題庫本", columns: myCols) {
                             ForEach(myBooks) { b in
-                                NavigationLink { LocalBankListView(vm: vm, bookName: b.name) } label: {
+                                NavigationLink {
+                                    // 與遠端一致：若從首頁快捷入口進入則新建 Workspace，否則回填並返回
+                                    let handler: ((BankItem, String?) -> Void)? = {
+                                        if let external = self.onPractice {
+                                            return { item, tag in
+                                                dismiss()
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                                                    external(item, tag)
+                                                }
+                                            }
+                                        } else {
+                                            return { item, tag in
+                                                vm.startLocalPractice(bookName: b.name, item: item, tag: tag)
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                                                    dismiss()
+                                                }
+                                            }
+                                        }
+                                    }()
+                                    LocalBankListView(vm: vm, bookName: b.name, onPractice: handler)
+                                } label: {
                                     ShelfTileCard(title: b.name, subtitle: nil, countText: "共 \(b.items.count) 題", iconSystemName: nil, accentColor: DS.Palette.primary, showChevron: true)
                                 }
                                 .buttonStyle(DSCardLinkStyle())

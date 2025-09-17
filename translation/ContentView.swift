@@ -108,7 +108,7 @@ struct ContentView: View {
                                 .minimumScaleFactor(0.9)
                         }
                         .buttonStyle(DSSecondaryButton())
-                        .disabled(vm.isLoading || vm.currentBankItemId == nil || AppConfig.backendURL == nil)
+                        .disabled(vm.isLoading || vm.currentBankItemId == nil)
 
                         Button(role: .destructive) {
                             vm.reset()

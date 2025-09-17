@@ -18,6 +18,7 @@ struct TranslationApp: App {
     @StateObject private var bankOrder = BankBooksOrderStore()
     @StateObject private var deckRootOrder = DeckRootOrderStore()
     @StateObject private var localBank = LocalBankStore()
+    @StateObject private var localProgress = LocalBankProgressStore()
     @StateObject private var bannerCenter = BannerCenter()
     @StateObject private var router = RouterStore()
     init() {
@@ -71,6 +72,7 @@ struct TranslationApp: App {
                 .environmentObject(bankOrder)
                 .environmentObject(deckRootOrder)
                 .environmentObject(localBank)
+                .environmentObject(localProgress)
                 .environmentObject(bannerCenter)
                 .onReceive(NotificationCenter.default.publisher(for: .correctionCompleted)) { note in
                     let wsIDStr = note.userInfo?[AppEventKeys.workspaceID] as? String ?? ""

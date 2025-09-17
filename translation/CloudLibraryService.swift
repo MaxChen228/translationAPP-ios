@@ -28,7 +28,7 @@ final class CloudLibraryHTTP: CloudLibraryService {
     private var base: URL { AppConfig.backendURL! }
 
     func fetchDecks() async throws -> [CloudDeckSummary] {
-        let url = base.appendingPathComponent("/cloud/decks")
+        let url = base.appendingPathComponent("cloud").appendingPathComponent("decks")
         AppLog.uiInfo("[cloud] GET /cloud/decks")
         let (data, resp) = try await URLSession.shared.data(from: url)
         guard let http = resp as? HTTPURLResponse, 200..<300 ~= http.statusCode else { throw URLError(.badServerResponse) }
@@ -36,7 +36,7 @@ final class CloudLibraryHTTP: CloudLibraryService {
     }
 
     func fetchDeckDetail(id: String) async throws -> CloudDeckDetail {
-        let url = base.appendingPathComponent("/cloud/decks/\(id)")
+        let url = base.appendingPathComponent("cloud").appendingPathComponent("decks").appendingPathComponent(id)
         AppLog.uiInfo("[cloud] GET /cloud/decks/\(id)")
         let (data, resp) = try await URLSession.shared.data(from: url)
         guard let http = resp as? HTTPURLResponse, 200..<300 ~= http.statusCode else { throw URLError(.badServerResponse) }
@@ -45,7 +45,7 @@ final class CloudLibraryHTTP: CloudLibraryService {
     }
 
     func fetchBooks() async throws -> [CloudBookSummary] {
-        let url = base.appendingPathComponent("/cloud/books")
+        let url = base.appendingPathComponent("cloud").appendingPathComponent("books")
         AppLog.uiInfo("[cloud] GET /cloud/books")
         let (data, resp) = try await URLSession.shared.data(from: url)
         guard let http = resp as? HTTPURLResponse, 200..<300 ~= http.statusCode else { throw URLError(.badServerResponse) }
@@ -53,9 +53,8 @@ final class CloudLibraryHTTP: CloudLibraryService {
     }
 
     func fetchBook(name: String) async throws -> CloudBookDetail {
-        // Encode name safely for URL path
-        let encoded = name.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? name
-        let url = base.appendingPathComponent("/cloud/books/\(encoded)")
+        // Append path components directly so the system handles encoding once
+        let url = base.appendingPathComponent("cloud").appendingPathComponent("books").appendingPathComponent(name)
         AppLog.uiInfo("[cloud] GET /cloud/books/<name>")
         let (data, resp) = try await URLSession.shared.data(from: url)
         guard let http = resp as? HTTPURLResponse, 200..<300 ~= http.statusCode else { throw URLError(.badServerResponse) }
@@ -116,4 +115,3 @@ final class CloudLibraryMock: CloudLibraryService {
         }
     }
 }
-

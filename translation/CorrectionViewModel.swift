@@ -39,6 +39,17 @@ final class CorrectionViewModel: ObservableObject {
     @Published var currentBankItemId: String? = nil
     @Published var currentPracticeTag: String? = nil
 
+    // 練習來源（遠端題庫或本機題庫）
+    enum PracticeSource: Equatable { case remote(tag: String?), local(bookName: String) }
+    @Published var practiceSource: PracticeSource? = nil
+    weak var localBankStore: LocalBankStore? = nil
+    weak var localProgressStore: LocalBankProgressStore? = nil
+
+    func bindLocalBankStores(localBank: LocalBankStore, progress: LocalBankProgressStore) {
+        self.localBankStore = localBank
+        self.localProgressStore = progress
+    }
+
 
     init(service: AIService = AIServiceFactory.makeDefault(), workspaceID: String = "default") {
         self.service = service
@@ -129,6 +140,10 @@ final class CorrectionViewModel: ObservableObject {
             if let hs2 = result.correctedHighlights { self.correctedHighlights = hs2 }
             else if let res = self.response { self.correctedHighlights = Highlighter.computeHighlightsInCorrected(text: res.corrected, errors: res.errors) }
             self.selectedErrorID = self.response?.errors.first?.id
+            // 若為本機練習，更新本機完成度
+            if case .local(let bookName) = self.practiceSource, let iid = self.currentBankItemId {
+                self.localProgressStore?.markCompleted(book: bookName, itemId: iid, score: self.response?.score)
+            }
             // Notify completion for banner/notification consumers
             NotificationCenter.default.post(name: .correctionCompleted, object: nil, userInfo: [
                 AppEventKeys.workspaceID: self.workspaceID,
@@ -150,7 +165,27 @@ final class CorrectionViewModel: ObservableObject {
         showPracticedHints = false
         currentBankItemId = item.id
         currentPracticeTag = tag ?? (item.tags?.first)
+        practiceSource = .remote(tag: currentPracticeTag)
         // 清空上一題的英文輸入與批改結果，避免殘留造成混淆
+        inputEn = ""
+        response = nil
+        highlights = []
+        correctedHighlights = []
+        selectedErrorID = nil
+        filterType = nil
+        cardMode = .original
+        requestFocusEn()
+    }
+
+    func startLocalPractice(bookName: String, item: BankItem, tag: String? = nil) {
+        // 填入新題目內容
+        inputZh = item.zh
+        practicedHints = item.hints
+        showPracticedHints = false
+        currentBankItemId = item.id
+        currentPracticeTag = tag ?? (item.tags?.first)
+        practiceSource = .local(bookName: bookName)
+        // 清空上一題的英文輸入與批改結果
         inputEn = ""
         response = nil
         highlights = []
@@ -163,6 +198,21 @@ final class CorrectionViewModel: ObservableObject {
 
     // 抽下一題（略過已完成），依目前練習標籤
     func loadNextPractice() async {
+        if case .local(let bookName) = practiceSource {
+            guard let bank = localBankStore, let progress = localProgressStore else {
+                await MainActor.run { self.errorMessage = "本機題庫未綁定" }
+                return
+            }
+            let items = bank.items(in: bookName)
+            if let next = items.first(where: { !progress.isCompleted(book: bookName, itemId: $0.id) && $0.id != self.currentBankItemId })
+                ?? items.first(where: { !progress.isCompleted(book: bookName, itemId: $0.id) }) {
+                await MainActor.run { self.startLocalPractice(bookName: bookName, item: next, tag: next.tags?.first) }
+            } else {
+                await MainActor.run { self.errorMessage = "沒有未完成的題目" }
+            }
+            return
+        }
+        // 遠端模式
         guard AppConfig.backendURL != nil else {
             await MainActor.run { self.errorMessage = "BACKEND_URL 未設定" }
             return
@@ -181,9 +231,7 @@ final class CorrectionViewModel: ObservableObject {
                 self.cardMode = .original
             }
         } catch {
-            await MainActor.run {
-                self.errorMessage = (error as NSError).localizedDescription
-            }
+            await MainActor.run { self.errorMessage = (error as NSError).localizedDescription }
         }
     }
 

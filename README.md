@@ -66,6 +66,16 @@ App 以 `AppConfig` 讀取 Info.plist 或環境變數：
   4. 若 API 失敗想退回規則式結果，設 `ALLOW_FALLBACK_ON_FAILURE=1`。
   5. 健康檢查：`GET /healthz` 回 `{status, provider, model}`。
 
+### 雲端瀏覽 API（Cloud Library）
+提供唯讀精選內容，供 App「瀏覽」並「複製到本機」。由 `CloudLibraryService` 呼叫。
+
+- `GET /cloud/decks` → `[{ name, count, id }]`
+- `GET /cloud/decks/{id}` → `{ id, name, cards: [{ id(UUID), front, back, frontNote?, backNote? }] }`
+- `GET /cloud/books` → `[{ name, count }]`
+- `GET /cloud/books/{name}` → `{ name, items: [BankItem] }`
+
+註：此簡易後端已內建少量假資料，方便開發；若 `BACKEND_URL` 未設定，App 也會自動改用 Mock 來源顯示示例。
+
 ### 批改 API（/correct）
 ```
 POST /correct
