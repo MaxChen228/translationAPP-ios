@@ -43,6 +43,12 @@ struct FlashcardDecksView: View {
                 }
 
                 ShelfGrid(title: "單字卡集", columns: cols) {
+                    // Browse cloud curated decks → copy to local
+                    NavigationLink { CloudDeckLibraryView() } label: {
+                        BrowseCloudCard(title: "瀏覽雲端單字卡")
+                    }
+                    .buttonStyle(.plain)
+
                     // New deck tile (similar look to NewDeckFolderCard)
                     Button {
                         let deck = decksStore.add(name: "未命名", cards: [])
@@ -189,6 +195,25 @@ private struct NewDeckCard: View {
 }
 
 // MARK: - Progress helpers
+
+private struct BrowseCloudCard: View {
+    var title: String
+    var body: some View {
+        VStack(spacing: 8) {
+            Image(systemName: "icloud.and.arrow.down").font(.title3)
+            Text(title).dsType(DS.Font.caption).foregroundStyle(.secondary)
+        }
+        .frame(minHeight: 96)
+        .frame(maxWidth: .infinity)
+        .padding(DS.Spacing.md)
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
+                .stroke(style: StrokeStyle(lineWidth: DS.BorderWidth.regular, dash: [5, 4]))
+                .foregroundStyle(DS.Palette.border.opacity(0.45))
+        )
+        .contentShape(RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous))
+    }
+}
 
 extension FlashcardDecksView {
     // 整體精熟度：以每張卡的等級 0...3 做平均並正規化到 0...1

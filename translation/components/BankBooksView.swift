@@ -18,6 +18,7 @@ struct BankBooksView: View {
     private let service = BankService()
     @EnvironmentObject private var bankFolders: BankFoldersStore
     @EnvironmentObject private var bankOrder: BankBooksOrderStore
+    @EnvironmentObject private var localBank: LocalBankStore
     @State private var renamingFolder: BankFolder? = nil
     @State private var draggingBookName: String? = nil
     // 書本完成度（0...1），key 為書名
@@ -53,6 +54,25 @@ struct BankBooksView: View {
                     }
                     DSSeparator(color: DS.Palette.border.opacity(0.2))
 
+                    // 本機題庫本（離線可用，從雲端複製後保存）
+                    let myBooks = localBank.books
+                    if !myBooks.isEmpty {
+                        let myCols = [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.sm2)]
+                        ShelfGrid(title: "本機題庫本", columns: myCols) {
+                            ForEach(myBooks) { b in
+                                NavigationLink { LocalBankListView(vm: vm, bookName: b.name) } label: {
+                                    ShelfTileCard(title: b.name, subtitle: nil, countText: "共 \(b.items.count) 題", iconSystemName: nil, accentColor: DS.Palette.primary, showChevron: true)
+                                }
+                                .buttonStyle(DSCardLinkStyle())
+                                .contextMenu {
+                                    Button("重新命名") { renamingFolder = nil /* dedicated rename sheet could be added later */ }
+                                    Button("刪除", role: .destructive) { localBank.remove(b.name) }
+                                }
+                            }
+                        }
+                        DSSeparator(color: DS.Palette.border.opacity(0.2))
+                    }
+
                     // 根層書本（未分到資料夾）＋ 依自訂順序排序；若為空仍顯示為空狀態
                     let rootBooks = books.filter { !bankFolders.isInAnyFolder($0.name) }
                     let rootNames = rootBooks.map { $0.name }
@@ -60,6 +80,11 @@ struct BankBooksView: View {
                     let orderedRootBooks: [BankService.BankBook] = orderedNames.compactMap { nm in rootBooks.first(where: { $0.name == nm }) }
                     let cols = [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.sm2)]
                     ShelfGrid(title: "題庫本", columns: cols) {
+                        // 瀏覽雲端精選（複製到本機）
+                        NavigationLink { CloudBankLibraryView(vm: vm) } label: {
+                            BrowseCloudCard(title: "瀏覽雲端題庫")
+                        }
+                        .buttonStyle(.plain)
                         ForEach(orderedRootBooks) { book in
                             NavigationLink {
                                 // 只有在外部有提供 onPractice（首頁快捷入口）時才傳入；
@@ -330,5 +355,24 @@ private struct BankBookCard: View {
                 .stroke(DS.Palette.border.opacity(0.3), lineWidth: DS.BorderWidth.hairline)
         )
         .dsCardShadow()
+    }
+}
+
+private struct BrowseCloudCard: View {
+    var title: String
+    var body: some View {
+        VStack(spacing: 8) {
+            Image(systemName: "icloud.and.arrow.down").font(.title3)
+            Text(title).dsType(DS.Font.caption).foregroundStyle(.secondary)
+        }
+        .frame(minHeight: 96)
+        .frame(maxWidth: .infinity)
+        .padding(DS.Spacing.md)
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
+                .stroke(style: StrokeStyle(lineWidth: DS.BorderWidth.regular, dash: [5, 4]))
+                .foregroundStyle(DS.Palette.border.opacity(0.45))
+        )
+        .contentShape(RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous))
     }
 }
