@@ -72,6 +72,8 @@ struct LocalBankListView: View {
                                 Button {
                                     if let onPractice {
                                         onPractice(item, item.tags?.first)
+                                        // 關閉本清單頁，與遠端列表行為一致（外層 handler 還會再關閉上一層頁面）
+                                        dismiss()
                                     } else {
                                         vm.bindLocalBankStores(localBank: localBank, progress: localProgress)
                                         vm.startLocalPractice(bookName: bookName, item: item, tag: item.tags?.first)

@@ -40,7 +40,7 @@ final class CorrectionViewModel: ObservableObject {
     @Published var currentPracticeTag: String? = nil
 
     // 練習來源（遠端題庫或本機題庫）
-    enum PracticeSource: Equatable { case remote(tag: String?), local(bookName: String) }
+    enum PracticeSource: Equatable { case local(bookName: String) }
     @Published var practiceSource: PracticeSource? = nil
     weak var localBankStore: LocalBankStore? = nil
     weak var localProgressStore: LocalBankProgressStore? = nil
@@ -157,25 +157,7 @@ final class CorrectionViewModel: ObservableObject {
         isLoading = false
     }
 
-    // 題庫開始練習：設定中文、提示、聚焦與 bankItemId
-    func startPractice(with item: BankItem, tag: String? = nil) {
-        // 填入新題目內容
-        inputZh = item.zh
-        practicedHints = item.hints
-        showPracticedHints = false
-        currentBankItemId = item.id
-        currentPracticeTag = tag ?? (item.tags?.first)
-        practiceSource = .remote(tag: currentPracticeTag)
-        // 清空上一題的英文輸入與批改結果，避免殘留造成混淆
-        inputEn = ""
-        response = nil
-        highlights = []
-        correctedHighlights = []
-        selectedErrorID = nil
-        filterType = nil
-        cardMode = .original
-        requestFocusEn()
-    }
+    // （移除遠端題庫練習入口）
 
     func startLocalPractice(bookName: String, item: BankItem, tag: String? = nil) {
         // 填入新題目內容
@@ -196,42 +178,22 @@ final class CorrectionViewModel: ObservableObject {
         requestFocusEn()
     }
 
-    // 抽下一題（略過已完成），依目前練習標籤
+    // 抽下一題（本機）：依目前練習的本機書本挑選未完成題
     func loadNextPractice() async {
-        if case .local(let bookName) = practiceSource {
-            guard let bank = localBankStore, let progress = localProgressStore else {
-                await MainActor.run { self.errorMessage = "本機題庫未綁定" }
-                return
-            }
-            let items = bank.items(in: bookName)
-            if let next = items.first(where: { !progress.isCompleted(book: bookName, itemId: $0.id) && $0.id != self.currentBankItemId })
-                ?? items.first(where: { !progress.isCompleted(book: bookName, itemId: $0.id) }) {
-                await MainActor.run { self.startLocalPractice(bookName: bookName, item: next, tag: next.tags?.first) }
-            } else {
-                await MainActor.run { self.errorMessage = "沒有未完成的題目" }
-            }
+        guard case .local(let bookName) = practiceSource else {
+            await MainActor.run { self.errorMessage = "目前不是本機題庫練習" }
             return
         }
-        // 遠端模式
-        guard AppConfig.backendURL != nil else {
-            await MainActor.run { self.errorMessage = "BACKEND_URL 未設定" }
+        guard let bank = localBankStore, let progress = localProgressStore else {
+            await MainActor.run { self.errorMessage = "本機題庫未綁定" }
             return
         }
-        let service = BankService()
-        do {
-            let next = try await service.fetchRandom(difficulty: nil, tag: currentPracticeTag, deviceId: DeviceID.current, skipCompleted: true)
-            await MainActor.run {
-                self.startPractice(with: next, tag: self.currentPracticeTag)
-                self.inputEn = ""
-                self.response = nil
-                self.highlights = []
-                self.correctedHighlights = []
-                self.selectedErrorID = nil
-                self.filterType = nil
-                self.cardMode = .original
-            }
-        } catch {
-            await MainActor.run { self.errorMessage = (error as NSError).localizedDescription }
+        let items = bank.items(in: bookName)
+        if let next = items.first(where: { !progress.isCompleted(book: bookName, itemId: $0.id) && $0.id != self.currentBankItemId })
+            ?? items.first(where: { !progress.isCompleted(book: bookName, itemId: $0.id) }) {
+            await MainActor.run { self.startLocalPractice(bookName: bookName, item: next, tag: next.tags?.first) }
+        } else {
+            await MainActor.run { self.errorMessage = "沒有未完成的題目" }
         }
     }
 

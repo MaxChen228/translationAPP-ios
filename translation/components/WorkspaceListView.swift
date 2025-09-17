@@ -276,11 +276,12 @@ private struct QuickActionsRow: View {
                         .buttonStyle(DSCardLinkStyle())
                     if let first = store.workspaces.first {
                         NavigationLink {
-                            // Home-level entry to Bank -> when picking a practice item, create a new workspace
-                            BankBooksView(vm: store.vm(for: first.id), onPractice: { item, tag in
+                            // Home-level entry to Bank -> when picking a local practice item, create a new workspace
+                            BankBooksView(vm: store.vm(for: first.id), onPracticeLocal: { bookName, item, tag in
                                 let newWS = store.addWorkspace()
                                 let newVM = store.vm(for: newWS.id)
-                                newVM.startPractice(with: item, tag: tag)
+                                // Local practice: Bind stores inside BankBooksView before invoking this closure
+                                newVM.startLocalPractice(bookName: bookName, item: item, tag: tag)
                                 router.open(workspaceID: newWS.id)
                             })
                         } label: { BankBooksEntryCard().frame(width: 220) }

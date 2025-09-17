@@ -47,21 +47,22 @@ struct NewBankFolderCard: View {
 
 struct BankFolderDetailView: View {
     let folderID: UUID
+    @ObservedObject var vm: CorrectionViewModel
+    var onPracticeLocal: ((String, BankItem, String?) -> Void)? = nil
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var folders: BankFoldersStore
-    private let service = BankService()
-
-    @State private var books: [BankService.BankBook] = []
-    @State private var isLoading = false
+    @EnvironmentObject private var localBank: LocalBankStore
+    @EnvironmentObject private var localProgress: LocalBankProgressStore
     @State private var error: String? = nil
     @State private var draggingBookName: String? = nil
     @State private var showRenameSheet = false
 
     private var folder: BankFolder? { folders.folders.first(where: { $0.id == folderID }) }
 
-    private var booksInFolder: [BankService.BankBook] {
+    private var booksInFolder: [LocalBankBook] {
         guard let f = folder else { return [] }
         let set = Set(f.bookNames)
-        return books.filter { set.contains($0.name) }
+        return localBank.books.filter { set.contains($0.name) }
     }
 
     var body: some View {
@@ -82,25 +83,43 @@ struct BankFolderDetailView: View {
 
                 let cols = [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.sm2)]
                 LazyVGrid(columns: cols, spacing: DS.Spacing.sm2) {
-                    ForEach(booksInFolder) { book in
-                        NavigationLink { BankListView(vm: CorrectionViewModel(), tag: book.name) } label: {
+                    ForEach(booksInFolder) { b in
+                        NavigationLink {
+                            let handler: ((BankItem, String?) -> Void)? = {
+                                if let external = self.onPracticeLocal {
+                                    return { item, tag in
+                                        dismiss()
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { external(b.name, item, tag) }
+                                    }
+                                } else {
+                                    return { item, tag in
+                                        vm.bindLocalBankStores(localBank: localBank, progress: localProgress)
+                                        vm.startLocalPractice(bookName: b.name, item: item, tag: tag)
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { dismiss() }
+                                    }
+                                }
+                            }()
+                            LocalBankListView(vm: vm, bookName: b.name, onPractice: handler)
+                        } label: {
+                            let stats = localProgress.stats(book: b.name, totalItems: b.items.count)
                             ShelfTileCard(
-                                title: book.name.capitalized,
-                                subtitle: "難度 \\(book.difficultyMin)-\\(book.difficultyMax)",
-                                countText: "共 \\(book.count) 題",
+                                title: b.name,
+                                subtitle: nil,
+                                countText: "共 \\(b.items.count) 題",
                                 iconSystemName: nil,
                                 accentColor: DS.Palette.primary,
-                                showChevron: true
+                                showChevron: true,
+                                progress: (stats.total > 0 ? Double(stats.done) / Double(stats.total) : 0)
                             )
                         }
                         .buttonStyle(DSCardLinkStyle())
                         .contextMenu {
-                            Button("移出到根") { folders.remove(bookName: book.name) }
+                            Button("移出到根") { folders.remove(bookName: b.name) }
                             #if canImport(UIKit)
-                            Button("複製名稱") { UIPasteboard.general.string = book.name }
+                            Button("複製名稱") { UIPasteboard.general.string = b.name }
                             #endif
                         }
-                        .onDrag { draggingBookName = book.name; return BookDragPayload.provider(for: book.name) }
+                        .onDrag { draggingBookName = b.name; return BookDragPayload.provider(for: b.name) }
                     }
                 }
             }
@@ -122,15 +141,6 @@ struct BankFolderDetailView: View {
             RenameSheet(name: folder?.name ?? "") { new in folders.rename(folderID, to: new) }
                 .presentationDetents([.height(180)])
         }
-        .task { await load() }
-        .refreshable { await load() }
-    }
-
-    private func load() async {
-        isLoading = true
-        error = nil
-        do { books = try await service.fetchBooks() } catch { self.error = (error as NSError).localizedDescription }
-        isLoading = false
     }
 }
 
