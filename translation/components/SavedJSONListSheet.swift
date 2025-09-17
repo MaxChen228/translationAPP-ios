@@ -14,48 +14,83 @@ struct SavedJSONListSheet: View {
     // Decoded rows and UI state (expand/collapse)
     @State private var decoded: [DecodedRecord] = []
     @State private var expanded: Set<UUID> = []
+    // Two temporary stashes: left/right
+    @State private var activeStash: SavedStash = .left
 
     var body: some View {
             Group {
-                if decoded.isEmpty {
+                if filteredDecoded.isEmpty {
                     VStack(spacing: 12) {
                         Image(systemName: "tray")
                             .font(.largeTitle)
                             .foregroundStyle(.secondary)
-                        Text("尚未儲存任何錯誤")
+                        Text(emptyText)
                             .foregroundStyle(.secondary)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(DS.Palette.background)
                 } else {
                     ScrollView {
-                        // 操作列：使用設計系統的簡約匡線按鈕
+                        // 操作列：左右切換 + 清空/儲存
                         HStack(spacing: DS.Spacing.md) {
-                            Button("清空", role: .destructive) { store.clearAll() }
+                            Button("清空", role: .destructive) { store.clear(activeStash) }
                                 .buttonStyle(DSSecondaryButtonCompact())
                                 .disabled(isSaving)
                             Spacer(minLength: 0)
+                            // Stash switcher with counts
+                            HStack(spacing: 8) {
+                                Button { withAnimation { activeStash = .left } } label: {
+                                    Image(systemName: "chevron.left")
+                                }
+                                .buttonStyle(DSOutlineCircleButton())
+                                .disabled(activeStash == .left)
+                                Text("\(store.count(in: .left)) / \(store.count(in: .right))")
+                                    .dsType(DS.Font.caption)
+                                    .foregroundStyle(.secondary)
+                                Button { withAnimation { activeStash = .right } } label: {
+                                    Image(systemName: "chevron.right")
+                                }
+                                .buttonStyle(DSOutlineCircleButton())
+                                .disabled(activeStash == .right)
+                            }
+                            Spacer(minLength: 0)
                             Button("儲存單字卡") { proposedName = "未命名"; showSaveDeckSheet = true }
                                 .buttonStyle(DSSecondaryButtonCompact())
-                                .disabled(isSaving || store.items.isEmpty)
+                                .disabled(isSaving || filteredDecoded.isEmpty)
                         }
                         .padding(.horizontal, DS.Spacing.lg)
                         .padding(.top, DS.Spacing.lg)
 
                         LazyVStack(alignment: .leading, spacing: DS.Spacing.md) {
-                            ForEach(decoded) { row in
-                                SavedErrorRowCard(
-                                    row: row,
-                                    expanded: expanded.contains(row.id),
-                                    onToggle: {
-                                        DSMotion.run(DS.AnimationToken.subtle) {
-                                            if expanded.contains(row.id) { expanded.remove(row.id) }
-                                            else { expanded.insert(row.id) }
-                                        }
+                            ForEach(filteredDecoded) { row in
+                                SwipeableRow(
+                                    allowLeft: activeStash == .right,
+                                    allowRight: activeStash == .left,
+                                    onTriggerLeft: {
+                                        // Move back to left but stay on right stash
+                                        store.move(row.id, to: .left)
+                                        Haptics.success()
                                     },
-                                    onCopy: { copyJSON(row.rawJSON) },
-                                    onDelete: { deleteRow(row.id) }
-                                )
+                                    onTriggerRight: {
+                                        // Move to right and switch to right stash
+                                        store.move(row.id, to: .right)
+                                        Haptics.success()
+                                        withAnimation { activeStash = .right }
+                                    }
+                                ) {
+                                    SavedErrorRowCard(
+                                        row: row,
+                                        expanded: expanded.contains(row.id),
+                                        onToggle: {
+                                            DSMotion.run(DS.AnimationToken.subtle) {
+                                                if expanded.contains(row.id) { expanded.remove(row.id) }
+                                                else { expanded.insert(row.id) }
+                                            }
+                                        },
+                                        onCopy: { copyJSON(row.rawJSON) },
+                                        onDelete: { deleteRow(row.id) }
+                                    )
+                                }
                             }
                         }
                         .padding(.horizontal, DS.Spacing.lg)
@@ -67,7 +102,7 @@ struct SavedJSONListSheet: View {
             .navigationTitle("已儲存 JSON")
             .navigationBarBackButtonHidden(isSaving)
             .sheet(isPresented: $showSaveDeckSheet) {
-                SaveDeckNameSheet(name: proposedName, count: store.items.count, isSaving: isSaving) { action in
+                SaveDeckNameSheet(name: proposedName, count: filteredDecoded.count, isSaving: isSaving) { action in
                     switch action {
                     case .cancel:
                         showSaveDeckSheet = false
@@ -98,7 +133,7 @@ struct SavedJSONListSheet: View {
             // Decode saved payloads
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
-            let payloads: [ErrorSavePayload] = store.items.compactMap { rec in
+            let payloads: [ErrorSavePayload] = store.items(in: activeStash).compactMap { rec in
                 guard let data = rec.json.data(using: .utf8) else { return nil }
                 return try? decoder.decode(ErrorSavePayload.self, from: data)
             }
@@ -122,6 +157,7 @@ private struct DecodedRecord: Identifiable, Equatable {
     let createdAt: Date
     let rawJSON: String
     let payload: ErrorSavePayload?
+    let stash: SavedStash
 }
 
 private extension SavedJSONListSheet {
@@ -133,7 +169,7 @@ private extension SavedJSONListSheet {
                 guard let data = rec.json.data(using: .utf8) else { return nil }
                 return try? decoder.decode(ErrorSavePayload.self, from: data)
             }()
-            return DecodedRecord(id: rec.id, createdAt: rec.createdAt, rawJSON: rec.json, payload: payload)
+            return DecodedRecord(id: rec.id, createdAt: rec.createdAt, rawJSON: rec.json, payload: payload, stash: rec.stash)
         }
         // 以時間倒序
         decoded.sort { $0.createdAt > $1.createdAt }
@@ -150,6 +186,9 @@ private extension SavedJSONListSheet {
         expanded.remove(id)
         decoded.removeAll { $0.id == id }
     }
+
+    var filteredDecoded: [DecodedRecord] { decoded.filter { $0.stash == activeStash } }
+    var emptyText: String { activeStash == .left ? "左暫存尚未儲存任何錯誤" : "右暫存尚未儲存任何錯誤" }
 }
 
 // MARK: - Row Card
