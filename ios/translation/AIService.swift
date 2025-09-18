@@ -109,6 +109,16 @@ final class AIServiceHTTP: AIService {
         let en: String
         let bankItemId: String?
         let deviceId: String?
+        // 新增：題庫提示（陣列，由後端自行解碼）與教師建議（非結構化段落）
+        let hints: [HintDTO]?
+        let suggestion: String?
+        // 選用：指定 LLM 模型（例如 gemini-2.5-pro / gemini-2.5-flash）
+        let model: String?
+    }
+
+    struct HintDTO: Codable {
+        let category: String
+        let text: String
     }
 
     // DTOs allow indices while mapping back to app models
@@ -133,15 +143,20 @@ final class AIServiceHTTP: AIService {
 
     // Backward-compatible entry (protocol requirement)
     func correct(zh: String, en: String) async throws -> AICorrectionResult {
-        try await correct(zh: zh, en: en, bankItemId: nil, deviceId: DeviceID.current)
+        try await correct(zh: zh, en: en, bankItemId: nil, deviceId: DeviceID.current, hints: nil, suggestion: nil)
     }
 
     // Preferred entry with metadata for progress tracking
-    func correct(zh: String, en: String, bankItemId: String?, deviceId: String? = DeviceID.current) async throws -> AICorrectionResult {
+    func correct(zh: String, en: String, bankItemId: String?, deviceId: String? = DeviceID.current, hints: [BankHint]? = nil, suggestion: String? = nil) async throws -> AICorrectionResult {
         var req = URLRequest(url: endpoint)
         req.httpMethod = "POST"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        req.httpBody = try JSONEncoder().encode(RequestBody(zh: zh, en: en, bankItemId: bankItemId, deviceId: deviceId))
+        let hintDTOs: [HintDTO]? = hints?.map { h in
+            HintDTO(category: h.category.rawValue, text: h.text)
+        }
+        // 從設定讀取選擇的 gemini model（若無則為 nil）
+        let model = UserDefaults.standard.string(forKey: "settings.geminiModel")
+        req.httpBody = try JSONEncoder().encode(RequestBody(zh: zh, en: en, bankItemId: bankItemId, deviceId: deviceId, hints: hintDTOs, suggestion: suggestion, model: model))
 
         let (data, resp) = try await session.data(for: req)
         guard let http = resp as? HTTPURLResponse, 200..<300 ~= http.statusCode else {

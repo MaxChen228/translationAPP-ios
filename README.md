@@ -58,8 +58,22 @@ App 透過 Info.plist 的 `BACKEND_URL` 讀取後端位址（由 `AppConfig` 使
 
 ## API 介面（簡述）
 - `POST /correct`
-  - 請求：`{ zh: string, en: string, bankItemId?: string, deviceId?: string }`
+  - 請求：
+    ```json
+    {
+      "zh": "string",
+      "en": "string",
+      "bankItemId": "string?",
+      "deviceId": "string?",
+      "hints": [{ "category": "morphological|syntactic|lexical|phonological|pragmatic", "text": "提示文字" }]?,
+      "suggestion": "教師建議（非結構化段落，可省略）",
+      "model": "gemini-2.5-pro | gemini-2.5-flash"?
+    }
+    ```
   - 回應：`{ corrected: string, score: number, errors: Error[] }`
+
+- `POST /make_deck`
+  - 請求新增（可選）：`model?: string`（同上，若後端支援將使用該模型產製卡片）
 - `GET /cloud/books`、`GET /cloud/books/{name}`：唯讀精選題庫
 - `GET /cloud/decks`、`GET /cloud/decks/{id}`：唯讀精選卡片集
 - `POST /make_deck`
@@ -86,4 +100,3 @@ App 透過 Info.plist 的 `BACKEND_URL` 讀取後端位址（由 `AppConfig` 使
 
 ## 貢獻
 請遵照 `AGENTS.md` 的風格/命名/測試規範。Git 提交建議採 Conventional Commits。
-

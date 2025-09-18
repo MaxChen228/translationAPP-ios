@@ -3,6 +3,7 @@ import SwiftUI
 struct TypeChipsView: View {
     var errors: [ErrorItem]
     @Binding var selection: ErrorType?
+    @Environment(\.locale) private var locale
 
     private var counts: [(ErrorType, Int)] {
         let dict = Dictionary(grouping: errors, by: { $0.type }).mapValues { $0.count }
@@ -15,7 +16,7 @@ struct TypeChipsView: View {
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                Chip(label: "全部", count: errors.count, color: .gray, selected: selection == nil) {
+                Chip(label: LocalizedStringKey("chips.all"), count: errors.count, color: .gray, selected: selection == nil) {
                     selection = nil
                 }
                 ForEach(counts, id: \.0) { t, c in
@@ -29,7 +30,7 @@ struct TypeChipsView: View {
     }
 
     struct Chip: View {
-        var label: String
+        var label: LocalizedStringKey
         var count: Int
         var color: Color
         var selected: Bool

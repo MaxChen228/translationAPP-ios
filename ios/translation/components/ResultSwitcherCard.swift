@@ -2,6 +2,7 @@ import SwiftUI
 import UIKit
 
 struct ResultSwitcherCard: View {
+    @Environment(\.locale) private var locale
     enum Mode: Int { case original = 0, corrected = 1 }
 
     var score: Int
@@ -16,9 +17,12 @@ struct ResultSwitcherCard: View {
 
     @Binding var mode: Mode
 
-    // copy 內文：一次複製三段
+    // copy 內文：一次複製三段（依當前語言顯示前綴）
     private var copyString: String {
-        "中文：\n\(inputZh)\n\n我的英文：\n\(inputEn)\n\n修正版：\n\(corrected)"
+        let zhPrefix = String(localized: "label.zhPrefix", locale: locale)
+        let enOriginalPrefix = String(localized: "label.enOriginalPrefix", locale: locale)
+        let enCorrectedPrefix = String(localized: "label.enCorrectedPrefix", locale: locale)
+        return "\(zhPrefix)\n\(inputZh)\n\n\(enOriginalPrefix)\(inputEn)\n\n\(enCorrectedPrefix)\(corrected)"
     }
 
     var body: some View {
@@ -31,7 +35,7 @@ struct ResultSwitcherCard: View {
 
     private var header: some View {
         HStack(alignment: .firstTextBaseline) {
-            Text(mode == .corrected ? "修正版" : "原文")
+            Text(mode == .corrected ? String(localized: "result.switcher.corrected", locale: locale) : String(localized: "result.switcher.original", locale: locale))
                 .dsType(DS.Font.section)
                 .foregroundStyle(.secondary)
                 .fontWeight(.semibold)

@@ -38,6 +38,8 @@ final class CorrectionViewModel: ObservableObject {
     // 題庫整合：紀錄目前要練習的題目 ID（若從題庫進入）
     @Published var currentBankItemId: String? = nil
     @Published var currentPracticeTag: String? = nil
+    // 題庫上下文（教師建議文字；非結構化）
+    private var currentBankSuggestionText: String? = nil
 
     // 練習來源（遠端題庫或本機題庫）
     enum PracticeSource: Equatable { case local(bookName: String) }
@@ -81,6 +83,7 @@ final class CorrectionViewModel: ObservableObject {
         cardMode = .original
         practicedHints = []
         showPracticedHints = false
+        currentBankSuggestionText = nil
         // 同步清掉持久化，符合「除非按右下角刪除才清空」
         let ud = UserDefaults.standard
         ud.removeObject(forKey: keyInputZh)
@@ -129,7 +132,14 @@ final class CorrectionViewModel: ObservableObject {
             AppLog.aiInfo("Start correction via \(String(describing: type(of: self.service)))")
             let result: AICorrectionResult
             if let http = self.service as? AIServiceHTTP {
-                result = try await http.correct(zh: inputZh, en: inputEn, bankItemId: currentBankItemId, deviceId: DeviceID.current)
+                result = try await http.correct(
+                    zh: inputZh,
+                    en: inputEn,
+                    bankItemId: currentBankItemId,
+                    deviceId: DeviceID.current,
+                    hints: practicedHints,
+                    suggestion: currentBankSuggestionText
+                )
             } else {
                 result = try await self.service.correct(zh: inputZh, en: inputEn)
             }
@@ -167,6 +177,8 @@ final class CorrectionViewModel: ObservableObject {
         currentBankItemId = item.id
         currentPracticeTag = tag ?? (item.tags?.first)
         practiceSource = .local(bookName: bookName)
+        // 教師 suggestion 為單段文字
+        currentBankSuggestionText = item.suggestion
         // 清空上一題的英文輸入與批改結果
         inputEn = ""
         response = nil
@@ -222,6 +234,8 @@ final class CorrectionViewModel: ObservableObject {
             self.correctedHighlights = Highlighter.computeHighlightsInCorrected(text: res.corrected, errors: res.errors)
         }
     }
+
+    // （提示陣列直接送後端解碼，無需組字串）
 
     private func persistResponse() {
         let ud = UserDefaults.standard

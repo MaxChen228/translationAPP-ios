@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct ResultsSectionView: View {
+    @Environment(\.locale) private var locale
     let res: AIResponse
     let inputZh: String
     let inputEn: String
@@ -28,11 +29,11 @@ struct ResultsSectionView: View {
                 mode: $mode
             )
 
-            DSSectionHeader(title: "錯誤列表", subtitle: "點擊項目聚焦對應高亮", accentUnderline: true)
+            DSSectionHeader(title: String(localized: "results.errors.title", locale: locale), subtitle: String(localized: "results.errors.subtitle", locale: locale), accentUnderline: true)
             TypeChipsView(errors: res.errors, selection: $filterType)
 
             if errors.isEmpty {
-                DSCard { Text("未偵測到錯誤。").foregroundStyle(.secondary) }
+                DSCard { Text("results.empty").foregroundStyle(.secondary) }
             } else {
                 VStack(alignment: .leading, spacing: DS.Spacing.md) {
                     ForEach(errors) { err in

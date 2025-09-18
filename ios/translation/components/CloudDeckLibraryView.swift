@@ -7,6 +7,7 @@ struct CloudDeckLibraryView: View {
     @State private var decks: [CloudDeckSummary] = []
     @State private var isLoading: Bool = false
     @State private var error: String? = nil
+    @Environment(\.locale) private var locale
 
     var body: some View {
         ScrollView {
@@ -14,10 +15,10 @@ struct CloudDeckLibraryView: View {
                 if isLoading { ProgressView().frame(maxWidth: .infinity, alignment: .center) }
                 if let error { ErrorStateCard(title: error) }
 
-                DSSectionHeader(title: "雲端單字卡集", subtitle: "瀏覽精選卡集，複製到本機使用", accentUnderline: true)
+                DSSectionHeader(title: String(localized: "cloud.decks.title", locale: locale), subtitle: String(localized: "cloud.decks.subtitle", locale: locale), accentUnderline: true)
 
                 if !isLoading && error == nil && decks.isEmpty {
-                    EmptyStateCard(title: "目前沒有雲端單字卡集", subtitle: "稍後再試，或檢查後端設定。", iconSystemName: "rectangle.on.rectangle.angled")
+                    EmptyStateCard(title: String(localized: "cloud.decks.empty", locale: locale), subtitle: String(localized: "cloud.common.retry", locale: locale), iconSystemName: "rectangle.on.rectangle.angled")
                 }
 
                 LazyVStack(alignment: .leading, spacing: DS.Spacing.md) {
@@ -29,7 +30,7 @@ struct CloudDeckLibraryView: View {
                                     Text("共 \(d.count) 張").dsType(DS.Font.caption).foregroundStyle(.secondary)
                                 }
                                 Spacer(minLength: 0)
-                                Button { Task { await copyDeck(d) } } label: { Label("複製到本機", systemImage: "arrow.down.doc.fill") }
+                                Button { Task { await copyDeck(d) } } label: { Label { Text("cloud.copyToLocal") } icon: { Image(systemName: "arrow.down.doc.fill") } }
                                     .buttonStyle(DSSecondaryButtonCompact())
                             }
                             .padding(.vertical, 6)
@@ -42,7 +43,7 @@ struct CloudDeckLibraryView: View {
             .padding(.bottom, DS.Spacing.lg)
         }
         .background(DS.Palette.background)
-        .navigationTitle("瀏覽單字卡集")
+        .navigationTitle(Text("nav.cloudDecks"))
         .task { await load() }
         .refreshable { await load() }
     }
@@ -69,4 +70,3 @@ struct CloudDeckLibraryView: View {
         }
     }
 }
-

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct LoadingOverlay: View {
-    var text: String = "正在批改…"
+    var textKey: LocalizedStringKey = "loading.correcting"
     var body: some View {
         ZStack {
             Color.black.opacity(0.12)
@@ -9,7 +9,7 @@ struct LoadingOverlay: View {
             VStack(spacing: 12) {
                 ProgressView()
                     .progressViewStyle(.circular)
-                Text(text)
+                Text(textKey)
                     .font(.headline)
             }
             .padding(.horizontal, 20)

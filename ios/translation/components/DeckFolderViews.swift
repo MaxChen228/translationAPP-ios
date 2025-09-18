@@ -4,6 +4,7 @@ import SwiftUI
 
 struct DeckFolderCard: View {
     let folder: DeckFolder
+    @Environment(\.locale) private var locale
     var body: some View {
         DSOutlineCard {
             VStack(alignment: .leading, spacing: DS.Spacing.md) {
@@ -20,7 +21,7 @@ struct DeckFolderCard: View {
                         .foregroundStyle(.tertiary)
                 }
                 DSSeparator(color: DS.Palette.border.opacity(0.12))
-                Text("共 \(folder.deckIDs.count) 個")
+                Text(String(format: String(localized: "folder.decks.count", locale: locale), folder.deckIDs.count))
                     .dsType(DS.Font.caption)
                     .foregroundStyle(.secondary)
             }
@@ -30,10 +31,11 @@ struct DeckFolderCard: View {
 }
 
 struct NewDeckFolderCard: View {
+    @Environment(\.locale) private var locale
     var body: some View {
         VStack(spacing: 8) {
             Image(systemName: "folder.badge.plus").font(.title3)
-            Text("新資料夾").dsType(DS.Font.caption).foregroundStyle(.secondary)
+            Text(String(localized: "folder.new", locale: locale)).dsType(DS.Font.caption).foregroundStyle(.secondary)
         }
         .frame(minHeight: 96)
         .frame(maxWidth: .infinity)
@@ -56,6 +58,7 @@ struct DeckFolderDetailView: View {
 
     @State private var draggingDeckID: UUID? = nil
     @State private var showRenameSheet: Bool = false
+    @Environment(\.locale) private var locale
 
     private var folder: DeckFolder? { folders.folders.first(where: { $0.id == folderID }) }
 
@@ -69,7 +72,7 @@ struct DeckFolderDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: DS.Spacing.lg) {
                 // Drop zone to move out to root
-                RootDropArea(title: "拖曳到此移出到根") {
+                RootDropArea(title: String(localized: "folder.root.moveOut", locale: locale)) {
                     draggingDeckID = nil
                 } onPerform: { payload in
                     if let deckID = DeckDragPayload.decodeDeckID(payload) {
@@ -83,8 +86,8 @@ struct DeckFolderDetailView: View {
                 if decksInFolder.isEmpty {
                     DSCard {
                         VStack(alignment: .leading, spacing: 6) {
-                            Text("資料夾內尚無單字卡集").dsType(DS.Font.bodyEmph)
-                            Text("從根清單拖曳卡片到此資料夾即可收納。")
+                            Text(String(localized: "deck.folder.empty", locale: locale)).dsType(DS.Font.bodyEmph)
+                            Text(String(localized: "deck.folder.hint", locale: locale))
                                 .dsType(DS.Font.caption).foregroundStyle(.secondary)
                         }
                     }
@@ -109,12 +112,12 @@ struct DeckFolderDetailView: View {
             .padding(.bottom, DS.Spacing.lg)
         }
         .background(DS.Palette.background)
-        .navigationTitle(folder?.name ?? "資料夾")
+        .navigationTitle(folder?.name ?? String(localized: "nav.folder", locale: locale))
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 HStack {
-                    Button("重新命名") { showRenameSheet = true }
-                    Button("刪除", role: .destructive) {
+                    Button(String(localized: "action.rename", locale: locale)) { showRenameSheet = true }
+                    Button(String(localized: "action.delete", locale: locale), role: .destructive) {
                         _ = folders.removeFolder(folderID)
                     }
                 }
@@ -132,6 +135,7 @@ struct DeckFolderDetailView: View {
 private struct FolderDeckCard: View {
     let name: String
     let count: Int
+    @Environment(\.locale) private var locale
     var body: some View {
         DSOutlineCard {
             VStack(alignment: .leading, spacing: 8) {
@@ -140,7 +144,7 @@ private struct FolderDeckCard: View {
                     .foregroundStyle(.primary)
                     .lineLimit(1)
                 HStack(spacing: 8) {
-                    Text("共 \(count) 張")
+                    Text(String(format: String(localized: "deck.cards.count", locale: locale), count))
                         .dsType(DS.Font.caption)
                         .foregroundStyle(.secondary)
                     Spacer(minLength: 0)

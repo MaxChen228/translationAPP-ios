@@ -6,7 +6,7 @@ struct ChinesePromptView: View {
     var body: some View {
         Group {
             if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                Text("尚未選擇題目")
+                Text("prompt.empty")
                     .dsType(DS.Font.caption)
                     .foregroundStyle(.secondary)
                     .padding(.vertical, 12)

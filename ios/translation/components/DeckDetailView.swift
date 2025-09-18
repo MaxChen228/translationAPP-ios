@@ -6,6 +6,7 @@ struct DeckDetailView: View {
     @EnvironmentObject private var progressStore: FlashcardProgressStore
     @State private var navigateToNewEditor: Bool = false
     @State private var newCardStartIndex: Int = 0
+    @Environment(\.locale) private var locale
 
     private var deck: PersistedFlashcardDeck? {
         decksStore.decks.first(where: { $0.id == deckID })
@@ -29,7 +30,7 @@ struct DeckDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: DS.Spacing.lg) {
                 if let d = deck {
-                    DSSectionHeader(title: d.name, subtitle: "單字卡集詳情", accentUnderline: true)
+                    DSSectionHeader(title: d.name, subtitle: String(localized: "deck.detail.subtitle", locale: locale), accentUnderline: true)
 
                     // 上：高質感圓環摘要（壓縮且資訊清晰）
                     DeckSummaryRings(new: counts.new, learning: counts.learning, mastered: counts.mastered)
@@ -38,7 +39,7 @@ struct DeckDetailView: View {
                     NavigationLink {
                         FlashcardsView(title: d.name, cards: d.cards, deckID: d.id)
                     } label: {
-                        Text("開始複習")
+                        Text("deck.action.startReview")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(DSPrimaryButton())
@@ -49,7 +50,7 @@ struct DeckDetailView: View {
                     } label: { EmptyView() }
 
                     // 下：卡片簡略列表（新增改為懸浮按鈕，避免擁擠）
-                    Text("詞語").dsType(DS.Font.section)
+                    Text("deck.words.title").dsType(DS.Font.section)
                     VStack(spacing: 10) {
                         ForEach(d.cards) { card in
                             let idx = d.cards.firstIndex(where: { $0.id == card.id }) ?? 0
@@ -62,7 +63,7 @@ struct DeckDetailView: View {
                         }
                     }
                 } else {
-                    Text("找不到卡片集").foregroundStyle(.secondary)
+                    Text(String(localized: "deck.notFound", locale: locale)).foregroundStyle(.secondary)
                 }
             }
             .padding(.horizontal, DS.Spacing.lg)
@@ -83,11 +84,11 @@ struct DeckDetailView: View {
                         .padding(.trailing, DS.Spacing.lg)
                         .padding(.bottom, DS.Spacing.lg)
                         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 6)
-                        .accessibilityLabel("新增卡片")
+                        .accessibilityLabel(Text("deck.action.addCard"))
                     }
             }
         }
-        .navigationTitle("單字卡")
+        .navigationTitle(Text("nav.deck"))
     }
 }
 
@@ -97,14 +98,15 @@ private struct DeckSummaryRings: View {
     let learning: Int
     let mastered: Int
     var total: Int { max(1, new + learning + mastered) }
+    @Environment(\.locale) private var locale
     var body: some View {
         DSCard {
             HStack(spacing: 0) {
-                SummaryRing(title: "未學習", count: new, total: total, color: DS.Brand.scheme.provence)
+                SummaryRing(title: String(localized: "deck.summary.new", locale: locale), count: new, total: total, color: DS.Brand.scheme.provence)
                 Divider().frame(height: 42).opacity(0.15)
-                SummaryRing(title: "仍在學習", count: learning, total: total, color: DS.Brand.scheme.peachQuartz)
+                SummaryRing(title: String(localized: "deck.summary.learning", locale: locale), count: learning, total: total, color: DS.Brand.scheme.peachQuartz)
                 Divider().frame(height: 42).opacity(0.15)
-                SummaryRing(title: "已精通", count: mastered, total: total, color: DS.Brand.scheme.monument)
+                SummaryRing(title: String(localized: "deck.summary.mastered", locale: locale), count: mastered, total: total, color: DS.Brand.scheme.monument)
             }
             .frame(maxWidth: .infinity)
         }

@@ -1,0 +1,186 @@
+/* 導覽 */
+"nav.settings" = "設定";
+"nav.workspace" = "Workspace";
+"nav.bank" = "題庫本";
+
+/* 快速功能 */
+"quick.title" = "快速功能";
+"quick.flashcards.title" = "單字卡";
+"quick.flashcards.subtitle" = "Markdown 正反面";
+"quick.bank.title" = "題庫本";
+"quick.bank.subtitle" = "本機題庫（離線）／雲端瀏覽複製";
+"quick.settings.title" = "設定";
+"quick.settings.subtitle" = "Banner 與 Model 等";
+"quick.addWorkspace" = "新增 Workspace";
+
+/* 設定 */
+"settings.banner.title" = "Banner";
+"settings.banner.subtitle" = "設定橫幅顯示秒數";
+"settings.banner.seconds" = "秒數";
+"settings.banner.test" = "測試橫幅";
+
+"settings.model.title" = "Gemini Model";
+"settings.model.subtitle" = "供未來使用";
+
+"settings.language.title" = "語言";
+"settings.language.subtitle" = "供未來使用";
+
+"settings.device.title" = "裝置與版本";
+"settings.device.id" = "Device ID";
+
+/* 通用 */
+"action.copy" = "複製";
+"msg.copiedDeviceID" = "已複製 Device ID";
+"label.version" = "版本";
+
+/* 翻譯流程（第二波） */
+"nav.translate" = "中英翻譯批改";
+"content.zh.title" = "中文原文";
+"content.zh.subtitle" = "輸入要翻成英文的句子";
+"content.bank" = "題庫";
+"content.en.title" = "我的英文";
+"content.en.subtitle" = "先輸入你的嘗試，再按下批改";
+"content.en.placeholder" = "例如：I go to the shop yesterday to buy some fruits.";
+"content.correct" = "批改";
+"content.correcting" = "批改中…";
+"content.next" = "下一題";
+"results.errors.title" = "錯誤列表";
+"results.errors.subtitle" = "點擊項目聚焦對應高亮";
+"results.empty" = "未偵測到錯誤。";
+"result.switcher.original" = "原文";
+"result.switcher.corrected" = "修正版";
+"error.suggestion" = "建議";
+"action.save" = "儲存";
+"action.saved" = "已儲存";
+"loading.correcting" = "正在批改…";
+"prompt.empty" = "尚未選擇題目";
+"hints.title" = "提示";
+"hints.empty" = "目前沒有提示";
+"chips.all" = "全部";
+"a11y.openSavedJSON" = "查看已儲存的錯誤 JSON";
+
+/* 錯誤類型 */
+"error.type.morphological" = "形態";
+"error.type.syntactic" = "句法";
+"error.type.lexical" = "詞彙";
+"error.type.phonological" = "語音/拼寫";
+"error.type.pragmatic" = "語用";
+
+/* 雲端瀏覽 */
+"cloud.decks.title" = "雲端單字卡集";
+"cloud.decks.subtitle" = "瀏覽精選卡集，複製到本機使用";
+"cloud.decks.empty" = "目前沒有雲端單字卡集";
+"cloud.books.title" = "雲端題庫本";
+"cloud.books.subtitle" = "瀏覽精選題庫，複製到本機使用";
+"cloud.books.empty" = "目前沒有雲端題庫本";
+"cloud.common.retry" = "稍後再試，或檢查後端設定。";
+"cloud.copyToLocal" = "複製到本機";
+"nav.cloudDecks" = "瀏覽單字卡集";
+"nav.cloudBooks" = "瀏覽題庫本";
+
+/* 單字卡 */
+"deck.detail.subtitle" = "單字卡集詳情";
+"deck.action.startReview" = "開始複習";
+"deck.words.title" = "詞語";
+"deck.action.addCard" = "新增卡片";
+"nav.deck" = "單字卡";
+"deck.notFound" = "找不到卡片集";
+"deck.summary.new" = "未學習";
+"deck.summary.learning" = "仍在學習";
+"deck.summary.mastered" = "已精通";
+"flashcards.title" = "單字卡";
+"flashcards.subtitle" = "點擊卡片可翻面 (支援 Markdown)";
+"flashcards.prev" = "上一張";
+"flashcards.showFront" = "看正面";
+"flashcards.showBack" = "看背面";
+"flashcards.audioSettings" = "播音設定";
+"flashcards.alert.delete" = "確定要刪除這張卡片嗎？";
+"flashcards.editor.title" = "編輯卡片";
+"flashcards.editor.front" = "正面（中文短語）";
+"flashcards.editor.frontNote" = "正面備註（可留空）";
+"flashcards.editor.back" = "背面（用 (A | B) 單行）";
+"flashcards.editor.backNote" = "背面備註（可留空）";
+"flashcards.editor.delete" = "刪除卡片";
+
+/* 單字卡設定 */
+"flashcards.settings.mode" = "複習模式";
+"flashcards.settings.help.annotate" = "標注：右滑 +1，左滑 −1，並切到下一張。";
+"flashcards.settings.help.browse" = "瀏覽：左右滑動切換卡片，不改精熟度。";
+
+/* TTS 設定 */
+"tts.title" = "播音設定";
+"tts.order" = "順序";
+"tts.order.front" = "Front";
+"tts.order.back" = "Back";
+"tts.order.frontThenBack" = "Front→Back";
+"tts.order.backThenFront" = "Back→Front";
+"tts.rate" = "語速";
+"tts.segmentGap" = "段間隔";
+"tts.cardGap" = "卡間隔";
+"tts.segment.short" = "段";
+"tts.card.short" = "卡";
+"tts.variantFill" = "變體補位";
+"tts.fill.random" = "隨機";
+"tts.fill.wrap" = "循環";
+"tts.start" = "開始播放";
+
+/* 已儲存 JSON */
+"nav.savedJSON" = "已儲存 JSON";
+"saved.clear" = "清空";
+"saved.saveDeck" = "儲存單字卡";
+"deck.untitled" = "未命名";
+"saved.empty" = "尚未儲存任何錯誤";
+"saved.unparsable" = "無法解析此筆資料";
+"label.zhPrefix" = "中文：";
+"label.enOriginalPrefix" = "原句：";
+"label.enCorrectedPrefix" = "修正版：";
+"action.copyJSON" = "複製JSON";
+"action.copied" = "已複製";
+"saved.confirm.delete" = "確定要刪除這筆紀錄嗎？";
+"action.delete" = "刪除";
+"action.cancel" = "取消";
+"action.edit" = "編輯";
+"action.done" = "完成";
+"loading.making" = "製作中…";
+"saved.saveDeck.prompt" = "將下列筆數整理為卡片集：";
+
+/* Workspace 狀態 */
+"workspace.status.loading" = "批改中…";
+"workspace.status.graded" = "已批改";
+"workspace.status.input" = "已輸入";
+"workspace.status.empty" = "空白";
+
+/* 橫幅：批改完成 */
+"banner.correctionDone.title" = "批改完成";
+"banner.correctionDone.action" = "查看";
+"label.points" = "分";
+"label.suggestions" = "個建議";
+/* 首頁 */
+"home.workspaces" = "Workspace";
+
+/* 題庫（本機） */
+"bank.folders.title" = "資料夾";
+"bank.local.title" = "題庫本";
+"bank.browseCloud" = "瀏覽雲端題庫";
+"bank.folders.empty" = "尚無資料夾";
+"bank.local.empty" = "目前沒有題庫本";
+"bank.folder.count" = "共 %d 本";
+"bank.book.count" = "共 %d 題";
+"bank.confirm.deleteBook" = "確定要刪除這本題庫嗎？";
+"bank.action.addToFolder" = "加入 %@";
+"bank.action.moveToRoot" = "移出到根";
+
+/* 資料夾 / 常用動作 */
+"folder.new" = "新資料夾";
+"nav.folder" = "資料夾";
+"action.rename" = "重新命名";
+"action.copyName" = "複製名稱";
+
+/* 單字卡資料夾空狀態 */
+"deck.folder.empty" = "資料夾內尚無單字卡集";
+"deck.folder.hint" = "從根清單拖曳卡片到此資料夾即可收納。";
+"deck.cards.count" = "共 %d 張";
+
+/* 錯誤詳情 */
+"error.applySuggestion" = "套用建議";
+"field.name" = "名稱";

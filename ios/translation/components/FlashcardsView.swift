@@ -79,6 +79,7 @@ struct FlashcardsView: View {
     @State private var showAudioSheet = false
     @State private var lastTTSSettings: TTSSettings? = nil
     @State private var currentBackComposed: String = ""
+    @Environment(\.locale) private var locale
 
     init(title: String = "單字卡", cards: [Flashcard] = FlashcardsStore.defaultCards, deckID: UUID? = nil, startIndex: Int = 0, startEditing: Bool = false) {
         _store = StateObject(wrappedValue: FlashcardsStore(cards: cards, startIndex: startIndex))
@@ -91,8 +92,8 @@ struct FlashcardsView: View {
         GeometryReader { geo in
             VStack(alignment: .leading, spacing: DS.Spacing.lg) {
                 DSSectionHeader(
-                    title: "單字卡",
-                    subtitle: "點擊卡片可翻面 (支援 Markdown)",
+                    title: String(localized: "flashcards.title", locale: locale),
+                    subtitle: String(localized: "flashcards.subtitle", locale: locale),
                     accentUnderline: true,
                     accentMatchTitle: true
                 )
@@ -198,13 +199,13 @@ struct FlashcardsView: View {
                         Spacer(minLength: DS.Spacing.md)
 
                         // 底部控制列：在播音模式也顯示（由 safeAreaInset 自動把內容往上推）
-                        HStack(spacing: DS.Spacing.md) {
-                            Button { prevButtonTapped() } label: { Label("上一張", systemImage: "chevron.left") }
+                            HStack(spacing: DS.Spacing.md) {
+                            Button { prevButtonTapped() } label: { Label { Text("flashcards.prev") } icon: { Image(systemName: "chevron.left") } }
                                 .buttonStyle(DSSecondaryButtonCompact())
 
-                            Button { flipTapped() } label: { Label(store.showBack ? "看正面" : "看背面", systemImage: "arrow.2.squarepath") }
+                            Button { flipTapped() } label: { Label { Text(store.showBack ? LocalizedStringKey("flashcards.showFront") : LocalizedStringKey("flashcards.showBack")) } icon: { Image(systemName: "arrow.2.squarepath") } }
                             .buttonStyle(DSPrimaryButton())
-                        }
+                            }
                     }
                 } else {
                     EmptyState()
@@ -221,7 +222,7 @@ struct FlashcardsView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 if store.current != nil {
-                    Button(isEditing ? "完成" : "編輯") {
+                    Button(isEditing ? String(localized: "action.done", locale: locale) : String(localized: "action.edit", locale: locale)) {
                         if isEditing { saveEdit() } else { beginEdit() }
                     }
                 }
@@ -232,7 +233,7 @@ struct FlashcardsView: View {
                 } label: {
                     Image(systemName: "gearshape")
                 }
-                .accessibilityLabel("設定")
+                .accessibilityLabel(Text("nav.settings"))
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
@@ -240,7 +241,7 @@ struct FlashcardsView: View {
                 } label: {
                     Image(systemName: "speaker.wave.2")
                 }
-                .accessibilityLabel("播音設定")
+                .accessibilityLabel(Text("flashcards.audioSettings"))
             }
         }
         .onAppear {
@@ -250,9 +251,9 @@ struct FlashcardsView: View {
                 if store.current != nil { beginEdit() }
             }
         }
-        .alert("確定要刪除這張卡片嗎？", isPresented: $showDeleteConfirm) {
-            Button("刪除", role: .destructive) { deleteCurrent() }
-            Button("取消", role: .cancel) {}
+        .alert(Text("flashcards.alert.delete"), isPresented: $showDeleteConfirm) {
+            Button(String(localized: "action.delete", locale: locale), role: .destructive) { deleteCurrent() }
+            Button(String(localized: "action.cancel", locale: locale), role: .cancel) {}
         }
         .sheet(isPresented: $showSettings) {
             FlashcardsSettingsSheet()
@@ -349,16 +350,16 @@ private struct CardEditor: View {
     var body: some View {
         DSCard(padding: DS.Spacing.lg) {
             VStack(alignment: .leading, spacing: 12) {
-                Text("編輯卡片").dsType(DS.Font.section)
-                TextField("正面（中文短語）", text: Binding(get: { draft?.front ?? "" }, set: { if var d = draft { d.front = $0; draft = d } }))
+                Text("flashcards.editor.title").dsType(DS.Font.section)
+                TextField(LocalizedStringKey("flashcards.editor.front"), text: Binding(get: { draft?.front ?? "" }, set: { if var d = draft { d.front = $0; draft = d } }))
                     .textFieldStyle(.roundedBorder)
-                TextField("正面備註（可留空）", text: Binding(get: { draft?.frontNote ?? "" }, set: { if var d = draft { d.frontNote = $0.isEmpty ? nil : $0; draft = d } }))
+                TextField(LocalizedStringKey("flashcards.editor.frontNote"), text: Binding(get: { draft?.frontNote ?? "" }, set: { if var d = draft { d.frontNote = $0.isEmpty ? nil : $0; draft = d } }))
                     .textFieldStyle(.roundedBorder)
-                TextField("背面（用 (A | B) 單行）", text: Binding(get: { draft?.back ?? "" }, set: { if var d = draft { d.back = $0; draft = d } }))
+                TextField(LocalizedStringKey("flashcards.editor.back"), text: Binding(get: { draft?.back ?? "" }, set: { if var d = draft { d.back = $0; draft = d } }))
                     .textFieldStyle(.roundedBorder)
-                TextField("背面備註（可留空）", text: Binding(get: { draft?.backNote ?? "" }, set: { if var d = draft { d.backNote = $0.isEmpty ? nil : $0; draft = d } }))
+                TextField(LocalizedStringKey("flashcards.editor.backNote"), text: Binding(get: { draft?.backNote ?? "" }, set: { if var d = draft { d.backNote = $0.isEmpty ? nil : $0; draft = d } }))
                     .textFieldStyle(.roundedBorder)
-                Button("刪除卡片", role: .destructive) { onDelete() }
+                Button(role: .destructive) { onDelete() } label: { Text("flashcards.editor.delete") }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 if let errorText { Text(errorText).foregroundStyle(.red).font(.caption) }
             }

@@ -1,0 +1,184 @@
+/* Navigation */
+"nav.settings" = "Settings";
+"nav.workspace" = "Workspace";
+"nav.bank" = "Banks";
+
+/* Quick Actions */
+"quick.title" = "Quick Actions";
+"quick.flashcards.title" = "Flashcards";
+"quick.flashcards.subtitle" = "Markdown fronts/backs";
+"quick.bank.title" = "Banks";
+"quick.bank.subtitle" = "Local (offline) / Browse cloud";
+"quick.settings.title" = "Settings";
+"quick.settings.subtitle" = "Banner, Model, etc.";
+"quick.addWorkspace" = "New Workspace";
+
+/* Settings */
+"settings.banner.title" = "Banner";
+"settings.banner.subtitle" = "Set banner display duration";
+"settings.banner.seconds" = "Seconds";
+"settings.banner.test" = "Test Banner";
+
+"settings.model.title" = "Gemini Model";
+"settings.model.subtitle" = "For future use";
+
+"settings.language.title" = "Language";
+"settings.language.subtitle" = "For future use";
+
+"settings.device.title" = "Device & Version";
+"settings.device.id" = "Device ID";
+
+/* Common */
+"action.copy" = "Copy";
+"msg.copiedDeviceID" = "Device ID copied";
+"label.version" = "Version";
+
+/* Error types */
+"error.type.morphological" = "Morphology";
+"error.type.syntactic" = "Syntax";
+"error.type.lexical" = "Lexicon";
+"error.type.phonological" = "Phonology/Spelling";
+"error.type.pragmatic" = "Pragmatics";
+
+/* Cloud Browsing */
+"cloud.decks.title" = "Cloud Decks";
+"cloud.decks.subtitle" = "Browse curated decks and copy to local";
+"cloud.decks.empty" = "No cloud decks";
+"cloud.books.title" = "Cloud Banks";
+"cloud.books.subtitle" = "Browse curated banks and copy to local";
+"cloud.books.empty" = "No cloud banks";
+"cloud.common.retry" = "Try again later or check backend settings.";
+"cloud.copyToLocal" = "Copy to Local";
+"nav.cloudDecks" = "Browse Decks";
+"nav.cloudBooks" = "Browse Banks";
+
+/* Decks / Flashcards */
+"deck.detail.subtitle" = "Deck details";
+"deck.action.startReview" = "Start Review";
+"deck.words.title" = "Words";
+"deck.action.addCard" = "Add Card";
+"nav.deck" = "Flashcards";
+"deck.notFound" = "Deck not found";
+"deck.summary.new" = "New";
+"deck.summary.learning" = "Learning";
+"deck.summary.mastered" = "Mastered";
+"flashcards.title" = "Flashcards";
+"flashcards.subtitle" = "Tap card to flip (Markdown supported)";
+"flashcards.prev" = "Previous";
+"flashcards.showFront" = "Show Front";
+"flashcards.showBack" = "Show Back";
+"flashcards.audioSettings" = "Audio Settings";
+"flashcards.alert.delete" = "Delete this card?";
+"flashcards.editor.title" = "Edit Card";
+"flashcards.editor.front" = "Front (Chinese phrase)";
+"flashcards.editor.frontNote" = "Front note (optional)";
+"flashcards.editor.back" = "Back (single line with (A | B))";
+"flashcards.editor.backNote" = "Back note (optional)";
+"flashcards.editor.delete" = "Delete Card";
+
+/* Flashcards Settings */
+"flashcards.settings.mode" = "Review Mode";
+"flashcards.settings.help.annotate" = "Annotate: swipe right +1, left −1, then go next.";
+"flashcards.settings.help.browse" = "Browse: swipe left/right to switch, level unchanged.";
+
+/* TTS Settings */
+"tts.title" = "TTS Settings";
+"tts.order" = "Order";
+"tts.order.front" = "Front";
+"tts.order.back" = "Back";
+"tts.order.frontThenBack" = "Front→Back";
+"tts.order.backThenFront" = "Back→Front";
+"tts.rate" = "Rate";
+"tts.segmentGap" = "Segment gap";
+"tts.cardGap" = "Card gap";
+"tts.segment.short" = "Seg";
+"tts.card.short" = "Card";
+"tts.variantFill" = "Variant fill";
+"tts.fill.random" = "Random";
+"tts.fill.wrap" = "Wrap";
+"tts.start" = "Start";
+
+/* Saved JSON */
+"nav.savedJSON" = "Saved JSON";
+"saved.clear" = "Clear";
+"saved.saveDeck" = "Save Deck";
+"deck.untitled" = "Untitled";
+"saved.empty" = "No saved errors";
+"saved.unparsable" = "Unable to parse this record";
+"label.zhPrefix" = "Chinese: ";
+"label.enOriginalPrefix" = "Original: ";
+"label.enCorrectedPrefix" = "Corrected: ";
+"action.copyJSON" = "Copy JSON";
+"action.copied" = "Copied";
+"saved.confirm.delete" = "Delete this record?";
+"action.delete" = "Delete";
+"action.cancel" = "Cancel";
+"action.edit" = "Edit";
+"action.done" = "Done";
+"loading.making" = "Making…";
+"saved.saveDeck.prompt" = "Items to make into a deck:";
+"error.applySuggestion" = "Apply suggestion";
+"field.name" = "Name";
+
+/* Translation Flow (Phase 2) */
+"nav.translate" = "Translation";
+"content.zh.title" = "Chinese Prompt";
+"content.zh.subtitle" = "Enter the sentence to translate";
+"content.bank" = "Bank";
+"content.en.title" = "My English";
+"content.en.subtitle" = "Type your attempt, then grade";
+"content.en.placeholder" = "e.g., I go to the shop yesterday to buy some fruits.";
+"content.correct" = "Grade";
+"content.correcting" = "Grading…";
+"content.next" = "Next";
+"results.errors.title" = "Errors";
+"results.errors.subtitle" = "Tap to focus the highlight";
+"results.empty" = "No errors detected.";
+"result.switcher.original" = "Original";
+"result.switcher.corrected" = "Corrected";
+"error.suggestion" = "Suggestion";
+"action.save" = "Save";
+"action.saved" = "Saved";
+"loading.correcting" = "Grading…";
+"prompt.empty" = "No item selected";
+"hints.title" = "Hints";
+"hints.empty" = "No hints yet";
+"chips.all" = "All";
+"a11y.openSavedJSON" = "Open saved error JSON";
+
+/* Workspace status */
+"workspace.status.loading" = "Grading…";
+"workspace.status.graded" = "Graded";
+"workspace.status.input" = "Input";
+"workspace.status.empty" = "Empty";
+
+/* Banner: correction completed */
+"banner.correctionDone.title" = "Grading Complete";
+"banner.correctionDone.action" = "View";
+"label.points" = "pts";
+"label.suggestions" = "suggestions";
+/* Home */
+"home.workspaces" = "Workspaces";
+
+/* Bank (Local) */
+"bank.folders.title" = "Folders";
+"bank.local.title" = "Local Banks";
+"bank.browseCloud" = "Browse Cloud Banks";
+"bank.folders.empty" = "No folders";
+"bank.local.empty" = "No local banks";
+"bank.folder.count" = "%d books";
+"bank.book.count" = "%d items";
+"bank.confirm.deleteBook" = "Delete this bank?";
+"bank.action.addToFolder" = "Add to %@";
+"bank.action.moveToRoot" = "Move to root";
+
+/* Folder / Common actions */
+"folder.new" = "New Folder";
+"nav.folder" = "Folder";
+"action.rename" = "Rename";
+"action.copyName" = "Copy Name";
+
+/* Deck folder empty state */
+"deck.folder.empty" = "No decks in this folder";
+"deck.folder.hint" = "Drag decks from the root list here.";
+"deck.cards.count" = "%d cards";

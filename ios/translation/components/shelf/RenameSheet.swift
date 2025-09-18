@@ -2,25 +2,26 @@ import SwiftUI
 
 struct RenameSheet: View {
     @Environment(\.dismiss) private var dismiss
-    let title: String
+    @Environment(\.locale) private var locale
+    let titleKey: LocalizedStringKey
     @State private var text: String
     let onDone: (String) -> Void
 
-    init(title: String = "重新命名", name: String, onDone: @escaping (String) -> Void) {
-        self.title = title
+    init(titleKey: LocalizedStringKey = "action.rename", name: String, onDone: @escaping (String) -> Void) {
+        self.titleKey = titleKey
         self._text = State(initialValue: name)
         self.onDone = onDone
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(title).dsType(DS.Font.section)
-            TextField("名稱", text: $text)
+            Text(titleKey).dsType(DS.Font.section)
+            TextField(String(localized: "field.name", locale: locale), text: $text)
                 .textFieldStyle(.roundedBorder)
             HStack {
                 Spacer()
-                Button("取消") { dismiss() }
-                Button("完成") {
+                Button(String(localized: "action.cancel", locale: locale)) { dismiss() }
+                Button(String(localized: "action.done", locale: locale)) {
                     let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
                     if !trimmed.isEmpty { onDone(trimmed) }
                     dismiss()
@@ -33,4 +34,3 @@ struct RenameSheet: View {
         .background(DS.Palette.background)
     }
 }
-

@@ -8,6 +8,7 @@ struct CloudBankLibraryView: View {
     @State private var books: [CloudBookSummary] = []
     @State private var isLoading: Bool = false
     @State private var error: String? = nil
+    @Environment(\.locale) private var locale
 
     var body: some View {
         ScrollView {
@@ -15,10 +16,10 @@ struct CloudBankLibraryView: View {
                 if isLoading { ProgressView().frame(maxWidth: .infinity, alignment: .center) }
                 if let error { ErrorStateCard(title: error) }
 
-                DSSectionHeader(title: "雲端題庫本", subtitle: "瀏覽精選題庫，複製到本機使用", accentUnderline: true)
+                DSSectionHeader(title: String(localized: "cloud.books.title", locale: locale), subtitle: String(localized: "cloud.books.subtitle", locale: locale), accentUnderline: true)
 
                 if !isLoading && error == nil && books.isEmpty {
-                    EmptyStateCard(title: "目前沒有雲端題庫本", subtitle: "稍後再試，或檢查後端設定。", iconSystemName: "books.vertical")
+                    EmptyStateCard(title: String(localized: "cloud.books.empty", locale: locale), subtitle: String(localized: "cloud.common.retry", locale: locale), iconSystemName: "books.vertical")
                 }
 
                 LazyVStack(alignment: .leading, spacing: DS.Spacing.md) {
@@ -30,7 +31,7 @@ struct CloudBankLibraryView: View {
                                     Text("共 \(b.count) 題").dsType(DS.Font.caption).foregroundStyle(.secondary)
                                 }
                                 Spacer(minLength: 0)
-                                Button { Task { await copyBook(b) } } label: { Label("複製到本機", systemImage: "arrow.down.doc.fill") }
+                                Button { Task { await copyBook(b) } } label: { Label { Text("cloud.copyToLocal") } icon: { Image(systemName: "arrow.down.doc.fill") } }
                                     .buttonStyle(DSSecondaryButtonCompact())
                             }
                             .padding(.vertical, 6)
@@ -43,7 +44,7 @@ struct CloudBankLibraryView: View {
             .padding(.bottom, DS.Spacing.lg)
         }
         .background(DS.Palette.background)
-        .navigationTitle("瀏覽題庫本")
+        .navigationTitle(Text("nav.cloudBooks"))
         .task { await load() }
         .refreshable { await load() }
     }
@@ -70,4 +71,3 @@ struct CloudBankLibraryView: View {
         }
     }
 }
-

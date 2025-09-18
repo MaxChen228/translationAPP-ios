@@ -19,6 +19,7 @@ struct BankBooksView: View {
     @State private var deletingBookName: String? = nil
     @State private var showDeleteConfirm: Bool = false
     @State private var draggingBookName: String? = nil
+    @Environment(\.locale) private var locale
 
     var body: some View {
         ScrollView {
@@ -29,15 +30,16 @@ struct BankBooksView: View {
                 }
                 // 資料夾區：即使為 0 也顯示新增卡
                 let folderCols = [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.sm2)]
-                ShelfGrid(title: "資料夾", columns: folderCols) {
+                ShelfGrid(title: String(localized: "bank.folders.title", locale: locale), columns: folderCols) {
                     ForEach(bankFolders.folders) { folder in
                         NavigationLink { BankFolderDetailView(folderID: folder.id, vm: vm, onPracticeLocal: onPracticeLocal) } label: {
-                            ShelfTileCard(title: folder.name, subtitle: nil, countText: "共 \(folder.bookNames.count) 本", iconSystemName: "folder", accentColor: DS.Brand.scheme.stucco, showChevron: true)
+                            let countText = String(format: String(localized: "bank.folder.count", locale: locale), folder.bookNames.count)
+                            ShelfTileCard(title: folder.name, subtitle: nil, countText: countText, iconSystemName: "folder", accentColor: DS.Brand.scheme.stucco, showChevron: true)
                         }
                         .buttonStyle(DSCardLinkStyle())
                         .contextMenu {
-                            Button("重新命名") { renamingFolder = folder }
-                            Button("刪除", role: .destructive) { _ = bankFolders.removeFolder(folder.id) }
+                            Button(String(localized: "action.rename", locale: locale)) { renamingFolder = folder }
+                            Button(String(localized: "action.delete", locale: locale), role: .destructive) { _ = bankFolders.removeFolder(folder.id) }
                         }
                         .onDrop(of: [.text], delegate: BookIntoFolderDropDelegate(folderID: folder.id, folders: bankFolders, draggingName: $draggingBookName))
                     }
@@ -52,10 +54,10 @@ struct BankBooksView: View {
                 let orderedNames = bankOrder.currentRootOrder(root: rootNames)
                 let orderedRootBooks: [LocalBankBook] = orderedNames.compactMap { nm in localRootBooks.first(where: { $0.name == nm }) }
                 let cols = [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.sm2)]
-                ShelfGrid(title: "題庫本", columns: cols) {
+                ShelfGrid(title: String(localized: "bank.local.title", locale: locale), columns: cols) {
                     // 瀏覽雲端精選（複製到本機）
                     NavigationLink { CloudBankLibraryView(vm: vm) } label: {
-                        BrowseCloudCard(title: "瀏覽雲端題庫")
+                        BrowseCloudCard(title: String(localized: "bank.browseCloud", locale: locale))
                     }
                     .buttonStyle(.plain)
                     ForEach(orderedRootBooks) { b in
@@ -83,7 +85,7 @@ struct BankBooksView: View {
                             ShelfTileCard(
                                 title: b.name,
                                 subtitle: nil,
-                                countText: "共 \(b.items.count) 題",
+                                countText: String(format: String(localized: "bank.book.count", locale: locale), b.items.count),
                                 iconSystemName: nil,
                                 accentColor: DS.Palette.primary,
                                 showChevron: true,
@@ -93,16 +95,16 @@ struct BankBooksView: View {
                         .buttonStyle(DSCardLinkStyle())
                         .contextMenu {
                             if bankFolders.folders.isEmpty {
-                                Text("尚無資料夾").foregroundStyle(.secondary)
+                                Text(String(localized: "bank.folders.empty", locale: locale)).foregroundStyle(.secondary)
                             } else {
                                 ForEach(bankFolders.folders) { folder in
-                                    Button("加入 \(folder.name)") { bankFolders.add(bookName: b.name, to: folder.id) }
+                                    Button(String(format: String(localized: "bank.action.addToFolder", locale: locale), folder.name)) { bankFolders.add(bookName: b.name, to: folder.id) }
                                 }
                             }
-                            Button("重新命名") { renamingBook = b }
-                            Button("刪除", role: .destructive) { deletingBookName = b.name; showDeleteConfirm = true }
+                            Button(String(localized: "action.rename", locale: locale)) { renamingBook = b }
+                            Button(String(localized: "action.delete", locale: locale), role: .destructive) { deletingBookName = b.name; showDeleteConfirm = true }
                             #if canImport(UIKit)
-                            Button("複製名稱") { UIPasteboard.general.string = b.name }
+                            Button(String(localized: "action.copyName", locale: locale)) { UIPasteboard.general.string = b.name }
                             #endif
                         }
                         .onDrag { draggingBookName = b.name; return BookDragPayload.provider(for: b.name) }
@@ -117,8 +119,8 @@ struct BankBooksView: View {
                 .dsAnimation(DS.AnimationToken.reorder, value: bankOrder.order)
                 if localBank.books.isEmpty && error == nil {
                     EmptyStateCard(
-                        title: "目前沒有題庫本",
-                        subtitle: "先從雲端瀏覽複製一些題目到本機。",
+                        title: String(localized: "bank.local.empty", locale: locale),
+                        subtitle: String(localized: "cloud.books.subtitle", locale: locale),
                         iconSystemName: "books.vertical"
                     )
                 }
@@ -128,7 +130,7 @@ struct BankBooksView: View {
             .padding(.bottom, DS.Spacing.lg)
         }
         .background(DS.Palette.background)
-        .navigationTitle("題庫本")
+        .navigationTitle(String(localized: "nav.bank"))
         .onDrop(of: [.text], delegate: ClearBookDragStateDropDelegate(draggingName: $draggingBookName))
         .onAppear { AppLog.uiInfo("[books] appear (local)=\(localBank.books.count)") }
         .sheet(item: $renamingFolder) { f in
@@ -145,8 +147,8 @@ struct BankBooksView: View {
             }
             .presentationDetents([.height(180)])
         }
-        .confirmationDialog("確定要刪除這本題庫嗎？", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
-            Button("刪除", role: .destructive) {
+        .confirmationDialog(String(localized: "bank.confirm.deleteBook", locale: locale), isPresented: $showDeleteConfirm, titleVisibility: .visible) {
+            Button(String(localized: "action.delete", locale: locale), role: .destructive) {
                 if let name = deletingBookName {
                     localBank.remove(name)
                     bankFolders.remove(bookName: name)
@@ -154,7 +156,7 @@ struct BankBooksView: View {
                 }
                 deletingBookName = nil
             }
-            Button("取消", role: .cancel) { deletingBookName = nil }
+            Button(String(localized: "action.cancel", locale: locale), role: .cancel) { deletingBookName = nil }
         }
     }
 }

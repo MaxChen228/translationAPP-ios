@@ -13,6 +13,8 @@ struct DeckMakeItem: Codable {
 struct DeckMakeRequest: Codable {
     let name: String
     let items: [DeckMakeItem]
+    // 選用：指定 LLM 模型（若後端支持以此模型產製卡片）
+    let model: String?
 }
 
 struct DeckCardDTO: Codable {
@@ -54,7 +56,8 @@ final class DeckServiceHTTP: DeckService {
                 type: p.error.type.rawValue
             )
         }
-        let req = DeckMakeRequest(name: name, items: items)
+        let model = UserDefaults.standard.string(forKey: "settings.geminiModel")
+        let req = DeckMakeRequest(name: name, items: items, model: model)
         var urlReq = URLRequest(url: try endpointURL())
         urlReq.httpMethod = "POST"
         urlReq.setValue("application/json", forHTTPHeaderField: "Content-Type")

@@ -20,7 +20,7 @@ struct ErrorItemRow: View {
                 .foregroundStyle(.secondary)
             if let s = err.suggestion, !s.isEmpty {
                 HStack(spacing: 8) {
-                    Text("建議")
+                    Text("error.suggestion")
                         .dsType(DS.Font.caption)
                         .foregroundStyle(.secondary)
                     SuggestionChip(text: s, color: theme.base)
@@ -66,9 +66,9 @@ private struct SaveActionBar: ViewModifier {
                             withAnimation(DS.AnimationToken.subtle) { didSave = true }
                         } label: {
                             if didSave {
-                                Label("已儲存", systemImage: "checkmark.seal.fill")
+                                Label { Text("action.saved") } icon: { Image(systemName: "checkmark.seal.fill") }
                             } else {
-                                Label("儲存", systemImage: "tray.and.arrow.down")
+                                Label { Text("action.save") } icon: { Image(systemName: "tray.and.arrow.down") }
                             }
                         }
                         .buttonStyle(DSSecondaryButtonCompact())

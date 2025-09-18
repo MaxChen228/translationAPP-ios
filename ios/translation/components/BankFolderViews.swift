@@ -2,6 +2,7 @@ import SwiftUI
 
 struct BankFolderCard: View {
     let folder: BankFolder
+    @Environment(\.locale) private var locale
     var body: some View {
         DSOutlineCard {
             VStack(alignment: .leading, spacing: DS.Spacing.md) {
@@ -18,7 +19,7 @@ struct BankFolderCard: View {
                         .foregroundStyle(.tertiary)
                 }
                 DSSeparator(color: DS.Palette.border.opacity(0.12))
-                Text("共 \(folder.bookNames.count) 本")
+                Text(String(format: String(localized: "bank.folder.count", locale: locale), folder.bookNames.count))
                     .dsType(DS.Font.caption)
                     .foregroundStyle(.secondary)
             }
@@ -28,10 +29,11 @@ struct BankFolderCard: View {
 }
 
 struct NewBankFolderCard: View {
+    @Environment(\.locale) private var locale
     var body: some View {
         VStack(spacing: 8) {
             Image(systemName: "folder.badge.plus").font(.title3)
-            Text("新資料夾").dsType(DS.Font.caption).foregroundStyle(.secondary)
+            Text(String(localized: "folder.new", locale: locale)).dsType(DS.Font.caption).foregroundStyle(.secondary)
         }
         .frame(minHeight: 96)
         .frame(maxWidth: .infinity)
@@ -59,6 +61,7 @@ struct BankFolderDetailView: View {
     @State private var error: String? = nil
     @State private var draggingBookName: String? = nil
     @State private var showRenameSheet = false
+    @Environment(\.locale) private var locale
 
     private var folder: BankFolder? { folders.folders.first(where: { $0.id == folderID }) }
 
@@ -71,7 +74,7 @@ struct BankFolderDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: DS.Spacing.lg) {
-                RootDropArea(title: "拖曳到此移出到根") {
+                RootDropArea(title: String(localized: "folder.root.moveOut", locale: locale)) {
                     draggingBookName = nil
                 } onPerform: { payload in
                     if let name = BookDragPayload.decode(payload) {
@@ -108,7 +111,7 @@ struct BankFolderDetailView: View {
                             ShelfTileCard(
                                 title: b.name,
                                 subtitle: nil,
-                                countText: "共 \\(b.items.count) 題",
+                                countText: String(format: String(localized: "bank.book.count", locale: locale), b.items.count),
                                 iconSystemName: nil,
                                 accentColor: DS.Palette.primary,
                                 showChevron: true,
@@ -117,11 +120,11 @@ struct BankFolderDetailView: View {
                         }
                         .buttonStyle(DSCardLinkStyle())
                         .contextMenu {
-                            Button("移出到根") { folders.remove(bookName: b.name) }
-                            Button("重新命名") { renamingBook = b }
-                            Button("刪除", role: .destructive) { deletingBookName = b.name; showDeleteConfirm = true }
+                            Button(String(localized: "bank.action.moveToRoot", locale: locale)) { folders.remove(bookName: b.name) }
+                            Button(String(localized: "action.rename", locale: locale)) { renamingBook = b }
+                            Button(String(localized: "action.delete", locale: locale), role: .destructive) { deletingBookName = b.name; showDeleteConfirm = true }
                             #if canImport(UIKit)
-                            Button("複製名稱") { UIPasteboard.general.string = b.name }
+                            Button(String(localized: "action.copyName", locale: locale)) { UIPasteboard.general.string = b.name }
                             #endif
                         }
                         .onDrag { draggingBookName = b.name; return BookDragPayload.provider(for: b.name) }
@@ -133,12 +136,12 @@ struct BankFolderDetailView: View {
             .padding(.bottom, DS.Spacing.lg)
         }
         .background(DS.Palette.background)
-        .navigationTitle(folder?.name ?? "資料夾")
+        .navigationTitle(folder?.name ?? String(localized: "nav.folder", locale: locale))
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 HStack {
-                    Button("重新命名") { showRenameSheet = true }
-                    Button("刪除", role: .destructive) { _ = folders.removeFolder(folderID) }
+                    Button(String(localized: "action.rename", locale: locale)) { showRenameSheet = true }
+                    Button(String(localized: "action.delete", locale: locale), role: .destructive) { _ = folders.removeFolder(folderID) }
                 }
             }
         }
@@ -156,8 +159,8 @@ struct BankFolderDetailView: View {
             }
             .presentationDetents([.height(180)])
         }
-        .confirmationDialog("確定要刪除這本題庫嗎？", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
-            Button("刪除", role: .destructive) {
+        .confirmationDialog(String(localized: "bank.confirm.deleteBook", locale: locale), isPresented: $showDeleteConfirm, titleVisibility: .visible) {
+            Button(String(localized: "action.delete", locale: locale), role: .destructive) {
                 if let name = deletingBookName {
                     localBank.remove(name)
                     folders.remove(bookName: name)
@@ -165,7 +168,7 @@ struct BankFolderDetailView: View {
                 }
                 deletingBookName = nil
             }
-            Button("取消", role: .cancel) { deletingBookName = nil }
+            Button(String(localized: "action.cancel", locale: locale), role: .cancel) { deletingBookName = nil }
         }
     }
 }

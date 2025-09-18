@@ -18,7 +18,7 @@ struct HintRow: View {
 }
 
 struct HintListSection: View {
-    var title: String = "提示"
+    var title: String = String(localized: "hints.title")
     var hints: [BankHint]
     @Binding var isExpanded: Bool
     var collapsible: Bool = true
@@ -34,7 +34,7 @@ struct HintListSection: View {
                     CountBubble(count: 0)
                     Spacer(minLength: 0)
                 }
-                Text("目前沒有提示")
+                Text(String(localized: "hints.empty"))
                     .dsType(DS.Font.caption)
                     .foregroundStyle(.secondary)
             } else if collapsible {
@@ -84,7 +84,7 @@ struct HintListSection: View {
 }
 
 struct TagLabel: View {
-    var text: String
+    var text: LocalizedStringKey
     var color: Color
     var body: some View {
         Text(text)

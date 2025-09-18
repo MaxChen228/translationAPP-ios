@@ -4,21 +4,22 @@ struct FlashcardsAudioSettingsSheet: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject var store: TTSSettingsStore
     var onStart: (TTSSettings) -> Void
+    @Environment(\.locale) private var locale
 
     var body: some View {
         let s = store.settings
         ScrollView {
         VStack(alignment: .leading, spacing: DS.Spacing.lg) {
-            DSSectionHeader(title: "播音設定", subtitle: summaryText(), accentUnderline: true)
+            DSSectionHeader(title: String(localized: "tts.title", locale: locale), subtitle: summaryText(), accentUnderline: true)
 
             DSOutlineCard {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("順序").dsType(DS.Font.caption).foregroundStyle(.secondary)
+                    Text("tts.order").dsType(DS.Font.caption).foregroundStyle(.secondary)
                     Picker("順序", selection: Binding(get: { s.readOrder }, set: { store.settings.readOrder = $0 })) {
-                        Text("Front").tag(ReadOrder.frontOnly)
-                        Text("Back").tag(ReadOrder.backOnly)
-                        Text("Front→Back").tag(ReadOrder.frontThenBack)
-                        Text("Back→Front").tag(ReadOrder.backThenFront)
+                        Text("tts.order.front").tag(ReadOrder.frontOnly)
+                        Text("tts.order.back").tag(ReadOrder.backOnly)
+                        Text("tts.order.frontThenBack").tag(ReadOrder.frontThenBack)
+                        Text("tts.order.backThenFront").tag(ReadOrder.backThenFront)
                     }
                     .tint(DS.Palette.primary)
                     .pickerStyle(.segmented)
@@ -28,7 +29,7 @@ struct FlashcardsAudioSettingsSheet: View {
             HStack(spacing: DS.Spacing.lg) {
                 DSOutlineCard {
                     VStack(alignment: .leading, spacing: 8) {
-                        HStack { Text("語速").dsType(DS.Font.caption).foregroundStyle(.secondary); Spacer(); Text(String(format: "%.2fx", store.settings.rate)).dsType(DS.Font.caption).foregroundStyle(.secondary) }
+                        HStack { Text("tts.rate").dsType(DS.Font.caption).foregroundStyle(.secondary); Spacer(); Text(String(format: "%.2fx", store.settings.rate)).dsType(DS.Font.caption).foregroundStyle(.secondary) }
                         Slider(value: Binding(get: { Double(store.settings.rate) }, set: { store.settings.rate = Float($0) }), in: 0.3...0.6)
                             .tint(DS.Palette.primary)
                     }
@@ -38,14 +39,14 @@ struct FlashcardsAudioSettingsSheet: View {
             HStack(spacing: DS.Spacing.lg) {
                 DSOutlineCard {
                     VStack(alignment: .leading, spacing: 8) {
-                        HStack { Text("段間隔").dsType(DS.Font.caption).foregroundStyle(.secondary); Spacer(); Text(String(format: "%.1fs", store.settings.segmentGap)).dsType(DS.Font.caption).foregroundStyle(.secondary) }
+                        HStack { Text("tts.segmentGap").dsType(DS.Font.caption).foregroundStyle(.secondary); Spacer(); Text(String(format: "%.1fs", store.settings.segmentGap)).dsType(DS.Font.caption).foregroundStyle(.secondary) }
                         Slider(value: Binding(get: { store.settings.segmentGap }, set: { store.settings.segmentGap = $0 }), in: 0...2, step: 0.1)
                             .tint(DS.Palette.primary)
                     }
                 }
                 DSOutlineCard {
                     VStack(alignment: .leading, spacing: 8) {
-                        HStack { Text("卡間隔").dsType(DS.Font.caption).foregroundStyle(.secondary); Spacer(); Text(String(format: "%.1fs", store.settings.cardGap)).dsType(DS.Font.caption).foregroundStyle(.secondary) }
+                        HStack { Text("tts.cardGap").dsType(DS.Font.caption).foregroundStyle(.secondary); Spacer(); Text(String(format: "%.1fs", store.settings.cardGap)).dsType(DS.Font.caption).foregroundStyle(.secondary) }
                         Slider(value: Binding(get: { store.settings.cardGap }, set: { store.settings.cardGap = $0 }), in: 0...3, step: 0.1)
                             .tint(DS.Palette.primary)
                     }
@@ -54,10 +55,10 @@ struct FlashcardsAudioSettingsSheet: View {
 
             DSOutlineCard {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("變體補位").dsType(DS.Font.caption).foregroundStyle(.secondary)
+                    Text("tts.variantFill").dsType(DS.Font.caption).foregroundStyle(.secondary)
                     Picker("補位", selection: Binding(get: { store.settings.variantFill }, set: { store.settings.variantFill = $0 })) {
-                        Text("隨機").tag(VariantFill.random)
-                        Text("循環").tag(VariantFill.wrap)
+                        Text("tts.fill.random").tag(VariantFill.random)
+                        Text("tts.fill.wrap").tag(VariantFill.wrap)
                     }
                     .tint(DS.Palette.primary)
                     .pickerStyle(.segmented)
@@ -66,7 +67,7 @@ struct FlashcardsAudioSettingsSheet: View {
 
             HStack {
                 Spacer()
-                Button("開始播放") {
+                Button(String(localized: "tts.start", locale: locale)) {
                     onStart(store.settings)
                     dismiss()
                 }
@@ -83,8 +84,8 @@ struct FlashcardsAudioSettingsSheet: View {
 
     private func summaryText() -> String {
         let s = store.settings
-        let order: String = s.readOrder == .frontOnly ? "Front" : s.readOrder == .backOnly ? "Back" : (s.readOrder == .frontThenBack ? "Front→Back" : "Back→Front")
-        let fill: String = s.variantFill == .random ? "隨機" : "循環"
-        return "\(order) • \(String(format: "%.2fx", s.rate)) • 段 \(String(format: "%.1fs", s.segmentGap)) • 卡 \(String(format: "%.1fs", s.cardGap)) • \(fill)"
+        let order: String = s.readOrder == .frontOnly ? String(localized: "tts.order.front", locale: locale) : s.readOrder == .backOnly ? String(localized: "tts.order.back", locale: locale) : (s.readOrder == .frontThenBack ? String(localized: "tts.order.frontThenBack", locale: locale) : String(localized: "tts.order.backThenFront", locale: locale))
+        let fill: String = s.variantFill == .random ? String(localized: "tts.fill.random", locale: locale) : String(localized: "tts.fill.wrap", locale: locale)
+        return "\(order) • \(String(format: "%.2fx", s.rate)) • \(String(localized: "tts.segment.short", locale: locale)) \(String(format: "%.1fs", s.segmentGap)) • \(String(localized: "tts.card.short", locale: locale)) \(String(format: "%.1fs", s.cardGap)) • \(fill)"
     }
 }

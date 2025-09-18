@@ -6,6 +6,7 @@ struct WorkspaceListView: View {
     @EnvironmentObject private var savedStore: SavedErrorsStore
     @EnvironmentObject private var router: RouterStore
     @EnvironmentObject private var bannerCenter: BannerCenter
+    @Environment(\.locale) private var locale
     @State private var showSavedSheet = false // legacy: replaced by NavigationLink
 
     // Rename state
@@ -30,7 +31,7 @@ struct WorkspaceListView: View {
                     DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.border))
                         .padding(.vertical, DS.Spacing.sm)
 
-                    ShelfGrid(title: "Workspaces", columns: cols) {
+                    ShelfGrid(title: String(localized: "home.workspaces", locale: locale), columns: cols) {
 
                     ForEach(store.workspaces) { ws in
                         WorkspaceItemLink(ws: ws, vm: store.vm(for: ws.id), store: store, draggingID: $draggingID) {
@@ -59,7 +60,7 @@ struct WorkspaceListView: View {
             // 後備 drop：若使用者把項目拖到空白處或邊緣放下，確保 draggingID 能被清除
             .onDrop(of: [.text], delegate: ClearDragStateDropDelegate(draggingID: $draggingID))
             .background(DS.Palette.background)
-            .navigationTitle("Workspace")
+            .navigationTitle(Text("nav.workspace"))
             .navigationDestination(for: Route.self) { route in
                 switch route {
                 case .workspace(let id):
@@ -158,12 +159,13 @@ private struct WorkspaceItemLink: View {
     var onRename: () -> Void
     var onDelete: () -> Void
     @EnvironmentObject private var savedStore: SavedErrorsStore
+    @Environment(\.locale) private var locale
 
     var status: String {
-        if vm.isLoading { return "批改中…" }
-        if vm.response != nil { return "已批改" }
-        if !(vm.inputZh.isEmpty && vm.inputEn.isEmpty) { return "已輸入" }
-        return "空白"
+        if vm.isLoading { return String(localized: "workspace.status.loading", locale: locale) }
+        if vm.response != nil { return String(localized: "workspace.status.graded", locale: locale) }
+        if !(vm.inputZh.isEmpty && vm.inputEn.isEmpty) { return String(localized: "workspace.status.input", locale: locale) }
+        return String(localized: "workspace.status.empty", locale: locale)
     }
 
     var statusColor: Color {
@@ -180,8 +182,8 @@ private struct WorkspaceItemLink: View {
         } label: {
             WorkspaceCard(name: ws.name, status: status, statusColor: statusColor)
                 .contextMenu {
-                    Button("重新命名") { onRename() }
-                    Button("刪除", role: .destructive) { onDelete() }
+                    Button(String(localized: "action.rename")) { onRename() }
+                    Button(String(localized: "action.delete"), role: .destructive) { onDelete() }
                 }
                 // 移除長按手勢避免與拖曳啟動衝突（改由 context menu）
         }
@@ -224,7 +226,7 @@ private struct AddWorkspaceCard: View {
     var body: some View {
         VStack(spacing: 8) {
             Image(systemName: "plus").font(.title2)
-            Text("新增 Workspace").dsType(DS.Font.caption).foregroundStyle(.secondary)
+            Text("quick.addWorkspace").dsType(DS.Font.caption).foregroundStyle(.secondary)
         }
         .frame(minHeight: 96)
         .frame(maxWidth: .infinity)
@@ -239,6 +241,7 @@ private struct AddWorkspaceCard: View {
 }
 
 private struct FlashcardsEntryCard: View {
+    @Environment(\.locale) private var locale
     var body: some View {
         DSOutlineCard {
             VStack(alignment: .leading, spacing: DS.Spacing.md) {
@@ -247,7 +250,7 @@ private struct FlashcardsEntryCard: View {
                         .font(.title3)
                         .foregroundStyle(DS.Brand.scheme.provence.opacity(0.85))
                         .frame(width: 28)
-                    Text("單字卡")
+                    Text("quick.flashcards.title")
                         .dsType(DS.Font.serifBody)
                         .fontWeight(.semibold)
                     Spacer()
@@ -255,7 +258,7 @@ private struct FlashcardsEntryCard: View {
                         .foregroundStyle(.tertiary)
                 }
                 DSSeparator(color: DS.Palette.border.opacity(0.12))
-                Text("Markdown 正反面")
+                Text("quick.flashcards.subtitle")
                     .dsType(DS.Font.caption)
                     .foregroundStyle(.secondary)
             }
@@ -269,9 +272,10 @@ private struct QuickActionsRow: View {
     @EnvironmentObject private var router: RouterStore
     @EnvironmentObject private var localBank: LocalBankStore
     @EnvironmentObject private var localProgress: LocalBankProgressStore
+    @Environment(\.locale) private var locale
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            DSSectionHeader(title: "快速功能", subtitle: nil, accentUnderline: true)
+            DSSectionHeader(title: String(localized: "quick.title", locale: locale), subtitle: nil, accentUnderline: true)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
                     NavigationLink { FlashcardDecksView() } label: { FlashcardsEntryCard().frame(width: 220) }
@@ -290,6 +294,8 @@ private struct QuickActionsRow: View {
                         } label: { BankBooksEntryCard().frame(width: 220) }
                             .buttonStyle(DSCardLinkStyle())
                     }
+                    NavigationLink { SettingsView() } label: { SettingsEntryCard().frame(width: 220) }
+                        .buttonStyle(DSCardLinkStyle())
                 }
                 .padding(.horizontal, 2)
             }
@@ -298,6 +304,7 @@ private struct QuickActionsRow: View {
 }
 
 private struct BankBooksEntryCard: View {
+    @Environment(\.locale) private var locale
     var body: some View {
         DSOutlineCard {
             VStack(alignment: .leading, spacing: DS.Spacing.md) {
@@ -306,7 +313,7 @@ private struct BankBooksEntryCard: View {
                         .font(.title3)
                         .foregroundStyle(DS.Brand.scheme.stucco.opacity(0.85))
                         .frame(width: 28)
-                    Text("題庫本")
+                    Text("quick.bank.title")
                         .dsType(DS.Font.serifBody)
                         .fontWeight(.semibold)
                     Spacer()
@@ -314,7 +321,34 @@ private struct BankBooksEntryCard: View {
                         .foregroundStyle(.tertiary)
                 }
                 DSSeparator(color: DS.Palette.border.opacity(0.12))
-                Text("本機題庫（離線）／雲端瀏覽複製")
+                Text("quick.bank.subtitle")
+                    .dsType(DS.Font.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(minHeight: 104)
+        }
+    }
+}
+
+private struct SettingsEntryCard: View {
+    @Environment(\.locale) private var locale
+    var body: some View {
+        DSOutlineCard {
+            VStack(alignment: .leading, spacing: DS.Spacing.md) {
+                HStack(spacing: 10) {
+                    Image(systemName: "gearshape")
+                        .font(.title3)
+                        .foregroundStyle(DS.Palette.primary.opacity(0.85))
+                        .frame(width: 28)
+                    Text("quick.settings.title")
+                        .dsType(DS.Font.serifBody)
+                        .fontWeight(.semibold)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .foregroundStyle(.tertiary)
+                }
+                DSSeparator(color: DS.Palette.border.opacity(0.12))
+                Text("quick.settings.subtitle")
                     .dsType(DS.Font.caption)
                     .foregroundStyle(.secondary)
             }
@@ -343,6 +377,7 @@ private struct StatusBadge: View {
 
 private struct RenameWorkspaceSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.locale) private var locale
     @State private var text: String
     let onDone: (String) -> Void
     init(name: String, onDone: @escaping (String) -> Void) {
@@ -351,13 +386,13 @@ private struct RenameWorkspaceSheet: View {
     }
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("重新命名").dsType(DS.Font.section)
-            TextField("名稱", text: $text)
+            Text(String(localized: "action.rename", locale: locale)).dsType(DS.Font.section)
+            TextField(String(localized: "field.name", locale: locale), text: $text)
                 .textFieldStyle(.roundedBorder)
             HStack {
                 Spacer()
-                Button("取消") { dismiss() }
-                Button("完成") {
+                Button(String(localized: "action.cancel", locale: locale)) { dismiss() }
+                Button(String(localized: "action.done", locale: locale)) {
                     let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
                     if !trimmed.isEmpty { onDone(trimmed) }
                     dismiss()

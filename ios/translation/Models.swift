@@ -10,13 +10,13 @@ enum ErrorType: String, Codable, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var displayName: String {
+    var displayName: LocalizedStringKey {
         switch self {
-        case .morphological: return "形態"
-        case .syntactic: return "句法"
-        case .lexical: return "詞彙"
-        case .phonological: return "語音/拼寫"
-        case .pragmatic: return "語用"
+        case .morphological: return LocalizedStringKey("error.type.morphological")
+        case .syntactic: return LocalizedStringKey("error.type.syntactic")
+        case .lexical: return LocalizedStringKey("error.type.lexical")
+        case .phonological: return LocalizedStringKey("error.type.phonological")
+        case .pragmatic: return LocalizedStringKey("error.type.pragmatic")
         }
     }
 
@@ -80,6 +80,8 @@ struct BankItem: Codable, Identifiable, Equatable {
     var zh: String
     var hints: [BankHint]
     var suggestions: [BankSuggestion]
+    // 教師提示（非結構化段落），作為批改上下文提供給後端
+    var suggestion: String? = nil
     var tags: [String]? = nil
     var difficulty: Int = 1 // 1-5
     // 後端若帶 completed（需附 deviceId 查詢）

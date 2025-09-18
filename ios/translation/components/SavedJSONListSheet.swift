@@ -16,6 +16,7 @@ struct SavedJSONListSheet: View {
     @State private var expanded: Set<UUID> = []
     // Two temporary stashes: left/right
     @State private var activeStash: SavedStash = .left
+    @Environment(\.locale) private var locale
 
     var body: some View {
             Group {
@@ -23,7 +24,7 @@ struct SavedJSONListSheet: View {
                     VStack(spacing: 12) {
                         // 操作列：左右切換 + 清空/儲存（空狀態也顯示，方便切換）
                         HStack(spacing: DS.Spacing.md) {
-                            Button("清空", role: .destructive) { store.clear(activeStash) }
+                            Button(String(localized: "saved.clear", locale: locale), role: .destructive) { store.clear(activeStash) }
                                 .buttonStyle(DSSecondaryButtonCompact())
                                 .disabled(isSaving)
                             Spacer(minLength: 0)
@@ -39,7 +40,7 @@ struct SavedJSONListSheet: View {
                                     .disabled(activeStash == .right)
                             }
                             Spacer(minLength: 0)
-                            Button("儲存單字卡") { proposedName = "未命名"; showSaveDeckSheet = true }
+                            Button { proposedName = String(localized: "deck.untitled", locale: locale); showSaveDeckSheet = true } label: { Text("saved.saveDeck") }
                                 .buttonStyle(DSSecondaryButtonCompact())
                                 .disabled(isSaving || filteredDecoded.isEmpty)
                         }
@@ -64,7 +65,7 @@ struct SavedJSONListSheet: View {
                     ScrollView {
                         // 操作列：左右切換 + 清空/儲存
                         HStack(spacing: DS.Spacing.md) {
-                            Button("清空", role: .destructive) { store.clear(activeStash) }
+                            Button(String(localized: "saved.clear", locale: locale), role: .destructive) { store.clear(activeStash) }
                                 .buttonStyle(DSSecondaryButtonCompact())
                                 .disabled(isSaving)
                             Spacer(minLength: 0)
@@ -85,7 +86,7 @@ struct SavedJSONListSheet: View {
                                 .disabled(activeStash == .right)
                             }
                             Spacer(minLength: 0)
-                            Button("儲存單字卡") { proposedName = "未命名"; showSaveDeckSheet = true }
+                            Button { proposedName = String(localized: "deck.untitled", locale: locale); showSaveDeckSheet = true } label: { Text("saved.saveDeck") }
                                 .buttonStyle(DSSecondaryButtonCompact())
                                 .disabled(isSaving || filteredDecoded.isEmpty)
                         }
@@ -105,7 +106,7 @@ struct SavedJSONListSheet: View {
                 }
             }
             }
-            .navigationTitle("已儲存 JSON")
+            .navigationTitle(Text("nav.savedJSON"))
             .navigationBarBackButtonHidden(isSaving)
             .sheet(isPresented: $showSaveDeckSheet) {
                 SaveDeckNameSheet(name: proposedName, count: filteredDecoded.count, isSaving: isSaving) { action in
@@ -121,7 +122,7 @@ struct SavedJSONListSheet: View {
             .alert(saveError ?? "", isPresented: Binding(get: { saveError != nil }, set: { _ in saveError = nil })) {}
             // 進行中轉圈圈（不會被中斷）；顯示在本 sheet 之上
             .overlay(alignment: .center) {
-                if isSaving { LoadingOverlay(text: "製作中…") }
+                if isSaving { LoadingOverlay(textKey: "loading.making") }
             }
             // 橫幅位階最高：在本 sheet 也疊一層 BannerHost
             .overlay(alignment: .bottomTrailing) {
@@ -194,7 +195,7 @@ private extension SavedJSONListSheet {
     }
 
     var filteredDecoded: [DecodedRecord] { decoded.filter { $0.stash == activeStash } }
-    var emptyText: String { activeStash == .left ? "左暫存尚未儲存任何錯誤" : "右暫存尚未儲存任何錯誤" }
+    var emptyText: String { String(localized: "saved.empty", locale: locale) }
     var currentCount: Int { store.count(in: activeStash) }
     var otherCount: Int { store.count(in: activeStash == .left ? .right : .left) }
 
@@ -204,7 +205,7 @@ private extension SavedJSONListSheet {
         if rows.isEmpty {
             VStack(spacing: 12) {
                 Image(systemName: "tray").font(.largeTitle).foregroundStyle(.secondary)
-                Text(stash == .left ? "左暫存尚未儲存任何錯誤" : "右暫存尚未儲存任何錯誤").foregroundStyle(.secondary)
+                Text(String(localized: "saved.empty", locale: locale)).foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, minHeight: 300)
         } else {
@@ -255,6 +256,7 @@ private struct SavedErrorRowCard: View {
     let onDelete: () -> Void
     @State private var didCopy = false
     @State private var showDeleteConfirm = false
+    @Environment(\.locale) private var locale
 
     var body: some View {
         DSCard {
@@ -268,7 +270,7 @@ private struct SavedErrorRowCard: View {
                             .lineLimit(1)
                             .foregroundStyle(.primary)
                     } else {
-                        Text("無法解析此筆資料")
+                        Text(String(localized: "saved.unparsable", locale: locale))
                             .foregroundStyle(.secondary)
                     }
                     Spacer(minLength: 0)
@@ -292,9 +294,9 @@ private struct SavedErrorRowCard: View {
                                 SuggestionChip(text: s, color: p.error.type.color)
                             }
                             Group {
-                                Text("中文：\(p.inputZh)").dsType(DS.Font.caption).foregroundStyle(.secondary)
-                                Text("原句：\(p.inputEn)").dsType(DS.Font.body)
-                                Text("修正版：\(p.correctedEn)").dsType(DS.Font.body)
+                                Text(String(localized: "label.zhPrefix", locale: locale) + p.inputZh).dsType(DS.Font.caption).foregroundStyle(.secondary)
+                                Text(String(localized: "label.enOriginalPrefix", locale: locale) + p.inputEn).dsType(DS.Font.body)
+                                Text(String(localized: "label.enCorrectedPrefix", locale: locale) + p.correctedEn).dsType(DS.Font.body)
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -307,18 +309,18 @@ private struct SavedErrorRowCard: View {
                                         onCopy(); Haptics.success(); withAnimation(DS.AnimationToken.subtle) { didCopy = true }
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { withAnimation { didCopy = false } }
                                     } label: {
-                                        if didCopy { Label("已複製", systemImage: "checkmark.seal.fill") }
-                                        else { Label("複製JSON", systemImage: "doc.on.doc") }
+                                        if didCopy { Label(String(localized: "action.copied", locale: locale), systemImage: "checkmark.seal.fill") }
+                                        else { Label(String(localized: "action.copyJSON", locale: locale), systemImage: "doc.on.doc") }
                                     }
                                         .buttonStyle(DSSecondaryButtonCompact())
-                                    Button(role: .destructive) { showDeleteConfirm = true } label: { Label("刪除", systemImage: "trash") }
+                                    Button(role: .destructive) { showDeleteConfirm = true } label: { Label(String(localized: "action.delete", locale: locale), systemImage: "trash") }
                                         .buttonStyle(DSSecondaryButtonCompact())
                                 }
                             }
                             .padding(.top, 2)
-                            .confirmationDialog("確定要刪除這筆紀錄嗎？", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
-                                Button("刪除", role: .destructive) { onDelete(); Haptics.warning() }
-                                Button("取消", role: .cancel) {}
+                            .confirmationDialog(String(localized: "saved.confirm.delete", locale: locale), isPresented: $showDeleteConfirm, titleVisibility: .visible) {
+                                Button(String(localized: "action.delete", locale: locale), role: .destructive) { onDelete(); Haptics.warning() }
+                                Button(String(localized: "action.cancel", locale: locale), role: .cancel) {}
                             }
                         }
                         .transition(.opacity)
@@ -339,20 +341,20 @@ private struct SavedErrorRowCard: View {
                                     onCopy(); Haptics.success(); withAnimation(DS.AnimationToken.subtle) { didCopy = true }
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { withAnimation { didCopy = false } }
                                 } label: {
-                                    if didCopy { Label("已複製", systemImage: "checkmark.seal.fill") }
-                                    else { Label("複製JSON", systemImage: "doc.on.doc") }
+                                    if didCopy { Label(String(localized: "action.copied", locale: locale), systemImage: "checkmark.seal.fill") }
+                                    else { Label(String(localized: "action.copyJSON", locale: locale), systemImage: "doc.on.doc") }
                                 }
                                     .buttonStyle(DSSecondaryButtonCompact())
-                                Button(role: .destructive) { showDeleteConfirm = true } label: { Label("刪除", systemImage: "trash") }
+                                Button(role: .destructive) { showDeleteConfirm = true } label: { Label(String(localized: "action.delete", locale: locale), systemImage: "trash") }
                                     .buttonStyle(DSSecondaryButtonCompact())
                             }
                         }
                         .padding(.top, 2)
                         .transition(.opacity)
-                        .confirmationDialog("確定要刪除這筆紀錄嗎？", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
-                            Button("刪除", role: .destructive) { onDelete(); Haptics.warning() }
-                            Button("取消", role: .cancel) {}
-        }
+                        .confirmationDialog(String(localized: "saved.confirm.delete", locale: locale), isPresented: $showDeleteConfirm, titleVisibility: .visible) {
+                            Button(String(localized: "action.delete", locale: locale), role: .destructive) { onDelete(); Haptics.warning() }
+                            Button(String(localized: "action.cancel", locale: locale), role: .cancel) {}
+                        }
         .zIndex(expanded ? 1 : 0)
         .animation(DS.AnimationToken.subtle, value: expanded)
     }
@@ -376,6 +378,7 @@ private struct SavedErrorRowCard: View {
 private struct SaveDeckNameSheet: View {
     enum Action { case cancel, save(String) }
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.locale) private var locale
     @State private var text: String
     let count: Int
     let isSaving: Bool
@@ -388,17 +391,17 @@ private struct SaveDeckNameSheet: View {
     }
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("儲存單字卡")
+            Text(String(localized: "saved.saveDeck", locale: locale))
                 .dsType(DS.Font.section)
-            Text("將 \(count) 筆已儲存內容整理為卡片集。請命名：")
+            Text(String(localized: "saved.saveDeck.prompt", locale: locale) + " \(count)")
                 .dsType(DS.Font.caption)
                 .foregroundStyle(.secondary)
-            TextField("未命名", text: $text)
+            TextField(String(localized: "deck.untitled", locale: locale), text: $text)
                 .textFieldStyle(.roundedBorder)
             HStack {
                 Spacer()
-                Button("取消") { onAction(.cancel) }
-                Button(isSaving ? "製作中…" : "儲存") {
+                Button(String(localized: "action.cancel", locale: locale)) { onAction(.cancel) }
+                Button(isSaving ? String(localized: "loading.making", locale: locale) : String(localized: "action.save", locale: locale)) {
                     onAction(.save(text))
                 }
                 .disabled(isSaving)

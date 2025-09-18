@@ -20,16 +20,17 @@ struct ContentView: View {
     enum Field { case zh, en }
     @State private var showSavedSheet: Bool = false // legacy; replaced by NavigationLink
 
+    @Environment(\.locale) private var locale
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: DS.Spacing.lg) {
                     HStack(alignment: .firstTextBaseline) {
-                        DSSectionHeader(title: "中文原文", subtitle: "輸入要翻成英文的句子", accentUnderline: true)
+                        DSSectionHeader(title: String(localized: "content.zh.title", locale: locale), subtitle: String(localized: "content.zh.subtitle", locale: locale), accentUnderline: true)
                         Spacer()
                         NavigationLink {
                             BankBooksView(vm: vm)
                         } label: {
-                            Label("題庫", systemImage: "books.vertical")
+                            Label { Text("content.bank") } icon: { Image(systemName: "books.vertical") }
                         }
                         .buttonStyle(DSSecondaryButton())
                         .frame(width: 92)
@@ -41,9 +42,9 @@ struct ContentView: View {
 
                     HintListSection(hints: vm.practicedHints, isExpanded: $vm.showPracticedHints)
 
-                    DSSectionHeader(title: "我的英文", subtitle: "先輸入你的嘗試，再按下批改", accentUnderline: true)
+                    DSSectionHeader(title: String(localized: "content.en.title", locale: locale), subtitle: String(localized: "content.en.subtitle", locale: locale), accentUnderline: true)
                     DSCard {
-                        DSTextArea(text: $vm.inputEn, minHeight: 140, placeholder: "例如：I go to the shop yesterday to buy some fruits.", isFocused: focused == .en, ruled: true)
+                        DSTextArea(text: $vm.inputEn, minHeight: 140, placeholder: String(localized: "content.en.placeholder", locale: locale), isFocused: focused == .en, ruled: true)
                             .focused($focused, equals: .en)
                     }
 
@@ -87,10 +88,10 @@ struct ContentView: View {
                                     HStack(spacing: 8) {
                                         ProgressView()
                                             .tint(.white)
-                                        Text("批改中…")
+                                        Text("content.correcting")
                                     }
                                 } else {
-                                    Label("批改", systemImage: "checkmark.seal.fill")
+                                    Label { Text("content.correct") } icon: { Image(systemName: "checkmark.seal.fill") }
                                 }
                             }
                             .frame(maxWidth: .infinity)
@@ -103,7 +104,7 @@ struct ContentView: View {
                             Task { await vm.loadNextPractice() }
                             focused = .en
                         } label: {
-                            Label("下一題", systemImage: "arrow.right.circle.fill")
+                            Label { Text("content.next") } icon: { Image(systemName: "arrow.right.circle.fill") }
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.9)
                         }
@@ -128,7 +129,7 @@ struct ContentView: View {
             }
             .disabled(vm.isLoading)
             .background(DS.Palette.background)
-            .navigationTitle("中英翻譯批改")
+            .navigationTitle(Text("nav.translate"))
             .toolbar {
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
@@ -145,7 +146,7 @@ struct ContentView: View {
                     } label: {
                         Image(systemName: "tray.full")
                     }
-                    .accessibilityLabel("查看已儲存的錯誤 JSON")
+                    .accessibilityLabel(Text("a11y.openSavedJSON"))
                 }
             }
         .overlay(alignment: .center) {

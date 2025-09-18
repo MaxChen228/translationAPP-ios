@@ -3,6 +3,7 @@ import SwiftUI
 struct ErrorDetailPopover: View {
     var err: ErrorItem
     var onApply: (() -> Void)?
+    @Environment(\.locale) private var locale
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -16,7 +17,7 @@ struct ErrorDetailPopover: View {
                 .dsType(DS.Font.body)
             if let s = err.suggestion, !s.isEmpty {
                 HStack(spacing: 8) {
-                    Text("建議")
+                    Text("error.suggestion")
                         .foregroundStyle(.secondary)
                         .dsType(DS.Font.caption)
                     SuggestionChip(text: s, color: err.type.color)
@@ -25,7 +26,7 @@ struct ErrorDetailPopover: View {
                     Button {
                         onApply()
                     } label: {
-                        Label("套用建議", systemImage: "arrow.right.circle.fill")
+                        Label(String(localized: "error.applySuggestion", locale: locale), systemImage: "arrow.right.circle.fill")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(DSPrimaryButton())

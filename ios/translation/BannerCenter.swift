@@ -6,8 +6,10 @@ final class BannerCenter: ObservableObject {
         withAnimation(DS.AnimationToken.snappy) {
             banner = BannerItem(title: title, subtitle: subtitle, actionTitle: actionTitle, action: action)
         }
-        // Auto dismiss after 2 seconds if no interaction
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+        // Auto dismiss after user-configured seconds (defaults to 2s)
+        let seconds = UserDefaults.standard.object(forKey: "settings.bannerSeconds") as? Double ?? 2.0
+        let delay = max(0.5, min(10.0, seconds))
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
             withAnimation(DS.AnimationToken.subtle) { self?.banner = nil }
         }
     }
