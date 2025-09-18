@@ -3,13 +3,13 @@
 These guidelines help contributors and automation agents work consistently in this SwiftUI iOS app.
 
 ## Project Structure & Module Organization
-- App code: `translation/` (e.g., `translationApp.swift`, `ContentView.swift`, `Assets.xcassets`).
-- Unit tests: `translationTests/` (Swift Testing framework).
-- UI tests: `translationUITests/` (XCTest UI tests).
-- Xcode project: `translation.xcodeproj` (single app target and scheme: `translation`).
+- App code: `ios/translation/` (e.g., `translationApp.swift`, `ContentView.swift`, `Assets.xcassets`).
+- Unit tests: `ios/translationTests/` (Swift Testing framework).
+- UI tests: `ios/translationUITests/` (XCTest UI tests).
+- Xcode project: `ios/translation.xcodeproj` (single app target and scheme: `translation`).
 
 ## Build, Test, and Development Commands
-- Open project: `open translation.xcodeproj` (or open in Xcode and press Cmd+R to run).
+- Open project: `open ios/translation.xcodeproj` (or open in Xcode and press Cmd+R to run).
 - Build (Debug): `xcodebuild -scheme translation -configuration Debug build`.
 - Run unit + UI tests (simulator):
   - `xcodebuild test -scheme translation -destination 'platform=iOS Simulator,name=iPhone 15'`.
@@ -23,8 +23,8 @@ These guidelines help contributors and automation agents work consistently in th
 - Use explicit access control (`internal`/`private`) where meaningful.
 
 ## Testing Guidelines
-- Unit tests: Swift Testing (`import Testing`), colocate helpers in `translationTests/`.
-- UI tests: XCTest in `translationUITests/`.
+- Unit tests: Swift Testing (`import Testing`), colocate helpers in `ios/translationTests/`.
+- UI tests: XCTest in `ios/translationUITests/`.
 - Name tests descriptively; one behavior per test. Aim for basic coverage of view logic and app launch.
 - Run: Cmd+U in Xcode or the `xcodebuild test` command above.
 
