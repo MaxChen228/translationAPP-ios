@@ -9,6 +9,7 @@ struct FlashcardDecksView: View {
     @State private var renaming: PersistedFlashcardDeck? = nil
     @State private var renamingFolder: DeckFolder? = nil
     @State private var draggingDeckID: UUID? = nil
+    @Environment(\.locale) private var locale
 
     var body: some View {
         ScrollView {
@@ -51,7 +52,7 @@ struct FlashcardDecksView: View {
 
                     // New deck tile (similar look to NewDeckFolderCard)
                     Button {
-                        let deck = decksStore.add(name: "未命名", cards: [])
+                        let deck = decksStore.add(name: String(localized: "deck.untitled", locale: locale), cards: [])
                         renaming = deck
                     } label: { NewDeckCard() }
                     .buttonStyle(.plain)
@@ -177,10 +178,11 @@ private struct DeckCard: View {
 
 // A dashed-outline card to create a new deck, visually consistent with NewDeckFolderCard.
 private struct NewDeckCard: View {
+    @Environment(\.locale) private var locale
     var body: some View {
         VStack(spacing: 8) {
             Image(systemName: "doc.badge.plus").font(.title3)
-            Text("新單字卡集").dsType(DS.Font.caption).foregroundStyle(.secondary)
+            Text(String(localized: "deck.new", locale: locale)).dsType(DS.Font.caption).foregroundStyle(.secondary)
         }
         .frame(minHeight: 96)
         .frame(maxWidth: .infinity)

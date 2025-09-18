@@ -51,6 +51,8 @@
 "cloud.copyToLocal" = "Copy to Local";
 "nav.cloudDecks" = "Browse Decks";
 "nav.cloudBooks" = "Browse Banks";
+"banner.copiedToLocal.title" = "Copied to Local";
+"banner.copyFailed.title" = "Copy failed";
 
 /* Decks / Flashcards */
 "deck.detail.subtitle" = "Deck details";
@@ -75,6 +77,9 @@
 "flashcards.editor.back" = "Back (single line with (A | B))";
 "flashcards.editor.backNote" = "Back note (optional)";
 "flashcards.editor.delete" = "Delete Card";
+"flashcards.level" = "Level %d";
+"flashcards.empty" = "No cards yet";
+"flashcards.empty.hint" = "Add or import cards later.";
 
 /* Flashcards Settings */
 "flashcards.settings.mode" = "Review Mode";
@@ -120,6 +125,11 @@
 "error.applySuggestion" = "Apply suggestion";
 "field.name" = "Name";
 "deck.mock.usageLabel" = "Usage";
+"label.progress" = "Progress";
+"label.completed" = "Completed";
+"a11y.copyCorrected" = "Copy corrected text";
+"a11y.scoreLabel" = "Score %d pts";
+"deck.new" = "New Deck";
 
 /* Translation Flow (Phase 2) */
 "nav.translate" = "Translation";
@@ -186,3 +196,4 @@
 "deck.cards.count" = "%d cards";
 "folder.decks.count" = "%d decks";
 "banner.deckSaved.title" = "Deck saved";
+"a11y.copyCorrected" = "Copy corrected text";

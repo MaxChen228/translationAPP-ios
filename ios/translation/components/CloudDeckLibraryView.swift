@@ -27,7 +27,7 @@ struct CloudDeckLibraryView: View {
                             HStack(alignment: .center, spacing: 12) {
                                 VStack(alignment: .leading, spacing: 6) {
                                     Text(d.name).dsType(DS.Font.section)
-                                    Text("共 \(d.count) 張").dsType(DS.Font.caption).foregroundStyle(.secondary)
+                                    Text(String(format: String(localized: "deck.cards.count", locale: locale), d.count)).dsType(DS.Font.caption).foregroundStyle(.secondary)
                                 }
                                 Spacer(minLength: 0)
                                 Button { Task { await copyDeck(d) } } label: { Label { Text("cloud.copyToLocal") } icon: { Image(systemName: "arrow.down.doc.fill") } }
@@ -64,9 +64,10 @@ struct CloudDeckLibraryView: View {
         do {
             let detail = try await service.fetchDeckDetail(id: d.id)
             _ = decksStore.add(name: detail.name, cards: detail.cards)
-            bannerCenter.show(title: "已複製到本機", subtitle: "\(detail.name) • \(detail.cards.count) 張")
+            let subtitle = "\(detail.name) • " + String(format: String(localized: "deck.cards.count", locale: locale), detail.cards.count)
+            bannerCenter.show(title: String(localized: "banner.copiedToLocal.title", locale: locale), subtitle: subtitle)
         } catch {
-            bannerCenter.show(title: "複製失敗", subtitle: (error as NSError).localizedDescription)
+            bannerCenter.show(title: String(localized: "banner.copyFailed.title", locale: locale), subtitle: (error as NSError).localizedDescription)
         }
     }
 }

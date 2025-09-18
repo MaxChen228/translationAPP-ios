@@ -187,7 +187,7 @@ struct FlashcardsView: View {
                         if mode == .annotate, let deckID = deckID {
                             HStack {
                                 let level = progressStore.level(deckID: deckID, cardID: card.id)
-                                Text("精熟度 \(level)")
+                                Text(String(format: String(localized: "flashcards.level", locale: locale), level))
                                     .dsType(DS.Font.caption)
                                     .padding(.vertical, 6)
                                     .padding(.horizontal, 10)
@@ -501,14 +501,15 @@ private struct AnyButtonStyle: ButtonStyle {
 }
 
 private struct EmptyState: View {
+    @Environment(\.locale) private var locale
     var body: some View {
         DSCard {
             VStack(spacing: 8) {
                 Image(systemName: "rectangle.on.rectangle.angled").font(.title)
-                Text("尚無卡片")
+                Text(String(localized: "flashcards.empty", locale: locale))
                     .dsType(DS.Font.section)
                     .fontWeight(.semibold)
-                Text("稍後可擴充為新增 / 匯入功能。")
+                Text(String(localized: "flashcards.empty.hint", locale: locale))
                     .dsType(DS.Font.caption)
                     .foregroundStyle(.secondary)
             }

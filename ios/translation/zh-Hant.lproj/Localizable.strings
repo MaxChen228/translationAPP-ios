@@ -78,6 +78,8 @@
 "cloud.copyToLocal" = "複製到本機";
 "nav.cloudDecks" = "瀏覽單字卡集";
 "nav.cloudBooks" = "瀏覽題庫本";
+"banner.copiedToLocal.title" = "已複製到本機";
+"banner.copyFailed.title" = "複製失敗";
 
 /* 單字卡 */
 "deck.detail.subtitle" = "單字卡集詳情";
@@ -102,6 +104,9 @@
 "flashcards.editor.back" = "背面（用 (A | B) 單行）";
 "flashcards.editor.backNote" = "背面備註（可留空）";
 "flashcards.editor.delete" = "刪除卡片";
+"flashcards.level" = "精熟度 %d";
+"flashcards.empty" = "尚無卡片";
+"flashcards.empty.hint" = "稍後可擴充為新增／匯入功能。";
 
 /* 單字卡設定 */
 "flashcards.settings.mode" = "複習模式";
@@ -188,3 +193,8 @@
 "error.applySuggestion" = "套用建議";
 "field.name" = "名稱";
 "deck.mock.usageLabel" = "用法";
+"label.progress" = "進度";
+"label.completed" = "已完成";
+"a11y.copyCorrected" = "複製修正版";
+"a11y.scoreLabel" = "分數 %d 分";
+"deck.new" = "新單字卡集";

@@ -28,7 +28,7 @@ struct CloudBankLibraryView: View {
                             HStack(alignment: .center, spacing: 12) {
                                 VStack(alignment: .leading, spacing: 6) {
                                     Text(b.name).dsType(DS.Font.section)
-                                    Text("共 \(b.count) 題").dsType(DS.Font.caption).foregroundStyle(.secondary)
+                                    Text(String(format: String(localized: "bank.book.count", locale: locale), b.count)).dsType(DS.Font.caption).foregroundStyle(.secondary)
                                 }
                                 Spacer(minLength: 0)
                                 Button { Task { await copyBook(b) } } label: { Label { Text("cloud.copyToLocal") } icon: { Image(systemName: "arrow.down.doc.fill") } }
@@ -65,9 +65,10 @@ struct CloudBankLibraryView: View {
         do {
             let detail = try await service.fetchBook(name: s.name)
             localBank.addOrReplaceBook(name: detail.name, items: detail.items)
-            bannerCenter.show(title: "已複製到本機", subtitle: "\(detail.name) • \(detail.items.count) 題")
+            let subtitle = "\(detail.name) • " + String(format: String(localized: "bank.book.count", locale: locale), detail.items.count)
+            bannerCenter.show(title: String(localized: "banner.copiedToLocal.title", locale: locale), subtitle: subtitle)
         } catch {
-            bannerCenter.show(title: "複製失敗", subtitle: (error as NSError).localizedDescription)
+            bannerCenter.show(title: String(localized: "banner.copyFailed.title", locale: locale), subtitle: (error as NSError).localizedDescription)
         }
     }
 }

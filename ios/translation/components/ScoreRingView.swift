@@ -3,6 +3,8 @@ import SwiftUI
 struct ScoreRingView: View {
     var score: Int // 0...100
 
+    @Environment(\.locale) private var locale
+
     var body: some View {
         let progress = min(max(Double(score)/100.0, 0.0), 1.0)
         ZStack {
@@ -15,7 +17,7 @@ struct ScoreRingView: View {
             VStack(spacing: 2) {
                 Text("\(score)")
                     .font(.title).bold()
-                Text("分")
+                Text("label.points")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -23,7 +25,7 @@ struct ScoreRingView: View {
         .frame(width: 96, height: 96)
         .padding(.vertical, 4)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("分數 \(score) 分")
+        .accessibilityLabel(String(format: String(localized: "a11y.scoreLabel", locale: locale), score))
     }
 }
 

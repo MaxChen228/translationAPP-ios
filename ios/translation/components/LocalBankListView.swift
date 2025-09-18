@@ -9,6 +9,7 @@ struct LocalBankListView: View {
     @EnvironmentObject private var localBank: LocalBankStore
     @EnvironmentObject private var localProgress: LocalBankProgressStore
     @State private var expanded: Set<String> = []
+    @Environment(\.locale) private var locale
 
     var body: some View {
         let items = localBank.items(in: bookName)
@@ -20,7 +21,7 @@ struct LocalBankListView: View {
                     let total = items.count
                     DSOutlineCard {
                         HStack(alignment: .center) {
-                            Text("進度")
+                            Text(String(localized: "label.progress", locale: locale))
                                 .dsType(DS.Font.caption)
                                 .foregroundStyle(.secondary)
                             ProgressView(value: Double(done), total: Double(max(total, 1)))
@@ -105,10 +106,11 @@ struct LocalBankListView: View {
 
 // 重用遠端清單的完成徽章樣式
 private struct CompletionBadge: View {
+    @Environment(\.locale) private var locale
     var body: some View {
         HStack(spacing: 6) {
             Image(systemName: "checkmark.seal.fill")
-            Text("已完成")
+            Text(String(localized: "label.completed", locale: locale))
         }
         .font(.subheadline)
         .foregroundStyle(DS.Palette.primary)
@@ -116,6 +118,6 @@ private struct CompletionBadge: View {
         .padding(.horizontal, 10)
         .background(Capsule().fill(Color.clear))
         .overlay(Capsule().stroke(DS.Palette.primary.opacity(DS.Opacity.strong), lineWidth: DS.BorderWidth.regular))
-        .accessibilityLabel("已完成")
+        .accessibilityLabel(Text("label.completed"))
     }
 }

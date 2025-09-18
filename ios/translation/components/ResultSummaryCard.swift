@@ -10,6 +10,7 @@ struct ResultSummaryCard: View {
 
     @State private var showCopied = false
 
+    @Environment(\.locale) private var locale
     var body: some View {
         switch style {
         case .ring:
@@ -38,7 +39,7 @@ struct ResultSummaryCard: View {
 
     private var headerActions: some View {
         HStack(alignment: .firstTextBaseline) {
-            Text("修正版")
+            Text("result.switcher.corrected")
                 .dsType(DS.Font.section, tracking: 0.2)
                 .fontWeight(.semibold)
                 .foregroundStyle(.secondary)
@@ -55,7 +56,7 @@ struct ResultSummaryCard: View {
                 Image(systemName: "doc.on.doc")
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("複製修正版")
+            .accessibilityLabel(Text("a11y.copyCorrected"))
 
             ShareLink(item: corrected) {
                 Image(systemName: "square.and.arrow.up")
@@ -64,7 +65,7 @@ struct ResultSummaryCard: View {
         }
         .overlay(alignment: .topTrailing) {
             if showCopied {
-                Text("已複製")
+                Text(String(localized: "action.copied", locale: locale))
                     .dsType(DS.Font.caption)
                     .padding(.vertical, 6)
                     .padding(.horizontal, 10)
