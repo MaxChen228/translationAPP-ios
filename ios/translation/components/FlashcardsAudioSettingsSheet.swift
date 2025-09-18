@@ -15,7 +15,7 @@ struct FlashcardsAudioSettingsSheet: View {
             DSOutlineCard {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("tts.order").dsType(DS.Font.caption).foregroundStyle(.secondary)
-                    Picker("順序", selection: Binding(get: { s.readOrder }, set: { store.settings.readOrder = $0 })) {
+                    Picker("tts.order", selection: Binding(get: { s.readOrder }, set: { store.settings.readOrder = $0 })) {
                         Text("tts.order.front").tag(ReadOrder.frontOnly)
                         Text("tts.order.back").tag(ReadOrder.backOnly)
                         Text("tts.order.frontThenBack").tag(ReadOrder.frontThenBack)
@@ -56,7 +56,7 @@ struct FlashcardsAudioSettingsSheet: View {
             DSOutlineCard {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("tts.variantFill").dsType(DS.Font.caption).foregroundStyle(.secondary)
-                    Picker("補位", selection: Binding(get: { store.settings.variantFill }, set: { store.settings.variantFill = $0 })) {
+                    Picker("tts.variantFill", selection: Binding(get: { store.settings.variantFill }, set: { store.settings.variantFill = $0 })) {
                         Text("tts.fill.random").tag(VariantFill.random)
                         Text("tts.fill.wrap").tag(VariantFill.wrap)
                     }

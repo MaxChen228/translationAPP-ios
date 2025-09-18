@@ -35,7 +35,7 @@ struct LocalBankListView: View {
                     }
                 }
                 if items.isEmpty {
-                    EmptyStateCard(title: "本機書本為空", subtitle: "請從雲端瀏覽並複製題庫到本機。", iconSystemName: "text.book.closed")
+                    EmptyStateCard(title: String(localized: "bank.book.empty", locale: locale), subtitle: String(localized: "bank.book.empty.hint", locale: locale), iconSystemName: "text.book.closed")
                 }
                 ForEach(items.indices, id: \.self) { i in
                     if i > 0 {
@@ -80,7 +80,7 @@ struct LocalBankListView: View {
                                         vm.startLocalPractice(bookName: bookName, item: item, tag: item.tags?.first)
                                         dismiss()
                                     }
-                                } label: { Label("練習", systemImage: "play.fill") }
+                                } label: { Label(String(localized: "action.practice", locale: locale), systemImage: "play.fill") }
                                     .buttonStyle(DSSecondaryButtonCompact())
                             }
                         }

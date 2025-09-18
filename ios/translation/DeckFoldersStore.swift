@@ -19,8 +19,9 @@ final class DeckFoldersStore: ObservableObject {
 
     // MARK: - CRUD
     @discardableResult
-    func addFolder(name: String = "新資料夾") -> DeckFolder {
-        let folder = DeckFolder(id: UUID(), name: name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "新資料夾" : name, deckIDs: [])
+    func addFolder(name: String = String(localized: "folder.new")) -> DeckFolder {
+        let fallback = String(localized: "folder.new")
+        let folder = DeckFolder(id: UUID(), name: name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? fallback : name, deckIDs: [])
         folders.append(folder)
         return folder
     }
@@ -90,4 +91,3 @@ final class DeckFoldersStore: ObservableObject {
         }
     }
 }
-

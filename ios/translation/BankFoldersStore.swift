@@ -19,8 +19,9 @@ final class BankFoldersStore: ObservableObject {
 
     // MARK: - CRUD
     @discardableResult
-    func addFolder(name: String = "新資料夾") -> BankFolder {
-        let folder = BankFolder(id: UUID(), name: name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "新資料夾" : name, bookNames: [])
+    func addFolder(name: String = String(localized: "folder.new")) -> BankFolder {
+        let fallback = String(localized: "folder.new")
+        let folder = BankFolder(id: UUID(), name: name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? fallback : name, bookNames: [])
         folders.append(folder)
         return folder
     }

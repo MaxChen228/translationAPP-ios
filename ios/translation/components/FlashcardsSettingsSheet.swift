@@ -10,9 +10,10 @@ struct FlashcardsSettingsSheet: View {
             Text("nav.settings").dsType(DS.Font.section)
             VStack(alignment: .leading, spacing: 8) {
                 Text("flashcards.settings.mode").dsType(DS.Font.caption).foregroundStyle(.secondary)
-                Picker("複習模式", selection: $modeRaw) {
+                Picker("flashcards.settings.mode", selection: $modeRaw) {
                     ForEach(FlashcardsReviewMode.allCases, id: \.rawValue) { m in
-                        Text(m.rawValue).tag(m.rawValue)
+                        let label: LocalizedStringKey = (m == .annotate) ? "flashcards.mode.annotate" : "flashcards.mode.browse"
+                        Text(label).tag(m.rawValue)
                     }
                 }
                 .pickerStyle(.segmented)
