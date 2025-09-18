@@ -11,6 +11,23 @@
   - 建置（Debug）：`xcodebuild -scheme translation -configuration Debug build`
   - 單元+UI 測試：`xcodebuild test -scheme translation -destination 'platform=iOS Simulator,name=iPhone 15'`
 
+### 雲端部署（Render + GitHub）
+此專案提供 Render Blueprint，支援一鍵部署後端（FastAPI）。
+
+1) 將本 repo 推到你的 GitHub 帳號，或讓 Render 能讀取本 repo。
+2) 在 Render Dashboard 新增 Blueprint，選擇本 repo（`render.yaml` 於根目錄）。
+3) 服務設定（預設已在 blueprint）：
+   - Build Command：`pip install -r backend/requirements.txt`
+   - Start Command：`uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
+   - Health Check：`/healthz`
+   - Plan：Free（可後續升級）
+4) 環境變數（Render → Environment）：
+   - `GEMINI_API_KEY`（必要；請在 Render 介面設定）
+   - `GEMINI_MODEL=gemini-2.5-flash`（可選）
+5) 部署完成後取得 `https://<service>.onrender.com`，於 iOS App 的 Build 設定/Info.plist 設定 `BACKEND_URL`。
+
+CI：此 repo 亦包含簡單的後端健康檢查 CI（`.github/workflows/backend-ci.yml`）。
+
 ## 主要畫面與流程（新版）
 - Workspace 清單（`WorkspaceListView`）
   - 以卡片呈現多個工作分頁（Workspace），每個 Workspace 都各自保存中文/英文輸入與批改結果。
