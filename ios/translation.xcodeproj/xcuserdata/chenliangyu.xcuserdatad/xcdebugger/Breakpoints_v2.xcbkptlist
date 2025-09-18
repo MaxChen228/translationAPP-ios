@@ -18,36 +18,6 @@
             endingLineNumber = "108"
             landmarkName = "body"
             landmarkType = "24">
-            <Locations>
-               <Location
-                  uuid = "B35CBBA5-42AA-4D7C-A8ED-AE102CC8D05D - aacf04bfc9df8c3"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #2 () -&gt; translation.ShelfTileCard in closure #1 (translation.LocalBankBook) -&gt; &lt;&lt;opaque return type of SwiftUI.View.onDrag(() -&gt; __C.NSItemProvider) -&gt; some&gt;&gt;.0 in closure #4 () -&gt; SwiftUI.ForEach&lt;Swift.Array&lt;translation.LocalBankBook&gt;, Swift.String, &lt;&lt;opaque return type of SwiftUI.View.onDrag(() -&gt; __C.NSItemProvider) -&gt; some&gt;&gt;.0&gt; in closure #1 () -&gt; SwiftUI.TupleView&lt;(translation.RootDropArea, Swift.Optional&lt;translation.DSCard&lt;SwiftUI.Text&gt;&gt;, SwiftUI.LazyVGrid&lt;SwiftUI.ForEach&lt;Swift.Array&lt;translation.LocalBankBook&gt;, Swift.String, &lt;&lt;opaque return type of SwiftUI.View.onDrag(() -&gt; __C.NSItemProvider) -&gt; some&gt;&gt;.0&gt;&gt;)&gt; in closure #1 () -&gt; &lt;&lt;opaque return type of SwiftUI.View.padding(SwiftUI.Edge.Set, Swift.Optional&lt;CoreGraphics.CGFloat&gt;) -&gt; some&gt;&gt;.0 in translation.BankFolderDetailView.body.getter : some"
-                  moduleName = "translation.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/chenliangyu/Desktop/traslation/translation_ios/ios/translation/components/BankFolderViews.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "108"
-                  endingLineNumber = "108">
-               </Location>
-               <Location
-                  uuid = "B35CBBA5-42AA-4D7C-A8ED-AE102CC8D05D - b88a58224b6b96cb"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #1 () -&gt; translation.LocalBankListView in closure #1 (translation.LocalBankBook) -&gt; &lt;&lt;opaque return type of SwiftUI.View.onDrag(() -&gt; __C.NSItemProvider) -&gt; some&gt;&gt;.0 in closure #4 () -&gt; SwiftUI.ForEach&lt;Swift.Array&lt;translation.LocalBankBook&gt;, Swift.String, &lt;&lt;opaque return type of SwiftUI.View.onDrag(() -&gt; __C.NSItemProvider) -&gt; some&gt;&gt;.0&gt; in closure #1 () -&gt; SwiftUI.TupleView&lt;(translation.RootDropArea, Swift.Optional&lt;translation.DSCard&lt;SwiftUI.Text&gt;&gt;, SwiftUI.LazyVGrid&lt;SwiftUI.ForEach&lt;Swift.Array&lt;translation.LocalBankBook&gt;, Swift.String, &lt;&lt;opaque return type of SwiftUI.View.onDrag(() -&gt; __C.NSItemProvider) -&gt; some&gt;&gt;.0&gt;&gt;)&gt; in closure #1 () -&gt; &lt;&lt;opaque return type of SwiftUI.View.padding(SwiftUI.Edge.Set, Swift.Optional&lt;CoreGraphics.CGFloat&gt;) -&gt; some&gt;&gt;.0 in translation.BankFolderDetailView.body.getter : some"
-                  moduleName = "translation.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/chenliangyu/Desktop/traslation/translation_ios/ios/translation/components/BankFolderViews.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "108"
-                  endingLineNumber = "108">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

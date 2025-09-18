@@ -149,8 +149,8 @@ struct SavedJSONListSheet: View {
             _ = decksStore.add(name: resolvedName, cards: cards)
             showSaveDeckSheet = false
             // Show confirmation banner (bottom-right, via BannerHost)
-            let subtitle = "\(resolvedName) • \(cards.count) 張"
-            bannerCenter.show(title: "已儲存單字卡", subtitle: subtitle)
+            let subtitle = "\(resolvedName) • " + String(format: String(localized: "deck.cards.count", locale: locale), cards.count)
+            bannerCenter.show(title: String(localized: "banner.deckSaved.title", locale: locale), subtitle: subtitle)
         } catch {
             saveError = (error as NSError).localizedDescription
         }

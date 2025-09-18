@@ -145,6 +145,7 @@
 "hints.empty" = "No hints yet";
 "chips.all" = "All";
 "a11y.openSavedJSON" = "Open saved error JSON";
+"a11y.copyCurrentComposition" = "Copy current composition";
 
 /* Workspace status */
 "workspace.status.loading" = "Grading…";
@@ -182,3 +183,5 @@
 "deck.folder.empty" = "No decks in this folder";
 "deck.folder.hint" = "Drag decks from the root list here.";
 "deck.cards.count" = "%d cards";
+"folder.decks.count" = "%d decks";
+"banner.deckSaved.title" = "Deck saved";

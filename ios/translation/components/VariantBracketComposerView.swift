@@ -8,6 +8,7 @@ struct VariantBracketComposerView: View {
     @State private var normalized: String = ""
     var onComposedChange: ((String) -> Void)? = nil
     @EnvironmentObject private var bannerCenter: BannerCenter
+    @Environment(\.locale) private var locale
 
     init(_ phrase: String, onComposedChange: ((String) -> Void)? = nil) {
         self.phrase = phrase
@@ -52,7 +53,7 @@ struct VariantBracketComposerView: View {
                     Image(systemName: "doc.on.doc")
                 }
                 .buttonStyle(DSSecondaryButtonCompact())
-                .accessibilityLabel("複製目前組合")
+                .accessibilityLabel(Text("a11y.copyCurrentComposition"))
 
                 Text(currentCombinedText(elements: parsed.elements))
                     .dsType(DS.Font.caption)
@@ -71,7 +72,7 @@ struct VariantBracketComposerView: View {
         let str = currentCombinedText(elements: elements)
         UIPasteboard.general.string = str
         Haptics.success()
-        bannerCenter.show(title: "已複製", subtitle: str)
+        bannerCenter.show(title: String(localized: "action.copied", locale: locale), subtitle: str)
         #endif
     }
 

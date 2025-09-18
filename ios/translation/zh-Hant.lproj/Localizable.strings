@@ -58,6 +58,7 @@
 "hints.empty" = "目前沒有提示";
 "chips.all" = "全部";
 "a11y.openSavedJSON" = "查看已儲存的錯誤 JSON";
+"a11y.copyCurrentComposition" = "複製目前組合";
 
 /* 錯誤類型 */
 "error.type.morphological" = "形態";
@@ -180,6 +181,8 @@
 "deck.folder.empty" = "資料夾內尚無單字卡集";
 "deck.folder.hint" = "從根清單拖曳卡片到此資料夾即可收納。";
 "deck.cards.count" = "共 %d 張";
+"folder.decks.count" = "共 %d 個";
+"banner.deckSaved.title" = "已儲存單字卡";
 
 /* 錯誤詳情 */
 "error.applySuggestion" = "套用建議";
