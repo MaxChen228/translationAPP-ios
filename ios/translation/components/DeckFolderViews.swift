@@ -35,7 +35,7 @@ struct NewDeckFolderCard: View {
     var body: some View {
         VStack(spacing: 8) {
             Image(systemName: "folder.badge.plus").font(.title3)
-            Text(String(localized: "folder.new", locale: locale)).dsType(DS.Font.caption).foregroundStyle(.secondary)
+            Text("folder.new").dsType(DS.Font.caption).foregroundStyle(.secondary)
         }
         .frame(minHeight: 96)
         .frame(maxWidth: .infinity)

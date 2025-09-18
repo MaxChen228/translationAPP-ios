@@ -29,7 +29,7 @@ struct ResultsSectionView: View {
                 mode: $mode
             )
 
-            DSSectionHeader(title: String(localized: "results.errors.title", locale: locale), subtitle: String(localized: "results.errors.subtitle", locale: locale), accentUnderline: true)
+            DSSectionHeader(titleKey: "results.errors.title", subtitleKey: "results.errors.subtitle", accentUnderline: true)
             TypeChipsView(errors: res.errors, selection: $filterType)
 
             if errors.isEmpty {

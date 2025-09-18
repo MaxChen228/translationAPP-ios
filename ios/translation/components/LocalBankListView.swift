@@ -80,7 +80,7 @@ struct LocalBankListView: View {
                                         vm.startLocalPractice(bookName: bookName, item: item, tag: item.tags?.first)
                                         dismiss()
                                     }
-                                } label: { Label(String(localized: "action.practice", locale: locale), systemImage: "play.fill") }
+                                } label: { Label { Text("action.practice") } icon: { Image(systemName: "play.fill") } }
                                     .buttonStyle(DSSecondaryButtonCompact())
                             }
                         }

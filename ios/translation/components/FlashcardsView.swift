@@ -64,6 +64,7 @@ struct FlashcardsView: View {
     @EnvironmentObject private var progressStore: FlashcardProgressStore
     @StateObject private var speech = SpeechEngine()
     @StateObject private var ttsStore = TTSSettingsStore()
+    @StateObject private var instant = InstantSpeaker()
     @State private var isEditing: Bool = false
     @State private var draft: Flashcard? = nil
     @State private var errorText: String? = nil
@@ -79,6 +80,7 @@ struct FlashcardsView: View {
     @State private var showAudioSheet = false
     @State private var lastTTSSettings: TTSSettings? = nil
     @State private var currentBackComposed: String = ""
+    @State private var currentBackComposedCardID: UUID? = nil
     @Environment(\.locale) private var locale
 
     init(title: String = "單字卡", cards: [Flashcard] = FlashcardsStore.defaultCards, deckID: UUID? = nil, startIndex: Int = 0, startEditing: Bool = false) {
@@ -92,8 +94,8 @@ struct FlashcardsView: View {
         GeometryReader { geo in
             VStack(alignment: .leading, spacing: DS.Spacing.lg) {
                 DSSectionHeader(
-                    title: String(localized: "flashcards.title", locale: locale),
-                    subtitle: String(localized: "flashcards.subtitle", locale: locale),
+                    titleKey: "flashcards.title",
+                    subtitleKey: "flashcards.subtitle",
                     accentUnderline: true,
                     accentMatchTitle: true
                 )
@@ -132,25 +134,28 @@ struct FlashcardsView: View {
                                 }
                             } back: {
                                 VStack(alignment: .leading, spacing: 10) {
-                                    VariantBracketComposerView(card.back, onComposedChange: { s in currentBackComposed = s })
+                                    VariantBracketComposerView(card.back, onComposedChange: { s in
+                                        currentBackComposed = s
+                                        currentBackComposedCardID = card.id
+                                    })
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                     if let note = card.backNote, !note.isEmpty {
                                         NoteText(text: note)
+                                    }
+                                }
+                            } overlay: {
+                                PlaySideButton(style: .outline, diameter: 28) {
+                                    if store.showBack {
+                                        let text = backTextToSpeak(for: card)
+                                        instant.speak(text: text, lang: ttsStore.settings.backLang, rate: ttsStore.settings.rate, speech: speech)
+                                    } else {
+                                        instant.speak(text: card.front, lang: ttsStore.settings.frontLang, rate: ttsStore.settings.rate, speech: speech)
                                     }
                                 }
                             }
                             .onTapGesture { flipTapped() }
                             .offset(x: dragX)
                             .rotationEffect(.degrees(Double(max(-10, min(10, dragX * 0.06)))))
-                            .overlay(alignment: .bottomTrailing) {
-                                PlaySideButton(style: .outline, diameter: 28) {
-                                    if store.showBack {
-                                        speakOne(text: currentBackComposed.isEmpty ? card.back : currentBackComposed, lang: ttsStore.settings.backLang)
-                                    } else {
-                                        speakOne(text: card.front, lang: ttsStore.settings.frontLang)
-                                    }
-                                }
-                            }
                             .frame(maxWidth: .infinity)
                             .frame(minHeight: 260)
                             .frame(maxHeight: .infinity)
@@ -170,17 +175,17 @@ struct FlashcardsView: View {
                                 if abs(t) > threshold {
                                     let dir: CGFloat = t > 0 ? 1 : -1
                                     // Toss out
-                                    withAnimation(DS.AnimationToken.tossOut) { dragX = dir * 800 }
+                                    DSMotion.run(DS.AnimationToken.tossOut) { dragX = dir * 800 }
                                     // Apply annotate if needed, then advance and animate in from opposite side
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
                                         if mode == .annotate { adjustProficiency(dir > 0 ? +1 : -1) }
                                         store.next()
                                         store.showBack = false
                                         dragX = -dir * 450
-                                        withAnimation(DS.AnimationToken.bouncy) { dragX = 0 }
+                                        DSMotion.run(DS.AnimationToken.bouncy) { dragX = 0 }
                                     }
                                 } else {
-                                    withAnimation(DS.AnimationToken.bouncy) { dragX = 0 }
+                                    DSMotion.run(DS.AnimationToken.bouncy) { dragX = 0 }
                                 }
                             })
 
@@ -216,7 +221,7 @@ struct FlashcardsView: View {
             .padding(.bottom, (speech.isPlaying || speech.isPaused) ? DS.Spacing.xl : DS.Spacing.lg)
             .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
             .background(DS.Palette.background)
-            .animation(DS.AnimationToken.subtle, value: (speech.isPlaying || speech.isPaused))
+            .dsAnimation(DS.AnimationToken.subtle, value: (speech.isPlaying || speech.isPaused))
         }
         .navigationTitle(title)
         .toolbar {
@@ -284,7 +289,7 @@ struct FlashcardsView: View {
         }
         .onChange(of: speech.currentCardIndex, initial: false) { _, newValue in
             if let v = newValue, v >= 0, v < store.cards.count {
-                withAnimation(DS.AnimationToken.subtle) {
+                DSMotion.run(DS.AnimationToken.subtle) {
                     store.index = v
                     store.showBack = false
                 }
@@ -293,12 +298,17 @@ struct FlashcardsView: View {
         .onChange(of: speech.currentFace, initial: false) { _, face in
             switch face {
             case .front?:
-                withAnimation(DS.AnimationToken.subtle) { store.showBack = false }
+                DSMotion.run(DS.AnimationToken.subtle) { store.showBack = false }
             case .back?:
-                withAnimation(DS.AnimationToken.subtle) { store.showBack = true }
+                DSMotion.run(DS.AnimationToken.subtle) { store.showBack = true }
             default:
                 break
             }
+        }
+        .onChange(of: store.index, initial: false) { _, _ in
+            // New card selected: clear previous composed cache to avoid stale playback
+            currentBackComposed = ""
+            currentBackComposedCardID = nil
         }
     }
 }
@@ -309,14 +319,14 @@ private extension FlashcardsView {
         guard let card = store.current else { return }
         draft = card
         errorText = nil
-        withAnimation { isEditing = true }
+        DSMotion.run(DS.AnimationToken.subtle) { isEditing = true }
         store.showBack = false
     }
 
     func cancelEdit() {
         draft = nil
         errorText = nil
-        withAnimation { isEditing = false }
+        DSMotion.run(DS.AnimationToken.subtle) { isEditing = false }
     }
 
     func saveEdit() {
@@ -385,23 +395,23 @@ private extension FlashcardsView {
         guard mode == .annotate else { return }
         guard let deckID = deckID, let current = store.current else { return }
         let _ = progressStore.adjust(deckID: deckID, cardID: current.id, delta: delta)
-        withAnimation(DS.AnimationToken.snappy) {
+        DSMotion.run(DS.AnimationToken.snappy) {
             flashDelta = delta
         }
         if delta > 0 { Haptics.success() } else { Haptics.warning() }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-            withAnimation(DS.AnimationToken.subtle) { flashDelta = nil }
+            DSMotion.run(DS.AnimationToken.subtle) { flashDelta = nil }
         }
     }
 
     func goToPreviousAnimated(restartAudio: Bool = false) {
         guard !store.cards.isEmpty else { return }
         let dir: CGFloat = 1 // toss right then bring previous from left
-        withAnimation(DS.AnimationToken.tossOut) { dragX = dir * 800 }
+        DSMotion.run(DS.AnimationToken.tossOut) { dragX = dir * 800 }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
             store.prev(); store.showBack = false
             dragX = -dir * 450
-            withAnimation(DS.AnimationToken.bouncy) { dragX = 0 }
+            DSMotion.run(DS.AnimationToken.bouncy) { dragX = 0 }
             if restartAudio {
                 let s = lastTTSSettings ?? ttsStore.settings
                 speech.stop()
@@ -416,14 +426,13 @@ private extension FlashcardsView {
 
     func flipTapped() {
         store.flip()
-        guard let card = store.current, isAudioActive else { return }
-        // Stop current queue and immediately read the face now shown
-        speech.stop()
+        guard let card = store.current, (speech.isPlaying || speech.isPaused) else { return }
+        // Interject via instant speaker without killing the continuous queue (pause → speak → buffered resume)
         if store.showBack {
-            let text = currentBackComposed.isEmpty ? card.back : currentBackComposed
-            speakOne(text: text, lang: ttsStore.settings.backLang)
+            let text = backTextToSpeak(for: card)
+            instant.speak(text: text, lang: ttsStore.settings.backLang, rate: ttsStore.settings.rate, speech: speech)
         } else {
-            speakOne(text: card.front, lang: ttsStore.settings.frontLang)
+            instant.speak(text: card.front, lang: ttsStore.settings.frontLang, rate: ttsStore.settings.rate, speech: speech)
         }
     }
 
@@ -437,6 +446,8 @@ private extension FlashcardsView {
     func speakOne(text: String, lang: String) {
         let rate = ttsStore.settings.rate
         let item = SpeechItem(text: text, langCode: lang, rate: rate, preDelay: 0, postDelay: 0, cardIndex: store.index, face: store.showBack ? .back : .front)
+        // Legacy one-shot via continuous engine is no longer used for instant playback.
+        // Keep method for compatibility if needed elsewhere.
         speech.play(queue: [item])
         lastTTSSettings = ttsStore.settings
     }
@@ -475,6 +486,19 @@ private extension FlashcardsView {
 extension FlashcardsView {
     @MainActor
     func bindSpeechSync() -> some View { EmptyView() }
+}
+
+private extension FlashcardsView {
+    func backImmediateText(for card: Flashcard) -> String {
+        let lines = PlaybackBuilder.buildBackLines(card.back, fill: ttsStore.settings.variantFill)
+        return lines.first ?? card.back
+    }
+    func backTextToSpeak(for card: Flashcard) -> String {
+        if let id = currentBackComposedCardID, id == card.id, !currentBackComposed.isEmpty {
+            return currentBackComposed
+        }
+        return backImmediateText(for: card)
+    }
 }
 
 private struct PlaySideButton: View {
@@ -519,52 +543,50 @@ private struct EmptyState: View {
     }
 }
 
-private struct FlipCard<Front: View, Back: View>: View {
+private struct FlipCard<Front: View, Back: View, Overlay: View>: View {
     var isFlipped: Bool
     let front: Front
     let back: Back
+    let overlay: () -> Overlay
 
-    init(isFlipped: Bool, @ViewBuilder front: () -> Front, @ViewBuilder back: () -> Back) {
+    init(isFlipped: Bool,
+         @ViewBuilder front: () -> Front,
+         @ViewBuilder back: () -> Back,
+         @ViewBuilder overlay: @escaping () -> Overlay) {
         self.isFlipped = isFlipped
         self.front = front()
         self.back = back()
+        self.overlay = overlay
+    }
+
+    @ViewBuilder
+    private func faceCard<Content: View>(_ content: Content) -> some View {
+        DSCard(padding: DS.Spacing.lg) {
+            VStack(spacing: 0) {
+                Spacer(minLength: 0)
+                content
+                    .dsType(DS.Font.body)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Spacer(minLength: 0)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .frame(minHeight: 220)
+        .frame(maxHeight: .infinity)
+        .overlay(alignment: .bottomTrailing) { overlay() }
     }
 
     var body: some View {
         ZStack {
             // Front face
-            DSCard(padding: DS.Spacing.lg) {
-                // Vertically center content while keeping leading alignment
-                VStack(spacing: 0) {
-                    Spacer(minLength: 0)
-                    front
-                        .dsType(DS.Font.body)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    Spacer(minLength: 0)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
-            .frame(minHeight: 220)
-            .frame(maxHeight: .infinity)
-            .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0), perspective: 0.8)
-            .opacity(isFlipped ? 0 : 1)
+            faceCard(front)
+                .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0), perspective: 0.8)
+                .opacity(isFlipped ? 0 : 1)
 
             // Back face (counter-rotated to render readable)
-            DSCard(padding: DS.Spacing.lg) {
-                // Vertically center content while keeping leading alignment
-                VStack(spacing: 0) {
-                    Spacer(minLength: 0)
-                    back
-                        .dsType(DS.Font.body)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    Spacer(minLength: 0)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
-            .frame(minHeight: 220)
-            .frame(maxHeight: .infinity)
-            .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0), perspective: 0.8)
-            .opacity(isFlipped ? 1 : 0)
+            faceCard(back)
+                .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0), perspective: 0.8)
+                .opacity(isFlipped ? 1 : 0)
         }
         .dsAnimation(DS.AnimationToken.flip, value: isFlipped)
     }

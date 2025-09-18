@@ -24,6 +24,8 @@
 
 "settings.language.title" = "Language";
 "settings.language.subtitle" = "For future use";
+"settings.language.zh" = "Chinese";
+"settings.language.en" = "English";
 
 "settings.device.title" = "Device & Version";
 "settings.device.id" = "Device ID";

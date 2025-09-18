@@ -62,6 +62,8 @@ enum DS {
         static var reorder: Animation { snappy }
         // Toss a card out quickly
         static var tossOut: Animation { .easeOut(duration: 0.18) }
+        // Progress indicators (rings/bars)
+        static var progress: Animation { .easeInOut(duration: 0.25) }
     }
 
     // Brand color scheme (easy to swap for theming)
@@ -210,6 +212,14 @@ enum DS {
             return firstExisting(FontFamily.avenirCandidates, size: 17)
         }
     }
+}
+
+// Centralized transition tokens to keep enter/exit effects consistent
+enum DSTransition {
+    static var slideTrailingFade: AnyTransition {
+        .move(edge: .trailing).combined(with: .opacity)
+    }
+    static var fade: AnyTransition { .opacity }
 }
 
 extension View {

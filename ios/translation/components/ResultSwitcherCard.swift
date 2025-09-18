@@ -35,7 +35,8 @@ struct ResultSwitcherCard: View {
 
     private var header: some View {
         HStack(alignment: .firstTextBaseline) {
-            Text(mode == .corrected ? String(localized: "result.switcher.corrected", locale: locale) : String(localized: "result.switcher.original", locale: locale))
+            let key: LocalizedStringKey = (mode == .corrected) ? "result.switcher.corrected" : "result.switcher.original"
+            Text(key)
                 .dsType(DS.Font.section)
                 .foregroundStyle(.secondary)
                 .fontWeight(.semibold)

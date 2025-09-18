@@ -3,14 +3,14 @@ import SwiftUI
 final class BannerCenter: ObservableObject {
     @Published var banner: BannerItem? = nil
     func show(title: String, subtitle: String? = nil, actionTitle: String? = nil, action: (() -> Void)? = nil) {
-        withAnimation(DS.AnimationToken.snappy) {
+        DSMotion.run(DS.AnimationToken.snappy) {
             banner = BannerItem(title: title, subtitle: subtitle, actionTitle: actionTitle, action: action)
         }
         // Auto dismiss after user-configured seconds (defaults to 2s)
         let seconds = UserDefaults.standard.object(forKey: "settings.bannerSeconds") as? Double ?? 2.0
         let delay = max(0.5, min(10.0, seconds))
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
-            withAnimation(DS.AnimationToken.subtle) { self?.banner = nil }
+            DSMotion.run(DS.AnimationToken.subtle) { self?.banner = nil }
         }
     }
 }
@@ -36,7 +36,7 @@ struct BannerHost: View {
                     }
                     if let t = item.actionTitle {
                         Spacer(minLength: 8)
-                        Button(t) { item.action?(); withAnimation(DS.AnimationToken.subtle) { center.banner = nil } }
+                        Button(t) { item.action?(); DSMotion.run(DS.AnimationToken.subtle) { center.banner = nil } }
                             .buttonStyle(DSSecondaryButtonCompact())
                     }
                 }
@@ -47,7 +47,7 @@ struct BannerHost: View {
                 // keep it off the edges (bottom-right corner)
                 .padding(.trailing, DS.Spacing.lg)
                 .padding(.bottom, DS.Spacing.lg)
-                .transition(.move(edge: .trailing).combined(with: .opacity))
+                .transition(DSTransition.slideTrailingFade)
                 .frame(maxWidth: 360, alignment: .trailing)
             }
         }

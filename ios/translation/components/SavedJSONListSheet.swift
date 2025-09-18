@@ -42,7 +42,7 @@ struct SavedJSONListSheet: View {
                             Spacer(minLength: 0)
                             Button {
                                 if AppConfig.correctAPIURL == nil {
-                                    bannerCenter.show(title: "未設定後端", subtitle: "請先設定 BACKEND_URL")
+                                    bannerCenter.show(title: String(localized: "banner.backend.missing.title", locale: locale), subtitle: String(localized: "banner.backend.missing.subtitle", locale: locale))
                                 } else {
                                     proposedName = String(localized: "deck.untitled", locale: locale); showSaveDeckSheet = true
                                 }
@@ -94,7 +94,7 @@ struct SavedJSONListSheet: View {
                             Spacer(minLength: 0)
                             Button {
                                 if AppConfig.correctAPIURL == nil {
-                                    bannerCenter.show(title: "未設定後端", subtitle: "請先設定 BACKEND_URL")
+                                    bannerCenter.show(title: String(localized: "banner.backend.missing.title", locale: locale), subtitle: String(localized: "banner.backend.missing.subtitle", locale: locale))
                                 } else {
                                     proposedName = String(localized: "deck.untitled", locale: locale); showSaveDeckSheet = true
                                 }
@@ -142,6 +142,7 @@ struct SavedJSONListSheet: View {
             }
         .onAppear { rebuildDecoded() }
         .onChange(of: store.items, initial: false) { _, _ in rebuildDecoded() }
+        .id(locale.identifier)
     }
 
     private func saveDeck(named name: String) async {
@@ -150,7 +151,7 @@ struct SavedJSONListSheet: View {
         defer { isSaving = false }
         guard AppConfig.correctAPIURL != nil else {
             isSaving = false
-            bannerCenter.show(title: "未設定後端", subtitle: "請先設定 BACKEND_URL")
+            bannerCenter.show(title: String(localized: "banner.backend.missing.title", locale: locale), subtitle: String(localized: "banner.backend.missing.subtitle", locale: locale))
             return
         }
         do {
@@ -323,8 +324,8 @@ private struct SavedErrorRowCard: View {
                                 HStack {
                                     Spacer()
                                     Button {
-                                        onCopy(); Haptics.success(); withAnimation(DS.AnimationToken.subtle) { didCopy = true }
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { withAnimation { didCopy = false } }
+                                        onCopy(); Haptics.success(); DSMotion.run(DS.AnimationToken.subtle) { didCopy = true }
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { DSMotion.run(DS.AnimationToken.subtle) { didCopy = false } }
                                     } label: {
                                         if didCopy { Label(String(localized: "action.copied", locale: locale), systemImage: "checkmark.seal.fill") }
                                         else { Label(String(localized: "action.copyJSON", locale: locale), systemImage: "doc.on.doc") }
@@ -340,7 +341,7 @@ private struct SavedErrorRowCard: View {
                                 Button(String(localized: "action.cancel", locale: locale), role: .cancel) {}
                             }
                         }
-                        .transition(.opacity)
+                        .transition(DSTransition.fade)
                     } else {
                         // Fallback: show raw JSON (monospace) when parse fails
                         ScrollView(.horizontal, showsIndicators: true) {
@@ -355,8 +356,8 @@ private struct SavedErrorRowCard: View {
                             HStack {
                                 Spacer()
                                 Button {
-                                    onCopy(); Haptics.success(); withAnimation(DS.AnimationToken.subtle) { didCopy = true }
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { withAnimation { didCopy = false } }
+                                    onCopy(); Haptics.success(); DSMotion.run(DS.AnimationToken.subtle) { didCopy = true }
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { DSMotion.run(DS.AnimationToken.subtle) { didCopy = false } }
                                 } label: {
                                     if didCopy { Label(String(localized: "action.copied", locale: locale), systemImage: "checkmark.seal.fill") }
                                     else { Label(String(localized: "action.copyJSON", locale: locale), systemImage: "doc.on.doc") }
@@ -367,13 +368,13 @@ private struct SavedErrorRowCard: View {
                             }
                         }
                         .padding(.top, 2)
-                        .transition(.opacity)
+                        .transition(DSTransition.fade)
                         .confirmationDialog(String(localized: "saved.confirm.delete", locale: locale), isPresented: $showDeleteConfirm, titleVisibility: .visible) {
                             Button(String(localized: "action.delete", locale: locale), role: .destructive) { onDelete(); Haptics.warning() }
                             Button(String(localized: "action.cancel", locale: locale), role: .cancel) {}
                         }
         .zIndex(expanded ? 1 : 0)
-        .animation(DS.AnimationToken.subtle, value: expanded)
+        .dsAnimation(DS.AnimationToken.subtle, value: expanded)
     }
 }
             }

@@ -13,7 +13,7 @@ struct DSPrimaryButton: ButtonStyle {
             )
             .opacity(configuration.isPressed ? 0.9 : 1)
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
-            .animation(DS.AnimationToken.snappy, value: configuration.isPressed)
+            .dsAnimation(DS.AnimationToken.snappy, value: configuration.isPressed)
     }
 }
 
@@ -30,7 +30,7 @@ struct DSSecondaryButton: ButtonStyle {
         )
             .opacity(configuration.isPressed ? 0.9 : 1)
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
-            .animation(DS.AnimationToken.snappy, value: configuration.isPressed)
+            .dsAnimation(DS.AnimationToken.snappy, value: configuration.isPressed)
     }
 }
 
@@ -48,7 +48,7 @@ struct DSSecondaryButtonCompact: ButtonStyle {
         )
             .opacity(configuration.isPressed ? 0.9 : 1)
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
-            .animation(DS.AnimationToken.snappy, value: configuration.isPressed)
+            .dsAnimation(DS.AnimationToken.snappy, value: configuration.isPressed)
     }
 }
 
@@ -120,6 +120,6 @@ struct DSCardLinkStyle: ButtonStyle {
                 RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
                     .stroke(DS.Palette.primary.opacity(configuration.isPressed ? DS.Opacity.strong : 0), lineWidth: DS.BorderWidth.regular)
             )
-            .animation(DS.AnimationToken.snappy, value: configuration.isPressed)
+            .dsAnimation(DS.AnimationToken.snappy, value: configuration.isPressed)
     }
 }

@@ -27,19 +27,19 @@ struct SwipeableRow<Content: View>: View {
                     }
                     .onEnded { _ in
                         if offsetX > threshold, allowRight {
-                            withAnimation(DS.AnimationToken.tossOut) { offsetX = maxOffset }
+                            DSMotion.run(DS.AnimationToken.tossOut) { offsetX = maxOffset }
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
                                 onTriggerRight()
-                                withAnimation(DS.AnimationToken.bouncy) { offsetX = 0 }
+                                DSMotion.run(DS.AnimationToken.bouncy) { offsetX = 0 }
                             }
                         } else if offsetX < -threshold, allowLeft {
-                            withAnimation(DS.AnimationToken.tossOut) { offsetX = -maxOffset }
+                            DSMotion.run(DS.AnimationToken.tossOut) { offsetX = -maxOffset }
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
                                 onTriggerLeft()
-                                withAnimation(DS.AnimationToken.bouncy) { offsetX = 0 }
+                                DSMotion.run(DS.AnimationToken.bouncy) { offsetX = 0 }
                             }
                         } else {
-                            withAnimation(DS.AnimationToken.bouncy) { offsetX = 0 }
+                            DSMotion.run(DS.AnimationToken.bouncy) { offsetX = 0 }
                         }
                     }
             )

@@ -8,11 +8,11 @@ struct SettingsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: DS.Spacing.lg) {
-                DSSectionHeader(title: String(localized: "settings.banner.title", locale: locale), subtitle: String(localized: "settings.banner.subtitle", locale: locale), accentUnderline: true)
+                DSSectionHeader(titleKey: "settings.banner.title", subtitleKey: "settings.banner.subtitle", accentUnderline: true)
                 DSOutlineCard {
                     VStack(alignment: .leading, spacing: 10) {
                         HStack {
-                            Text(String(localized: "settings.banner.seconds", locale: locale)).dsType(DS.Font.caption).foregroundStyle(.secondary)
+                            Text("settings.banner.seconds").dsType(DS.Font.caption).foregroundStyle(.secondary)
                             Spacer()
                             Text(String(format: "%.1fs", settings.bannerSeconds)).dsType(DS.Font.caption).foregroundStyle(.secondary)
                         }
@@ -20,15 +20,13 @@ struct SettingsView: View {
                             .tint(DS.Palette.primary)
                         HStack {
                             Spacer()
-                            Button(String(localized: "settings.banner.test", locale: locale)) {
-                                bannerCenter.show(title: String(localized: "settings.banner.test", locale: locale), subtitle: String(format: "%.1fs", settings.bannerSeconds))
-                            }
+                            Button(action: { bannerCenter.show(title: String(localized: "settings.banner.test"), subtitle: String(format: "%.1fs", settings.bannerSeconds)) }) { Text("settings.banner.test") }
                             .buttonStyle(DSSecondaryButtonCompact())
                         }
                     }
                 }
 
-                DSSectionHeader(title: String(localized: "settings.model.title", locale: locale), subtitle: String(localized: "settings.model.subtitle", locale: locale), accentUnderline: true)
+                DSSectionHeader(titleKey: "settings.model.title", subtitleKey: "settings.model.subtitle", accentUnderline: true)
                 DSOutlineCard {
                     Picker("Model", selection: Binding(get: { settings.geminiModel }, set: { settings.geminiModel = $0 })) {
                         ForEach(AppSettingsStore.availableModels, id: \.self) { m in
@@ -39,22 +37,23 @@ struct SettingsView: View {
                     .tint(DS.Palette.primary)
                 }
 
-                DSSectionHeader(title: String(localized: "settings.language.title", locale: locale), subtitle: String(localized: "settings.language.subtitle", locale: locale), accentUnderline: true)
+                DSSectionHeader(titleKey: "settings.language.title", subtitleKey: "settings.language.subtitle", accentUnderline: true)
                 DSOutlineCard {
+                    let langOptions: [(code: String, key: LocalizedStringKey)] = [("zh", "settings.language.zh"), ("en", "settings.language.en")]
                     Picker("Language", selection: Binding(get: { settings.language }, set: { settings.language = $0 })) {
-                        ForEach(AppSettingsStore.availableLanguages, id: \.code) { item in
-                            Text(item.label).tag(item.code)
+                        ForEach(langOptions, id: \.code) { opt in
+                            Text(opt.key).tag(opt.code)
                         }
                     }
                     .pickerStyle(.segmented)
                     .tint(DS.Palette.primary)
                 }
 
-                DSSectionHeader(title: String(localized: "settings.device.title", locale: locale), subtitle: nil, accentUnderline: true)
+                DSSectionHeader(titleKey: "settings.device.title", subtitleKey: nil, accentUnderline: true)
                 DSOutlineCard {
                     VStack(alignment: .leading, spacing: 10) {
                         HStack(alignment: .firstTextBaseline) {
-                            Text(String(localized: "settings.device.id", locale: locale)).dsType(DS.Font.caption).foregroundStyle(.secondary)
+                            Text("settings.device.id").dsType(DS.Font.caption).foregroundStyle(.secondary)
                             Spacer()
                             Text(settings.deviceID)
                                 .font(DS.Font.monoSmall)
@@ -63,18 +62,18 @@ struct SettingsView: View {
                         }
                         HStack {
                             Spacer()
-                            Button(String(localized: "action.copy", locale: locale)) {
+                            Button(action: {
                                 #if canImport(UIKit)
                                 UIPasteboard.general.string = settings.deviceID
                                 #endif
                                 Haptics.success()
-                                bannerCenter.show(title: String(localized: "msg.copiedDeviceID", locale: locale))
-                            }
+                                bannerCenter.show(title: String(localized: "msg.copiedDeviceID"))
+                            }) { Text("action.copy") }
                             .buttonStyle(DSSecondaryButtonCompact())
                         }
                         DSSeparator()
                         HStack {
-                            Text(String(localized: "label.version", locale: locale)).dsType(DS.Font.caption).foregroundStyle(.secondary)
+                            Text("label.version").dsType(DS.Font.caption).foregroundStyle(.secondary)
                             Spacer()
                             Text(settings.appVersion).dsType(DS.Font.caption)
                         }
@@ -86,6 +85,7 @@ struct SettingsView: View {
             .padding(.bottom, DS.Spacing.lg)
         }
         .background(DS.Palette.background)
-        .navigationTitle(String(localized: "nav.settings", locale: locale))
+        .navigationTitle(Text("nav.settings"))
+        .id(locale.identifier)
     }
 }

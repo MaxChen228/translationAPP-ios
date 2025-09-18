@@ -24,6 +24,8 @@
 
 "settings.language.title" = "語言";
 "settings.language.subtitle" = "供未來使用";
+"settings.language.zh" = "中文";
+"settings.language.en" = "英文";
 
 "settings.device.title" = "裝置與版本";
 "settings.device.id" = "Device ID";

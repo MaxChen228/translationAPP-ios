@@ -80,7 +80,12 @@ struct TranslationApp: App {
                 .environment(\.locale, Locale(identifier: settings.language == "zh" ? "zh-Hant" : "en"))
                 .onAppear {
                     if AppConfig.backendURL == nil {
-                        bannerCenter.show(title: "未設定後端", subtitle: "請在 Info.plist 或環境變數設定 BACKEND_URL")
+                        let localeID = settings.language == "zh" ? "zh-Hant" : "en"
+                        let locale = Locale(identifier: localeID)
+                        bannerCenter.show(
+                            title: String(localized: "banner.backend.missing.title", locale: locale),
+                            subtitle: String(localized: "banner.backend.missing.subtitle", locale: locale)
+                        )
                     }
                 }
                 .onReceive(NotificationCenter.default.publisher(for: .correctionCompleted)) { note in

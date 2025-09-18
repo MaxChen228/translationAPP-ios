@@ -30,7 +30,7 @@ struct DeckDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: DS.Spacing.lg) {
                 if let d = deck {
-                    DSSectionHeader(title: d.name, subtitle: String(localized: "deck.detail.subtitle", locale: locale), accentUnderline: true)
+                    DSSectionHeader(titleText: Text(d.name), subtitleText: Text("deck.detail.subtitle"), accentUnderline: true)
 
                     // 上：高質感圓環摘要（壓縮且資訊清晰）
                     DeckSummaryRings(new: counts.new, learning: counts.learning, mastered: counts.mastered)
@@ -102,17 +102,17 @@ private struct DeckSummaryRings: View {
     var body: some View {
         DSCard {
             HStack(spacing: 0) {
-                SummaryRing(title: String(localized: "deck.summary.new", locale: locale), count: new, total: total, color: DS.Brand.scheme.provence)
+                SummaryRing(titleKey: "deck.summary.new", count: new, total: total, color: DS.Brand.scheme.provence)
                 Divider().frame(height: 42).opacity(0.15)
-                SummaryRing(title: String(localized: "deck.summary.learning", locale: locale), count: learning, total: total, color: DS.Brand.scheme.peachQuartz)
+                SummaryRing(titleKey: "deck.summary.learning", count: learning, total: total, color: DS.Brand.scheme.peachQuartz)
                 Divider().frame(height: 42).opacity(0.15)
-                SummaryRing(title: String(localized: "deck.summary.mastered", locale: locale), count: mastered, total: total, color: DS.Brand.scheme.monument)
+                SummaryRing(titleKey: "deck.summary.mastered", count: mastered, total: total, color: DS.Brand.scheme.monument)
             }
             .frame(maxWidth: .infinity)
         }
     }
     private struct SummaryRing: View {
-        let title: String
+        let titleKey: LocalizedStringKey
         let count: Int
         let total: Int
         let color: Color
@@ -130,7 +130,7 @@ private struct DeckSummaryRings: View {
                         .foregroundStyle(color)
                 }
                 .frame(width: 48, height: 48)
-                Text(title)
+                Text(titleKey)
                     .dsType(DS.Font.caption)
                     .foregroundStyle(.secondary)
             }

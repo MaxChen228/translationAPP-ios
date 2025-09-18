@@ -30,7 +30,7 @@ struct BankBooksView: View {
                 }
                 // 資料夾區：即使為 0 也顯示新增卡
                 let folderCols = [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.sm2)]
-                ShelfGrid(title: String(localized: "bank.folders.title", locale: locale), columns: folderCols) {
+                ShelfGrid(titleKey: "bank.folders.title", columns: folderCols) {
                     ForEach(bankFolders.folders) { folder in
                         NavigationLink { BankFolderDetailView(folderID: folder.id, vm: vm, onPracticeLocal: onPracticeLocal) } label: {
                             let countText = String(format: String(localized: "bank.folder.count", locale: locale), folder.bookNames.count)
@@ -43,7 +43,7 @@ struct BankBooksView: View {
                         }
                         .onDrop(of: [.text], delegate: BookIntoFolderDropDelegate(folderID: folder.id, folders: bankFolders, draggingName: $draggingBookName))
                     }
-                    Button { _ = bankFolders.addFolder() } label: { NewBankFolderCard() }
+                    Button { _ = bankFolders.addFolder(name: String(localized: "folder.new", locale: locale)) } label: { NewBankFolderCard() }
                         .buttonStyle(.plain)
                 }
                 DSSeparator(color: DS.Palette.border.opacity(0.2))
@@ -54,10 +54,10 @@ struct BankBooksView: View {
                 let orderedNames = bankOrder.currentRootOrder(root: rootNames)
                 let orderedRootBooks: [LocalBankBook] = orderedNames.compactMap { nm in localRootBooks.first(where: { $0.name == nm }) }
                 let cols = [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.sm2)]
-                ShelfGrid(title: String(localized: "bank.local.title", locale: locale), columns: cols) {
+                ShelfGrid(titleKey: "bank.local.title", columns: cols) {
                     // 瀏覽雲端精選（複製到本機）
                     NavigationLink { CloudBankLibraryView(vm: vm) } label: {
-                        BrowseCloudCard(title: String(localized: "bank.browseCloud", locale: locale))
+                        BrowseCloudCard(titleKey: "bank.browseCloud")
                     }
                     .buttonStyle(.plain)
                     ForEach(orderedRootBooks) { b in
@@ -130,7 +130,7 @@ struct BankBooksView: View {
             .padding(.bottom, DS.Spacing.lg)
         }
         .background(DS.Palette.background)
-        .navigationTitle(String(localized: "nav.bank"))
+        .navigationTitle(Text("nav.bank"))
         .onDrop(of: [.text], delegate: ClearBookDragStateDropDelegate(draggingName: $draggingBookName))
         .onAppear { AppLog.uiInfo("[books] appear (local)=\(localBank.books.count)") }
         .sheet(item: $renamingFolder) { f in
@@ -196,11 +196,11 @@ private struct ClearBookDragStateDropDelegate: DropDelegate {
 // 遠端題庫型別已移除
 
 private struct BrowseCloudCard: View {
-    var title: String
+    var titleKey: LocalizedStringKey
     var body: some View {
         VStack(spacing: 8) {
             Image(systemName: "icloud.and.arrow.down").font(.title3)
-            Text(title).dsType(DS.Font.caption).foregroundStyle(.secondary)
+            Text(titleKey).dsType(DS.Font.caption).foregroundStyle(.secondary)
         }
         .frame(minHeight: 96)
         .frame(maxWidth: .infinity)

@@ -31,7 +31,7 @@ struct WorkspaceListView: View {
                     DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.border))
                         .padding(.vertical, DS.Spacing.sm)
 
-                    ShelfGrid(title: String(localized: "home.workspaces", locale: locale), columns: cols) {
+                    ShelfGrid(titleKey: "home.workspaces", columns: cols) {
 
                     ForEach(store.workspaces) { ws in
                         WorkspaceItemLink(ws: ws, vm: store.vm(for: ws.id), store: store, draggingID: $draggingID) {
@@ -57,6 +57,7 @@ struct WorkspaceListView: View {
                 .padding(.horizontal, DS.Spacing.lg)
                 .padding(.top, DS.Spacing.lg)
             }
+            .id(locale.identifier)
             // 後備 drop：若使用者把項目拖到空白處或邊緣放下，確保 draggingID 能被清除
             .onDrop(of: [.text], delegate: ClearDragStateDropDelegate(draggingID: $draggingID))
             .background(DS.Palette.background)
@@ -161,11 +162,11 @@ private struct WorkspaceItemLink: View {
     @EnvironmentObject private var savedStore: SavedErrorsStore
     @Environment(\.locale) private var locale
 
-    var status: String {
-        if vm.isLoading { return String(localized: "workspace.status.loading", locale: locale) }
-        if vm.response != nil { return String(localized: "workspace.status.graded", locale: locale) }
-        if !(vm.inputZh.isEmpty && vm.inputEn.isEmpty) { return String(localized: "workspace.status.input", locale: locale) }
-        return String(localized: "workspace.status.empty", locale: locale)
+    var statusKey: LocalizedStringKey {
+        if vm.isLoading { return "workspace.status.loading" }
+        if vm.response != nil { return "workspace.status.graded" }
+        if !(vm.inputZh.isEmpty && vm.inputEn.isEmpty) { return "workspace.status.input" }
+        return "workspace.status.empty"
     }
 
     var statusColor: Color {
@@ -180,10 +181,10 @@ private struct WorkspaceItemLink: View {
         NavigationLink {
             ContentView(vm: vm).environmentObject(savedStore)
         } label: {
-            WorkspaceCard(name: ws.name, status: status, statusColor: statusColor)
+            WorkspaceCard(name: ws.name, statusKey: statusKey, statusColor: statusColor)
                 .contextMenu {
-                    Button(String(localized: "action.rename")) { onRename() }
-                    Button(String(localized: "action.delete"), role: .destructive) { onDelete() }
+                    Button(String(localized: "action.rename", locale: locale)) { onRename() }
+                    Button(String(localized: "action.delete", locale: locale), role: .destructive) { onDelete() }
                 }
                 // 移除長按手勢避免與拖曳啟動衝突（改由 context menu）
         }
@@ -198,7 +199,7 @@ private struct WorkspaceItemLink: View {
 
 private struct WorkspaceCard: View {
     var name: String
-    var status: String
+    var statusKey: LocalizedStringKey
     var statusColor: Color
     var body: some View {
         DSOutlineCard {
@@ -210,7 +211,7 @@ private struct WorkspaceCard: View {
                 DSSeparator(color: DS.Palette.border.opacity(0.12))
                 
                 HStack(spacing: 10) {
-                    StatusBadge(text: status, color: statusColor)
+                    StatusBadge(textKey: statusKey, color: statusColor)
                     Spacer()
                     Image(systemName: "chevron.right")
                         .foregroundStyle(.tertiary)
@@ -275,7 +276,7 @@ private struct QuickActionsRow: View {
     @Environment(\.locale) private var locale
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            DSSectionHeader(title: String(localized: "quick.title", locale: locale), subtitle: nil, accentUnderline: true)
+            DSSectionHeader(titleKey: "quick.title", subtitleKey: nil, accentUnderline: true)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
                     NavigationLink { FlashcardDecksView() } label: { FlashcardsEntryCard().frame(width: 220) }
@@ -360,12 +361,12 @@ private struct SettingsEntryCard: View {
 // 移除晶片變體：回到簡潔文本副標
 
 private struct StatusBadge: View {
-    var text: String
+    var textKey: LocalizedStringKey
     var color: Color
     var body: some View {
         HStack(spacing: 8) {
             Circle().fill(color).frame(width: 8, height: 8)
-            Text(text).dsType(DS.Font.caption).foregroundStyle(.secondary)
+            Text(textKey).dsType(DS.Font.caption).foregroundStyle(.secondary)
         }
         .padding(.vertical, 6)
         .padding(.horizontal, 10)

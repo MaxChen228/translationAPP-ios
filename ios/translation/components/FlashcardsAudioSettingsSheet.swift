@@ -10,7 +10,7 @@ struct FlashcardsAudioSettingsSheet: View {
         let s = store.settings
         ScrollView {
         VStack(alignment: .leading, spacing: DS.Spacing.lg) {
-            DSSectionHeader(title: String(localized: "tts.title", locale: locale), subtitle: summaryText(), accentUnderline: true)
+            DSSectionHeader(titleText: Text("tts.title"), subtitleText: Text(summaryText()), accentUnderline: true)
 
             DSOutlineCard {
                 VStack(alignment: .leading, spacing: 12) {

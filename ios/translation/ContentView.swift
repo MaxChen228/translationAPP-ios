@@ -26,7 +26,7 @@ struct ContentView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: DS.Spacing.lg) {
                     HStack(alignment: .firstTextBaseline) {
-                        DSSectionHeader(title: String(localized: "content.zh.title", locale: locale), subtitle: String(localized: "content.zh.subtitle", locale: locale), accentUnderline: true)
+                        DSSectionHeader(titleKey: "content.zh.title", subtitleKey: "content.zh.subtitle", accentUnderline: true)
                         Spacer()
                         NavigationLink {
                             BankBooksView(vm: vm)
@@ -43,7 +43,7 @@ struct ContentView: View {
 
                     HintListSection(hints: vm.practicedHints, isExpanded: $vm.showPracticedHints)
 
-                    DSSectionHeader(title: String(localized: "content.en.title", locale: locale), subtitle: String(localized: "content.en.subtitle", locale: locale), accentUnderline: true)
+                    DSSectionHeader(titleKey: "content.en.title", subtitleKey: "content.en.subtitle", accentUnderline: true)
                     DSCard {
                         DSTextArea(text: $vm.inputEn, minHeight: 140, placeholder: String(localized: "content.en.placeholder", locale: locale), isFocused: focused == .en, ruled: true)
                             .focused($focused, equals: .en)

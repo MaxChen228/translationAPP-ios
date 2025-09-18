@@ -17,7 +17,7 @@ struct FlashcardDecksView: View {
                 // 頂部大標移除，避免與下方區塊標題重複
 
                 // 資料夾區（外觀與題庫本一致）—即使為 0 也顯示新增卡
-                ShelfGrid(title: String(localized: "deck.folders.title", locale: locale), columns: cols) {
+                ShelfGrid(titleKey: "deck.folders.title", columns: cols) {
                     ForEach(deckFolders.folders) { folder in
                         NavigationLink { DeckFolderDetailView(folderID: folder.id) } label: {
                             ShelfTileCard(title: folder.name, subtitle: nil, countText: String(format: String(localized: "folder.decks.count", locale: locale), folder.deckIDs.count), iconSystemName: "folder", accentColor: DS.Brand.scheme.monument, showChevron: true)
@@ -29,7 +29,7 @@ struct FlashcardDecksView: View {
                         }
                         .onDrop(of: [.text], delegate: DeckIntoFolderDropDelegate(folderID: folder.id, folders: deckFolders, draggingDeckID: $draggingDeckID))
                     }
-                    Button { _ = deckFolders.addFolder() } label: { NewDeckFolderCard() }
+                    Button { _ = deckFolders.addFolder(name: String(localized: "folder.new", locale: locale)) } label: { NewDeckFolderCard() }
                         .buttonStyle(.plain)
                 }
                 DSSeparator(color: DS.Palette.border.opacity(0.2))
@@ -43,10 +43,10 @@ struct FlashcardDecksView: View {
                     return rootDecks.first(where: { $0.id == did })
                 }
 
-                ShelfGrid(title: String(localized: "deck.root.title", locale: locale), columns: cols) {
+                ShelfGrid(titleKey: "deck.root.title", columns: cols) {
                     // Browse cloud curated decks → copy to local
                     NavigationLink { CloudDeckLibraryView() } label: {
-                        BrowseCloudCard(title: String(localized: "deck.browseCloud", locale: locale))
+                        BrowseCloudCard(titleKey: "deck.browseCloud")
                     }
                     .buttonStyle(.plain)
 
@@ -96,6 +96,7 @@ struct FlashcardDecksView: View {
         }
         .background(DS.Palette.background)
         .navigationTitle(Text("nav.deck"))
+        .id(locale.identifier)
         .toolbar { }
         .onDrop(of: [.text], delegate: ClearDeckDragStateDropDelegate(draggingDeckID: $draggingDeckID))
         .sheet(item: $renaming) { dk in
@@ -200,11 +201,11 @@ private struct NewDeckCard: View {
 // MARK: - Progress helpers
 
 private struct BrowseCloudCard: View {
-    var title: String
+    var titleKey: LocalizedStringKey
     var body: some View {
         VStack(spacing: 8) {
             Image(systemName: "icloud.and.arrow.down").font(.title3)
-            Text(title).dsType(DS.Font.caption).foregroundStyle(.secondary)
+            Text(titleKey).dsType(DS.Font.caption).foregroundStyle(.secondary)
         }
         .frame(minHeight: 96)
         .frame(maxWidth: .infinity)

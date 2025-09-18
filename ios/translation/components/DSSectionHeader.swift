@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct DSSectionHeader: View {
-    var title: String
-    var subtitle: String? = nil
+    var title: Text
+    var subtitle: Text? = nil
     // 強調底線
     var accentUnderline: Bool = false
     var accentWidth: CGFloat = 36
@@ -20,9 +20,98 @@ struct DSSectionHeader: View {
     @State private var subtitleWidth: CGFloat = 0
     @State private var titleWidth: CGFloat = 0
 
+    // MARK: - Initializers (type-safe; avoid accidental verbatim)
+    init(
+        titleText: Text,
+        subtitleText: Text? = nil,
+        accentUnderline: Bool = false,
+        accentWidth: CGFloat = 36,
+        accentHeight: CGFloat = 2,
+        accentOpacity: Double = 0.6,
+        accentMatchTitle: Bool = true,
+        accentLines: Int = 1,
+        accentSpacing: CGFloat = 3,
+        accentFill: Bool = false,
+        accentFillHeight: CGFloat = 10,
+        accentFillOpacity: Double = 0.10
+    ) {
+        self.title = titleText
+        self.subtitle = subtitleText
+        self.accentUnderline = accentUnderline
+        self.accentWidth = accentWidth
+        self.accentHeight = accentHeight
+        self.accentOpacity = accentOpacity
+        self.accentMatchTitle = accentMatchTitle
+        self.accentLines = accentLines
+        self.accentSpacing = accentSpacing
+        self.accentFill = accentFill
+        self.accentFillHeight = accentFillHeight
+        self.accentFillOpacity = accentFillOpacity
+    }
+
+    init(
+        titleKey: LocalizedStringKey,
+        subtitleKey: LocalizedStringKey? = nil,
+        accentUnderline: Bool = false,
+        accentWidth: CGFloat = 36,
+        accentHeight: CGFloat = 2,
+        accentOpacity: Double = 0.6,
+        accentMatchTitle: Bool = true,
+        accentLines: Int = 1,
+        accentSpacing: CGFloat = 3,
+        accentFill: Bool = false,
+        accentFillHeight: CGFloat = 10,
+        accentFillOpacity: Double = 0.10
+    ) {
+        self.init(
+            titleText: Text(titleKey),
+            subtitleText: subtitleKey.map { (k: LocalizedStringKey) in Text(k) },
+            accentUnderline: accentUnderline,
+            accentWidth: accentWidth,
+            accentHeight: accentHeight,
+            accentOpacity: accentOpacity,
+            accentMatchTitle: accentMatchTitle,
+            accentLines: accentLines,
+            accentSpacing: accentSpacing,
+            accentFill: accentFill,
+            accentFillHeight: accentFillHeight,
+            accentFillOpacity: accentFillOpacity
+        )
+    }
+
+    init(
+        verbatimTitle: String,
+        verbatimSubtitle: String? = nil,
+        accentUnderline: Bool = false,
+        accentWidth: CGFloat = 36,
+        accentHeight: CGFloat = 2,
+        accentOpacity: Double = 0.6,
+        accentMatchTitle: Bool = true,
+        accentLines: Int = 1,
+        accentSpacing: CGFloat = 3,
+        accentFill: Bool = false,
+        accentFillHeight: CGFloat = 10,
+        accentFillOpacity: Double = 0.10
+    ) {
+        self.init(
+            titleText: Text(verbatim: verbatimTitle),
+            subtitleText: verbatimSubtitle.map { Text(verbatim: $0) },
+            accentUnderline: accentUnderline,
+            accentWidth: accentWidth,
+            accentHeight: accentHeight,
+            accentOpacity: accentOpacity,
+            accentMatchTitle: accentMatchTitle,
+            accentLines: accentLines,
+            accentSpacing: accentSpacing,
+            accentFill: accentFill,
+            accentFillHeight: accentFillHeight,
+            accentFillOpacity: accentFillOpacity
+        )
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(title)
+            title
                 .dsType(DS.Font.serifTitle)
                 .fontWeight(.semibold)
                 .background(WidthReader(width: $titleWidth))
@@ -45,8 +134,8 @@ struct DSSectionHeader: View {
                 }
                 .padding(.top, 2)
             }
-            if let subtitle, !subtitle.isEmpty {
-                Text(subtitle)
+            if let subtitle {
+                subtitle
                     .dsType(DS.Font.caption)
                     .foregroundStyle(DS.Palette.subdued)
                     .background(WidthReader(width: $subtitleWidth))

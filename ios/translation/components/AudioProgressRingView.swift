@@ -22,7 +22,7 @@ struct AudioProgressRingView: View {
                     center: .center
                 ), style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 .rotationEffect(.degrees(-90))
-                .animation(.easeInOut(duration: 0.25), value: progress)
+                .dsAnimation(DS.AnimationToken.progress, value: progress)
 
             // Waveform inside, clipped to circle
             // no inner waveform per latest requirement – keep minimal

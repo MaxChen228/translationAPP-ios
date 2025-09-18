@@ -15,7 +15,7 @@ struct CloudDeckLibraryView: View {
                 if isLoading { ProgressView().frame(maxWidth: .infinity, alignment: .center) }
                 if let error { ErrorStateCard(title: error) }
 
-                DSSectionHeader(title: String(localized: "cloud.decks.title", locale: locale), subtitle: String(localized: "cloud.decks.subtitle", locale: locale), accentUnderline: true)
+                DSSectionHeader(titleKey: "cloud.decks.title", subtitleKey: "cloud.decks.subtitle", accentUnderline: true)
 
                 if !isLoading && error == nil && decks.isEmpty {
                     EmptyStateCard(title: String(localized: "cloud.decks.empty", locale: locale), subtitle: String(localized: "cloud.common.retry", locale: locale), iconSystemName: "rectangle.on.rectangle.angled")

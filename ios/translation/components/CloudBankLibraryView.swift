@@ -16,7 +16,7 @@ struct CloudBankLibraryView: View {
                 if isLoading { ProgressView().frame(maxWidth: .infinity, alignment: .center) }
                 if let error { ErrorStateCard(title: error) }
 
-                DSSectionHeader(title: String(localized: "cloud.books.title", locale: locale), subtitle: String(localized: "cloud.books.subtitle", locale: locale), accentUnderline: true)
+                DSSectionHeader(titleKey: "cloud.books.title", subtitleKey: "cloud.books.subtitle", accentUnderline: true)
 
                 if !isLoading && error == nil && books.isEmpty {
                     EmptyStateCard(title: String(localized: "cloud.books.empty", locale: locale), subtitle: String(localized: "cloud.common.retry", locale: locale), iconSystemName: "books.vertical")
