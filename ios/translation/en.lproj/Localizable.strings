@@ -133,6 +133,13 @@
 "a11y.copyCorrected" = "Copy corrected text";
 "a11y.scoreLabel" = "Score %d pts";
 "deck.new" = "New Deck";
+"flashcards.mode.browse" = "Browse";
+"flashcards.mode.annotate" = "Annotate";
+"banner.backend.missing.title" = "Backend not configured";
+"banner.backend.missing.subtitle" = "Please set BACKEND_URL";
+"action.practice" = "Practice";
+"bank.book.empty" = "This local book is empty";
+"bank.book.empty.hint" = "Browse cloud banks and copy to local.";
 "flashcards.validator.frontEmpty" = "Front cannot be empty";
 "flashcards.validator.backSingleLine" = "Back must be a single line";
 "flashcards.validator.bracketsMismatch" = "Brackets must be paired";
@@ -163,6 +170,8 @@
 "chips.all" = "All";
 "a11y.openSavedJSON" = "Open saved error JSON";
 "a11y.copyCurrentComposition" = "Copy current composition";
+"banner.backend.missing.title" = "Backend not configured";
+"banner.backend.missing.subtitle" = "Please set BACKEND_URL";
 
 /* Workspace status */
 "workspace.status.loading" = "Grading…";

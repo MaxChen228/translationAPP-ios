@@ -6,7 +6,7 @@ struct SavedJSONListSheet: View {
     @EnvironmentObject var decksStore: FlashcardDecksStore
     @EnvironmentObject private var bannerCenter: BannerCenter
     @State private var showSaveDeckSheet = false
-    @State private var proposedName: String = "未命名"
+    @State private var proposedName: String = String(localized: "deck.untitled")
     @State private var isSaving = false
     @State private var saveError: String? = nil
     private let deckService: DeckService = DeckServiceFactory.makeDefault()

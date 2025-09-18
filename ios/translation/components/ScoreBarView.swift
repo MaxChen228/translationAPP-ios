@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ScoreBarView: View {
     var score: Int // 0...100
+    @Environment(\.locale) private var locale
 
     private var progress: CGFloat { CGFloat(max(0, min(100, score))) / 100 }
     private var grade: String {
@@ -29,6 +30,6 @@ struct ScoreBarView: View {
         .frame(maxWidth: .infinity)
         .dsAnimation(DS.AnimationToken.bouncy, value: score)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("分數 \(score) 分")
+        .accessibilityLabel(String(format: String(localized: "a11y.scoreLabel", locale: locale), score))
     }
 }

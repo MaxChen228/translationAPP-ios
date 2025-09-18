@@ -26,8 +26,8 @@ struct CloudDeckLibraryView: View {
                         DSOutlineCard {
                             HStack(alignment: .center, spacing: 12) {
                                 VStack(alignment: .leading, spacing: 6) {
-                                    Text(d.name).dsType(DS.Font.section)
-                                    Text(String(format: String(localized: "deck.cards.count", locale: locale), d.count)).dsType(DS.Font.caption).foregroundStyle(.secondary)
+                    Text(d.name).dsType(DS.Font.section)
+                    Text(String(format: String(localized: "deck.cards.count", locale: locale), d.count)).dsType(DS.Font.caption).foregroundStyle(.secondary)
                                 }
                                 Spacer(minLength: 0)
                                 Button { Task { await copyDeck(d) } } label: { Label { Text("cloud.copyToLocal") } icon: { Image(systemName: "arrow.down.doc.fill") } }
@@ -53,9 +53,9 @@ struct CloudDeckLibraryView: View {
         error = nil
         guard AppConfig.backendURL != nil else {
             isLoading = false
-            let msg = "BACKEND_URL 未設定，無法瀏覽雲端卡片集。"
+            let msg = String(localized: "banner.backend.missing.subtitle", locale: locale)
             error = msg
-            bannerCenter.show(title: "未設定後端", subtitle: msg)
+            bannerCenter.show(title: String(localized: "banner.backend.missing.title", locale: locale), subtitle: msg)
             decks = []
             return
         }
@@ -70,7 +70,7 @@ struct CloudDeckLibraryView: View {
 
     private func copyDeck(_ d: CloudDeckSummary) async {
         guard AppConfig.backendURL != nil else {
-            bannerCenter.show(title: "未設定後端", subtitle: "請先設定 BACKEND_URL")
+            bannerCenter.show(title: String(localized: "banner.backend.missing.title", locale: locale), subtitle: String(localized: "banner.backend.missing.subtitle", locale: locale))
             return
         }
         do {

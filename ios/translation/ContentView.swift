@@ -82,7 +82,7 @@ struct ContentView: View {
                     HStack(spacing: DS.Spacing.md) {
                         Button {
                             if AppConfig.correctAPIURL == nil {
-                                bannerCenter.show(title: "未設定後端", subtitle: "請先設定 BACKEND_URL")
+                                bannerCenter.show(title: String(localized: "banner.backend.missing.title", locale: locale), subtitle: String(localized: "banner.backend.missing.subtitle", locale: locale))
                             } else {
                                 Task { await vm.runCorrection() }
                                 focused = nil

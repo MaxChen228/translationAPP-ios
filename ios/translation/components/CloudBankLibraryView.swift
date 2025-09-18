@@ -27,8 +27,8 @@ struct CloudBankLibraryView: View {
                         DSOutlineCard {
                             HStack(alignment: .center, spacing: 12) {
                                 VStack(alignment: .leading, spacing: 6) {
-                                    Text(b.name).dsType(DS.Font.section)
-                                    Text(String(format: String(localized: "bank.book.count", locale: locale), b.count)).dsType(DS.Font.caption).foregroundStyle(.secondary)
+                    Text(b.name).dsType(DS.Font.section)
+                    Text(String(format: String(localized: "bank.book.count", locale: locale), b.count)).dsType(DS.Font.caption).foregroundStyle(.secondary)
                                 }
                                 Spacer(minLength: 0)
                                 Button { Task { await copyBook(b) } } label: { Label { Text("cloud.copyToLocal") } icon: { Image(systemName: "arrow.down.doc.fill") } }
@@ -54,9 +54,9 @@ struct CloudBankLibraryView: View {
         error = nil
         guard AppConfig.backendURL != nil else {
             isLoading = false
-            let msg = "BACKEND_URL 未設定，無法瀏覽雲端題庫。"
+            let msg = String(localized: "banner.backend.missing.subtitle", locale: locale)
             error = msg
-            bannerCenter.show(title: "未設定後端", subtitle: msg)
+            bannerCenter.show(title: String(localized: "banner.backend.missing.title", locale: locale), subtitle: msg)
             books = []
             return
         }
@@ -71,7 +71,7 @@ struct CloudBankLibraryView: View {
 
     private func copyBook(_ s: CloudBookSummary) async {
         guard AppConfig.backendURL != nil else {
-            bannerCenter.show(title: "未設定後端", subtitle: "請先設定 BACKEND_URL")
+            bannerCenter.show(title: String(localized: "banner.backend.missing.title", locale: locale), subtitle: String(localized: "banner.backend.missing.subtitle", locale: locale))
             return
         }
         do {

@@ -204,3 +204,10 @@
 "a11y.copyCorrected" = "複製修正版";
 "a11y.scoreLabel" = "分數 %d 分";
 "deck.new" = "新單字卡集";
+"flashcards.mode.browse" = "瀏覽";
+"flashcards.mode.annotate" = "標注";
+"banner.backend.missing.title" = "未設定後端";
+"banner.backend.missing.subtitle" = "請先設定 BACKEND_URL";
+"action.practice" = "練習";
+"bank.book.empty" = "本機書本為空";
+"bank.book.empty.hint" = "請從雲端瀏覽並複製題庫到本機。";

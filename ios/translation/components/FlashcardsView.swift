@@ -113,9 +113,9 @@ struct FlashcardsView: View {
                         ScrollView {
                             CardEditor(draft: $draft, errorText: $errorText, onDelete: { showDeleteConfirm = true })
                             HStack(spacing: DS.Spacing.md) {
-                                Button("取消") { cancelEdit() }
+                                Button(String(localized: "action.cancel", locale: locale)) { cancelEdit() }
                                 .buttonStyle(DSSecondaryButton())
-                                Button("儲存") { saveEdit() }
+                                Button(String(localized: "action.save", locale: locale)) { saveEdit() }
                                 .buttonStyle(DSPrimaryButton())
                                 .disabled(validationError() != nil)
                             }

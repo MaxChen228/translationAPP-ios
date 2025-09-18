@@ -95,7 +95,7 @@ struct FlashcardDecksView: View {
             .padding(.bottom, DS.Spacing.lg)
         }
         .background(DS.Palette.background)
-        .navigationTitle("單字卡")
+        .navigationTitle(Text("nav.deck"))
         .toolbar { }
         .onDrop(of: [.text], delegate: ClearDeckDragStateDropDelegate(draggingDeckID: $draggingDeckID))
         .sheet(item: $renaming) { dk in
@@ -171,8 +171,9 @@ private struct RootDeckReorderDropDelegate: DropDelegate {
 private struct DeckCard: View {
     let name: String
     let count: Int
+    @Environment(\.locale) private var locale
     var body: some View {
-        ShelfTileCard(title: name, subtitle: nil, countText: "共 \(count) 張", iconSystemName: nil, accentColor: DS.Palette.primary, showChevron: true)
+        ShelfTileCard(title: name, subtitle: nil, countText: String(format: String(localized: "deck.cards.count", locale: locale), count), iconSystemName: nil, accentColor: DS.Palette.primary, showChevron: true)
     }
 }
 
