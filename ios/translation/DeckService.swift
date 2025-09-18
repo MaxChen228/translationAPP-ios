@@ -30,10 +30,7 @@ protocol DeckService {
 }
 
 enum DeckServiceFactory {
-    static func makeDefault() -> DeckService {
-        if AppConfig.correctAPIURL != nil { return DeckServiceHTTP() }
-        return DeckServiceMock()
-    }
+    static func makeDefault() -> DeckService { DeckServiceHTTP() }
 }
 
 final class DeckServiceHTTP: DeckService {
@@ -89,22 +86,4 @@ final class DeckServiceHTTP: DeckService {
     }
 }
 
-final class DeckServiceMock: DeckService {
-    func makeDeck(name: String, from payloads: [ErrorSavePayload]) async throws -> (name: String, cards: [Flashcard]) {
-        // Build very small mock deck using corrected sentences as fronts
-        let lang = (UserDefaults.standard.string(forKey: "settings.language") ?? "zh")
-        let locale = Locale(identifier: lang == "zh" ? "zh-Hant" : "en")
-        let usage = String(localized: "deck.mock.usageLabel", locale: locale)
-        let zhPrefix = String(localized: "label.zhPrefix", locale: locale)
-        let enOriginalPrefix = String(localized: "label.enOriginalPrefix", locale: locale)
-        let untitled = String(localized: "deck.untitled", locale: locale)
-
-        let cards: [Flashcard] = payloads.prefix(10).map { p in
-            let front = "**\(usage)**: \(p.error.suggestion ?? p.error.span)\n\n\(p.correctedEn)"
-            let back = "\(zhPrefix)\(p.error.explainZh ?? "")\n\n\(enOriginalPrefix)\(p.inputEn)"
-            return Flashcard(front: front, back: back, frontNote: nil, backNote: nil)
-        }
-        let finalName = name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? untitled : name
-        return (finalName, cards)
-    }
-}
+// Mock implementation removed: BACKEND_URL is required for deck operations.

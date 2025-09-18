@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 
 // Cloud curated content (read-only): decks and bank books
-// Provides HTTP-backed implementation when BACKEND_URL is set, and a mock otherwise.
+// Requires BACKEND_URL; no mock fallback.
 
 struct CloudDeckSummary: Codable, Identifiable, Equatable { let id: String; let name: String; let count: Int }
 struct CloudDeckDetail: Codable, Equatable { let id: String; let name: String; let cards: [Flashcard] }
@@ -22,7 +22,13 @@ enum CloudLibraryServiceFactory {
 }
 
 final class CloudLibraryHTTP: CloudLibraryService {
-    private var base: URL { AppConfig.backendURL! }
+    private var base: URL {
+        guard let u = AppConfig.backendURL else {
+            // Methods should only be called after UI has guarded env
+            fatalError("BACKEND_URL missing")
+        }
+        return u
+    }
 
     func fetchDecks() async throws -> [CloudDeckSummary] {
         let url = base.appendingPathComponent("cloud").appendingPathComponent("decks")

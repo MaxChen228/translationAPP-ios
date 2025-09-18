@@ -52,6 +52,14 @@ struct CloudBankLibraryView: View {
     private func load() async {
         isLoading = true
         error = nil
+        guard AppConfig.backendURL != nil else {
+            isLoading = false
+            let msg = "BACKEND_URL 未設定，無法瀏覽雲端題庫。"
+            error = msg
+            bannerCenter.show(title: "未設定後端", subtitle: msg)
+            books = []
+            return
+        }
         do {
             books = try await service.fetchBooks()
         } catch {
@@ -62,6 +70,10 @@ struct CloudBankLibraryView: View {
     }
 
     private func copyBook(_ s: CloudBookSummary) async {
+        guard AppConfig.backendURL != nil else {
+            bannerCenter.show(title: "未設定後端", subtitle: "請先設定 BACKEND_URL")
+            return
+        }
         do {
             let detail = try await service.fetchBook(name: s.name)
             localBank.addOrReplaceBook(name: detail.name, items: detail.items)

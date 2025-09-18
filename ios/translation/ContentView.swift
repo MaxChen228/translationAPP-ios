@@ -10,6 +10,7 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var vm: CorrectionViewModel
     @EnvironmentObject private var savedStore: SavedErrorsStore
+    @EnvironmentObject private var bannerCenter: BannerCenter
     init(service: AIService = AIServiceFactory.makeDefault()) {
         _vm = StateObject(wrappedValue: CorrectionViewModel(service: service))
     }
@@ -80,8 +81,12 @@ struct ContentView: View {
                     // 內嵌於頁面底部的操作列（不再懸浮）
                     HStack(spacing: DS.Spacing.md) {
                         Button {
-                            Task { await vm.runCorrection() }
-                            focused = nil
+                            if AppConfig.correctAPIURL == nil {
+                                bannerCenter.show(title: "未設定後端", subtitle: "請先設定 BACKEND_URL")
+                            } else {
+                                Task { await vm.runCorrection() }
+                                focused = nil
+                            }
                         } label: {
                             Group {
                                 if vm.isLoading {

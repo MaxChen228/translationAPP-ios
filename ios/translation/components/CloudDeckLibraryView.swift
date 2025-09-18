@@ -51,6 +51,14 @@ struct CloudDeckLibraryView: View {
     private func load() async {
         isLoading = true
         error = nil
+        guard AppConfig.backendURL != nil else {
+            isLoading = false
+            let msg = "BACKEND_URL 未設定，無法瀏覽雲端卡片集。"
+            error = msg
+            bannerCenter.show(title: "未設定後端", subtitle: msg)
+            decks = []
+            return
+        }
         do {
             decks = try await service.fetchDecks()
         } catch {
@@ -61,6 +69,10 @@ struct CloudDeckLibraryView: View {
     }
 
     private func copyDeck(_ d: CloudDeckSummary) async {
+        guard AppConfig.backendURL != nil else {
+            bannerCenter.show(title: "未設定後端", subtitle: "請先設定 BACKEND_URL")
+            return
+        }
         do {
             let detail = try await service.fetchDeckDetail(id: d.id)
             _ = decksStore.add(name: detail.name, cards: detail.cards)

@@ -50,7 +50,7 @@ enum AppConfig {
     }
 }
 
-// MARK: - Mock Implementation
+// MARK: - Unavailable stub (when BACKEND_URL missing)
 
 final class UnavailableAIService: AIService {
     struct MissingBackendError: LocalizedError {

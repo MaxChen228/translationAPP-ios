@@ -78,6 +78,11 @@ struct TranslationApp: App {
                 .environmentObject(settings)
                 // Inject locale for runtime language switch (zh-Hant / en)
                 .environment(\.locale, Locale(identifier: settings.language == "zh" ? "zh-Hant" : "en"))
+                .onAppear {
+                    if AppConfig.backendURL == nil {
+                        bannerCenter.show(title: "未設定後端", subtitle: "請在 Info.plist 或環境變數設定 BACKEND_URL")
+                    }
+                }
                 .onReceive(NotificationCenter.default.publisher(for: .correctionCompleted)) { note in
                     let wsIDStr = note.userInfo?[AppEventKeys.workspaceID] as? String ?? ""
                     let score = note.userInfo?[AppEventKeys.score] as? Int ?? 0

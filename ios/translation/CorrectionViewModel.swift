@@ -104,7 +104,7 @@ final class CorrectionViewModel: ObservableObject {
 
     // 移除舊的 Sheet 題庫流程；改為列表頁直接回填中文
 
-    // 真實批改（若無後端設定則使用 MockAIService）
+    // 真實批改（需設定 BACKEND_URL；未設定時 UI 會提示並略過）
     func runCorrection() async {
         let user = inputEn.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !user.isEmpty else {

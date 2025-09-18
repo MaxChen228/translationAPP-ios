@@ -34,7 +34,7 @@ App 透過 Info.plist 的 `BACKEND_URL` 讀取後端位址（由 `AppConfig` 使
 - 雲端卡片集：`GET {BACKEND_URL}/cloud/decks`、`GET {BACKEND_URL}/cloud/decks/{id}`
 - 產生單字卡：`POST {BACKEND_URL}/make_deck`
 
-若未設定 `BACKEND_URL`，App 會自動切為本地 Mock，仍可體驗主要流程。
+注意：必須先設定 `BACKEND_URL`，否則批改、雲端瀏覽與單字卡產生會顯示錯誤提示（Banner），不再提供本地 Mock。
 
 ## 主要畫面與流程
 - Workspace 清單（components/WorkspaceListView.swift）
@@ -56,7 +56,7 @@ App 透過 Info.plist 的 `BACKEND_URL` 讀取後端位址（由 `AppConfig` 使
 - 測試：`ios/translationTests/`、`ios/translationUITests/`
 - 專案檔：`ios/translation.xcodeproj`
 
-## API 介面（簡述）
+## API 介面（簡述｜需設定 BACKEND_URL）
 - `POST /correct`
   - 請求：
     ```json
@@ -93,7 +93,7 @@ App 透過 Info.plist 的 `BACKEND_URL` 讀取後端位址（由 `AppConfig` 使
 - 覆蓋重點：批改流程、高亮定位、Deck JSON 解析、TTS 邏輯基本面
 
 ## 疑難排解
-- 沒有批改結果：先確認 `BACKEND_URL` 是否設定正確，或改以 Mock 測試。
+- 沒有批改結果：先確認 `BACKEND_URL` 是否設定正確（必填）。
 - 題庫清單為空：先到「題庫本」頁的「瀏覽雲端題庫」複製到本機。
 - 字型未生效：確認字型檔在 bundle 並被 `FontLoader` 註冊。
 - 高亮錯位：回傳錯誤時盡量提供 `hints.before/after/occurrence` 提升片段對位準確度。

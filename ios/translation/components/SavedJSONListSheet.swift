@@ -40,7 +40,13 @@ struct SavedJSONListSheet: View {
                                     .disabled(activeStash == .right)
                             }
                             Spacer(minLength: 0)
-                            Button { proposedName = String(localized: "deck.untitled", locale: locale); showSaveDeckSheet = true } label: { Text("saved.saveDeck") }
+                            Button {
+                                if AppConfig.correctAPIURL == nil {
+                                    bannerCenter.show(title: "未設定後端", subtitle: "請先設定 BACKEND_URL")
+                                } else {
+                                    proposedName = String(localized: "deck.untitled", locale: locale); showSaveDeckSheet = true
+                                }
+                            } label: { Text("saved.saveDeck") }
                                 .buttonStyle(DSSecondaryButtonCompact())
                                 .disabled(isSaving || filteredDecoded.isEmpty)
                         }
@@ -86,7 +92,13 @@ struct SavedJSONListSheet: View {
                                 .disabled(activeStash == .right)
                             }
                             Spacer(minLength: 0)
-                            Button { proposedName = String(localized: "deck.untitled", locale: locale); showSaveDeckSheet = true } label: { Text("saved.saveDeck") }
+                            Button {
+                                if AppConfig.correctAPIURL == nil {
+                                    bannerCenter.show(title: "未設定後端", subtitle: "請先設定 BACKEND_URL")
+                                } else {
+                                    proposedName = String(localized: "deck.untitled", locale: locale); showSaveDeckSheet = true
+                                }
+                            } label: { Text("saved.saveDeck") }
                                 .buttonStyle(DSSecondaryButtonCompact())
                                 .disabled(isSaving || filteredDecoded.isEmpty)
                         }
@@ -136,6 +148,11 @@ struct SavedJSONListSheet: View {
         guard !isSaving else { return }
         isSaving = true
         defer { isSaving = false }
+        guard AppConfig.correctAPIURL != nil else {
+            isSaving = false
+            bannerCenter.show(title: "未設定後端", subtitle: "請先設定 BACKEND_URL")
+            return
+        }
         do {
             // Decode saved payloads
             let decoder = JSONDecoder()
