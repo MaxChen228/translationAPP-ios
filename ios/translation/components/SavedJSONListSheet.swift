@@ -144,7 +144,7 @@ struct SavedJSONListSheet: View {
                 guard let data = rec.json.data(using: .utf8) else { return nil }
                 return try? decoder.decode(ErrorSavePayload.self, from: data)
             }
-            let effectiveName = name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "未命名" : name
+            let effectiveName = name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? String(localized: "deck.untitled", locale: locale) : name
             let (resolvedName, cards) = try await deckService.makeDeck(name: effectiveName, from: payloads)
             _ = decksStore.add(name: resolvedName, cards: cards)
             showSaveDeckSheet = false

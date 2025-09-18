@@ -187,3 +187,4 @@
 /* 錯誤詳情 */
 "error.applySuggestion" = "套用建議";
 "field.name" = "名稱";
+"deck.mock.usageLabel" = "用法";

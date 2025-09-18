@@ -119,6 +119,7 @@
 "saved.saveDeck.prompt" = "Items to make into a deck:";
 "error.applySuggestion" = "Apply suggestion";
 "field.name" = "Name";
+"deck.mock.usageLabel" = "Usage";
 
 /* Translation Flow (Phase 2) */
 "nav.translate" = "Translation";
