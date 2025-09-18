@@ -333,12 +333,12 @@ private extension FlashcardsView {
 
     func validationError() -> String? {
         guard let d = draft else { return nil }
-        if d.front.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return "正面不可空白" }
-        if d.back.contains("\n") || d.back.contains("\r") { return "背面需為單行" }
+        if d.front.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return String(localized: "flashcards.validator.frontEmpty", locale: locale) }
+        if d.back.contains("\n") || d.back.contains("\r") { return String(localized: "flashcards.validator.backSingleLine", locale: locale) }
         // Very light bracket check
         let open = d.back.filter { $0 == "(" || $0 == "（" }.count
         let close = d.back.filter { $0 == ")" || $0 == "）" }.count
-        if open != close { return "括號需成對" }
+        if open != close { return String(localized: "flashcards.validator.bracketsMismatch", locale: locale) }
         return nil
     }
 }

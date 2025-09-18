@@ -17,15 +17,15 @@ struct FlashcardDecksView: View {
                 // 頂部大標移除，避免與下方區塊標題重複
 
                 // 資料夾區（外觀與題庫本一致）—即使為 0 也顯示新增卡
-                ShelfGrid(title: "資料夾", columns: cols) {
+                ShelfGrid(title: String(localized: "deck.folders.title", locale: locale), columns: cols) {
                     ForEach(deckFolders.folders) { folder in
                         NavigationLink { DeckFolderDetailView(folderID: folder.id) } label: {
-                            ShelfTileCard(title: folder.name, subtitle: nil, countText: "共 \(folder.deckIDs.count) 個", iconSystemName: "folder", accentColor: DS.Brand.scheme.monument, showChevron: true)
+                            ShelfTileCard(title: folder.name, subtitle: nil, countText: String(format: String(localized: "folder.decks.count", locale: locale), folder.deckIDs.count), iconSystemName: "folder", accentColor: DS.Brand.scheme.monument, showChevron: true)
                         }
                         .buttonStyle(DSCardLinkStyle())
                         .contextMenu {
-                            Button("重新命名") { renamingFolder = folder }
-                            Button("刪除", role: .destructive) { _ = deckFolders.removeFolder(folder.id) }
+                            Button(String(localized: "action.rename", locale: locale)) { renamingFolder = folder }
+                            Button(String(localized: "action.delete", locale: locale), role: .destructive) { _ = deckFolders.removeFolder(folder.id) }
                         }
                         .onDrop(of: [.text], delegate: DeckIntoFolderDropDelegate(folderID: folder.id, folders: deckFolders, draggingDeckID: $draggingDeckID))
                     }
@@ -43,10 +43,10 @@ struct FlashcardDecksView: View {
                     return rootDecks.first(where: { $0.id == did })
                 }
 
-                ShelfGrid(title: "單字卡集", columns: cols) {
+                ShelfGrid(title: String(localized: "deck.root.title", locale: locale), columns: cols) {
                     // Browse cloud curated decks → copy to local
                     NavigationLink { CloudDeckLibraryView() } label: {
-                        BrowseCloudCard(title: "瀏覽雲端單字卡")
+                        BrowseCloudCard(title: String(localized: "deck.browseCloud", locale: locale))
                     }
                     .buttonStyle(.plain)
 
@@ -62,7 +62,7 @@ struct FlashcardDecksView: View {
                             ShelfTileCard(
                                 title: deck.name,
                                 subtitle: nil,
-                                countText: "共 \(deck.cards.count) 張",
+                                countText: String(format: String(localized: "deck.cards.count", locale: locale), deck.cards.count),
                                 iconSystemName: nil,
                                 accentColor: DS.Palette.primary,
                                 showChevron: true,
@@ -71,8 +71,8 @@ struct FlashcardDecksView: View {
                         }
                         .buttonStyle(DSCardLinkStyle())
                         .contextMenu {
-                            Button("重新命名") { renaming = deck }
-                            Button("刪除", role: .destructive) {
+                            Button(String(localized: "action.rename", locale: locale)) { renaming = deck }
+                            Button(String(localized: "action.delete", locale: locale), role: .destructive) {
                                 decksStore.remove(deck.id)
                                 deckOrder.removeFromOrder("deck:\(deck.id.uuidString)")
                             }

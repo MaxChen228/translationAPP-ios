@@ -25,8 +25,8 @@ enum AIServiceFactory {
             AppLog.aiInfo("Using HTTP AIService: \(url.absoluteString)")
             return AIServiceHTTP(endpoint: url)
         }
-        AppLog.aiInfo("Using MockAIService")
-        return MockAIService()
+        AppLog.aiError("BACKEND_URL missing: AIService unavailable")
+        return UnavailableAIService()
     }
 }
 
@@ -52,44 +52,12 @@ enum AppConfig {
 
 // MARK: - Mock Implementation
 
-final class MockAIService: AIService {
+final class UnavailableAIService: AIService {
+    struct MissingBackendError: LocalizedError {
+        var errorDescription: String? { "BACKEND_URL 未設定，無法連線後端。" }
+    }
     func correct(zh: String, en: String) async throws -> AICorrectionResult {
-        // Use deterministic mock similar to existing runMockCorrection()
-        let errors: [ErrorItem] = [
-            ErrorItem(
-                id: UUID(),
-                span: "go",
-                type: .morphological,
-                explainZh: "應使用過去式。",
-                suggestion: "went",
-                hints: ErrorHints(before: "I ", after: " to", occurrence: 1)
-            ),
-            ErrorItem(
-                id: UUID(),
-                span: "shop",
-                type: .lexical,
-                explainZh: "在此情境更常用 store。",
-                suggestion: "store",
-                hints: ErrorHints(before: "the ", after: " yesterday", occurrence: nil)
-            ),
-            ErrorItem(
-                id: UUID(),
-                span: "fruits",
-                type: .pragmatic,
-                explainZh: "可數名詞泛指時常用單數不可數。",
-                suggestion: "fruit",
-                hints: ErrorHints(before: "some ", after: ".", occurrence: nil)
-            )
-        ]
-
-        let corrected = "I went to the store yesterday to buy some fruit."
-        let response = AIResponse(corrected: corrected, score: 85, errors: errors)
-
-        // Prefer computing highlights here to isolate logic
-        let originalHighlights = Highlighter.computeHighlights(text: en, errors: errors)
-        let correctedHighlights = Highlighter.computeHighlightsInCorrected(text: corrected, errors: errors)
-
-        return AICorrectionResult(response: response, originalHighlights: originalHighlights, correctedHighlights: correctedHighlights)
+        throw MissingBackendError()
     }
 }
 
