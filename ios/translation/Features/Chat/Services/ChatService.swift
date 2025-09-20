@@ -35,19 +35,31 @@ final class ChatServiceHTTP: ChatService {
         self.session = session
     }
 
-    struct MessageDTO: Codable { let role: String; let content: String }
+    struct AttachmentDTO: Codable {
+        let type: String
+        let mimeType: String
+        let data: String
+    }
+
+    struct MessageDTO: Codable {
+        let role: String
+        let content: String
+        let attachments: [AttachmentDTO]?
+    }
     struct TurnResponseDTO: Codable {
         let reply: String
         let state: String
         let checklist: [String]?
     }
+    struct ResearchItemDTO: Codable {
+        let term: String
+        let explanation: String
+        let context: String
+        let type: String
+    }
+
     struct ResearchResponseDTO: Codable {
-        let title: String
-        let summary: String
-        let sourceZh: String?
-        let attemptEn: String?
-        let correctedEn: String
-        let errors: [AIServiceHTTP.ErrorDTO]
+        let items: [ResearchItemDTO]
     }
 
     func send(messages: [ChatMessage]) async throws -> ChatTurnResponse {
@@ -58,22 +70,29 @@ final class ChatServiceHTTP: ChatService {
 
     func research(messages: [ChatMessage]) async throws -> ChatResearchResponse {
         let dto = try await postResearch(messages: MessageList(messages: messages))
-        let errors = dto.errors.map { e -> ErrorItem in
-            let type = ErrorType(rawValue: e.type) ?? .lexical
-            let identifier = e.id ?? UUID()
-            let hints: ErrorHints? = {
-                guard let h = e.hints else { return nil }
-                return ErrorHints(before: h.before, after: h.after, occurrence: h.occurrence)
-            }()
-            return ErrorItem(id: identifier, span: e.span, type: type, explainZh: e.explainZh, suggestion: e.suggestion, hints: hints)
+        let items = dto.items.map { item in
+            ChatResearchItem(
+                term: item.term,
+                explanation: item.explanation,
+                context: item.context,
+                type: ErrorType(rawValue: item.type) ?? .lexical
+            )
         }
-        return ChatResearchResponse(title: dto.title, summary: dto.summary, sourceZh: dto.sourceZh, attemptEn: dto.attemptEn, correctedEn: dto.correctedEn, errors: errors)
+        guard !items.isEmpty else {
+            throw URLError(.cannotDecodeContentData)
+        }
+        return ChatResearchResponse(items: items)
     }
 
     private struct MessageList: Codable {
         let messages: [MessageDTO]
         init(messages: [ChatMessage]) {
-            self.messages = messages.map { MessageDTO(role: $0.role.rawValue, content: $0.content) }
+            self.messages = messages.map { message in
+                let attachments = message.attachments.isEmpty ? nil : message.attachments.map { attachment in
+                    AttachmentDTO(type: attachment.kind.rawValue, mimeType: attachment.mimeType, data: attachment.data.base64EncodedString())
+                }
+                return MessageDTO(role: message.role.rawValue, content: message.content, attachments: attachments)
+            }
         }
     }
 

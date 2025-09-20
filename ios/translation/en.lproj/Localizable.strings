@@ -99,6 +99,11 @@
 "chat.research" = "Start Deep Research";
 "chat.checklist" = "Next Steps";
 "chat.researchResult" = "Research Result";
+"chat.research.save" = "Add to Saved JSON";
+"chat.research.saved" = "Saved";
+"chat.research.ready" = "Research ready — review the cards below";
+"chat.research.context" = "Context";
+"chat.research.collapsedHint" = "Tap to view all %d cards.";
 "chat.attempt" = "Original Attempt";
 "chat.corrected" = "Corrected English";
 "chat.source" = "Original brief";
@@ -158,6 +163,9 @@
 "action.done" = "Done";
 "loading.making" = "Making…";
 "saved.saveDeck.prompt" = "Items to make into a deck:";
+"saved.source.correction" = "Correction";
+"saved.source.research" = "Research";
+"saved.deckName.placeholder" = "Deck name";
 "error.applySuggestion" = "Apply suggestion";
 "field.name" = "Name";
 "deck.mock.usageLabel" = "Usage";
@@ -220,6 +228,7 @@
 "banner.correctionFailed.title" = "Grading Failed";
 "banner.cloud.loadFailed.title" = "Load failed";
 "banner.tts.error.title" = "TTS Error";
+"banner.researchSaved.title" = "Saved to stash";
 /* Home */
 "home.workspaces" = "Workspaces";
 

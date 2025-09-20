@@ -1,19 +1,60 @@
 import Foundation
 
-struct DeckMakeItem: Codable {
-    let zh: String
-    let en: String
-    let corrected: String
-    let span: String?
-    let suggestion: String?
-    let explainZh: String?
-    let type: String?
-}
-
 struct DeckMakeRequest: Codable {
+    struct Item: Codable {
+        enum Source: String, Codable { case correction, research }
+        struct Correction: Codable {
+            let zh: String
+            let en: String
+            let corrected: String
+            let span: String?
+            let suggestion: String?
+            let explainZh: String?
+            let type: String
+        }
+        struct Research: Codable {
+            let term: String
+            let explanation: String
+            let context: String
+            let type: String
+        }
+
+        let source: Source
+        let correction: Correction?
+        let research: Research?
+
+        static func correction(_ payload: ErrorSavePayload) -> Item {
+            Item(
+                source: .correction,
+                correction: Correction(
+                    zh: payload.inputZh,
+                    en: payload.inputEn,
+                    corrected: payload.correctedEn,
+                    span: payload.error.span,
+                    suggestion: payload.error.suggestion,
+                    explainZh: payload.error.explainZh,
+                    type: payload.error.type.rawValue
+                ),
+                research: nil
+            )
+        }
+
+        static func research(_ payload: ResearchSavePayload) -> Item {
+            Item(
+                source: .research,
+                correction: nil,
+                research: Research(
+                    term: payload.term,
+                    explanation: payload.explanation,
+                    context: payload.context,
+                    type: payload.type.rawValue
+                )
+            )
+        }
+    }
+
     let name: String
-    let items: [DeckMakeItem]
-    // 選用：指定 LLM 模型（若後端支持以此模型產製卡片）
+    let items: [Item]
     let model: String?
 }
 
@@ -26,7 +67,7 @@ struct DeckCardDTO: Codable {
 struct DeckMakeResponse: Codable { let name: String; let cards: [DeckCardDTO] }
 
 protocol DeckService {
-    func makeDeck(name: String, from payloads: [ErrorSavePayload]) async throws -> (name: String, cards: [Flashcard])
+    func makeDeck(name: String, items: [DeckMakeRequest.Item]) async throws -> (name: String, cards: [Flashcard])
 }
 
 enum DeckServiceFactory {
@@ -41,18 +82,7 @@ final class DeckServiceHTTP: DeckService {
         return comps.url ?? correct.deletingLastPathComponent().appendingPathComponent("make_deck")
     }
 
-    func makeDeck(name: String, from payloads: [ErrorSavePayload]) async throws -> (name: String, cards: [Flashcard]) {
-        let items: [DeckMakeItem] = payloads.map { p in
-            DeckMakeItem(
-                zh: p.inputZh,
-                en: p.inputEn,
-                corrected: p.correctedEn,
-                span: p.error.span,
-                suggestion: p.error.suggestion,
-                explainZh: p.error.explainZh,
-                type: p.error.type.rawValue
-            )
-        }
+    func makeDeck(name: String, items: [DeckMakeRequest.Item]) async throws -> (name: String, cards: [Flashcard]) {
         let model = UserDefaults.standard.string(forKey: "settings.geminiModel")
         let req = DeckMakeRequest(name: name, items: items, model: model)
         var urlReq = URLRequest(url: try endpointURL())
@@ -81,7 +111,7 @@ final class DeckServiceHTTP: DeckService {
         }
         let dto = try JSONDecoder().decode(DeckMakeResponse.self, from: data)
         let cards = dto.cards.map { Flashcard(front: $0.front, back: $0.back, frontNote: $0.frontNote, backNote: $0.backNote) }
-        AppLog.aiInfo("make_deck name=\(dto.name) items_in=\(payloads.count) cards_out=\(cards.count)")
+        AppLog.aiInfo("make_deck name=\(dto.name) items_in=\(items.count) cards_out=\(cards.count)")
         return (dto.name, cards)
     }
 }

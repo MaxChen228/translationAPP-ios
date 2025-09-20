@@ -4,8 +4,7 @@ struct DeckDetailView: View {
     let deckID: UUID
     @EnvironmentObject private var decksStore: FlashcardDecksStore
     @EnvironmentObject private var progressStore: FlashcardProgressStore
-    @State private var navigateToNewEditor: Bool = false
-    @State private var newCardStartIndex: Int = 0
+    @State private var newEditorRoute: NewEditorRoute?
     @Environment(\.locale) private var locale
 
     private var deck: PersistedFlashcardDeck? {
@@ -40,11 +39,6 @@ struct DeckDetailView: View {
                     }
                     .buttonStyle(DSPrimaryButton())
 
-                    // 隱藏導頁器：新增卡片後直接進入編輯
-                    NavigationLink(isActive: $navigateToNewEditor) {
-                        FlashcardsView(title: d.name, cards: d.cards, deckID: d.id, startIndex: newCardStartIndex, startEditing: true)
-                    } label: { EmptyView() }
-
                     // 下：卡片簡略列表（新增改為懸浮按鈕，避免擁擠）
                     Text("deck.words.title").dsType(DS.Font.section)
                     VStack(spacing: 10) {
@@ -67,6 +61,20 @@ struct DeckDetailView: View {
             .padding(.bottom, DS.Spacing.lg)
         }
         .background(DS.Palette.background)
+        .navigationDestination(item: $newEditorRoute) { route in
+            if let targetDeck = deck(for: route.deckID) {
+                FlashcardsView(
+                    title: targetDeck.name,
+                    cards: targetDeck.cards,
+                    deckID: targetDeck.id,
+                    startIndex: route.startIndex,
+                    startEditing: true
+                )
+            } else {
+                Text(String(localized: "deck.notFound", locale: locale))
+                    .foregroundStyle(.secondary)
+            }
+        }
         // 右下懸浮新增按鈕（FAB）：降低視覺干擾且隨時可用
         .safeAreaInset(edge: .bottom, alignment: .trailing) {
             if deck != nil {
@@ -156,15 +164,24 @@ private struct CardPreviewRow: View {
 }
 
 private extension DeckDetailView {
+    struct NewEditorRoute: Identifiable, Hashable {
+        let id = UUID()
+        let deckID: UUID
+        let startIndex: Int
+    }
+
+    func deck(for id: UUID) -> PersistedFlashcardDeck? {
+        decksStore.decks.first(where: { $0.id == id })
+    }
+
     func addNewCardAndEdit() {
         guard let d = deck else { return }
         let insertionIndex = d.cards.count
         let card = Flashcard(front: "", back: "")
         decksStore.addCard(to: d.id, card: card)
-        newCardStartIndex = insertionIndex
         // 小延遲以等待列表刷新（避免同幀 push 導致資料未更新）
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-            navigateToNewEditor = true
+            newEditorRoute = NewEditorRoute(deckID: d.id, startIndex: insertionIndex)
         }
     }
 }

@@ -63,7 +63,7 @@ struct VariantBracketComposerView: View {
             }
         }
         .onAppear { ensureSelection(groups: groups); onComposedChange?(currentCombinedText(elements: parsed.elements)) }
-        .onChange(of: phrase) { _ in ensureSelection(groups: groups); onComposedChange?(currentCombinedText(elements: parsed.elements)) }
+        .onChange(of: phrase) { _, _ in ensureSelection(groups: groups); onComposedChange?(currentCombinedText(elements: parsed.elements)) }
         .padding(.bottom, 52) // 預留右下角播放鍵空間，避免重疊
     }
 

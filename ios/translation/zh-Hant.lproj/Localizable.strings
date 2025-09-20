@@ -126,6 +126,11 @@
 "chat.research" = "開始深入研究";
 "chat.checklist" = "即將處理";
 "chat.researchResult" = "研究結果";
+"chat.research.save" = "加入暫存 JSON";
+"chat.research.saved" = "已加入";
+"chat.research.ready" = "研究完成，請檢視下方卡片";
+"chat.research.context" = "語境";
+"chat.research.collapsedHint" = "點一下展開全部研究卡片（共 %d 張）";
 "chat.attempt" = "原始英文";
 "chat.corrected" = "修正版英文";
 "chat.source" = "題目原文";
@@ -185,6 +190,9 @@
 "action.done" = "完成";
 "loading.making" = "製作中…";
 "saved.saveDeck.prompt" = "將下列筆數整理為卡片集：";
+"saved.source.correction" = "批改";
+"saved.source.research" = "研究";
+"saved.deckName.placeholder" = "卡片集名稱";
 
 /* Workspace 狀態 */
 "workspace.status.loading" = "批改中…";
@@ -200,6 +208,7 @@
 "banner.correctionFailed.title" = "批改失敗";
 "banner.cloud.loadFailed.title" = "載入失敗";
 "banner.tts.error.title" = "TTS 錯誤";
+"banner.researchSaved.title" = "已加入暫存";
 /* 首頁 */
 "home.workspaces" = "Workspace";
 

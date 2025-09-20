@@ -1,9 +1,13 @@
 import SwiftUI
+import PhotosUI
+import UIKit
 
 /// 主聊天工作區，提供訊息串、研究結果與輸入列。
 struct ChatWorkspaceView: View {
     @StateObject private var viewModel: ChatViewModel
     @FocusState private var isComposerFocused: Bool
+    @State private var pendingAttachments: [ChatAttachment] = []
+    @State private var pendingPhotoItem: PhotosPickerItem? = nil
 
     private enum ScrollAnchor: Hashable {
         case message(UUID)
@@ -33,6 +37,7 @@ struct ChatWorkspaceView: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
                     viewModel.reset()
+                    pendingAttachments.removeAll()
                     isComposerFocused = false
                 } label: {
                     Label("chat.reset", systemImage: "arrow.counterclockwise")
@@ -54,7 +59,15 @@ struct ChatWorkspaceView: View {
                         }
 
                         if let checklist = viewModel.checklist, !checklist.isEmpty {
-                            ChatChecklistCard(titleKey: "chat.checklist", items: checklist)
+                            ChatChecklistCard(
+                                titleKey: "chat.checklist",
+                                items: checklist,
+                                showResearchButton: shouldShowResearchButton,
+                                isResearchButtonEnabled: canRunResearch,
+                                onResearch: {
+                                    Task { await viewModel.runResearch() }
+                                }
+                            )
                                 .id(ScrollAnchor.checklist)
                         }
 
@@ -80,6 +93,8 @@ struct ChatWorkspaceView: View {
                         .padding(.top, DS.Spacing.lg)
                 }
             }
+            .contentShape(Rectangle())
+            .simultaneousGesture(TapGesture().onEnded { dismissKeyboard() })
             .task(id: viewModel.messages.last?.id) {
                 await MainActor.run { scrollToLatest(proxy) }
             }
@@ -104,6 +119,10 @@ struct ChatWorkspaceView: View {
                 ErrorBanner(text: error)
             }
 
+            if !pendingAttachments.isEmpty {
+                AttachmentPreviewStrip(attachments: pendingAttachments, onRemove: removeAttachment)
+            }
+
             ZStack(alignment: .topLeading) {
                 if viewModel.inputText.isEmpty {
                     Text("chat.placeholder")
@@ -115,7 +134,7 @@ struct ChatWorkspaceView: View {
 
                 TextEditor(text: $viewModel.inputText)
                     .focused($isComposerFocused)
-                    .frame(minHeight: 112, alignment: .leading)
+                    .frame(minHeight: 64, maxHeight: 180, alignment: .leading)
                     .font(DS.Font.body)
                     .scrollContentBackground(.hidden)
                     .padding(.horizontal, 4)
@@ -131,21 +150,25 @@ struct ChatWorkspaceView: View {
                     .stroke(isComposerFocused ? DS.Palette.primary.opacity(DS.Opacity.strong) : DS.Palette.border.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.regular)
             )
 
-            HStack(spacing: DS.Spacing.sm2) {
+            HStack(alignment: .center, spacing: DS.Spacing.sm2) {
                 ChatStateBadge(state: viewModel.state, isLoading: viewModel.isLoading)
 
-                Spacer()
+                Spacer(minLength: DS.Spacing.sm)
 
-                Button {
-                    Task { await viewModel.runResearch() }
-                } label: {
-                    Label("chat.research", systemImage: "doc.text.magnifyingglass")
+                PhotosPicker(selection: $pendingPhotoItem, matching: .images, photoLibrary: .shared()) {
+                    Label("Add Image", systemImage: "paperclip")
+                        .labelStyle(.iconOnly)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(DS.Brand.scheme.classicBlue)
                 }
-                .buttonStyle(DSSecondaryButtonCompact())
-                .disabled(!canRunResearch)
+                .disabled(viewModel.isLoading)
 
                 Button {
-                    Task { await viewModel.sendMessage() }
+                    let attachments = pendingAttachments
+                    Task {
+                        await viewModel.sendMessage(attachments: attachments)
+                        await MainActor.run { pendingAttachments.removeAll() }
+                    }
                 } label: {
                     Label("chat.send", systemImage: "paperplane.fill")
                 }
@@ -156,22 +179,35 @@ struct ChatWorkspaceView: View {
         .padding(.horizontal, DS.Spacing.md)
         .padding(.vertical, DS.Spacing.md)
         .background(DS.Palette.surfaceAlt)
+        .onChange(of: pendingPhotoItem) { _, newValue in
+            guard let item = newValue else { return }
+            handleSelectedPhotoItem(item)
+            pendingPhotoItem = nil
+        }
     }
 
     private var canSend: Bool {
-        !viewModel.isLoading && !viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        guard !viewModel.isLoading else { return false }
+        let hasText = !viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        return hasText || !pendingAttachments.isEmpty
     }
 
     private var canRunResearch: Bool {
-        !viewModel.isLoading && viewModel.messages.contains { $0.role == .user }
+        !viewModel.isLoading && viewModel.state == .ready && viewModel.messages.contains { $0.role == .user }
+    }
+
+    private var shouldShowResearchButton: Bool {
+        canRunResearch && (viewModel.researchResult?.items.isEmpty ?? true)
     }
 
     private var canReset: Bool {
-        viewModel.messages.contains { $0.role == .user } || !viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.researchResult != nil || (viewModel.checklist?.isEmpty == false)
+        viewModel.messages.contains { $0.role == .user } || !viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.researchResult != nil || (viewModel.checklist?.isEmpty == false) || !pendingAttachments.isEmpty
     }
 
     private var shouldShowEmptyState: Bool {
-        !viewModel.messages.contains { $0.role == .user } && viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        !viewModel.messages.contains { $0.role == .user }
+            && viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && pendingAttachments.isEmpty
     }
 
     @MainActor
@@ -198,6 +234,53 @@ struct ChatWorkspaceView: View {
         viewModel.inputText = suggestion
         isComposerFocused = true
     }
+
+    private func dismissKeyboard() {
+        isComposerFocused = false
+#if canImport(UIKit)
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+#endif
+    }
+
+    private func removeAttachment(_ attachment: ChatAttachment) {
+        pendingAttachments.removeAll { $0.id == attachment.id }
+    }
+
+    private func handleSelectedPhotoItem(_ item: PhotosPickerItem) {
+        Task {
+            let currentCount = await MainActor.run { pendingAttachments.count }
+            guard currentCount < 3 else { return }
+            guard let data = try? await item.loadTransferable(type: Data.self) else { return }
+            guard let prepared = prepareImageData(from: data) else { return }
+            await MainActor.run {
+                let attachment = ChatAttachment(kind: .image, mimeType: prepared.mime, data: prepared.data)
+                pendingAttachments.append(attachment)
+            }
+        }
+    }
+
+    private func prepareImageData(from data: Data) -> (data: Data, mime: String)? {
+        #if canImport(UIKit)
+        guard let image = UIImage(data: data) else { return nil }
+        let maxDimension: CGFloat = 1024
+        let targetSize: CGSize
+        let maxSide = max(image.size.width, image.size.height)
+        if maxSide > maxDimension {
+            let scale = maxDimension / maxSide
+            targetSize = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+        } else {
+            targetSize = image.size
+        }
+        let renderer = UIGraphicsImageRenderer(size: targetSize)
+        let scaled = renderer.image { _ in
+            image.draw(in: CGRect(origin: .zero, size: targetSize))
+        }
+        guard let jpegData = scaled.jpegData(compressionQuality: 0.75) else { return nil }
+        return (jpegData, "image/jpeg")
+        #else
+        return nil
+        #endif
+    }
 }
 
 private struct ChatBubble: View {
@@ -214,6 +297,10 @@ private struct ChatBubble: View {
                     .dsType(DS.Font.body, lineSpacing: 6)
                     .foregroundStyle(isUser ? DS.Palette.onPrimary : .primary)
                     .multilineTextAlignment(isUser ? .trailing : .leading)
+
+                if !message.attachments.isEmpty {
+                    AttachmentGallery(attachments: message.attachments, isUser: isUser)
+                }
             }
             .padding(.vertical, DS.Spacing.sm2)
             .padding(.horizontal, DS.Spacing.md)
@@ -236,31 +323,80 @@ private struct ChatBubble: View {
 
             if !isUser { Spacer(minLength: 24) }
         }
-        .frame(maxWidth: .infinity, alignment: isUser ? .trailing : .leading)
+    }
+}
+
+private struct AttachmentPreviewStrip: View {
+    var attachments: [ChatAttachment]
+    var onRemove: (ChatAttachment) -> Void
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: DS.Spacing.sm2) {
+                ForEach(attachments) { attachment in
+                    AttachmentThumbnail(attachment: attachment, showRemove: true, onRemove: onRemove)
+                }
+            }
+            .padding(.horizontal, DS.Spacing.sm2)
+        }
+    }
+}
+
+private struct AttachmentGallery: View {
+    var attachments: [ChatAttachment]
+    var isUser: Bool
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: DS.Spacing.sm2) {
+                ForEach(attachments) { attachment in
+                    AttachmentThumbnail(attachment: attachment, showRemove: false, onRemove: { _ in })
+                        .overlay(
+                            RoundedRectangle(cornerRadius: DS.Radius.sm, style: .continuous)
+                                .stroke(isUser ? Color.white.opacity(0.5) : DS.Palette.border.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.hairline)
+                        )
+                }
+            }
+        }
     }
 }
 
 private struct ChatChecklistCard: View {
     var titleKey: LocalizedStringKey
     var items: [String]
+    var showResearchButton: Bool = false
+    var isResearchButtonEnabled: Bool = true
+    var onResearch: (() -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.sm) {
-            Label {
-                Text(titleKey).dsType(DS.Font.section)
-            } icon: {
-                Image(systemName: "checklist")
-                    .foregroundStyle(DS.Brand.scheme.classicBlue)
+            HStack(alignment: .center, spacing: DS.Spacing.sm) {
+                Label {
+                    Text(titleKey).dsType(DS.Font.section)
+                } icon: {
+                    Image(systemName: "checklist")
+                        .foregroundStyle(DS.Brand.scheme.classicBlue)
+                }
+
+                Spacer(minLength: 0)
+
+                if showResearchButton, let onResearch {
+                    Button(action: onResearch) {
+                        Label("chat.research", systemImage: "doc.text.magnifyingglass")
+                    }
+                    .buttonStyle(DSSecondaryButtonCompact())
+                    .disabled(!isResearchButtonEnabled)
+                }
             }
 
-            VStack(alignment: .leading, spacing: 8) {
-                ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+            VStack(alignment: .leading, spacing: DS.Spacing.sm2) {
+                ForEach(items, id: \.self) { item in
                     HStack(alignment: .top, spacing: 8) {
-                        Image(systemName: "circle")
-                            .font(.caption)
-                            .foregroundStyle(DS.Palette.primary.opacity(0.8))
-                            .padding(.top, 4)
-                        Text(verbatim: item)
+                        Image(systemName: "circle.fill")
+                            .font(.system(size: 6))
+                            .foregroundStyle(DS.Palette.primary)
+                            .padding(.top, 5)
+                        Text(item)
                             .dsType(DS.Font.body, lineSpacing: 4)
                     }
                 }
@@ -278,56 +414,106 @@ private struct ChatChecklistCard: View {
     }
 }
 
+private struct AttachmentThumbnail: View {
+    var attachment: ChatAttachment
+    var showRemove: Bool
+    var onRemove: (ChatAttachment) -> Void
+
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            Group {
+                #if canImport(UIKit)
+                if let image = attachment.uiImage {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                } else {
+                    placeholder
+                }
+                #else
+                placeholder
+                #endif
+            }
+            .frame(width: 72, height: 72)
+            .clipShape(RoundedRectangle(cornerRadius: DS.Radius.sm, style: .continuous))
+
+            if showRemove {
+                Button {
+                    onRemove(attachment)
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 18))
+                        .foregroundStyle(.white)
+                        .shadow(radius: 2)
+                }
+                .offset(x: 6, y: -6)
+            }
+        }
+    }
+
+    private var placeholder: some View {
+        RoundedRectangle(cornerRadius: DS.Radius.sm, style: .continuous)
+            .fill(DS.Palette.surfaceAlt)
+            .overlay(
+                Image(systemName: "photo")
+                    .font(.title3)
+                    .foregroundStyle(.secondary)
+            )
+    }
+}
+
 private struct ChatResearchCard: View {
     var response: ChatResearchResponse
+    @EnvironmentObject private var savedStore: SavedErrorsStore
+    @EnvironmentObject private var bannerCenter: BannerCenter
+    @State private var savedItemIDs: Set<UUID> = []
+    @State private var isExpanded: Bool = false
+    @Environment(\.locale) private var locale
 
     var body: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.md) {
-            Label {
-                Text("chat.researchResult").dsType(DS.Font.section)
-            } icon: {
-                Image(systemName: "lightbulb.fill")
-                    .foregroundStyle(DS.Brand.scheme.peachQuartz)
-            }
+            Button {
+                guard !response.items.isEmpty else { return }
+                withAnimation(DS.AnimationToken.subtle) { isExpanded.toggle() }
+            } label: {
+                HStack(alignment: .center, spacing: DS.Spacing.sm) {
+                    Label {
+                        Text("chat.researchResult").dsType(DS.Font.section)
+                    } icon: {
+                        Image(systemName: "lightbulb.fill")
+                            .foregroundStyle(DS.Brand.scheme.peachQuartz)
+                    }
 
-            if !response.title.isEmpty {
-                Text(response.title)
-                    .dsType(DS.Font.serifTitle)
-            }
+                    Spacer(minLength: 0)
 
-            Text(response.summary)
-                .dsType(DS.Font.body, lineSpacing: 6)
-                .foregroundStyle(.secondary)
-
-            if let source = response.sourceZh, !source.isEmpty {
-                section(titleKey: "chat.source") {
-                    Text(source)
-                        .dsType(DS.Font.body, lineSpacing: 4)
-                }
-            }
-
-            if let attempt = response.attemptEn, !attempt.isEmpty {
-                section(titleKey: "chat.attempt") {
-                    Text(attempt)
-                        .dsType(DS.Font.body, lineSpacing: 4)
-                        .foregroundStyle(.secondary)
-                }
-            }
-
-            section(titleKey: "chat.corrected") {
-                Text(response.correctedEn)
-                    .dsType(DS.Font.body, lineSpacing: 4)
-            }
-
-            if !response.errors.isEmpty {
-                Text("chat.research.errors")
-                    .dsType(DS.Font.section)
-
-                VStack(alignment: .leading, spacing: DS.Spacing.sm) {
-                    ForEach(response.errors) { err in
-                        ErrorItemRow(err: err, selected: false)
+                    if !response.items.isEmpty {
+                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(.secondary)
                     }
                 }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            if response.items.isEmpty {
+                Text(String(localized: "chat.research.ready"))
+                    .dsType(DS.Font.body)
+                    .foregroundStyle(.secondary)
+            } else if isExpanded {
+                VStack(alignment: .leading, spacing: DS.Spacing.md) {
+                    ForEach(response.items) { item in
+                        ResearchItemCard(
+                            item: item,
+                            isSaved: savedItemIDs.contains(item.id),
+                            onSave: { saveItem(item) }
+                        )
+                    }
+                }
+            } else {
+                Text(collapsedHint(for: response.items.count))
+                    .dsType(DS.Font.body)
+                    .foregroundStyle(.secondary)
             }
         }
         .padding(DS.Spacing.md)
@@ -339,16 +525,78 @@ private struct ChatResearchCard: View {
             RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
                 .stroke(DS.Palette.border.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.thin)
         )
+        .onChange(of: response.id) { _, _ in
+            savedItemIDs.removeAll()
+            isExpanded = false
+        }
     }
 
-    @ViewBuilder
-    private func section(titleKey: LocalizedStringKey, @ViewBuilder content: () -> some View) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(titleKey)
-                .dsType(DS.Font.caption)
+    private func saveItem(_ item: ChatResearchItem) {
+        guard !savedItemIDs.contains(item.id) else { return }
+        let payload = ResearchSavePayload(
+            term: item.term,
+            explanation: item.explanation,
+            context: item.context,
+            type: item.type,
+            savedAt: Date()
+        )
+        savedStore.add(research: payload)
+        savedItemIDs.insert(item.id)
+        Haptics.success()
+        bannerCenter.show(
+            title: String(localized: "banner.researchSaved.title"),
+            subtitle: item.term
+        )
+    }
+
+    private func collapsedHint(for count: Int) -> String {
+        let template = String(localized: "chat.research.collapsedHint", locale: locale)
+        return String(format: template, locale: locale, count)
+    }
+}
+
+private struct ResearchItemCard: View {
+    var item: ChatResearchItem
+    var isSaved: Bool
+    var onSave: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DS.Spacing.sm) {
+            HStack(alignment: .top, spacing: DS.Spacing.sm2) {
+                TagLabel(text: item.type.displayName, color: item.type.color)
+                Text(item.term)
+                    .dsType(DS.Font.serifTitle)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+                Spacer(minLength: 0)
+                Button(action: onSave) {
+                    if isSaved {
+                        Label(String(localized: "chat.research.saved"), systemImage: "checkmark.seal.fill")
+                    } else {
+                        Label(String(localized: "chat.research.save"), systemImage: "tray.and.arrow.down")
+                    }
+                }
+                .buttonStyle(DSSecondaryButtonCompact())
+                .disabled(isSaved)
+            }
+
+            Text(item.explanation)
+                .dsType(DS.Font.body, lineSpacing: 4)
                 .foregroundStyle(.secondary)
-            content()
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("chat.research.context")
+                    .dsType(DS.Font.caption)
+                    .foregroundStyle(.secondary)
+                Text(item.context)
+                    .dsType(DS.Font.body)
+            }
         }
+        .padding(DS.Spacing.sm)
+        .background(
+            RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
+                .fill(DS.Palette.surfaceAlt)
+        )
     }
 }
 
@@ -511,16 +759,7 @@ private struct ErrorBanner: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
-                .stroke(DS.Palette.warning.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.thin)
+                .stroke(DS.Palette.warning.opacity(0.5), lineWidth: DS.BorderWidth.hairline)
         )
-    }
-}
-
-struct ChatWorkspaceView_Previews: PreviewProvider {
-    static var previews: some View {
-        NavigationView {
-            ChatWorkspaceView()
-        }
-        .environment(\.locale, Locale(identifier: "zh-Hant"))
     }
 }

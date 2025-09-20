@@ -376,24 +376,24 @@ private extension FlashcardsView {
     }
 
     func saveEdit() {
-        guard var d = draft else { cancelEdit(); return }
+        guard let draftCard = draft else { cancelEdit(); return }
         if let err = validationError() { errorText = err; return }
         // Apply to in-memory list
-        if let idx = store.cards.firstIndex(where: { $0.id == d.id }) {
-            store.cards[idx] = d
+        if let idx = store.cards.firstIndex(where: { $0.id == draftCard.id }) {
+            store.cards[idx] = draftCard
         }
         // Persist to deck store if available
-        if let deckID = deckID { decksStore.updateCard(in: deckID, card: d) }
+        if let deckID = deckID { decksStore.updateCard(in: deckID, card: draftCard) }
         cancelEdit()
     }
 
     func validationError() -> String? {
-        guard let d = draft else { return nil }
-        if d.front.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return String(localized: "flashcards.validator.frontEmpty", locale: locale) }
-        if d.back.contains("\n") || d.back.contains("\r") { return String(localized: "flashcards.validator.backSingleLine", locale: locale) }
+        guard let draft = draft else { return nil }
+        if draft.front.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return String(localized: "flashcards.validator.frontEmpty", locale: locale) }
+        if draft.back.contains("\n") || draft.back.contains("\r") { return String(localized: "flashcards.validator.backSingleLine", locale: locale) }
         // Very light bracket check
-        let open = d.back.filter { $0 == "(" || $0 == "（" }.count
-        let close = d.back.filter { $0 == ")" || $0 == "）" }.count
+        let open = draft.back.filter { $0 == "(" || $0 == "（" }.count
+        let close = draft.back.filter { $0 == ")" || $0 == "）" }.count
         if open != close { return String(localized: "flashcards.validator.bracketsMismatch", locale: locale) }
         return nil
     }

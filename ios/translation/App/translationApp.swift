@@ -91,21 +91,19 @@ struct TranslationApp: App {
                     }
                 }
                 .onReceive(NotificationCenter.default.publisher(for: .correctionCompleted)) { note in
-                    let wsIDStr = note.userInfo?[AppEventKeys.workspaceID] as? String ?? ""
                     let score = note.userInfo?[AppEventKeys.score] as? Int ?? 0
                     let errors = note.userInfo?[AppEventKeys.errors] as? Int ?? 0
                     let localeID = settings.language == "zh" ? "zh-Hant" : "en"
                     let locale = Locale(identifier: localeID)
                     let subtitle = "\(score) " + String(localized: "label.points", locale: locale) + " • \(errors) " + String(localized: "label.suggestions", locale: locale)
-                    var targetUUID: UUID? = UUID(uuidString: wsIDStr)
+                    let targetWorkspaceID = (note.userInfo?[AppEventKeys.workspaceID] as? String).flatMap(UUID.init(uuidString:))
                     let title = String(localized: "banner.correctionDone.title", locale: locale)
                     let action = String(localized: "banner.correctionDone.action", locale: locale)
-                    bannerCenter.show(title: title, subtitle: subtitle, actionTitle: targetUUID != nil ? action : nil) {
-                        if let id = targetUUID { router.open(workspaceID: id) }
+                    bannerCenter.show(title: title, subtitle: subtitle, actionTitle: targetWorkspaceID != nil ? action : nil) {
+                        if let id = targetWorkspaceID { router.open(workspaceID: id) }
                     }
                 }
                 .onReceive(NotificationCenter.default.publisher(for: .correctionFailed)) { note in
-                    let wsIDStr = note.userInfo?[AppEventKeys.workspaceID] as? String ?? ""
                     let err = note.userInfo?[AppEventKeys.error] as? String
                     let localeID = settings.language == "zh" ? "zh-Hant" : "en"
                     let locale = Locale(identifier: localeID)

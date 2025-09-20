@@ -18,7 +18,7 @@ struct SwipeableRow<Content: View>: View {
             .gesture(
                 DragGesture(minimumDistance: 10, coordinateSpace: .local)
                     .onChanged { value in
-                        var t = value.translation.width
+                        let t = value.translation.width
                         if t > 0 { // rightwards
                             if allowRight { offsetX = min(t, maxOffset) } else { offsetX = 0 }
                         } else { // leftwards

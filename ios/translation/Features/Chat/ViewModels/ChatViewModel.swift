@@ -18,11 +18,11 @@ final class ChatViewModel: ObservableObject {
         messages = [ChatMessage(role: .assistant, content: String(localized: "chat.greeting"))]
     }
 
-    func sendMessage() async {
+    func sendMessage(attachments: [ChatAttachment] = []) async {
         let trimmed = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
+        guard !trimmed.isEmpty || !attachments.isEmpty else { return }
         inputText = ""
-        messages.append(ChatMessage(role: .user, content: trimmed))
+        messages.append(ChatMessage(role: .user, content: trimmed, attachments: attachments))
         await sendCurrentMessages()
     }
 
@@ -46,7 +46,9 @@ final class ChatViewModel: ObservableObject {
         do {
             let res = try await service.research(messages: messages)
             researchResult = res
-            messages.append(ChatMessage(role: .assistant, content: res.summary))
+            let bulletList = res.items.map { "• \($0.term)" }.joined(separator: "\n")
+            let messageText = bulletList.isEmpty ? String(localized: "chat.research.ready") : bulletList
+            messages.append(ChatMessage(role: .assistant, content: messageText))
             errorMessage = nil
         } catch {
             errorMessage = (error as NSError).localizedDescription
