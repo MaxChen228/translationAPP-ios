@@ -29,16 +29,16 @@ final class FlashcardsViewModel: ObservableObject {
 
     enum ReviewPhase { case allOnce, unfamiliarLoop }
 
-    init(title: String,
+    init(store: FlashcardsStore,
+         title: String,
          cards: [Flashcard],
          deckID: UUID?,
-         startIndex: Int,
          startEditingOnAppear: Bool) {
+        self.store = store
         self.title = title
         self.originalCards = cards
         self.deckID = deckID
         self.startEditingOnAppear = startEditingOnAppear
-        self.store = FlashcardsStore(cards: cards, startIndex: startIndex)
     }
 
     var isAudioActive: Bool { speechManager.isPlaying || speechManager.isPaused }

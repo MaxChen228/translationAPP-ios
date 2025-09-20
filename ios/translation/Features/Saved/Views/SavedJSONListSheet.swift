@@ -230,6 +230,15 @@ private extension SavedJSONListSheet {
         decoded.removeAll { $0.id == id }
     }
 
+    func move(_ row: DecodedRecord, to stash: SavedStash) {
+        guard row.stash != stash else { return }
+        store.move(row.id, to: stash)
+        Haptics.success()
+        if expanded.contains(row.id) {
+            DSMotion.run(DS.AnimationToken.subtle) { expanded.remove(row.id) }
+        }
+    }
+
     var filteredDecoded: [DecodedRecord] { decoded.filter { $0.stash == activeStash } }
     var currentCount: Int { store.count(in: activeStash) }
     var otherCount: Int { store.count(in: activeStash == .left ? .right : .left) }
@@ -246,30 +255,43 @@ private extension SavedJSONListSheet {
         } else {
             LazyVStack(alignment: .leading, spacing: DS.Spacing.md) {
                 ForEach(rows) { row in
-                    SwipeableRow(
-                        allowLeft: stash == .right,
-                        allowRight: stash == .left,
-                        onTriggerLeft: {
-                            store.move(row.id, to: .left)
-                            Haptics.success()
+                    SavedErrorRowCard(
+                        row: row,
+                        expanded: expanded.contains(row.id),
+                        onToggle: {
+                            DSMotion.run(DS.AnimationToken.subtle) {
+                                if expanded.contains(row.id) { expanded.remove(row.id) }
+                                else { expanded.insert(row.id) }
+                            }
                         },
-                        onTriggerRight: {
-                            store.move(row.id, to: .right)
-                            Haptics.success()
+                        onCopy: { copyJSON(row.rawJSON) },
+                        onDelete: { deleteRow(row.id) }
+                    )
+                    .swipeActions(edge: .leading, allowsFullSwipe: stash == .right) {
+                        if stash == .right {
+                            Button {
+                                move(row, to: .left)
+                            } label: {
+                                Label(String(localized: "saved.moveLeft", locale: locale), systemImage: "arrow.uturn.backward.circle")
+                            }
+                            .tint(DS.Brand.scheme.provence)
                         }
-                    ) {
-                        SavedErrorRowCard(
-                            row: row,
-                            expanded: expanded.contains(row.id),
-                            onToggle: {
-                                DSMotion.run(DS.AnimationToken.subtle) {
-                                    if expanded.contains(row.id) { expanded.remove(row.id) }
-                                    else { expanded.insert(row.id) }
-                                }
-                            },
-                            onCopy: { copyJSON(row.rawJSON) },
-                            onDelete: { deleteRow(row.id) }
-                        )
+                    }
+                    .swipeActions(edge: .trailing, allowsFullSwipe: stash == .left) {
+                        if stash == .left {
+                            Button {
+                                move(row, to: .right)
+                            } label: {
+                                Label(String(localized: "saved.moveRight", locale: locale), systemImage: "arrow.uturn.forward.circle")
+                            }
+                            .tint(DS.Brand.scheme.classicBlue)
+                        }
+
+                        Button(role: .destructive) {
+                            deleteRow(row.id)
+                        } label: {
+                            Label(String(localized: "action.delete", locale: locale), systemImage: "trash")
+                        }
                     }
                 }
             }
