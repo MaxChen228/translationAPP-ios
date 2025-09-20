@@ -63,9 +63,8 @@
 "deck.action.addCard" = "Add Card";
 "nav.deck" = "Flashcards";
 "deck.notFound" = "Deck not found";
-"deck.summary.new" = "New";
-"deck.summary.learning" = "Learning";
-"deck.summary.mastered" = "Mastered";
+"deck.summary.unfamiliar" = "Unfamiliar";
+"deck.summary.familiar" = "Familiar";
 "deck.folders.title" = "Folders";
 "deck.root.title" = "Decks";
 "deck.browseCloud" = "Browse Cloud Decks";
@@ -82,13 +81,40 @@
 "flashcards.editor.back" = "Back (single line with (A | B))";
 "flashcards.editor.backNote" = "Back note (optional)";
 "flashcards.editor.delete" = "Delete Card";
-"flashcards.level" = "Level %d";
+"flashcards.status.familiar" = "Familiar";
+"flashcards.status.unfamiliar" = "Unfamiliar";
+"flashcards.annotate.familiar" = "Familiar";
+"flashcards.annotate.unfamiliar" = "Unfamiliar";
 "flashcards.empty" = "No cards yet";
 "flashcards.empty.hint" = "Add or import cards later.";
 
+/* Chat */
+"chat.title" = "AI Deep Chat";
+"chat.subtitle" = "Clarify your request with Gemini";
+"chat.greeting" = "Hi! I'm ready to help—what should we explore today?";
+"chat.reset" = "Reset";
+"chat.placeholder" = "Type a message";
+"chat.reset" = "Reset conversation";
+"chat.send" = "Send";
+"chat.research" = "Start Deep Research";
+"chat.checklist" = "Next Steps";
+"chat.researchResult" = "Research Result";
+"chat.attempt" = "Original Attempt";
+"chat.corrected" = "Corrected English";
+"chat.source" = "Original brief";
+"chat.research.errors" = "Error insights";
+"chat.state.gathering" = "Gathering context";
+"chat.state.ready" = "Ready to answer";
+"chat.state.completed" = "Task completed";
+"chat.empty.title" = "Ready when you are";
+"chat.empty.subtitle" = "Share your sentence, question, or idea—here are a few ways to get started.";
+"chat.empty.suggestion1" = "Translate this Chinese sentence into natural English.";
+"chat.empty.suggestion2" = "Review this English email for tone and clarity.";
+"chat.empty.suggestion3" = "Help me prepare follow-up questions for a user interview.";
+
 /* Flashcards Settings */
 "flashcards.settings.mode" = "Review Mode";
-"flashcards.settings.help.annotate" = "Annotate: swipe right +1, left −1, then go next.";
+"flashcards.settings.help.annotate" = "Annotate: swipe right → Familiar; left → Unfamiliar, then go next.";
 "flashcards.settings.help.browse" = "Browse: swipe left/right to switch, level unchanged.";
 
 /* TTS Settings */
@@ -107,11 +133,15 @@
 "tts.fill.random" = "Random";
 "tts.fill.wrap" = "Wrap";
 "tts.start" = "Start";
+"tts.play" = "Play audio";
+"tts.pause" = "Pause audio";
 
 /* Saved JSON */
 "nav.savedJSON" = "Saved JSON";
 "saved.clear" = "Clear";
 "saved.saveDeck" = "Save Deck";
+"saved.switchLeft" = "Switch to left stash";
+"saved.switchRight" = "Switch to right stash";
 "deck.untitled" = "Untitled";
 "saved.empty" = "No saved errors";
 "saved.unparsable" = "Unable to parse this record";
@@ -122,6 +152,7 @@
 "action.copied" = "Copied";
 "saved.confirm.delete" = "Delete this record?";
 "action.delete" = "Delete";
+"action.back" = "Back";
 "action.cancel" = "Cancel";
 "action.edit" = "Edit";
 "action.done" = "Done";
@@ -186,6 +217,9 @@
 "banner.correctionDone.action" = "View";
 "label.points" = "pts";
 "label.suggestions" = "suggestions";
+"banner.correctionFailed.title" = "Grading Failed";
+"banner.cloud.loadFailed.title" = "Load failed";
+"banner.tts.error.title" = "TTS Error";
 /* Home */
 "home.workspaces" = "Workspaces";
 
@@ -193,6 +227,10 @@
 "bank.folders.title" = "Folders";
 "bank.local.title" = "Local Banks";
 "bank.browseCloud" = "Browse Cloud Banks";
+"bank.random.title" = "Random";
+"bank.random.settings" = "Random Settings";
+"bank.random.excludeCompleted" = "Exclude completed";
+"banner.random.noneEligible" = "No eligible items";
 "bank.folders.empty" = "No folders";
 "bank.local.empty" = "No local banks";
 "bank.folder.count" = "%d books";
@@ -214,3 +252,16 @@
 "folder.decks.count" = "%d decks";
 "banner.deckSaved.title" = "Deck saved";
 "a11y.copyCorrected" = "Copy corrected text";
+"settings.flashcards.title" = "Flashcards";
+"settings.flashcards.subtitle" = "Familiarity & Reset";
+"settings.flashcards.resetAll" = "Reset Familiarity";
+"settings.flashcards.reset.hint" = "Reset all cards to Unfamiliar.";
+"settings.flashcards.reset.confirm.title" = "Reset all flashcards?";
+"settings.flashcards.reset.confirm.subtitle" = "This sets every card to Unfamiliar and cannot be undone.";
+"settings.flashcards.reset.done" = "Reset to Unfamiliar";
+"flashcards.round.completed" = "Round complete";
+"flashcards.session.completed" = "Session complete";
+"flashcards.emptyDeckReset.title" = "All Familiar";
+"flashcards.emptyDeckReset.message" = "No unfamiliar cards. Reset all to Unfamiliar and start?";
+"flashcards.emptyDeckReset.reset" = "Reset & Start";
+"flashcards.emptyDeckReset.cancel" = "Back";

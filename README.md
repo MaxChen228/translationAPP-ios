@@ -5,6 +5,18 @@ SwiftUI iOS App：提供中英翻譯批改、錯誤高亮、Workspace 多工、�
 本 repo 僅包含 iOS 前端。後端服務已獨立為另一個 Git 倉：
 - translation-backend（GitHub）：https://github.com/MaxChen228/translation
 
+## 文件導覽
+- [docs/README.md](docs/README.md)：iOS 文件索引，快速連結到架構導覽與常見功能說明。
+- 若需掌握整體模組與資料流，請先閱讀 `docs/architecture.md`。
+- 針對批改、題庫、聊天、TTS 等具體需求，可查閱 `docs/workflows.md` 的功能流程索引。
+
+## 目錄概覽
+- `ios/translation/App/`：App 生命週期、全域設定與路由（`translationApp.swift`, `AppSettingsStore.swift` 等）。
+- `ios/translation/DesignSystem/`：Design System 與共用 UI 元件（`DesignSystem.swift`, `Components/DS*`）。
+- `ios/translation/Features/`：依領域拆分的模組（Workspace、Bank、Flashcards、Saved、Chat、Settings）。
+- `ios/translation/Shared/`：跨模組共享的模型、服務、工具與通用 View。
+- `ios/translation/Resources/`：資源與在地化字串。
+
 ## 環境需求
 - Xcode 16.4+（iOS 18 SDK）
 - iOS 16+（建議 iOS 17/18 模擬器）

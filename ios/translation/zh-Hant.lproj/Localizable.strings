@@ -90,9 +90,8 @@
 "deck.action.addCard" = "新增卡片";
 "nav.deck" = "單字卡";
 "deck.notFound" = "找不到卡片集";
-"deck.summary.new" = "未學習";
-"deck.summary.learning" = "仍在學習";
-"deck.summary.mastered" = "已精通";
+"deck.summary.unfamiliar" = "不熟悉";
+"deck.summary.familiar" = "熟悉";
 "deck.folders.title" = "資料夾";
 "deck.root.title" = "單字卡集";
 "deck.browseCloud" = "瀏覽雲端單字卡";
@@ -109,13 +108,40 @@
 "flashcards.editor.back" = "背面（用 (A | B) 單行）";
 "flashcards.editor.backNote" = "背面備註（可留空）";
 "flashcards.editor.delete" = "刪除卡片";
-"flashcards.level" = "精熟度 %d";
+"flashcards.status.familiar" = "熟悉";
+"flashcards.status.unfamiliar" = "不熟悉";
+"flashcards.annotate.familiar" = "熟悉";
+"flashcards.annotate.unfamiliar" = "不熟悉";
 "flashcards.empty" = "尚無卡片";
 "flashcards.empty.hint" = "稍後可擴充為新增／匯入功能。";
 
+/* 聊天 */
+"chat.title" = "AI 深入訪談";
+"chat.subtitle" = "與 Gemini 聊聊，確認需求";
+"chat.greeting" = "嗨！我是你的研究助手，需要我幫忙什麼？";
+"chat.reset" = "重新開始";
+"chat.placeholder" = "輸入訊息";
+"chat.reset" = "重新開始對話";
+"chat.send" = "送出";
+"chat.research" = "開始深入研究";
+"chat.checklist" = "即將處理";
+"chat.researchResult" = "研究結果";
+"chat.attempt" = "原始英文";
+"chat.corrected" = "修正版英文";
+"chat.source" = "題目原文";
+"chat.research.errors" = "錯誤洞察";
+"chat.state.gathering" = "蒐集中";
+"chat.state.ready" = "已準備回覆";
+"chat.state.completed" = "任務完成";
+"chat.empty.title" = "準備好了，等你開口";
+"chat.empty.subtitle" = "輸入你的句子、問題或想法，也可以先從下面的範例開始。";
+"chat.empty.suggestion1" = "幫我把這段中文翻成自然的英文。";
+"chat.empty.suggestion2" = "幫我檢查這封英文郵件的語氣與清楚度。";
+"chat.empty.suggestion3" = "幫我準備使用者訪談的追問問題。";
+
 /* 單字卡設定 */
 "flashcards.settings.mode" = "複習模式";
-"flashcards.settings.help.annotate" = "標注：右滑 +1，左滑 −1，並切到下一張。";
+"flashcards.settings.help.annotate" = "標注：右滑 → 熟悉；左滑 → 不熟悉，並切到下一張。";
 "flashcards.settings.help.browse" = "瀏覽：左右滑動切換卡片，不改精熟度。";
 
 /* TTS 設定 */
@@ -134,11 +160,15 @@
 "tts.fill.random" = "隨機";
 "tts.fill.wrap" = "循環";
 "tts.start" = "開始播放";
+"tts.play" = "播放音訊";
+"tts.pause" = "暫停音訊";
 
 /* 已儲存 JSON */
 "nav.savedJSON" = "已儲存 JSON";
 "saved.clear" = "清空";
 "saved.saveDeck" = "儲存單字卡";
+"saved.switchLeft" = "切換到左側收藏";
+"saved.switchRight" = "切換到右側收藏";
 "deck.untitled" = "未命名";
 "saved.empty" = "尚未儲存任何錯誤";
 "saved.unparsable" = "無法解析此筆資料";
@@ -149,6 +179,7 @@
 "action.copied" = "已複製";
 "saved.confirm.delete" = "確定要刪除這筆紀錄嗎？";
 "action.delete" = "刪除";
+"action.back" = "返回";
 "action.cancel" = "取消";
 "action.edit" = "編輯";
 "action.done" = "完成";
@@ -166,6 +197,9 @@
 "banner.correctionDone.action" = "查看";
 "label.points" = "分";
 "label.suggestions" = "個建議";
+"banner.correctionFailed.title" = "批改失敗";
+"banner.cloud.loadFailed.title" = "載入失敗";
+"banner.tts.error.title" = "TTS 錯誤";
 /* 首頁 */
 "home.workspaces" = "Workspace";
 
@@ -173,6 +207,10 @@
 "bank.folders.title" = "資料夾";
 "bank.local.title" = "題庫本";
 "bank.browseCloud" = "瀏覽雲端題庫";
+"bank.random.title" = "隨機出題";
+"bank.random.settings" = "出題設定";
+"bank.random.excludeCompleted" = "排除已完成";
+"banner.random.noneEligible" = "沒有可抽的題目";
 "bank.folders.empty" = "尚無資料夾";
 "bank.local.empty" = "目前沒有題庫本";
 "bank.folder.count" = "共 %d 本";
@@ -213,3 +251,16 @@
 "action.practice" = "練習";
 "bank.book.empty" = "本機書本為空";
 "bank.book.empty.hint" = "請從雲端瀏覽並複製題庫到本機。";
+"settings.flashcards.title" = "單字卡";
+"settings.flashcards.subtitle" = "熟悉度與重置";
+"settings.flashcards.resetAll" = "重置熟悉度";
+"settings.flashcards.reset.hint" = "將所有單字卡重設為『不熟悉』。";
+"settings.flashcards.reset.confirm.title" = "重置所有單字卡？";
+"settings.flashcards.reset.confirm.subtitle" = "此動作會把所有單字卡標記為『不熟悉』，無法復原。";
+"settings.flashcards.reset.done" = "已重置為不熟悉";
+"flashcards.round.completed" = "本輪完成";
+"flashcards.session.completed" = "複習完成";
+"flashcards.emptyDeckReset.title" = "全部皆熟悉";
+"flashcards.emptyDeckReset.message" = "目前沒有不熟悉的卡片，要重置為不熟悉並開始複習嗎？";
+"flashcards.emptyDeckReset.reset" = "重置並開始";
+"flashcards.emptyDeckReset.cancel" = "返回";
