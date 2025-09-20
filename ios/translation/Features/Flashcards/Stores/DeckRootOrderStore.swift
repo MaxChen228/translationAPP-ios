@@ -4,9 +4,13 @@ import SwiftUI
 @MainActor
 final class DeckRootOrderStore: ObservableObject {
     private let key = "deck.root.order"
+    private let persistenceManager: PersistenceManager
     @Published private(set) var order: [String] = [] { didSet { persist() } }
 
-    init() { load() }
+    init(persistenceManager: PersistenceManager = UserDefaultsPersistenceManager()) {
+        self.persistenceManager = persistenceManager
+        load()
+    }
 
     // Ensure every id in rootIDs appears in order, append missing to the end.
     func ensure(rootIDs: [String]) {
@@ -60,23 +64,18 @@ final class DeckRootOrderStore: ObservableObject {
 
     // MARK: - Persistence
     private func load() {
-        guard let data = UserDefaults.standard.data(forKey: key) else {
-            AppLog.flashcardsDebug("No existing deck root order data found in UserDefaults")
-            return
-        }
-        do {
-            order = try JSONDecoder().decode([String].self, from: data)
+        if let loadedOrder = persistenceManager.load([String].self, forKey: key) {
+            order = loadedOrder
             AppLog.flashcardsDebug("Successfully loaded \(order.count) deck order items from UserDefaults")
-        } catch {
-            AppLog.flashcardsError("Failed to decode deck root order from UserDefaults: \(error.localizedDescription)")
+        } else {
+            AppLog.flashcardsDebug("No existing deck root order data found in UserDefaults")
             order = []
         }
     }
 
     private func persist() {
         do {
-            let data = try JSONEncoder().encode(order)
-            UserDefaults.standard.set(data, forKey: key)
+            try persistenceManager.save(order, forKey: key)
             AppLog.flashcardsDebug("Successfully persisted \(order.count) deck order items to UserDefaults")
         } catch {
             AppLog.flashcardsError("Failed to persist deck root order to UserDefaults: \(error.localizedDescription)")
