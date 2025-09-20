@@ -52,43 +52,87 @@ struct SavedJSONListSheet: View {
     }
 
     private var emptyState: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 0) {
             controlBar
                 .padding(.horizontal, DS.Spacing.lg)
                 .padding(.top, DS.Spacing.lg)
 
-            ZStack(alignment: .top) {
-                if activeStash == .left {
-                    stashSection(for: .left)
-                        .transition(.asymmetric(insertion: .move(edge: .leading), removal: .move(edge: .trailing)))
-                } else {
-                    stashSection(for: .right)
-                        .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
-                }
+            Spacer(minLength: DS.Spacing.lg)
+
+            VStack(spacing: 12) {
+                Image(systemName: "tray")
+                    .font(.largeTitle)
+                    .foregroundStyle(.secondary)
+                Text(String(localized: "saved.empty", locale: locale))
+                    .foregroundStyle(.secondary)
             }
-            .dsAnimation(DS.AnimationToken.snappy, value: activeStash)
+            .padding(.horizontal, DS.Spacing.lg)
+
+            Spacer()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(DS.Palette.background)
     }
 
     private var populatedState: some View {
-        ScrollView {
+        VStack(spacing: 0) {
             controlBar
                 .padding(.horizontal, DS.Spacing.lg)
                 .padding(.top, DS.Spacing.lg)
+                .padding(.bottom, DS.Spacing.md)
 
-            ZStack(alignment: .top) {
-                if activeStash == .left {
-                    stashSection(for: .left)
-                        .transition(.asymmetric(insertion: .move(edge: .leading), removal: .move(edge: .trailing)))
-                } else {
-                    stashSection(for: .right)
-                        .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+            List {
+                ForEach(filteredDecoded) { row in
+                    SavedErrorRowCard(
+                        row: row,
+                        expanded: expanded.contains(row.id),
+                        onToggle: {
+                            DSMotion.run(DS.AnimationToken.subtle) {
+                                if expanded.contains(row.id) { expanded.remove(row.id) }
+                                else { expanded.insert(row.id) }
+                            }
+                        },
+                        onCopy: { copyJSON(row.rawJSON) },
+                        onDelete: { deleteRow(row.id) }
+                    )
+                    .swipeActions(edge: .leading, allowsFullSwipe: activeStash == .right) {
+                        if activeStash == .right {
+                            Button {
+                                move(row, to: .left)
+                            } label: {
+                                Label(String(localized: "saved.moveLeft", locale: locale), systemImage: "arrow.uturn.backward.circle")
+                            }
+                            .tint(DS.Brand.scheme.provence)
+                        }
+                    }
+                    .swipeActions(edge: .trailing, allowsFullSwipe: activeStash == .left) {
+                        if activeStash == .left {
+                            Button {
+                                move(row, to: .right)
+                            } label: {
+                                Label(String(localized: "saved.moveRight", locale: locale), systemImage: "arrow.uturn.forward.circle")
+                            }
+                            .tint(DS.Brand.scheme.classicBlue)
+                        }
+
+                        Button(role: .destructive) {
+                            deleteRow(row.id)
+                        } label: {
+                            Label(String(localized: "action.delete", locale: locale), systemImage: "trash")
+                        }
+                    }
+                    .listRowInsets(.init(top: 0, leading: DS.Spacing.lg, bottom: DS.Spacing.md, trailing: DS.Spacing.lg))
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
                 }
             }
-            .dsAnimation(DS.AnimationToken.snappy, value: activeStash)
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
+            .background(DS.Palette.background)
+            .id(activeStash)
         }
+        .background(DS.Palette.background)
+        .animation(DS.AnimationToken.snappy, value: activeStash)
     }
 
     private var controlBar: some View {
@@ -242,65 +286,6 @@ private extension SavedJSONListSheet {
     var filteredDecoded: [DecodedRecord] { decoded.filter { $0.stash == activeStash } }
     var currentCount: Int { store.count(in: activeStash) }
     var otherCount: Int { store.count(in: activeStash == .left ? .right : .left) }
-
-    @ViewBuilder
-    func stashSection(for stash: SavedStash) -> some View {
-        let rows = decoded.filter { $0.stash == stash }
-        if rows.isEmpty {
-            VStack(spacing: 12) {
-                Image(systemName: "tray").font(.largeTitle).foregroundStyle(.secondary)
-                Text(String(localized: "saved.empty", locale: locale)).foregroundStyle(.secondary)
-            }
-            .frame(maxWidth: .infinity, minHeight: 300)
-        } else {
-            LazyVStack(alignment: .leading, spacing: DS.Spacing.md) {
-                ForEach(rows) { row in
-                    SavedErrorRowCard(
-                        row: row,
-                        expanded: expanded.contains(row.id),
-                        onToggle: {
-                            DSMotion.run(DS.AnimationToken.subtle) {
-                                if expanded.contains(row.id) { expanded.remove(row.id) }
-                                else { expanded.insert(row.id) }
-                            }
-                        },
-                        onCopy: { copyJSON(row.rawJSON) },
-                        onDelete: { deleteRow(row.id) }
-                    )
-                    .swipeActions(edge: .leading, allowsFullSwipe: stash == .right) {
-                        if stash == .right {
-                            Button {
-                                move(row, to: .left)
-                            } label: {
-                                Label(String(localized: "saved.moveLeft", locale: locale), systemImage: "arrow.uturn.backward.circle")
-                            }
-                            .tint(DS.Brand.scheme.provence)
-                        }
-                    }
-                    .swipeActions(edge: .trailing, allowsFullSwipe: stash == .left) {
-                        if stash == .left {
-                            Button {
-                                move(row, to: .right)
-                            } label: {
-                                Label(String(localized: "saved.moveRight", locale: locale), systemImage: "arrow.uturn.forward.circle")
-                            }
-                            .tint(DS.Brand.scheme.classicBlue)
-                        }
-
-                        Button(role: .destructive) {
-                            deleteRow(row.id)
-                        } label: {
-                            Label(String(localized: "action.delete", locale: locale), systemImage: "trash")
-                        }
-                    }
-                }
-            }
-            .padding(.horizontal, DS.Spacing.lg)
-            .padding(.top, DS.Spacing.md)
-            .padding(.bottom, DS.Spacing.lg)
-            .dsAnimation(DS.AnimationToken.reorder, value: rows.map { $0.id })
-        }
-    }
 }
 
 // MARK: - Row Card

@@ -411,70 +411,122 @@ private struct ChatBubble: View {
     private var isUser: Bool { message.role == .user }
 
     var body: some View {
-        if isUser {
-            HStack(alignment: .bottom) {
+        HStack(alignment: .top) {
+            if isUser {
                 Spacer(minLength: 24)
-                UserMessageBubble(message: message)
+                ChatMessageContainer(style: .user, isUser: true) {
+                    messageContent
+                }
+            } else {
+                ChatMessageContainer(style: .assistant, isUser: false) {
+                    messageContent
+                }
+                Spacer(minLength: 24)
             }
+        }
+    }
+
+    @ViewBuilder
+    private var messageContent: some View {
+        RichText(message: message, isUser: isUser)
+
+        if !message.attachments.isEmpty {
+            AttachmentGallery(attachments: message.attachments, isUser: isUser)
+        }
+    }
+}
+
+private struct ChatMessageContainer<Content: View>: View {
+    var style: ChatMessageStyle
+    var isUser: Bool
+    private let contentBuilder: ContentBuilder
+
+    init(style: ChatMessageStyle, isUser: Bool, @ViewBuilder content: @escaping ContentBuilder) {
+        self.style = style
+        self.isUser = isUser
+        self.contentBuilder = content
+    }
+
+    typealias ContentBuilder = () -> Content
+
+    var body: some View {
+        VStack(alignment: isUser ? .trailing : .leading, spacing: DS.Spacing.sm) {
+            contentBuilder()
+        }
+        .padding(style.contentInsets)
+        .frame(maxWidth: style.maxWidth ?? .infinity, alignment: isUser ? .trailing : .leading)
+        .background(background)
+        .overlay(border)
+        .applyingShadow(style.shadow)
+    }
+
+    @ViewBuilder
+    private var background: some View {
+        if let backgroundStyle = style.backgroundStyle {
+            RoundedRectangle(cornerRadius: style.cornerRadius, style: .continuous)
+                .fill(backgroundStyle)
+        }
+    }
+
+    @ViewBuilder
+    private var border: some View {
+        if let borderColor = style.borderColor {
+            RoundedRectangle(cornerRadius: style.cornerRadius, style: .continuous)
+                .stroke(borderColor, lineWidth: style.borderWidth)
+        }
+    }
+}
+
+private struct ChatMessageStyle {
+    struct Shadow {
+        var color: Color
+        var radius: CGFloat
+        var x: CGFloat
+        var y: CGFloat
+    }
+
+    var contentInsets: EdgeInsets
+    var backgroundStyle: AnyShapeStyle?
+    var borderColor: Color?
+    var borderWidth: CGFloat
+    var shadow: Shadow?
+    var cornerRadius: CGFloat
+    var maxWidth: CGFloat?
+
+    static let user = ChatMessageStyle(
+        contentInsets: EdgeInsets(top: DS.Spacing.sm2, leading: DS.Spacing.md, bottom: DS.Spacing.sm2, trailing: DS.Spacing.md),
+        backgroundStyle: AnyShapeStyle(DS.Palette.primaryGradient),
+        borderColor: nil,
+        borderWidth: DS.BorderWidth.hairline,
+        shadow: Shadow(
+            color: DS.Shadow.card.color.opacity(0.4),
+            radius: DS.Shadow.card.radius / 2,
+            x: 0,
+            y: DS.Shadow.card.y / 2
+        ),
+        cornerRadius: DS.Radius.lg,
+        maxWidth: 320
+    )
+
+    static let assistant = ChatMessageStyle(
+        contentInsets: EdgeInsets(top: DS.Spacing.sm2, leading: 0, bottom: DS.Spacing.sm2, trailing: 0),
+        backgroundStyle: nil,
+        borderColor: nil,
+        borderWidth: 0,
+        shadow: nil,
+        cornerRadius: DS.Radius.lg,
+        maxWidth: nil
+    )
+}
+
+private extension View {
+    @ViewBuilder
+    func applyingShadow(_ style: ChatMessageStyle.Shadow?) -> some View {
+        if let style {
+            self.shadow(color: style.color, radius: style.radius, x: style.x, y: style.y)
         } else {
-            HStack(alignment: .top) {
-                AssistantMessageCard(message: message)
-                Spacer(minLength: 24)
-            }
+            self
         }
-    }
-}
-
-private struct UserMessageBubble: View {
-    var message: ChatMessage
-
-    var body: some View {
-        VStack(alignment: .trailing, spacing: DS.Spacing.sm) {
-            RichText(message: message, isUser: true)
-
-            if !message.attachments.isEmpty {
-                AttachmentGallery(attachments: message.attachments, isUser: true)
-            }
-        }
-        .padding(.vertical, DS.Spacing.sm2)
-        .padding(.horizontal, DS.Spacing.md)
-        .background(
-            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                .fill(DS.Palette.primaryGradient)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                .stroke(Color.clear, lineWidth: DS.BorderWidth.hairline)
-        )
-        .shadow(color: DS.Shadow.card.color.opacity(0.4), radius: DS.Shadow.card.radius / 2, x: 0, y: DS.Shadow.card.y / 2)
-        .frame(maxWidth: 320, alignment: .trailing)
-    }
-}
-
-private struct AssistantMessageCard: View {
-    var message: ChatMessage
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: DS.Spacing.sm) {
-            RichText(message: message, isUser: false)
-
-            if !message.attachments.isEmpty {
-                AttachmentGallery(attachments: message.attachments, isUser: false)
-            }
-        }
-        .padding(.vertical, DS.Spacing.md)
-        .padding(.horizontal, DS.Spacing.md)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                .fill(DS.Palette.surface)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                .stroke(DS.Palette.border.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.hairline)
-        )
-        .shadow(color: DS.Shadow.card.color, radius: DS.Shadow.card.radius, x: DS.Shadow.card.x, y: DS.Shadow.card.y)
-        .padding(.vertical, DS.Spacing.sm2)
     }
 }
 

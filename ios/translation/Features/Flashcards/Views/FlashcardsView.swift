@@ -68,7 +68,7 @@ struct FlashcardsView: View {
     var body: some View {
         GeometryReader { geo in
             VStack(alignment: .leading, spacing: DS.Spacing.lg) {
-                TopBar(
+                FlashcardsTopBar(
                     width: geo.size.width,
                     index: store.index,
                     total: store.cards.count,
@@ -108,15 +108,15 @@ struct FlashcardsView: View {
                         ZStack {
                             let preview = (mode == .annotate) ? viewModel.swipePreview : nil
                             if mode == .annotate, let preview {
-                                ClassificationCard(label: preview.label, color: preview.color)
+                                FlashcardsClassificationCard(label: preview.label, color: preview.color)
                                     .dsAnimation(DS.AnimationToken.subtle, value: preview)
                             } else {
-                                FlipCard(isFlipped: store.showBack) {
+                                FlashcardsFlipCard(isFlipped: store.showBack) {
                                     VStack(alignment: .leading, spacing: 10) {
-                                        MarkdownText(card.front)
+                                        FlashcardsMarkdownText(card.front)
                                             .frame(maxWidth: .infinity, alignment: .leading)
                                         if let note = card.frontNote, !note.isEmpty {
-                                            NoteText(text: note)
+                                            FlashcardsNoteText(text: note)
                                         }
                                     }
                                 } back: {
@@ -126,11 +126,11 @@ struct FlashcardsView: View {
                                         })
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         if let note = card.backNote, !note.isEmpty {
-                                            NoteText(text: note)
+                                            FlashcardsNoteText(text: note)
                                         }
                                     }
                                 } overlay: {
-                                    PlaySideButton(style: .outline, diameter: 28) {
+                                    FlashcardsPlaySideButton(style: .outline, diameter: 28) {
                                         let manager = viewModel.speechManager
                                         if store.showBack {
                                             let text = viewModel.backTextToSpeak(for: card)
@@ -320,115 +320,6 @@ private extension FlashcardsView {
     }
 }
 
-// 側邊計數徽章（圓角膠囊，顯示數字）
-private struct SideCountBadge: View {
-    let count: Int
-    let color: Color
-    var filled: Bool = false
-    var body: some View {
-        Text("\(count)")
-            .font(.headline).bold()
-            .foregroundStyle(filled ? Color.white : .primary)
-            .padding(.vertical, 6)
-            .padding(.horizontal, 10)
-            .background(
-                Capsule().fill(filled ? color : color.opacity(0.12))
-            )
-            .overlay(
-                Capsule().stroke(color.opacity(filled ? 0.0 : 0.6), lineWidth: DS.BorderWidth.regular)
-            )
-    }
-}
-
-private struct CardEditor: View {
-    @Binding var draft: Flashcard?
-    @Binding var errorText: String?
-    let onDelete: () -> Void
-    var body: some View {
-        DSCard(padding: DS.Spacing.lg) {
-            VStack(alignment: .leading, spacing: 12) {
-                Text("flashcards.editor.title").dsType(DS.Font.section)
-                TextField(LocalizedStringKey("flashcards.editor.front"), text: Binding(get: { draft?.front ?? "" }, set: { if var d = draft { d.front = $0; draft = d } }))
-                    .textFieldStyle(.roundedBorder)
-                TextField(LocalizedStringKey("flashcards.editor.frontNote"), text: Binding(get: { draft?.frontNote ?? "" }, set: { if var d = draft { d.frontNote = $0.isEmpty ? nil : $0; draft = d } }))
-                    .textFieldStyle(.roundedBorder)
-                TextField(LocalizedStringKey("flashcards.editor.back"), text: Binding(get: { draft?.back ?? "" }, set: { if var d = draft { d.back = $0; draft = d } }))
-                    .textFieldStyle(.roundedBorder)
-                TextField(LocalizedStringKey("flashcards.editor.backNote"), text: Binding(get: { draft?.backNote ?? "" }, set: { if var d = draft { d.backNote = $0.isEmpty ? nil : $0; draft = d } }))
-                    .textFieldStyle(.roundedBorder)
-                Button(role: .destructive) { onDelete() } label: { Text("flashcards.editor.delete") }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                if let errorText { Text(errorText).foregroundStyle(DS.Palette.danger).font(.caption) }
-            }
-        }
-    }
-}
-
-private struct PlaySideButton: View {
-    enum Style { case filled, outline }
-    var style: Style = .filled
-    var diameter: CGFloat = 28
-    var action: () -> Void
-    var body: some View {
-        DSQuickActionIconButton(
-            systemName: "speaker.wave.2.fill",
-            labelKey: "tts.play",
-            action: action,
-            shape: .circle,
-            style: style == .filled ? .filled : .outline,
-            size: diameter
-        )
-        .padding(6)
-    }
-}
-
-private struct ClassificationCard: View {
-    var label: LocalizedStringKey
-    var color: Color
-    var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                .fill(DS.Palette.surface)
-            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                .stroke(color, lineWidth: 4)
-            Text(label)
-                .font(.title).bold()
-                .foregroundStyle(color)
-        }
-        // Animation keyed by layout changes; no explicit value needed here
-    }
-}
-
-private struct TopBar: View {
-    let width: CGFloat
-    let index: Int
-    let total: Int
-    let onClose: () -> Void
-    let onOpenSettings: () -> Void
-    var body: some View {
-        VStack(spacing: 8) {
-            HStack {
-                DSQuickActionIconButton(systemName: "xmark", labelKey: "action.cancel", action: onClose, style: .outline)
-                Spacer()
-                Text("\(min(max(1, index + 1), max(1, total))) / \(max(1, total))")
-                    .font(.headline)
-                    .foregroundStyle(.primary)
-                Spacer()
-                DSQuickActionIconButton(systemName: "gearshape", labelKey: "nav.settings", action: onOpenSettings, style: .outline)
-            }
-            // Slim progress bar
-            let prog = (total <= 0 ? 0.0 : Double(index + 1) / Double(max(1, total)))
-            ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 2, style: .continuous)
-                    .fill(DS.Palette.border.opacity(0.25))
-                    .frame(height: 4)
-                RoundedRectangle(cornerRadius: 2, style: .continuous)
-                    .fill(DS.Palette.primary)
-                    .frame(width: max(0, (width - DS.Spacing.lg * 2) * prog), height: 4)
-            }
-        }
-    }
-}
 
 private struct EmptyState: View {
     @Environment(\.locale) private var locale
@@ -446,107 +337,6 @@ private struct EmptyState: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, DS.Spacing.lg)
         }
-    }
-}
-
-private struct FlipCard<Front: View, Back: View, Overlay: View>: View {
-    var isFlipped: Bool
-    let front: Front
-    let back: Back
-    let overlay: () -> Overlay
-
-    init(isFlipped: Bool,
-         @ViewBuilder front: () -> Front,
-         @ViewBuilder back: () -> Back,
-         @ViewBuilder overlay: @escaping () -> Overlay) {
-        self.isFlipped = isFlipped
-        self.front = front()
-        self.back = back()
-        self.overlay = overlay
-    }
-
-    @ViewBuilder
-    private func faceCard<Content: View>(_ content: Content) -> some View {
-        DSCard(padding: DS.Spacing.lg) {
-            VStack(spacing: 0) {
-                Spacer(minLength: 0)
-                content
-                    .dsType(DS.Font.body)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                Spacer(minLength: 0)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
-        .frame(minHeight: 220)
-        .frame(maxHeight: .infinity)
-        .overlay(alignment: .bottomTrailing) { overlay() }
-    }
-
-    var body: some View {
-        ZStack {
-            // Front face
-            faceCard(front)
-                .rotation3DEffect(.degrees(isFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0), perspective: 0.8)
-                .opacity(isFlipped ? 0 : 1)
-
-            // Back face (counter-rotated to render readable)
-            faceCard(back)
-                .rotation3DEffect(.degrees(isFlipped ? 0 : -180), axis: (x: 0, y: 1, z: 0), perspective: 0.8)
-                .opacity(isFlipped ? 1 : 0)
-        }
-        .dsAnimation(DS.AnimationToken.flip, value: isFlipped)
-    }
-}
-
-private struct MarkdownText: View {
-    let text: String
-    init(_ text: String) { self.text = text }
-
-    private func preprocess(_ md: String) -> String {
-        // Minimal block-level handling so lists/headings render nicely in Text
-        // - Replace leading Markdown list markers with bullets
-        // - Strip heading markers but keep line breaks
-        return md.split(separator: "\n", omittingEmptySubsequences: false).map { line in
-            let s = String(line)
-            if s.trimmingCharacters(in: .whitespaces).hasPrefix("- ") || s.trimmingCharacters(in: .whitespaces).hasPrefix("* ") {
-                return "• " + s.trimmingCharacters(in: .whitespaces).dropFirst(2)
-            }
-            if s.trimmingCharacters(in: .whitespaces).hasPrefix("#") {
-                // Remove leading #'s and a single space if present
-                let trimmed = s.trimmingCharacters(in: .whitespaces)
-                let dropped = trimmed.drop(while: { $0 == "#" || $0 == " " })
-                return String(dropped)
-            }
-            return s
-        }.joined(separator: "\n")
-    }
-
-    var body: some View {
-        let processed = preprocess(text)
-        Group {
-            if let attr = try? AttributedString(
-                markdown: processed,
-                options: AttributedString.MarkdownParsingOptions(
-                    interpretedSyntax: .inlineOnlyPreservingWhitespace,
-                    failurePolicy: .returnPartiallyParsedIfPossible
-                )
-            ) {
-                Text(attr)
-            } else {
-                Text(processed)
-            }
-        }
-        .foregroundStyle(.primary)
-        .textSelection(.enabled)
-    }
-}
-
-private struct NoteText: View {
-    let text: String
-    var body: some View {
-        Text(text)
-            .dsType(DS.Font.caption)
-            .foregroundStyle(.secondary)
     }
 }
 
