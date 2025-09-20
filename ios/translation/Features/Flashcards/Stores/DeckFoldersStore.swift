@@ -10,12 +10,16 @@ struct DeckFolder: Identifiable, Codable, Equatable {
 @MainActor
 final class DeckFoldersStore: ObservableObject {
     private let key = "saved.flashcard.folders"
+    private let persistenceManager: PersistenceManager
 
     @Published private(set) var folders: [DeckFolder] = [] {
         didSet { persist() }
     }
 
-    init() { load() }
+    init(persistenceManager: PersistenceManager = UserDefaultsPersistenceManager()) {
+        self.persistenceManager = persistenceManager
+        load()
+    }
 
     // MARK: - CRUD
     @discardableResult
@@ -79,23 +83,18 @@ final class DeckFoldersStore: ObservableObject {
 
     // MARK: - Persistence
     private func load() {
-        guard let data = UserDefaults.standard.data(forKey: key) else {
-            AppLog.flashcardsDebug("No existing deck folders data found in UserDefaults")
-            return
-        }
-        do {
-            folders = try JSONDecoder().decode([DeckFolder].self, from: data)
+        if let loadedFolders = persistenceManager.load([DeckFolder].self, forKey: key) {
+            folders = loadedFolders
             AppLog.flashcardsDebug("Successfully loaded \(folders.count) deck folders from UserDefaults")
-        } catch {
-            AppLog.flashcardsError("Failed to decode deck folders from UserDefaults: \(error.localizedDescription)")
+        } else {
+            AppLog.flashcardsDebug("No existing deck folders data found in UserDefaults")
             folders = []
         }
     }
 
     private func persist() {
         do {
-            let data = try JSONEncoder().encode(folders)
-            UserDefaults.standard.set(data, forKey: key)
+            try persistenceManager.save(folders, forKey: key)
             AppLog.flashcardsDebug("Successfully persisted \(folders.count) deck folders to UserDefaults")
         } catch {
             AppLog.flashcardsError("Failed to persist deck folders to UserDefaults: \(error.localizedDescription)")

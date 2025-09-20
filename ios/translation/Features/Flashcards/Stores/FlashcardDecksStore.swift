@@ -10,12 +10,16 @@ struct PersistedFlashcardDeck: Codable, Identifiable, Equatable {
 @MainActor
 final class FlashcardDecksStore: ObservableObject {
     private let defaultsKey = "saved.flashcard.decks"
+    private let persistenceManager: PersistenceManager
 
     @Published private(set) var decks: [PersistedFlashcardDeck] = [] {
         didSet { persist() }
     }
 
-    init() { load() }
+    init(persistenceManager: PersistenceManager = UserDefaultsPersistenceManager()) {
+        self.persistenceManager = persistenceManager
+        load()
+    }
 
     func add(name: String, cards: [Flashcard]) -> PersistedFlashcardDeck {
         let deck = PersistedFlashcardDeck(id: UUID(), name: name, cards: cards)
@@ -57,23 +61,18 @@ final class FlashcardDecksStore: ObservableObject {
     }
 
     private func load() {
-        guard let data = UserDefaults.standard.data(forKey: defaultsKey) else {
-            AppLog.flashcardsDebug("No existing flashcard decks data found in UserDefaults")
-            return
-        }
-        do {
-            decks = try JSONDecoder().decode([PersistedFlashcardDeck].self, from: data)
+        if let loadedDecks = persistenceManager.load([PersistedFlashcardDeck].self, forKey: defaultsKey) {
+            decks = loadedDecks
             AppLog.flashcardsDebug("Successfully loaded \(decks.count) flashcard decks from UserDefaults")
-        } catch {
-            AppLog.flashcardsError("Failed to decode flashcard decks from UserDefaults: \(error.localizedDescription)")
+        } else {
+            AppLog.flashcardsDebug("No existing flashcard decks data found in UserDefaults")
             decks = []
         }
     }
 
     private func persist() {
         do {
-            let data = try JSONEncoder().encode(decks)
-            UserDefaults.standard.set(data, forKey: defaultsKey)
+            try persistenceManager.save(decks, forKey: defaultsKey)
             AppLog.flashcardsDebug("Successfully persisted \(decks.count) flashcard decks to UserDefaults")
         } catch {
             AppLog.flashcardsError("Failed to persist flashcard decks to UserDefaults: \(error.localizedDescription)")
