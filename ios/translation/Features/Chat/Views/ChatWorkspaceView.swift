@@ -114,7 +114,7 @@ struct ChatWorkspaceView: View {
     }
 
     private var composer: some View {
-        VStack(spacing: DS.Spacing.sm2) {
+        VStack(spacing: DS.Spacing.sm) {
             if let error = viewModel.errorMessage, !error.isEmpty {
                 ErrorBanner(text: error)
             }
@@ -123,32 +123,7 @@ struct ChatWorkspaceView: View {
                 AttachmentPreviewStrip(attachments: pendingAttachments, onRemove: removeAttachment)
             }
 
-            ZStack(alignment: .topLeading) {
-                if viewModel.inputText.isEmpty {
-                    Text("chat.placeholder")
-                        .dsType(DS.Font.body, lineSpacing: 4, tracking: 0.1)
-                        .foregroundStyle(DS.Palette.subdued)
-                        .padding(.top, 8)
-                        .padding(.horizontal, 6)
-                }
-
-                TextEditor(text: $viewModel.inputText)
-                    .focused($isComposerFocused)
-                    .frame(minHeight: 64, maxHeight: 180, alignment: .leading)
-                    .font(DS.Font.body)
-                    .scrollContentBackground(.hidden)
-                    .padding(.horizontal, 4)
-                    .padding(.vertical, 4)
-            }
-            .padding(4)
-            .background(
-                RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
-                    .fill(DS.Palette.surface)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
-                    .stroke(isComposerFocused ? DS.Palette.primary.opacity(DS.Opacity.strong) : DS.Palette.border.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.regular)
-            )
+            AdaptiveComposer(text: $viewModel.inputText, isFocused: $isComposerFocused)
 
             HStack(alignment: .center, spacing: DS.Spacing.sm2) {
                 ChatStateBadge(state: viewModel.state, isLoading: viewModel.isLoading)
@@ -177,7 +152,7 @@ struct ChatWorkspaceView: View {
             }
         }
         .padding(.horizontal, DS.Spacing.md)
-        .padding(.vertical, DS.Spacing.md)
+        .padding(.vertical, DS.Spacing.sm)
         .background(DS.Palette.surfaceAlt)
         .onChange(of: pendingPhotoItem) { _, newValue in
             guard let item = newValue else { return }
@@ -283,6 +258,141 @@ struct ChatWorkspaceView: View {
     }
 }
 
+private struct AdaptiveComposer: View {
+    @Binding var text: String
+    @FocusState.Binding var isFocused: Bool
+    @State private var measuredHeight: CGFloat = 38
+
+    private let minHeight: CGFloat = 38
+    private let maxHeight: CGFloat = 180
+
+    private var clampedHeight: CGFloat {
+        min(max(measuredHeight, minHeight), maxHeight)
+    }
+
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            if text.isEmpty {
+                Text("chat.placeholder")
+                    .dsType(DS.Font.body)
+                    .foregroundStyle(DS.Palette.subdued)
+                    .padding(.top, 10)
+                    .padding(.horizontal, 12)
+            }
+
+            GrowingTextView(
+                text: $text,
+                calculatedHeight: $measuredHeight,
+                isFocused: Binding(
+                    get: { isFocused },
+                    set: { isFocused = $0 }
+                ),
+                maxHeight: maxHeight
+            )
+            .frame(height: clampedHeight)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 8)
+        }
+        .background(
+            RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
+                .fill(DS.Palette.surface)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
+                .stroke(isFocused ? DS.Palette.primary.opacity(DS.Opacity.strong) : DS.Palette.border.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.regular)
+        )
+        .dsAnimation(DS.AnimationToken.subtle, value: isFocused)
+    }
+}
+
+#if canImport(UIKit)
+private struct GrowingTextView: UIViewRepresentable {
+    @Binding var text: String
+    @Binding var calculatedHeight: CGFloat
+    @Binding var isFocused: Bool
+    var maxHeight: CGFloat
+
+    func makeCoordinator() -> Coordinator { Coordinator(parent: self) }
+
+    func makeUIView(context: Context) -> UITextView {
+        let textView = UITextView()
+        textView.backgroundColor = .clear
+        textView.isScrollEnabled = false
+        textView.textContainerInset = .zero
+        textView.textContainer.lineFragmentPadding = 0
+        textView.font = DS.DSUIFont.body()
+        textView.delegate = context.coordinator
+        textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        textView.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
+        return textView
+    }
+
+    func updateUIView(_ uiView: UITextView, context: Context) {
+        if uiView.text != text {
+            uiView.text = text
+        }
+
+        if isFocused && !uiView.isFirstResponder {
+            uiView.becomeFirstResponder()
+        } else if !isFocused && uiView.isFirstResponder {
+            uiView.resignFirstResponder()
+        }
+
+        recalculateHeight(for: uiView)
+    }
+
+    private func recalculateHeight(for textView: UITextView) {
+        let targetSize = CGSize(width: textView.bounds.width == 0 ? UIScreen.main.bounds.width - 32 : textView.bounds.width, height: .greatestFiniteMagnitude)
+        let size = textView.sizeThatFits(targetSize)
+        textView.isScrollEnabled = size.height > maxHeight
+        if calculatedHeight != size.height {
+            DispatchQueue.main.async {
+                calculatedHeight = size.height
+            }
+        }
+    }
+
+    final class Coordinator: NSObject, UITextViewDelegate {
+        var parent: GrowingTextView
+
+        init(parent: GrowingTextView) {
+            self.parent = parent
+        }
+
+        func textViewDidChange(_ textView: UITextView) {
+            parent.text = textView.text ?? ""
+            parent.recalculateHeight(for: textView)
+        }
+
+        func textViewDidBeginEditing(_ textView: UITextView) {
+            if !parent.isFocused {
+                DispatchQueue.main.async { self.parent.isFocused = true }
+            }
+        }
+
+        func textViewDidEndEditing(_ textView: UITextView) {
+            if parent.isFocused {
+                DispatchQueue.main.async { self.parent.isFocused = false }
+            }
+        }
+    }
+}
+#endif
+
+#if !canImport(UIKit)
+private struct GrowingTextView: View {
+    @Binding var text: String
+    @Binding var calculatedHeight: CGFloat
+    @Binding var isFocused: Bool
+    var maxHeight: CGFloat
+
+    var body: some View {
+        TextEditor(text: $text)
+            .frame(minHeight: calculatedHeight)
+    }
+}
+#endif
+
 private struct ChatBubble: View {
     var message: ChatMessage
 
@@ -293,10 +403,7 @@ private struct ChatBubble: View {
             if isUser { Spacer(minLength: 24) }
 
             VStack(alignment: isUser ? .trailing : .leading, spacing: 6) {
-                Text(message.content)
-                    .dsType(DS.Font.body, lineSpacing: 6)
-                    .foregroundStyle(isUser ? DS.Palette.onPrimary : .primary)
-                    .multilineTextAlignment(isUser ? .trailing : .leading)
+                RichText(message: message, isUser: isUser)
 
                 if !message.attachments.isEmpty {
                     AttachmentGallery(attachments: message.attachments, isUser: isUser)
@@ -323,6 +430,27 @@ private struct ChatBubble: View {
 
             if !isUser { Spacer(minLength: 24) }
         }
+    }
+}
+
+private struct RichText: View {
+    var message: ChatMessage
+    var isUser: Bool
+
+    private var attributed: AttributedString {
+        let markdown = message.content
+        let style = AttributedString.MarkdownParsingOptions(interpretedSyntax: .full)
+        if let parsed = try? AttributedString(markdown: markdown, options: style) {
+            return parsed
+        }
+        return AttributedString(message.content)
+    }
+
+    var body: some View {
+        Text(attributed)
+            .dsType(DS.Font.body, lineSpacing: 6)
+            .foregroundStyle(isUser ? DS.Palette.onPrimary : .primary)
+            .multilineTextAlignment(isUser ? .trailing : .leading)
     }
 }
 
@@ -512,7 +640,7 @@ private struct ChatResearchCard: View {
                 }
             } else {
                 Text(collapsedHint(for: response.items.count))
-                    .dsType(DS.Font.body)
+                    .dsType(DS.Font.caption)
                     .foregroundStyle(.secondary)
             }
         }
@@ -561,14 +689,37 @@ private struct ResearchItemCard: View {
     var onSave: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: DS.Spacing.sm) {
-            HStack(alignment: .top, spacing: DS.Spacing.sm2) {
-                TagLabel(text: item.type.displayName, color: item.type.color)
-                Text(item.term)
-                    .dsType(DS.Font.serifTitle)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.leading)
-                Spacer(minLength: 0)
+        VStack(alignment: .leading, spacing: DS.Spacing.md) {
+            VStack(alignment: .leading, spacing: DS.Spacing.sm2) {
+                HStack(alignment: .firstTextBaseline, spacing: DS.Spacing.sm2) {
+                    TagLabel(text: item.type.displayName, color: item.type.color)
+                    Text(item.term)
+                        .dsType(DS.Font.section)
+                        .foregroundStyle(.primary)
+                        .lineLimit(2)
+                    Spacer(minLength: 0)
+                }
+
+                Text(item.explanation)
+                    .dsType(DS.Font.body, lineSpacing: 4)
+                    .foregroundStyle(.secondary)
+
+                if !item.context.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("chat.research.context")
+                            .dsType(DS.Font.caption)
+                            .foregroundStyle(.secondary)
+                        Text(item.context)
+                            .dsType(DS.Font.body, lineSpacing: 4)
+                            .foregroundStyle(.primary)
+                    }
+                }
+            }
+
+            DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(0.35))
+
+            HStack {
+                Spacer()
                 Button(action: onSave) {
                     if isSaved {
                         Label(String(localized: "chat.research.saved"), systemImage: "checkmark.seal.fill")
@@ -579,23 +730,22 @@ private struct ResearchItemCard: View {
                 .buttonStyle(DSSecondaryButtonCompact())
                 .disabled(isSaved)
             }
-
-            Text(item.explanation)
-                .dsType(DS.Font.body, lineSpacing: 4)
-                .foregroundStyle(.secondary)
-
-            VStack(alignment: .leading, spacing: 6) {
-                Text("chat.research.context")
-                    .dsType(DS.Font.caption)
-                    .foregroundStyle(.secondary)
-                Text(item.context)
-                    .dsType(DS.Font.body)
-            }
         }
-        .padding(DS.Spacing.sm)
+        .padding(DS.Spacing.md2)
         .background(
             RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
-                .fill(DS.Palette.surfaceAlt)
+                .fill(DS.Palette.surface)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
+                .stroke(item.type.color.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.hairline)
+                .overlay(
+                    Rectangle()
+                        .fill(item.type.color)
+                        .frame(width: 3)
+                        .clipShape(RoundedRectangle(cornerRadius: 2, style: .continuous))
+                        .padding(.vertical, 6), alignment: .leading
+                )
         )
     }
 }
