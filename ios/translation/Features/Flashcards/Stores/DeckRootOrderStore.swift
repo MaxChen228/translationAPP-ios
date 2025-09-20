@@ -60,12 +60,26 @@ final class DeckRootOrderStore: ObservableObject {
 
     // MARK: - Persistence
     private func load() {
-        guard let data = UserDefaults.standard.data(forKey: key) else { return }
-        if let arr = try? JSONDecoder().decode([String].self, from: data) { order = arr }
+        guard let data = UserDefaults.standard.data(forKey: key) else {
+            AppLog.flashcardsDebug("No existing deck root order data found in UserDefaults")
+            return
+        }
+        do {
+            order = try JSONDecoder().decode([String].self, from: data)
+            AppLog.flashcardsDebug("Successfully loaded \(order.count) deck order items from UserDefaults")
+        } catch {
+            AppLog.flashcardsError("Failed to decode deck root order from UserDefaults: \(error.localizedDescription)")
+            order = []
+        }
     }
+
     private func persist() {
-        if let data = try? JSONEncoder().encode(order) {
+        do {
+            let data = try JSONEncoder().encode(order)
             UserDefaults.standard.set(data, forKey: key)
+            AppLog.flashcardsDebug("Successfully persisted \(order.count) deck order items to UserDefaults")
+        } catch {
+            AppLog.flashcardsError("Failed to persist deck root order to UserDefaults: \(error.localizedDescription)")
         }
     }
 }

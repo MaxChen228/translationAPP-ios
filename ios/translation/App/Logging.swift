@@ -7,6 +7,7 @@ enum AppLog {
     }()
     static let ai = Logger(subsystem: subsystem, category: "AI")
     static let ui = Logger(subsystem: subsystem, category: "UI")
+    static let flashcards = Logger(subsystem: subsystem, category: "Flashcards")
 
     // Convenience: also mirror logs to Xcode console via print in DEBUG so you always see them
     @inline(__always)
@@ -56,6 +57,32 @@ extension AppLog {
         ui.error("\(message, privacy: .public)")
         #if DEBUG
         print("[UI][error] \(message)")
+        #endif
+    }
+}
+
+extension AppLog {
+    @inline(__always)
+    static func flashcardsDebug(_ message: String) {
+        flashcards.debug("\(message, privacy: .public)")
+        #if DEBUG
+        print("[Flashcards][debug] \(message)")
+        #endif
+    }
+
+    @inline(__always)
+    static func flashcardsInfo(_ message: String) {
+        flashcards.info("\(message, privacy: .public)")
+        #if DEBUG
+        print("[Flashcards][info] \(message)")
+        #endif
+    }
+
+    @inline(__always)
+    static func flashcardsError(_ message: String) {
+        flashcards.error("\(message, privacy: .public)")
+        #if DEBUG
+        print("[Flashcards][error] \(message)")
         #endif
     }
 }

@@ -35,15 +35,27 @@ final class FlashcardProgressStore: ObservableObject {
 
     // MARK: - Persistence
     private func load() {
-        guard let data = UserDefaults.standard.data(forKey: key) else { return }
-        if let arr = try? JSONDecoder().decode([String].self, from: data) {
+        guard let data = UserDefaults.standard.data(forKey: key) else {
+            AppLog.flashcardsDebug("No existing flashcard progress data found in UserDefaults")
+            return
+        }
+        do {
+            let arr = try JSONDecoder().decode([String].self, from: data)
             familiarKeys = Set(arr)
+            AppLog.flashcardsDebug("Successfully loaded \(familiarKeys.count) flashcard progress items from UserDefaults")
+        } catch {
+            AppLog.flashcardsError("Failed to decode flashcard progress from UserDefaults: \(error.localizedDescription)")
+            familiarKeys = []
         }
     }
 
     private func persist() {
-        if let data = try? JSONEncoder().encode(Array(familiarKeys)) {
+        do {
+            let data = try JSONEncoder().encode(Array(familiarKeys))
             UserDefaults.standard.set(data, forKey: key)
+            AppLog.flashcardsDebug("Successfully persisted \(familiarKeys.count) flashcard progress items to UserDefaults")
+        } catch {
+            AppLog.flashcardsError("Failed to persist flashcard progress to UserDefaults: \(error.localizedDescription)")
         }
     }
 

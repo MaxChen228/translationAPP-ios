@@ -79,15 +79,26 @@ final class DeckFoldersStore: ObservableObject {
 
     // MARK: - Persistence
     private func load() {
-        guard let data = UserDefaults.standard.data(forKey: key) else { return }
-        if let obj = try? JSONDecoder().decode([DeckFolder].self, from: data) {
-            folders = obj
+        guard let data = UserDefaults.standard.data(forKey: key) else {
+            AppLog.flashcardsDebug("No existing deck folders data found in UserDefaults")
+            return
+        }
+        do {
+            folders = try JSONDecoder().decode([DeckFolder].self, from: data)
+            AppLog.flashcardsDebug("Successfully loaded \(folders.count) deck folders from UserDefaults")
+        } catch {
+            AppLog.flashcardsError("Failed to decode deck folders from UserDefaults: \(error.localizedDescription)")
+            folders = []
         }
     }
 
     private func persist() {
-        if let data = try? JSONEncoder().encode(folders) {
+        do {
+            let data = try JSONEncoder().encode(folders)
             UserDefaults.standard.set(data, forKey: key)
+            AppLog.flashcardsDebug("Successfully persisted \(folders.count) deck folders to UserDefaults")
+        } catch {
+            AppLog.flashcardsError("Failed to persist deck folders to UserDefaults: \(error.localizedDescription)")
         }
     }
 }

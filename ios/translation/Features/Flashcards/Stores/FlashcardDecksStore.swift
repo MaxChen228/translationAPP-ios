@@ -57,10 +57,15 @@ final class FlashcardDecksStore: ObservableObject {
     }
 
     private func load() {
-        guard let data = UserDefaults.standard.data(forKey: defaultsKey) else { return }
+        guard let data = UserDefaults.standard.data(forKey: defaultsKey) else {
+            AppLog.flashcardsDebug("No existing flashcard decks data found in UserDefaults")
+            return
+        }
         do {
             decks = try JSONDecoder().decode([PersistedFlashcardDeck].self, from: data)
+            AppLog.flashcardsDebug("Successfully loaded \(decks.count) flashcard decks from UserDefaults")
         } catch {
+            AppLog.flashcardsError("Failed to decode flashcard decks from UserDefaults: \(error.localizedDescription)")
             decks = []
         }
     }
@@ -69,8 +74,9 @@ final class FlashcardDecksStore: ObservableObject {
         do {
             let data = try JSONEncoder().encode(decks)
             UserDefaults.standard.set(data, forKey: defaultsKey)
+            AppLog.flashcardsDebug("Successfully persisted \(decks.count) flashcard decks to UserDefaults")
         } catch {
-            // ignore persist errors
+            AppLog.flashcardsError("Failed to persist flashcard decks to UserDefaults: \(error.localizedDescription)")
         }
     }
 
