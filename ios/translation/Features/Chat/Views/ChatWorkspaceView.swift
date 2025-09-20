@@ -1,6 +1,7 @@
 import SwiftUI
 import PhotosUI
 import UIKit
+import Foundation
 
 /// 主聊天工作區，提供訊息串、研究結果與輸入列。
 struct ChatWorkspaceView: View {
@@ -123,20 +124,24 @@ struct ChatWorkspaceView: View {
                 AttachmentPreviewStrip(attachments: pendingAttachments, onRemove: removeAttachment)
             }
 
+            ChatStateBadge(state: viewModel.state, isLoading: viewModel.isLoading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
             AdaptiveComposer(text: $viewModel.inputText, isFocused: $isComposerFocused)
 
-            HStack(alignment: .center, spacing: DS.Spacing.sm2) {
-                ChatStateBadge(state: viewModel.state, isLoading: viewModel.isLoading)
-
-                Spacer(minLength: DS.Spacing.sm)
-
+            HStack(alignment: .center, spacing: DS.Spacing.sm) {
                 PhotosPicker(selection: $pendingPhotoItem, matching: .images, photoLibrary: .shared()) {
-                    Label("Add Image", systemImage: "paperclip")
-                        .labelStyle(.iconOnly)
+                    Image(systemName: "paperclip")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(DS.Brand.scheme.classicBlue)
+                        .padding(10)
+                        .background(
+                            Circle().fill(DS.Brand.scheme.babyBlue.opacity(DS.Opacity.fill))
+                        )
                 }
                 .disabled(viewModel.isLoading)
+
+                Spacer(minLength: DS.Spacing.sm)
 
                 Button {
                     let attachments = pendingAttachments
@@ -145,9 +150,16 @@ struct ChatWorkspaceView: View {
                         await MainActor.run { pendingAttachments.removeAll() }
                     }
                 } label: {
-                    Label("chat.send", systemImage: "paperplane.fill")
+                    Image(systemName: "paperplane.fill")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(DS.Palette.onPrimary)
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 18)
+                        .background(
+                            Capsule(style: .continuous)
+                                .fill(DS.Palette.primary)
+                        )
                 }
-                .buttonStyle(DSPrimaryButtonCompact())
                 .disabled(!canSend)
             }
         }
@@ -399,37 +411,70 @@ private struct ChatBubble: View {
     private var isUser: Bool { message.role == .user }
 
     var body: some View {
-        HStack(alignment: .bottom) {
-            if isUser { Spacer(minLength: 24) }
-
-            VStack(alignment: isUser ? .trailing : .leading, spacing: 6) {
-                RichText(message: message, isUser: isUser)
-
-                if !message.attachments.isEmpty {
-                    AttachmentGallery(attachments: message.attachments, isUser: isUser)
-                }
+        if isUser {
+            HStack(alignment: .bottom) {
+                Spacer(minLength: 24)
+                UserMessageBubble(message: message)
             }
-            .padding(.vertical, DS.Spacing.sm2)
-            .padding(.horizontal, DS.Spacing.md)
-            .background(
-                Group {
-                    if isUser {
-                        RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                            .fill(DS.Palette.primaryGradient)
-                    } else {
-                        RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                            .fill(DS.Palette.surface)
-                    }
-                }
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                    .stroke(isUser ? Color.clear : DS.Palette.border.opacity(DS.Opacity.hairline), lineWidth: DS.BorderWidth.hairline)
-            )
-            .frame(maxWidth: 360, alignment: isUser ? .trailing : .leading)
-
-            if !isUser { Spacer(minLength: 24) }
+        } else {
+            HStack(alignment: .top) {
+                AssistantMessageCard(message: message)
+                Spacer(minLength: 24)
+            }
         }
+    }
+}
+
+private struct UserMessageBubble: View {
+    var message: ChatMessage
+
+    var body: some View {
+        VStack(alignment: .trailing, spacing: DS.Spacing.sm) {
+            RichText(message: message, isUser: true)
+
+            if !message.attachments.isEmpty {
+                AttachmentGallery(attachments: message.attachments, isUser: true)
+            }
+        }
+        .padding(.vertical, DS.Spacing.sm2)
+        .padding(.horizontal, DS.Spacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
+                .fill(DS.Palette.primaryGradient)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
+                .stroke(Color.clear, lineWidth: DS.BorderWidth.hairline)
+        )
+        .shadow(color: DS.Shadow.card.color.opacity(0.4), radius: DS.Shadow.card.radius / 2, x: 0, y: DS.Shadow.card.y / 2)
+        .frame(maxWidth: 320, alignment: .trailing)
+    }
+}
+
+private struct AssistantMessageCard: View {
+    var message: ChatMessage
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DS.Spacing.sm) {
+            RichText(message: message, isUser: false)
+
+            if !message.attachments.isEmpty {
+                AttachmentGallery(attachments: message.attachments, isUser: false)
+            }
+        }
+        .padding(.vertical, DS.Spacing.md)
+        .padding(.horizontal, DS.Spacing.md)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
+                .fill(DS.Palette.surface)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
+                .stroke(DS.Palette.border.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.hairline)
+        )
+        .shadow(color: DS.Shadow.card.color, radius: DS.Shadow.card.radius, x: DS.Shadow.card.x, y: DS.Shadow.card.y)
+        .padding(.vertical, DS.Spacing.sm2)
     }
 }
 
@@ -437,20 +482,142 @@ private struct RichText: View {
     var message: ChatMessage
     var isUser: Bool
 
-    private var attributed: AttributedString {
-        let markdown = message.content
-        let style = AttributedString.MarkdownParsingOptions(interpretedSyntax: .full)
-        if let parsed = try? AttributedString(markdown: markdown, options: style) {
-            return parsed
-        }
-        return AttributedString(message.content)
+    var body: some View {
+        ChatMarkdownText(markdown: message.content, isUser: isUser)
     }
+}
+
+private struct ChatMarkdownText: View {
+    var markdown: String
+    var isUser: Bool
 
     var body: some View {
-        Text(attributed)
-            .dsType(DS.Font.body, lineSpacing: 6)
-            .foregroundStyle(isUser ? DS.Palette.onPrimary : .primary)
-            .multilineTextAlignment(isUser ? .trailing : .leading)
+        VStack(alignment: .leading, spacing: DS.Spacing.sm) {
+            ForEach(Array(blocks.enumerated()), id: \.offset) { _, block in
+                blockView(block)
+                    .frame(maxWidth: .infinity, alignment: isUser ? .trailing : .leading)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: isUser ? .trailing : .leading)
+    }
+
+    private enum MarkdownBlock {
+        case heading(String)
+        case bullets([String])
+        case paragraph(String)
+        case quote(String)
+    }
+
+    private var blocks: [MarkdownBlock] {
+        var result: [MarkdownBlock] = []
+        var bullets: [String] = []
+        var paragraph: [String] = []
+        var quotes: [String] = []
+
+        func flushParagraph() {
+            if !paragraph.isEmpty {
+                result.append(.paragraph(paragraph.joined(separator: "\n")))
+                paragraph.removeAll()
+            }
+        }
+
+        func flushBullets() {
+            if !bullets.isEmpty {
+                result.append(.bullets(bullets))
+                bullets.removeAll()
+            }
+        }
+
+        func flushQuotes() {
+            if !quotes.isEmpty {
+                result.append(.quote(quotes.joined(separator: "\n")))
+                quotes.removeAll()
+            }
+        }
+
+        let lines = markdown.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
+        for line in lines {
+            let trimmed = line.trimmingCharacters(in: CharacterSet.whitespaces)
+            if trimmed.hasPrefix("## ") {
+                flushParagraph(); flushBullets(); flushQuotes()
+                let heading = String(trimmed.dropFirst(3)).trimmingCharacters(in: .whitespaces)
+                result.append(.heading(heading))
+            } else if trimmed.hasPrefix("- ") {
+                flushParagraph(); flushQuotes()
+                let bullet = String(trimmed.dropFirst(2)).trimmingCharacters(in: .whitespaces)
+                bullets.append(bullet)
+            } else if trimmed.hasPrefix("> ") {
+                flushParagraph(); flushBullets()
+                let quote = String(trimmed.dropFirst(1)).trimmingCharacters(in: .whitespaces)
+                quotes.append(quote)
+            } else if trimmed.isEmpty {
+                flushParagraph(); flushBullets(); flushQuotes()
+            } else {
+                flushBullets(); flushQuotes()
+                paragraph.append(line)
+            }
+        }
+
+        flushParagraph()
+        flushBullets()
+        flushQuotes()
+
+        if result.isEmpty {
+            result = [.paragraph(markdown)]
+        }
+        return result
+    }
+
+    @ViewBuilder
+    private func blockView(_ block: MarkdownBlock) -> some View {
+        switch block {
+        case .heading(let text):
+            Text(text)
+                .dsType(DS.Font.section, lineSpacing: 4)
+                .foregroundStyle(isUser ? DS.Palette.onPrimary : DS.Palette.primary)
+        case .paragraph(let text):
+            attributedText(text)
+                .dsType(DS.Font.body, lineSpacing: 6)
+                .multilineTextAlignment(isUser ? .trailing : .leading)
+                .foregroundStyle(isUser ? DS.Palette.onPrimary : .primary)
+        case .bullets(let items):
+            VStack(alignment: .leading, spacing: 6) {
+                ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+                    HStack(alignment: .top, spacing: 8) {
+                        Circle()
+                            .fill(isUser ? DS.Palette.onPrimary.opacity(0.9) : DS.Palette.primary)
+                            .frame(width: 6, height: 6)
+                            .padding(.top, 6)
+                        attributedText(item)
+                            .dsType(DS.Font.body, lineSpacing: 6)
+                            .multilineTextAlignment(.leading)
+                            .foregroundStyle(isUser ? DS.Palette.onPrimary : .primary)
+                    }
+                }
+            }
+        case .quote(let text):
+            attributedText(text)
+                .dsType(DS.Font.body, lineSpacing: 6)
+                .foregroundStyle(isUser ? DS.Palette.onPrimary.opacity(0.8) : .secondary)
+                .padding(.leading, DS.Spacing.sm)
+                .overlay(alignment: .leading) {
+                    Rectangle()
+                        .fill((isUser ? DS.Palette.onPrimary : DS.Palette.primary).opacity(0.2))
+                        .frame(width: 3)
+                        .cornerRadius(1.5)
+                }
+        }
+    }
+
+    private func attributedText(_ text: String) -> Text {
+        let options = AttributedString.MarkdownParsingOptions(
+            interpretedSyntax: .full,
+            failurePolicy: .returnPartiallyParsedIfPossible
+        )
+        if let attr = try? AttributedString(markdown: text, options: options) {
+            return Text(attr)
+        }
+        return Text(text)
     }
 }
 
@@ -653,6 +820,7 @@ private struct ChatResearchCard: View {
             RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
                 .stroke(DS.Palette.border.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.thin)
         )
+        .shadow(color: DS.Shadow.card.color, radius: DS.Shadow.card.radius, x: DS.Shadow.card.x, y: DS.Shadow.card.y)
         .onChange(of: response.id) { _, _ in
             savedItemIDs.removeAll()
             isExpanded = false
@@ -782,19 +950,19 @@ private struct ChatStateBadge: View {
 
     var body: some View {
         let color = tint(for: displayState)
-        return HStack(spacing: 8) {
+        return HStack(spacing: 6) {
             Circle()
                 .fill(color)
-                .frame(width: 8, height: 8)
+                .frame(width: 6, height: 6)
             Text(title(for: displayState))
                 .dsType(DS.Font.caption)
                 .foregroundStyle(color)
         }
-        .padding(.vertical, 6)
-        .padding(.horizontal, 12)
+        .padding(.vertical, 4)
+        .padding(.horizontal, 10)
         .background(
             Capsule(style: .continuous)
-                .fill(color.opacity(DS.Opacity.fill))
+                .fill(color.opacity(0.12))
         )
     }
 

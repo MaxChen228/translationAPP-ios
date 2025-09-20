@@ -85,9 +85,7 @@ struct FlashcardsView: View {
     @EnvironmentObject private var decksStore: FlashcardDecksStore
     @EnvironmentObject private var progressStore: FlashcardProgressStore
     @EnvironmentObject private var bannerCenter: BannerCenter
-    @StateObject private var speech = SpeechEngine()
-    @StateObject private var ttsStore = TTSSettingsStore()
-    @StateObject private var instant = InstantSpeaker()
+    @StateObject private var speechManager = FlashcardSpeechManager()
     @State private var isEditing: Bool = false
     @State private var draft: Flashcard? = nil
     @State private var errorText: String? = nil
@@ -186,9 +184,9 @@ struct FlashcardsView: View {
                                     PlaySideButton(style: .outline, diameter: 28) {
                                         if store.showBack {
                                             let text = backTextToSpeak(for: card)
-                                            instant.speak(text: text, lang: ttsStore.settings.backLang, rate: ttsStore.settings.rate, speech: speech)
+                                            speechManager.speak(text: text, lang: speechManager.settings.backLang, rate: speechManager.settings.rate, speech: speechManager.speechEngine)
                                         } else {
-                                            instant.speak(text: card.front, lang: ttsStore.settings.frontLang, rate: ttsStore.settings.rate, speech: speech)
+                                            speechManager.speak(text: card.front, lang: speechManager.settings.frontLang, rate: speechManager.settings.rate, speech: speechManager.speechEngine)
                                         }
                                     }
                                 }
@@ -241,8 +239,8 @@ struct FlashcardsView: View {
                             )
                             Spacer()
                             DSQuickActionIconButton(
-                                systemName: (speech.isPlaying && !speech.isPaused) ? "pause.fill" : "play.fill",
-                                labelKey: (speech.isPlaying && !speech.isPaused) ? "tts.pause" : "tts.play",
+                                systemName: (speechManager.isPlaying && !speechManager.isPaused) ? "pause.fill" : "play.fill",
+                                labelKey: (speechManager.isPlaying && !speechManager.isPaused) ? "tts.pause" : "tts.play",
                                 action: { ttsToggle() },
                                 shape: .circle,
                                 style: .filled,
@@ -258,10 +256,10 @@ struct FlashcardsView: View {
             }
             .padding(.horizontal, DS.Spacing.lg)
             .padding(.top, DS.Spacing.lg)
-            .padding(.bottom, (speech.isPlaying || speech.isPaused) ? DS.Spacing.xl : DS.Spacing.lg)
+            .padding(.bottom, (speechManager.isPlaying || speechManager.isPaused) ? DS.Spacing.xl : DS.Spacing.lg)
             .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
             .background(DS.Palette.background)
-            .dsAnimation(DS.AnimationToken.subtle, value: (speech.isPlaying || speech.isPaused))
+            .dsAnimation(DS.AnimationToken.subtle, value: (speechManager.isPlaying || speechManager.isPaused))
         }
         // Use custom top bar; hide system navigation chrome
         .navigationTitle("")
@@ -286,13 +284,13 @@ struct FlashcardsView: View {
             Button(String(localized: "action.cancel", locale: locale), role: .cancel) {}
         }
         .sheet(isPresented: $showSettings) {
-            FlashcardsSettingsSheet(ttsStore: ttsStore, onOpenAudio: { showAudioSheet = true })
+            FlashcardsSettingsSheet(ttsStore: speechManager.ttsStore, onOpenAudio: { showAudioSheet = true })
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
                 .presentationContentInteraction(.scrolls)
         }
         .sheet(isPresented: $showAudioSheet) {
-            FlashcardsAudioSettingsSheet(store: ttsStore) { settings in
+            FlashcardsAudioSettingsSheet(store: speechManager.ttsStore) { settings in
                 startTTS(with: settings)
             }
             .presentationDetents([.height(360)])
@@ -307,7 +305,7 @@ struct FlashcardsView: View {
             Text("flashcards.emptyDeckReset.message")
         }
         // 移除底部迷你播放器，改用右下角播放按鈕
-        .onChange(of: speech.currentCardIndex, initial: false) { _, newValue in
+        .onChange(of: speechManager.currentCardIndex, initial: false) { _, newValue in
             if let v = newValue, v >= 0, v < store.cards.count {
                 DSMotion.run(DS.AnimationToken.subtle) {
                     store.index = v
@@ -315,7 +313,7 @@ struct FlashcardsView: View {
                 }
             }
         }
-        .onChange(of: speech.currentFace, initial: false) { _, face in
+        .onChange(of: speechManager.currentFace, initial: false) { _, face in
             switch face {
             case .front?:
                 DSMotion.run(DS.AnimationToken.subtle) { store.showBack = false }
@@ -345,7 +343,7 @@ private extension FlashcardsView {
         }
     }
 
-    var isAudioActive: Bool { speech.isPlaying || speech.isPaused }
+    var isAudioActive: Bool { speechManager.isPlaying || speechManager.isPaused }
     func applyUnfamiliarFilterOnAppear() {
         guard let deckID = deckID else { return }
         swipePreview = nil
@@ -500,7 +498,7 @@ private extension FlashcardsView {
         store.cards = list
         store.index = 0
         store.showBack = false
-        if isAudioActive, let s = lastTTSSettings { speech.stop(); startTTS(with: s) }
+        if isAudioActive, let s = lastTTSSettings { speechManager.stop(); startTTS(with: s) }
         bannerCenter.show(title: String(localized: "flashcards.round.completed", locale: locale))
     }
 
@@ -508,7 +506,7 @@ private extension FlashcardsView {
         store.cards = list
         store.index = 0
         store.showBack = false
-        if isAudioActive, let s = lastTTSSettings { speech.stop(); startTTS(with: s) }
+        if isAudioActive, let s = lastTTSSettings { speechManager.stop(); startTTS(with: s) }
         bannerCenter.show(title: String(localized: "flashcards.round.completed", locale: locale))
     }
 
@@ -528,8 +526,8 @@ private extension FlashcardsView {
             dragX = -dir * 450
             DSMotion.run(DS.AnimationToken.bouncy) { dragX = 0 }
             if restartAudio {
-                let s = lastTTSSettings ?? ttsStore.settings
-                speech.stop()
+                let s = lastTTSSettings ?? speechManager.settings
+                speechManager.stop()
                 startTTS(with: s)
             }
         }
@@ -541,37 +539,37 @@ private extension FlashcardsView {
 
     func flipTapped() {
         store.flip()
-        guard let card = store.current, (speech.isPlaying || speech.isPaused) else { return }
+        guard let card = store.current, (speechManager.isPlaying || speechManager.isPaused) else { return }
         // Interject via instant speaker without killing the continuous queue (pause → speak → buffered resume)
         if store.showBack {
             let text = backTextToSpeak(for: card)
-            instant.speak(text: text, lang: ttsStore.settings.backLang, rate: ttsStore.settings.rate, speech: speech)
+            speechManager.speak(text: text, lang: speechManager.settings.backLang, rate: speechManager.settings.rate, speech: speechManager.speechEngine)
         } else {
-            instant.speak(text: card.front, lang: ttsStore.settings.frontLang, rate: ttsStore.settings.rate, speech: speech)
+            speechManager.speak(text: card.front, lang: speechManager.settings.frontLang, rate: speechManager.settings.rate, speech: speechManager.speechEngine)
         }
     }
 
     // MARK: - TTS
     func startTTS(with settings: TTSSettings) {
         let queue = PlaybackBuilder.buildQueue(cards: store.cards, startIndex: store.index, settings: settings)
-        speech.play(queue: queue)
+        speechManager.play(queue: queue)
         lastTTSSettings = settings
     }
 
     func speakOne(text: String, lang: String) {
-        let rate = ttsStore.settings.rate
+        let rate = speechManager.settings.rate
         let item = SpeechItem(text: text, langCode: lang, rate: rate, preDelay: 0, postDelay: 0, cardIndex: store.index, face: store.showBack ? .back : .front)
         // Legacy one-shot via continuous engine is no longer used for instant playback.
         // Keep method for compatibility if needed elsewhere.
-        speech.play(queue: [item])
-        lastTTSSettings = ttsStore.settings
+        speechManager.play(queue: [item])
+        lastTTSSettings = speechManager.settings
     }
 
     func ttsToggle() {
-        if speech.isPlaying && !speech.isPaused { speech.pause(); return }
-        if speech.isPlaying && speech.isPaused { speech.resume(); return }
+        if speechManager.isPlaying && !speechManager.isPaused { speechManager.pause(); return }
+        if speechManager.isPlaying && speechManager.isPaused { speechManager.resume(); return }
         // Not playing: start with last settings or default
-        startTTS(with: lastTTSSettings ?? ttsStore.settings)
+        startTTS(with: lastTTSSettings ?? speechManager.settings)
     }
 
     func ttsNextCard() {
@@ -579,7 +577,7 @@ private extension FlashcardsView {
         store.next()
         store.showBack = false
         if let s = lastTTSSettings {
-            speech.stop()
+            speechManager.stop()
             startTTS(with: s)
         }
     }
@@ -589,7 +587,7 @@ private extension FlashcardsView {
         store.prev()
         store.showBack = false
         if let s = lastTTSSettings {
-            speech.stop()
+            speechManager.stop()
             startTTS(with: s)
         }
     }
@@ -605,7 +603,7 @@ extension FlashcardsView {
 
 private extension FlashcardsView {
     func backImmediateText(for card: Flashcard) -> String {
-        let lines = PlaybackBuilder.buildBackLines(card.back, fill: ttsStore.settings.variantFill)
+        let lines = PlaybackBuilder.buildBackLines(card.back, fill: speechManager.settings.variantFill)
         return lines.first ?? card.back
     }
     func backTextToSpeak(for card: Flashcard) -> String {
