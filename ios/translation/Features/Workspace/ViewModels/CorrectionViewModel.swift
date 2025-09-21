@@ -165,10 +165,6 @@ final class CorrectionViewModel: ObservableObject {
             if let hs2 = result.correctedHighlights { self.correctedHighlights = hs2 }
             else if let res = self.response { self.correctedHighlights = Highlighter.computeHighlightsInCorrected(text: res.corrected, errors: res.errors) }
             self.selectedErrorID = self.response?.errors.first?.id
-            // 若為本機練習，更新本機完成度
-            if case .local(let bookName) = self.practiceSource, let iid = self.currentBankItemId {
-                self.localProgressStore?.markCompleted(book: bookName, itemId: iid, score: self.response?.score)
-            }
             // Notify completion for banner/notification consumers
             NotificationCenter.default.post(name: .correctionCompleted, object: nil, userInfo: [
                 AppEventKeys.workspaceID: self.workspaceID,
@@ -311,6 +307,16 @@ final class CorrectionViewModel: ObservableObject {
 
         store.add(record)
         AppLog.aiInfo("Practice record saved successfully: score=\(response.score), errors=\(response.errors.count), total records=\(store.records.count)")
+
+        if case .local(let bookName) = practiceSource, let itemId = currentBankItemId {
+            if let progressStore = localProgressStore {
+                if !progressStore.isCompleted(book: bookName, itemId: itemId) {
+                    progressStore.markCompleted(book: bookName, itemId: itemId, score: response.score)
+                }
+            } else {
+                AppLog.aiError("Cannot mark practice completed: progress store not bound")
+            }
+        }
 
         // 發送通知給用戶
         NotificationCenter.default.post(name: .practiceRecordSaved, object: nil, userInfo: [

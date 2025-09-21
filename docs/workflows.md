@@ -39,7 +39,7 @@
 | 顯示月曆與日卡片 | `Features/Calendar/Views/CalendarView.swift` | 使用 `DSCalendarGrid` 呈現月曆，提供上/下個月及「回到今天」快速操作，並以 `DayDetailView` 顯示所選日期統計。 |
 | 月份導覽與統計 | `Features/Calendar/ViewModels/CalendarViewModel.swift` | 每次月份切換時重新計算每日練習摘要，並與 `PracticeRecordsStore` 綁定以同步最新紀錄。 |
 | 日曆統計排版 | `Features/Calendar/Views/DayDetailView.swift` | 展開所選日期練習次數、平均分數、錯誤類別等摘要，使用 Design System 分段呈現。 |
-| 練習紀錄資料源 | `Features/Saved/Stores/PracticeRecordsStore.swift` | 儲存批改結果、提供 `getStatistics()` 與 `getRecordsGroupedByDate()` 等接口給日曆與列表使用。 |
+| 練習紀錄資料源 | `Features/Saved/Stores/PracticeRecordsStore.swift` | 儲存批改結果、提供 `getStatistics()` 與 `getRecordsGroupedByDate()` 等接口給日曆與列表使用；按下「儲存練習記錄」時亦會標記該題為已完成。 |
 
 | 任務 | 主要檔案 | 說明 |
 | ---- | -------- | ---- |
