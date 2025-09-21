@@ -68,6 +68,13 @@ final class CorrectionViewModel: ObservableObject {
             self.practicedHints = hints
         }
         self.showPracticedHints = UserDefaults.standard.bool(forKey: keyShowHints)
+
+        // 重新計算highlight（從已恢復的response和inputEn）
+        if let res = self.response, !inputEn.isEmpty {
+            self.highlights = Highlighter.computeHighlights(text: inputEn, errors: res.errors)
+            self.correctedHighlights = Highlighter.computeHighlightsInCorrected(text: res.corrected, errors: res.errors)
+        }
+
         AppLog.aiInfo("CorrectionViewModel initialized (ws=\(workspaceID)) with service: \(String(describing: type(of: service)))")
     }
 
