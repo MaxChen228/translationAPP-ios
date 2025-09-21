@@ -108,6 +108,11 @@
 "practice.error.notLocal" = "Not currently practicing a local bank.";
 "practice.error.storeMissing" = "Local bank data is unavailable.";
 "practice.error.noneRemaining" = "Practice session completed.";
+"practice.save.record" = "Save Practice Record";
+
+/* Banner messages */
+"banner.practice.saved.title" = "Practice Record Saved";
+"banner.practice.saved.subtitle" = "Successfully saved to local storage";
 
 /* Backend errors */
 "error.backend.missing" = "Network unavailable. Please check connection.";

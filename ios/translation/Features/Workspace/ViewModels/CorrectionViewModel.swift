@@ -281,8 +281,15 @@ final class CorrectionViewModel: ObservableObject {
 
     // 保存練習記錄
     func savePracticeRecord() {
-        guard let response = self.response,
-              let store = practiceRecordsStore else { return }
+        guard let response = self.response else {
+            AppLog.aiError("Cannot save practice record: no response available")
+            return
+        }
+
+        guard let store = practiceRecordsStore else {
+            AppLog.aiError("Cannot save practice record: store not bound")
+            return
+        }
 
         let startTime = practiceStartTime ?? Date()
         let bankBookName: String? = if case .local(let bookName) = practiceSource { bookName } else { nil }
@@ -303,6 +310,12 @@ final class CorrectionViewModel: ObservableObject {
         )
 
         store.add(record)
-        AppLog.aiInfo("Practice record saved: score=\(response.score), errors=\(response.errors.count)")
+        AppLog.aiInfo("Practice record saved successfully: score=\(response.score), errors=\(response.errors.count), total records=\(store.records.count)")
+
+        // 發送通知給用戶
+        NotificationCenter.default.post(name: .practiceRecordSaved, object: nil, userInfo: [
+            "score": response.score,
+            "errors": response.errors.count
+        ])
     }
 }

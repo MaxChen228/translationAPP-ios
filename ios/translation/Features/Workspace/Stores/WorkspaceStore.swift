@@ -17,6 +17,11 @@ final class WorkspaceStore: ObservableObject {
     // Keep strong references so tasks continue even離開詳情頁
     private var viewModels: [UUID: CorrectionViewModel] = [:]
 
+    // Store references for dependency injection
+    weak var localBankStore: LocalBankStore?
+    weak var localProgressStore: LocalBankProgressStore?
+    weak var practiceRecordsStore: PracticeRecordsStore?
+
     init() {
         load()
         if workspaces.isEmpty {
@@ -28,6 +33,15 @@ final class WorkspaceStore: ObservableObject {
     func vm(for id: UUID, service: AIService = AIServiceFactory.makeDefault()) -> CorrectionViewModel {
         if let vm = viewModels[id] { return vm }
         let vm = CorrectionViewModel(service: service, workspaceID: id.uuidString)
+
+        // Bind stores if available
+        if let localBank = localBankStore, let localProgress = localProgressStore {
+            vm.bindLocalBankStores(localBank: localBank, progress: localProgress)
+        }
+        if let practiceRecords = practiceRecordsStore {
+            vm.bindPracticeRecordsStore(practiceRecords)
+        }
+
         viewModels[id] = vm
         return vm
     }
@@ -38,7 +52,17 @@ final class WorkspaceStore: ObservableObject {
         let ws = Workspace(id: UUID(), name: name ?? "Workspace \(index)")
         workspaces.append(ws)
         // 準備 VM（將自動載入其持久化狀態）
-        viewModels[ws.id] = CorrectionViewModel(service: AIServiceFactory.makeDefault(), workspaceID: ws.id.uuidString)
+        let vm = CorrectionViewModel(service: AIServiceFactory.makeDefault(), workspaceID: ws.id.uuidString)
+
+        // Bind stores if available
+        if let localBank = localBankStore, let localProgress = localProgressStore {
+            vm.bindLocalBankStores(localBank: localBank, progress: localProgress)
+        }
+        if let practiceRecords = practiceRecordsStore {
+            vm.bindPracticeRecordsStore(practiceRecords)
+        }
+
+        viewModels[ws.id] = vm
         return ws
     }
 

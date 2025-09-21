@@ -20,6 +20,7 @@ struct TranslationApp: App {
     @StateObject private var deckRootOrder = DeckRootOrderStore()
     @StateObject private var localBank = LocalBankStore()
     @StateObject private var localProgress = LocalBankProgressStore()
+    @StateObject private var practiceRecords = PracticeRecordsStore()
     @StateObject private var bannerCenter = BannerCenter()
     @StateObject private var router = RouterStore()
     @StateObject private var settings = AppSettingsStore()
@@ -84,6 +85,7 @@ struct TranslationApp: App {
                 .environmentObject(deckRootOrder)
                 .environmentObject(localBank)
                 .environmentObject(localProgress)
+                .environmentObject(practiceRecords)
                 .environmentObject(bannerCenter)
                 .environmentObject(settings)
                 .environmentObject(randomSettings)
@@ -125,6 +127,15 @@ struct TranslationApp: App {
                     let locale = Locale(identifier: localeID)
                     let title = String(localized: "banner.tts.error.title", locale: locale)
                     bannerCenter.show(title: title, subtitle: err)
+                }
+                .onReceive(NotificationCenter.default.publisher(for: .practiceRecordSaved)) { note in
+                    let score = note.userInfo?["score"] as? Int ?? 0
+                    let errors = note.userInfo?["errors"] as? Int ?? 0
+                    let localeID = settings.language == "zh" ? "zh-Hant" : "en"
+                    let locale = Locale(identifier: localeID)
+                    let title = String(localized: "banner.practice.saved.title", locale: locale)
+                    let subtitle = String(localized: "banner.practice.saved.subtitle", locale: locale)
+                    bannerCenter.show(title: title, subtitle: subtitle)
                 }
         }
     }

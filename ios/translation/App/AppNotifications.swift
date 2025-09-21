@@ -4,6 +4,7 @@ extension Notification.Name {
     static let correctionCompleted = Notification.Name("correctionCompleted")
     static let correctionFailed = Notification.Name("correctionFailed")
     static let ttsError = Notification.Name("ttsError")
+    static let practiceRecordSaved = Notification.Name("practiceRecordSaved")
 }
 
 enum AppEventKeys {

@@ -14,6 +14,7 @@ struct ResultsSectionView: View {
     @Binding var mode: ResultSwitcherCard.Mode
     let applySuggestion: (ErrorItem) -> Void
     let onSave: (ErrorItem) -> Void
+    let onSavePracticeRecord: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.lg) {
@@ -48,6 +49,19 @@ struct ResultsSectionView: View {
                     }
                 }
             }
+
+            // 儲存練習記錄按鈕
+            Button {
+                onSavePracticeRecord()
+            } label: {
+                Label {
+                    Text("practice.save.record")
+                } icon: {
+                    Image(systemName: "square.and.arrow.down")
+                }
+            }
+            .buttonStyle(DSSecondaryButton())
+            .frame(maxWidth: .infinity)
         }
     }
 

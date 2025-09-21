@@ -1,5 +1,16 @@
 import SwiftUI
 
+private func difficultyToRoman(_ difficulty: Int) -> String {
+    switch difficulty {
+    case 1: return "Ⅰ"
+    case 2: return "Ⅱ"
+    case 3: return "Ⅲ"
+    case 4: return "Ⅳ"
+    case 5: return "Ⅴ"
+    default: return "Ⅰ"
+    }
+}
+
 struct LocalBankListView: View {
     @ObservedObject var vm: CorrectionViewModel
     let bookName: String
@@ -183,12 +194,14 @@ struct LocalBankListView: View {
                             )
                         HStack(alignment: .center, spacing: 8) {
                             HStack(spacing: 8) {
-                                HStack(spacing: 4) {
-                                    ForEach(1...5, id: \.self) { j in
-                                        Circle().fill(j <= item.difficulty ? DS.Palette.primary.opacity(0.8) : DS.Palette.border.opacity(DS.Opacity.border))
-                                            .frame(width: 6, height: 6)
-                                    }
-                                }
+                                Text(difficultyToRoman(item.difficulty))
+                                    .dsType(DS.Font.labelSm)
+                                    .foregroundStyle(DS.Palette.primary.opacity(0.8))
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 2)
+                                    .background(
+                                        Capsule().fill(DS.Palette.primary.opacity(0.1))
+                                    )
                                 if let tags = item.tags, !tags.isEmpty {
                                     Text(tags.joined(separator: ", "))
                                         .dsType(DS.Font.caption)

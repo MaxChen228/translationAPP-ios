@@ -4,6 +4,9 @@ import UniformTypeIdentifiers
 struct WorkspaceListView: View {
     @StateObject private var store = WorkspaceStore()
     @EnvironmentObject private var savedStore: SavedErrorsStore
+    @EnvironmentObject private var localBank: LocalBankStore
+    @EnvironmentObject private var localProgress: LocalBankProgressStore
+    @EnvironmentObject private var practiceRecords: PracticeRecordsStore
     @EnvironmentObject private var router: RouterStore
     @EnvironmentObject private var bannerCenter: BannerCenter
     @Environment(\.locale) private var locale
@@ -83,7 +86,13 @@ struct WorkspaceListView: View {
                 }
                 .presentationDetents([.height(180)])
             }
-            .onAppear { draggingID = nil }
+            .onAppear {
+                draggingID = nil
+                // Bind stores to WorkspaceStore
+                store.localBankStore = localBank
+                store.localProgressStore = localProgress
+                store.practiceRecordsStore = practiceRecords
+            }
         }
         // 只在 ScrollView 範圍處理後備 drop；避免多層干擾
         // banner 監聽已移到 App root，這裡只處理 Router 指令

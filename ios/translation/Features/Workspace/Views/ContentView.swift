@@ -74,6 +74,9 @@ struct ContentView: View {
                                     savedAt: Date()
                                 )
                                 savedStore.add(payload: payload)
+                            },
+                            onSavePracticeRecord: {
+                                vm.savePracticeRecord()
                             }
                         )
                     }

@@ -9,7 +9,10 @@ struct NestedTagFilterView: View {
         var stats: [TagCategory: Int] = [:]
         for category in TagCategory.allCases {
             let categoryTags = TagRegistry.tags(for: category)
-            let count = categoryTags.compactMap { tagStats[$0] }.reduce(0, +)
+            let count = categoryTags.compactMap { tag in
+                let tagCount = tagStats[tag] ?? 0
+                return tagCount > 0 ? tagCount : nil
+            }.reduce(0, +)
             stats[category] = count
         }
         return stats
@@ -91,7 +94,9 @@ struct ExpandableTagCategoryView: View {
     }
 
     private var categoryTags: [String] {
-        TagRegistry.tags(for: category)
+        TagRegistry.tags(for: category).filter { tag in
+            (tagStats[tag] ?? 0) > 0
+        }
     }
 
     private var isCategorySelected: Bool {

@@ -1,5 +1,16 @@
 import SwiftUI
 
+private func difficultyToRoman(_ difficulty: Int) -> String {
+    switch difficulty {
+    case 1: return "Ⅰ"
+    case 2: return "Ⅱ"
+    case 3: return "Ⅲ"
+    case 4: return "Ⅳ"
+    case 5: return "Ⅴ"
+    default: return "Ⅰ"
+    }
+}
+
 struct DSFilterChipsView: View {
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -67,13 +78,9 @@ struct DSDifficultyFilterChip: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 6) {
-                HStack(spacing: 2) {
-                    ForEach(1...difficulty, id: \.self) { _ in
-                        Image(systemName: "star.fill")
-                            .font(.caption2)
-                            .foregroundStyle(difficultyColor)
-                    }
-                }
+                Text(difficultyToRoman(difficulty))
+                    .dsType(DS.Font.labelSm)
+                    .foregroundStyle(difficultyColor)
                 Text("\(count)")
                     .dsType(DS.Font.caption)
                     .padding(.vertical, 2)

@@ -135,6 +135,11 @@
 "practice.error.notLocal" = "目前不是本機題庫練習";
 "practice.error.storeMissing" = "本機題庫未綁定";
 "practice.error.noneRemaining" = "練習已完成，表現優秀。";
+"practice.save.record" = "儲存練習記錄";
+
+/* Banner messages */
+"banner.practice.saved.title" = "練習記錄已儲存";
+"banner.practice.saved.subtitle" = "已成功儲存到本機";
 
 /* 後端錯誤 */
 "error.backend.missing" = "網路無法連線，請檢查設定。";
