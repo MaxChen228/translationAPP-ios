@@ -26,7 +26,7 @@ final class ChatPersistenceManager {
             let fileURL = sessionFileURL(for: sessionData.id)
             try data.write(to: fileURL)
         } catch {
-            print("Failed to save chat session: \(error)")
+            AppLog.chatError("Failed to save chat session: \(error)")
         }
     }
 
@@ -36,7 +36,7 @@ final class ChatPersistenceManager {
             let data = try Data(contentsOf: fileURL)
             return try decoder.decode(ChatSessionData.self, from: data)
         } catch {
-            print("Failed to load chat session \(id): \(error)")
+            AppLog.chatError("Failed to load chat session \(id): \(error)")
             return nil
         }
     }
@@ -53,7 +53,7 @@ final class ChatPersistenceManager {
                 }
             }
         } catch {
-            print("Failed to load active sessions: \(error)")
+            AppLog.chatError("Failed to load active sessions: \(error)")
             return []
         }
     }
@@ -63,7 +63,7 @@ final class ChatPersistenceManager {
             let fileURL = sessionFileURL(for: id)
             try fileManager.removeItem(at: fileURL)
         } catch {
-            print("Failed to delete session \(id): \(error)")
+            AppLog.chatError("Failed to delete session \(id): \(error)")
         }
     }
 
@@ -74,7 +74,7 @@ final class ChatPersistenceManager {
                 try fileManager.removeItem(at: fileURL)
             }
         } catch {
-            print("Failed to clear sessions: \(error)")
+            AppLog.chatError("Failed to clear sessions: \(error)")
         }
     }
 
@@ -84,7 +84,7 @@ final class ChatPersistenceManager {
         do {
             try fileManager.createDirectory(at: chatSessionsDirectory, withIntermediateDirectories: true)
         } catch {
-            print("Failed to create chat sessions directory: \(error)")
+            AppLog.chatError("Failed to create chat sessions directory: \(error)")
         }
     }
 

@@ -82,7 +82,7 @@ final class ChatManager: ObservableObject {
         }
 
         isBackgroundTaskActive = true
-        print("🔄 Started background task for chat")
+        AppLog.chatInfo("🔄 Started background task for chat")
     }
 
     private func endBackgroundTaskIfNeeded() async {
@@ -91,7 +91,7 @@ final class ChatManager: ObservableObject {
         UIApplication.shared.endBackgroundTask(backgroundTaskID)
         backgroundTaskID = .invalid
         isBackgroundTaskActive = false
-        print("✅ Ended background task for chat")
+        AppLog.chatInfo("✅ Ended background task for chat")
     }
 
     private func handleBackgroundTask(task: BGAppRefreshTask) {
