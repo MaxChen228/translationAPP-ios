@@ -147,6 +147,12 @@
 "chat.state.gathering" = "Gathering context";
 "chat.state.ready" = "Ready to answer";
 "chat.state.completed" = "Task completed";
+
+/* Chat Continuation */
+"chat.continuation.title" = "Unfinished Conversation Found";
+"chat.continuation.subtitle" = "AI was responding when you left. Continue?";
+"chat.continuation.resume" = "Resume";
+"chat.background.active" = "Generating in background";
 "chat.empty.title" = "Ready when you are";
 "chat.empty.subtitle" = "Share your sentence, question, or idea—here are a few ways to get started.";
 "chat.empty.suggestion1" = "Translate this Chinese sentence into natural English.";

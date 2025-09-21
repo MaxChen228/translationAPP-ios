@@ -29,6 +29,19 @@ struct ChatWorkspaceView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            // 繼續對話橫幅
+            if viewModel.showContinuationBanner {
+                ContinuationBanner(
+                    onResume: { Task { await viewModel.resumePendingRequest() } },
+                    onDismiss: { viewModel.dismissContinuationBanner() }
+                )
+            }
+
+            // 後台任務指示器
+            if viewModel.isBackgroundActive {
+                BackgroundTaskIndicator()
+            }
+
             conversation
             composer
         }
@@ -1167,5 +1180,75 @@ private struct ErrorBanner: View {
             RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
                 .stroke(DS.Palette.warning.opacity(0.5), lineWidth: DS.BorderWidth.hairline)
         )
+    }
+}
+
+private struct ContinuationBanner: View {
+    var onResume: () -> Void
+    var onDismiss: () -> Void
+
+    var body: some View {
+        HStack(alignment: .center, spacing: DS.Spacing.sm) {
+            Image(systemName: "arrow.clockwise")
+                .foregroundStyle(DS.Brand.scheme.classicBlue)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("chat.continuation.title")
+                    .dsType(DS.Font.body)
+                    .foregroundStyle(.primary)
+                Text("chat.continuation.subtitle")
+                    .dsType(DS.Font.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            Button(action: onResume) {
+                Text("chat.continuation.resume")
+            }
+            .buttonStyle(DSSecondaryButtonCompact())
+
+            Button(action: onDismiss) {
+                Image(systemName: "xmark")
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.vertical, DS.Spacing.sm2)
+        .padding(.horizontal, DS.Spacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
+                .fill(DS.Brand.scheme.babyBlue.opacity(0.12))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
+                .stroke(DS.Brand.scheme.classicBlue.opacity(0.3), lineWidth: DS.BorderWidth.hairline)
+        )
+        .padding(.horizontal, DS.Spacing.md)
+        .padding(.top, DS.Spacing.sm)
+    }
+}
+
+private struct BackgroundTaskIndicator: View {
+    var body: some View {
+        HStack(spacing: DS.Spacing.sm2) {
+            ProgressView()
+                .progressViewStyle(.circular)
+                .tint(DS.Brand.scheme.classicBlue)
+                .scaleEffect(0.8)
+
+            Text("chat.background.active")
+                .dsType(DS.Font.caption)
+                .foregroundStyle(DS.Brand.scheme.classicBlue)
+        }
+        .padding(.vertical, 6)
+        .padding(.horizontal, DS.Spacing.sm)
+        .background(
+            Capsule(style: .continuous)
+                .fill(DS.Brand.scheme.babyBlue.opacity(0.12))
+        )
+        .padding(.horizontal, DS.Spacing.md)
+        .padding(.bottom, DS.Spacing.sm2)
+        .frame(maxWidth: .infinity, alignment: .center)
     }
 }

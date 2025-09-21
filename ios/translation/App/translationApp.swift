@@ -7,6 +7,7 @@
 
 import SwiftUI
 import UIKit
+import BackgroundTasks
 
 @main
 struct TranslationApp: App {
