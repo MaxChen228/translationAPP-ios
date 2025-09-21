@@ -45,8 +45,8 @@ struct BankPracticeRecordsView: View {
                 } else {
                     VStack(alignment: .leading, spacing: DS.Spacing.lg) {
                         DSSectionHeader(
-                            titleText: Text(String(localized: "practice.records.list.title", locale: locale)),
-                            subtitleText: Text(String(localized: "practice.records.list.subtitle", locale: locale)),
+                            titleKey: "practice.records.list.title",
+                            subtitleKey: "practice.records.list.subtitle",
                             accentUnderline: true
                         )
 
