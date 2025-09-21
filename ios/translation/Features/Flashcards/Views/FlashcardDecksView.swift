@@ -8,7 +8,7 @@ struct FlashcardDecksView: View {
     private var cols: [GridItem] { [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.sm2)] }
     @State private var renaming: PersistedFlashcardDeck? = nil
     @State private var renamingFolder: DeckFolder? = nil
-    @State private var draggingDeckID: UUID? = nil
+    @StateObject private var editController = ShelfEditController<UUID>()
     @Environment(\.locale) private var locale
 
     var body: some View {
@@ -24,10 +24,22 @@ struct FlashcardDecksView: View {
                         }
                         .buttonStyle(DSCardLinkStyle())
                         .contextMenu {
+                            Button(String(localized: "action.edit", locale: locale)) {
+                                editController.enterEditMode()
+                                Haptics.medium()
+                            }
                             Button(String(localized: "action.rename", locale: locale)) { renamingFolder = folder }
                             Button(String(localized: "action.delete", locale: locale), role: .destructive) { _ = deckFolders.removeFolder(folder.id) }
                         }
-                        .onDrop(of: [.text], delegate: DeckIntoFolderDropDelegate(folderID: folder.id, folders: deckFolders, draggingDeckID: $draggingDeckID))
+                        .onDrop(of: [.text], delegate: DeckIntoFolderDropDelegate(folderID: folder.id, folders: deckFolders, editController: editController))
+                        .highPriorityGesture(
+                            TapGesture().onEnded {
+                                if editController.isEditing {
+                                    editController.exitEditMode()
+                                }
+                            },
+                            including: .gesture
+                        )
                     }
                     Button { _ = deckFolders.addFolder(name: String(localized: "folder.new", locale: locale)) } label: { NewDeckFolderCard() }
                         .buttonStyle(.plain)
@@ -49,9 +61,11 @@ struct FlashcardDecksView: View {
                         BrowseCloudCard(titleKey: "deck.browseCloud")
                     }
                     .buttonStyle(.plain)
+                    .disabled(editController.isEditing)
 
                     // New deck tile (similar look to NewDeckFolderCard)
                     Button {
+                        editController.exitEditMode()
                         let deck = decksStore.add(name: String(localized: "deck.untitled", locale: locale), cards: [])
                         renaming = deck
                     } label: { NewDeckCard() }
@@ -70,14 +84,27 @@ struct FlashcardDecksView: View {
                             )
                         }
                         .buttonStyle(DSCardLinkStyle())
+                        .shelfWiggle(isActive: editController.isEditing)
                         .contextMenu {
-                            Button(String(localized: "action.rename", locale: locale)) { renaming = deck }
+                            Button(String(localized: "action.edit", locale: locale)) {
+                                editController.enterEditMode()
+                                Haptics.medium()
+                            }
+                            Button(String(localized: "action.rename", locale: locale)) {
+                                editController.exitEditMode()
+                                renaming = deck
+                            }
                             Button(String(localized: "action.delete", locale: locale), role: .destructive) {
+                                editController.exitEditMode()
                                 decksStore.remove(deck.id)
                                 deckOrder.removeFromOrder("deck:\(deck.id.uuidString)")
                             }
                         }
-                        .onDrag { draggingDeckID = deck.id; return DeckDragPayload.provider(for: deck.id) }
+                        .onDrag {
+                            guard editController.isEditing else { return NSItemProvider() }
+                            editController.beginDragging(deck.id)
+                            return DeckDragPayload.provider(for: deck.id)
+                        }
                         .onDrop(of: [.text], delegate: RootDeckReorderDropDelegate(
                             overDeckID: deck.id,
                             rootIDsProvider: {
@@ -85,8 +112,16 @@ struct FlashcardDecksView: View {
                                 return deckOrder.currentOrder(rootIDs: r)
                             },
                             move: { id, to, root in deckOrder.move(id: id, to: to, rootIDs: root) },
-                            draggingDeckID: $draggingDeckID
+                            editController: editController
                         ))
+                        .highPriorityGesture(
+                            TapGesture().onEnded {
+                                if editController.isEditing {
+                                    editController.exitEditMode()
+                                }
+                            },
+                            including: .gesture
+                        )
                     }
                 }
             }
@@ -98,7 +133,17 @@ struct FlashcardDecksView: View {
         .navigationTitle(Text("nav.deck"))
         .id(locale.identifier)
         .toolbar { }
-        .onDrop(of: [.text], delegate: ClearDeckDragStateDropDelegate(draggingDeckID: $draggingDeckID))
+        .onDrop(of: [.text], delegate: ClearDeckDragStateDropDelegate(editController: editController))
+        .contentShape(Rectangle())
+        .simultaneousGesture(
+            TapGesture().onEnded {
+                if editController.isEditing {
+                    editController.exitEditMode()
+                }
+            },
+            including: .gesture
+        )
+        .onAppear { editController.exitEditMode() }
         .sheet(item: $renaming) { dk in
             RenameSheet(name: dk.name) { new in decksStore.rename(dk.id, to: new) }
                 .presentationDetents([.height(180)])
@@ -115,14 +160,14 @@ struct FlashcardDecksView: View {
 private struct DeckIntoFolderDropDelegate: DropDelegate {
     let folderID: UUID
     let folders: DeckFoldersStore
-    @Binding var draggingDeckID: UUID?
+    let editController: ShelfEditController<UUID>
 
     func validateDrop(info: DropInfo) -> Bool { true }
     func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
 
     func performDrop(info: DropInfo) -> Bool {
         let providers = info.itemProviders(for: [.text])
-        guard let p = providers.first else { draggingDeckID = nil; return false }
+        guard let p = providers.first else { editController.endDragging(); return false }
         var handled = false
         _ = p.loadObject(ofClass: NSString.self) { obj, _ in
             if let ns = obj as? NSString, let id = DeckDragPayload.decodeDeckID(ns as String) {
@@ -130,16 +175,19 @@ private struct DeckIntoFolderDropDelegate: DropDelegate {
                 handled = true
             }
         }
-        draggingDeckID = nil
+        editController.endDragging()
         return handled
     }
 }
 
 private struct ClearDeckDragStateDropDelegate: DropDelegate {
-    @Binding var draggingDeckID: UUID?
+    let editController: ShelfEditController<UUID>
     func validateDrop(info: DropInfo) -> Bool { true }
     func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
-    func performDrop(info: DropInfo) -> Bool { draggingDeckID = nil; return true }
+    func performDrop(info: DropInfo) -> Bool {
+        editController.endDragging()
+        return true
+    }
 }
 
 // DeckDragPayload is defined in DeckFolderViews.swift and reused here.
@@ -149,13 +197,13 @@ private struct RootDeckReorderDropDelegate: DropDelegate {
     let overDeckID: UUID
     let rootIDsProvider: () -> [String]
     let move: (String, Int, [String]) -> Void
-    @Binding var draggingDeckID: UUID?
+    let editController: ShelfEditController<UUID>
 
     func validateDrop(info: DropInfo) -> Bool { true }
     func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
 
     func dropEntered(info: DropInfo) {
-        guard let dragging = draggingDeckID else { return }
+        guard let dragging = editController.draggingID else { return }
         let dragKey = "deck:\(dragging.uuidString)"
         let targetKey = "deck:\(overDeckID.uuidString)"
         let root = rootIDsProvider()
@@ -166,7 +214,10 @@ private struct RootDeckReorderDropDelegate: DropDelegate {
         }
     }
 
-    func performDrop(info: DropInfo) -> Bool { draggingDeckID = nil; return true }
+    func performDrop(info: DropInfo) -> Bool {
+        editController.endDragging()
+        return true
+    }
 }
 
 private struct DeckCard: View {

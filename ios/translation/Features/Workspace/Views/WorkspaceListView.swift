@@ -3,6 +3,7 @@ import UniformTypeIdentifiers
 
 struct WorkspaceListView: View {
     @StateObject private var store = WorkspaceStore()
+    @StateObject private var workspaceEditController = ShelfEditController<UUID>()
     @EnvironmentObject private var savedStore: SavedErrorsStore
     @EnvironmentObject private var localBank: LocalBankStore
     @EnvironmentObject private var localProgress: LocalBankProgressStore
@@ -21,8 +22,6 @@ struct WorkspaceListView: View {
     // Navigation via typed routes to avoid off-stage pushes
     private enum Route: Hashable { case workspace(UUID) }
     @State private var path: [Route] = []
-    // 拖曳中的項目（以 ID 辨識）。供重排使用。
-    @State private var draggingID: UUID? = nil
     @State private var isEditingQuickActions = false
 
     var body: some View {
@@ -44,7 +43,12 @@ struct WorkspaceListView: View {
                     ShelfGrid(titleKey: "home.workspaces", columns: cols) {
 
                     ForEach(store.workspaces) { ws in
-                        WorkspaceItemLink(ws: ws, vm: store.vm(for: ws.id), store: store, draggingID: $draggingID) {
+                        WorkspaceItemLink(
+                            ws: ws,
+                            vm: store.vm(for: ws.id),
+                            store: store,
+                            editController: workspaceEditController
+                        ) {
                             startRename(ws)
                         } onDelete: {
                             store.remove(ws.id)
@@ -55,13 +59,14 @@ struct WorkspaceListView: View {
                     .dsAnimation(DS.AnimationToken.reorder, value: store.workspaces)
 
                     Button {
+                        workspaceEditController.exitEditMode()
                         _ = store.addWorkspace()
                     } label: {
                         AddWorkspaceCard()
                     }
                     .buttonStyle(.plain)
                     // 允許拖到新增卡以移到清單尾端
-                    .onDrop(of: [.text], delegate: AddToEndDropDelegate(store: store, draggingID: $draggingID))
+                    .onDrop(of: [.text], delegate: AddToEndDropDelegate(store: store, editController: workspaceEditController))
                     }
                 }
                 .padding(.horizontal, DS.Spacing.lg)
@@ -69,7 +74,16 @@ struct WorkspaceListView: View {
             }
             .id(locale.identifier)
             // 後備 drop：若使用者把項目拖到空白處或邊緣放下，確保 draggingID 能被清除
-            .onDrop(of: [.text], delegate: ClearDragStateDropDelegate(draggingID: $draggingID))
+            .onDrop(of: [.text], delegate: ClearDragStateDropDelegate(editController: workspaceEditController))
+            .contentShape(Rectangle())
+            .simultaneousGesture(
+                TapGesture().onEnded {
+                    if workspaceEditController.isEditing {
+                        workspaceEditController.exitEditMode()
+                    }
+                },
+                including: .gesture
+            )
             .background(DS.Palette.background)
             .navigationTitle(Text("nav.workspace"))
             .navigationDestination(for: Route.self) { route in
@@ -99,13 +113,13 @@ struct WorkspaceListView: View {
                 }
             }
             .onAppear {
-                draggingID = nil
                 // Bind stores to WorkspaceStore
                 store.localBankStore = localBank
                 store.localProgressStore = localProgress
                 store.practiceRecordsStore = practiceRecords
                 // Rebind all existing ViewModels to ensure they have the latest store references
                 store.rebindAllStores()
+                workspaceEditController.exitEditMode()
             }
         }
         // 只在 ScrollView 範圍處理後備 drop；避免多層干擾
@@ -126,6 +140,9 @@ struct WorkspaceListView: View {
         if isEditingQuickActions {
             showQuickActionPicker = false
         }
+        if !isEditingQuickActions {
+            workspaceEditController.exitEditMode()
+        }
         isEditingQuickActions.toggle()
     }
 
@@ -144,13 +161,13 @@ struct WorkspaceListView: View {
 private struct ReorderDropDelegate: DropDelegate {
     let item: Workspace
     let store: WorkspaceStore
-    @Binding var draggingID: UUID?
+    let editController: ShelfEditController<UUID>
 
     func validateDrop(info: DropInfo) -> Bool { true }
     func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
 
     func dropEntered(info: DropInfo) {
-        guard let draggingID, draggingID != item.id else { return }
+        guard let draggingID = editController.draggingID, draggingID != item.id else { return }
         guard let from = store.index(of: draggingID), let to = store.index(of: item.id) else { return }
         if from != to {
             store.moveWorkspace(id: draggingID, to: to > from ? to + 1 : to)
@@ -159,7 +176,7 @@ private struct ReorderDropDelegate: DropDelegate {
     }
 
     func performDrop(info: DropInfo) -> Bool {
-        draggingID = nil
+        editController.endDragging()
         Haptics.success()
         return true
     }
@@ -167,25 +184,29 @@ private struct ReorderDropDelegate: DropDelegate {
 
 private struct AddToEndDropDelegate: DropDelegate {
     let store: WorkspaceStore
-    @Binding var draggingID: UUID?
+    let editController: ShelfEditController<UUID>
     func validateDrop(info: DropInfo) -> Bool { true }
     func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
     func dropEntered(info: DropInfo) { }
     func performDrop(info: DropInfo) -> Bool {
-        guard let draggingID else { return false }
+        guard let draggingID = editController.draggingID else { return false }
         store.moveWorkspace(id: draggingID, to: store.workspaces.count)
-        self.draggingID = nil
+        editController.endDragging()
         Haptics.success()
         return true
     }
 }
 
 private struct ClearDragStateDropDelegate: DropDelegate {
-    @Binding var draggingID: UUID?
+    let editController: ShelfEditController<UUID>
     func validateDrop(info: DropInfo) -> Bool { true }
     // 使用 .move 以確保 performDrop 會被呼叫（部分情境下 .cancel 可能不觸發 performDrop）
     func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
-    func performDrop(info: DropInfo) -> Bool { AppLog.uiDebug("[drag] clear-drop performDrop (fallback)"); draggingID = nil; return true }
+    func performDrop(info: DropInfo) -> Bool {
+        AppLog.uiDebug("[drag] clear-drop performDrop (fallback)")
+        editController.endDragging()
+        return true
+    }
 }
 
 // 以 isTargeted 監控拖放生命週期，會話結束時確保清理狀態
@@ -195,7 +216,7 @@ private struct WorkspaceItemLink: View {
     let ws: Workspace
     @ObservedObject var vm: CorrectionViewModel
     let store: WorkspaceStore
-    @Binding var draggingID: UUID?
+    @ObservedObject var editController: ShelfEditController<UUID>
     var onRename: () -> Void
     var onDelete: () -> Void
     @EnvironmentObject private var savedStore: SavedErrorsStore
@@ -222,17 +243,36 @@ private struct WorkspaceItemLink: View {
         } label: {
             WorkspaceCard(name: ws.name, statusKey: statusKey, statusColor: statusColor)
                 .contextMenu {
-                    Button(String(localized: "action.rename", locale: locale)) { onRename() }
-                    Button(String(localized: "action.delete", locale: locale), role: .destructive) { onDelete() }
+                    Button(String(localized: "action.edit", locale: locale)) {
+                        editController.enterEditMode()
+                        Haptics.medium()
+                    }
+                    Button(String(localized: "action.rename", locale: locale)) {
+                        editController.exitEditMode()
+                        onRename()
+                    }
+                    Button(String(localized: "action.delete", locale: locale), role: .destructive) {
+                        editController.exitEditMode()
+                        onDelete()
+                    }
                 }
-                // 移除長按手勢避免與拖曳啟動衝突（改由 context menu）
         }
         .buttonStyle(DSCardLinkStyle())
+        .shelfWiggle(isActive: editController.isEditing)
         .onDrag {
-            self.draggingID = ws.id
+            guard editController.isEditing else { return NSItemProvider() }
+            editController.beginDragging(ws.id)
             return NSItemProvider(object: ws.id.uuidString as NSString)
         }
-        .onDrop(of: [.text], delegate: ReorderDropDelegate(item: ws, store: store, draggingID: $draggingID))
+        .onDrop(of: [.text], delegate: ReorderDropDelegate(item: ws, store: store, editController: editController))
+        .highPriorityGesture(
+            TapGesture().onEnded {
+                if editController.isEditing {
+                    editController.exitEditMode()
+                }
+            },
+            including: .gesture
+        )
     }
 }
 

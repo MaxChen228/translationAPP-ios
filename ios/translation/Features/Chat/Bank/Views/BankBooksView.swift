@@ -10,6 +10,7 @@ struct BankBooksView: View {
     var onPracticeLocal: ((String, BankItem, String?) -> Void)? = nil
     @Environment(\.dismiss) private var dismiss
     @State private var error: String? = nil
+    @StateObject private var editController = ShelfEditController<String>()
     @EnvironmentObject private var bankFolders: BankFoldersStore
     @EnvironmentObject private var bankOrder: BankBooksOrderStore
     @EnvironmentObject private var localBank: LocalBankStore
@@ -20,7 +21,6 @@ struct BankBooksView: View {
     @State private var renamingBook: LocalBankBook? = nil
     @State private var deletingBookName: String? = nil
     @State private var showDeleteConfirm: Bool = false
-    @State private var draggingBookName: String? = nil
     @State private var showRandomSettings: Bool = false
     @Environment(\.locale) private var locale
 
@@ -41,10 +41,22 @@ struct BankBooksView: View {
                         }
                         .buttonStyle(DSCardLinkStyle())
                         .contextMenu {
+                            Button(String(localized: "action.edit", locale: locale)) {
+                                editController.enterEditMode()
+                                Haptics.medium()
+                            }
                             Button(String(localized: "action.rename", locale: locale)) { renamingFolder = folder }
                             Button(String(localized: "action.delete", locale: locale), role: .destructive) { _ = bankFolders.removeFolder(folder.id) }
                         }
-                        .onDrop(of: [.text], delegate: BookIntoFolderDropDelegate(folderID: folder.id, folders: bankFolders, draggingName: $draggingBookName))
+                        .onDrop(of: [.text], delegate: BookIntoFolderDropDelegate(folderID: folder.id, folders: bankFolders, editController: editController))
+                        .highPriorityGesture(
+                            TapGesture().onEnded {
+                                if editController.isEditing {
+                                    editController.exitEditMode()
+                                }
+                            },
+                            including: .gesture
+                        )
                     }
                     Button { _ = bankFolders.addFolder(name: String(localized: "folder.new", locale: locale)) } label: { NewBankFolderCard() }
                         .buttonStyle(.plain)
@@ -68,7 +80,10 @@ struct BankBooksView: View {
                                 }
                                 .accessibilityLabel("瀏覽所有題庫")
                                 RandomPracticeToolbarButton { runRandomPractice() }
-                                RandomSettingsToolbarButton { showRandomSettings = true }
+                                RandomSettingsToolbarButton {
+                                    editController.exitEditMode()
+                                    showRandomSettings = true
+                                }
                             }
                             .padding(.top, 2)
                         }
@@ -78,6 +93,7 @@ struct BankBooksView: View {
                             BrowseCloudCard(titleKey: "bank.browseCloud")
                         }
                         .buttonStyle(.plain)
+                        .disabled(editController.isEditing)
                         ForEach(orderedRootBooks) { b in
                             NavigationLink {
                                 // Workspace 內：直接寫入當前 vm 並返回；首頁快捷入口：交由外部建立 Workspace
@@ -111,7 +127,12 @@ struct BankBooksView: View {
                             )
                         }
                         .buttonStyle(DSCardLinkStyle())
+                        .shelfWiggle(isActive: editController.isEditing)
                         .contextMenu {
+                            Button(String(localized: "action.edit", locale: locale)) {
+                                editController.enterEditMode()
+                                Haptics.medium()
+                            }
                             if bankFolders.folders.isEmpty {
                                 Text(String(localized: "bank.folders.empty", locale: locale)).foregroundStyle(.secondary)
                             } else {
@@ -119,19 +140,44 @@ struct BankBooksView: View {
                                     Button(String(format: String(localized: "bank.action.addToFolder", locale: locale), folder.name)) { bankFolders.add(bookName: b.name, to: folder.id) }
                                 }
                             }
-                            Button(String(localized: "action.rename", locale: locale)) { renamingBook = b }
-                            Button(String(localized: "action.delete", locale: locale), role: .destructive) { deletingBookName = b.name; showDeleteConfirm = true }
+                            Button(String(localized: "action.rename", locale: locale)) {
+                                editController.exitEditMode()
+                                renamingBook = b
+                            }
+                            Button(String(localized: "action.delete", locale: locale), role: .destructive) {
+                                editController.exitEditMode()
+                                deletingBookName = b.name
+                                showDeleteConfirm = true
+                            }
                             #if canImport(UIKit)
-                            Button(String(localized: "action.copyName", locale: locale)) { UIPasteboard.general.string = b.name }
+                            Button(String(localized: "action.copyName", locale: locale)) {
+                                editController.exitEditMode()
+                                UIPasteboard.general.string = b.name
+                            }
                             #endif
                         }
-                        .onDrag { draggingBookName = b.name; return BookDragPayload.provider(for: b.name) }
+                        .onDrag {
+                            guard editController.isEditing else { return NSItemProvider() }
+                            editController.beginDragging(b.name)
+                            return BookDragPayload.provider(for: b.name)
+                        }
                         .onDrop(of: [.text], delegate: ShelfReorderDropDelegate(
                             overItemID: b.name,
-                            draggingID: $draggingBookName,
+                            draggingID: Binding(
+                                get: { editController.draggingID },
+                                set: { editController.draggingID = $0 }
+                            ),
                             indexOf: { name in bankOrder.indexInRoot(name, root: orderedRootBooks.map { $0.name }) },
                             move: { id, to in bankOrder.moveInRoot(id: id, to: to, root: orderedRootBooks.map { $0.name }) }
                         ))
+                        .highPriorityGesture(
+                            TapGesture().onEnded {
+                                if editController.isEditing {
+                                    editController.exitEditMode()
+                                }
+                            },
+                            including: .gesture
+                        )
                         }
                     }
                 }
@@ -150,8 +196,20 @@ struct BankBooksView: View {
         }
         .background(DS.Palette.background)
         .navigationTitle(Text("nav.bank"))
-        .onDrop(of: [.text], delegate: ClearBookDragStateDropDelegate(draggingName: $draggingBookName))
-        .onAppear { AppLog.uiInfo("[books] appear (local)=\(localBank.books.count)") }
+        .onDrop(of: [.text], delegate: ClearBookDragStateDropDelegate(editController: editController))
+        .contentShape(Rectangle())
+        .simultaneousGesture(
+            TapGesture().onEnded {
+                if editController.isEditing {
+                    editController.exitEditMode()
+                }
+            },
+            including: .gesture
+        )
+        .onAppear {
+            AppLog.uiInfo("[books] appear (local)=\(localBank.books.count)")
+            editController.exitEditMode()
+        }
         .sheet(isPresented: $showRandomSettings) {
             RandomPracticeSettingsSheet()
                 .presentationDetents([.medium, .large])
@@ -185,6 +243,7 @@ struct BankBooksView: View {
 
     // MARK: - Random helpers
     private func runRandomPractice() {
+        editController.exitEditMode()
         if let picked = pickRandomItem() {
             let (bookName, item) = picked
             let tag = item.tags?.first
@@ -233,14 +292,14 @@ struct BankBooksView: View {
 private struct BookIntoFolderDropDelegate: DropDelegate {
     let folderID: UUID
     let folders: BankFoldersStore
-    @Binding var draggingName: String?
+    let editController: ShelfEditController<String>
 
     func validateDrop(info: DropInfo) -> Bool { true }
     func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
 
     func performDrop(info: DropInfo) -> Bool {
         let providers = info.itemProviders(for: [.text])
-        guard let p = providers.first else { draggingName = nil; return false }
+        guard let p = providers.first else { editController.endDragging(); return false }
         var handled = false
         _ = p.loadObject(ofClass: NSString.self) { obj, _ in
             if let ns = obj as? NSString, let name = BookDragPayload.decode(ns as String) {
@@ -248,16 +307,19 @@ private struct BookIntoFolderDropDelegate: DropDelegate {
                 handled = true
             }
         }
-        draggingName = nil
+        editController.endDragging()
         return handled
     }
 }
 
 private struct ClearBookDragStateDropDelegate: DropDelegate {
-    @Binding var draggingName: String?
+    let editController: ShelfEditController<String>
     func validateDrop(info: DropInfo) -> Bool { true }
     func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
-    func performDrop(info: DropInfo) -> Bool { draggingName = nil; return true }
+    func performDrop(info: DropInfo) -> Bool {
+        editController.endDragging()
+        return true
+    }
 }
 
 // 遠端題庫型別已移除
