@@ -1,7 +1,7 @@
 import SwiftUI
 
 @MainActor
-final class FlashcardsAudioController {
+class FlashcardsAudioController {
     private unowned let viewModel: FlashcardsViewModel
 
     private var speechManager: FlashcardSpeechManager { viewModel.speechManager }

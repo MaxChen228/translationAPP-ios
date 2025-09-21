@@ -17,26 +17,33 @@ final class FlashcardsStore: ObservableObject {
     func prev() { guard !cards.isEmpty else { return }; index = (index - 1 + cards.count) % cards.count; showBack = false }
     func flip() { showBack.toggle() }
 
-    static var defaultCards: [Flashcard] = [
-        Flashcard(
-            front: "# ameliorate\n\n- verb\n- to make something better; improve\n\n**Example**: *We need to ameliorate the working conditions.*",
-            back: "**中文**：改善、改進\n\n- 近義：improve, enhance\n- 反義：worsen\n\n> 記憶：a- (to) + melior (better)",
-            frontNote: nil,
-            backNote: "備註：正式語氣，日常可用 improve"
-        ),
-        Flashcard(
-            front: "# ubiquitous\n\n- adjective\n- present, appearing, or found everywhere\n\n`Wi‑Fi` is ubiquitous in modern cities.",
-            back: "**中文**：普遍存在的、無所不在的\n\n- 例：智慧型手機已經無所不在\n- 片語：ubiquitous presence",
-            frontNote: nil,
-            backNote: "備註：口語亦可用 everywhere/commonly seen"
-        ),
-        Flashcard(
-            front: "# succinct\n\n- adjective\n- briefly and clearly expressed\n\n**Synonyms**: concise, terse",
-            back: "**中文**：簡潔的、言簡意賅的\n\n- 用法：a succinct summary\n- 小技巧：suc- (sub) + cinct (gird) → ‘束起來’ → 簡明",
-            frontNote: nil,
-            backNote: nil
-        )
-    ]
+    static var defaultCards: [Flashcard] {
+        [
+            Flashcard(
+                front: String(localized: "flashcards.sample1.front"),
+                back: String(localized: "flashcards.sample1.back"),
+                frontNote: nil,
+                backNote: localizedOptional("flashcards.sample1.backNote")
+            ),
+            Flashcard(
+                front: String(localized: "flashcards.sample2.front"),
+                back: String(localized: "flashcards.sample2.back"),
+                frontNote: nil,
+                backNote: localizedOptional("flashcards.sample2.backNote")
+            ),
+            Flashcard(
+                front: String(localized: "flashcards.sample3.front"),
+                back: String(localized: "flashcards.sample3.back"),
+                frontNote: nil,
+                backNote: localizedOptional("flashcards.sample3.backNote")
+            )
+        ]
+    }
+
+    private static func localizedOptional(_ key: String) -> String? {
+        let value = Bundle.main.localizedString(forKey: key, value: "", table: nil)
+        return value.isEmpty ? nil : value
+    }
 
     // End of store helpers
 }
@@ -48,12 +55,15 @@ struct FlashcardsView: View {
     @EnvironmentObject private var decksStore: FlashcardDecksStore
     @EnvironmentObject private var progressStore: FlashcardProgressStore
     @EnvironmentObject private var bannerCenter: BannerCenter
-    @AppStorage("flashcards.reviewMode") private var modeRaw: String = FlashcardsReviewMode.browse.rawValue
-    private var mode: FlashcardsReviewMode { get { FlashcardsReviewMode(rawValue: modeRaw) ?? .browse } set { modeRaw = newValue.rawValue } }
+    @AppStorage("flashcards.reviewMode") private var modeRaw: String = FlashcardsReviewMode.browse.storageValue
+    private var mode: FlashcardsReviewMode {
+        get { FlashcardsReviewMode.fromStorage(modeRaw) }
+        set { modeRaw = newValue.storageValue }
+    }
     @Environment(\.locale) private var locale
     @Environment(\.dismiss) private var dismiss
 
-    init(title: String = "單字卡", cards: [Flashcard] = FlashcardsStore.defaultCards, deckID: UUID? = nil, startIndex: Int = 0, startEditing: Bool = false) {
+    init(title: String = String(localized: "flashcards.title"), cards: [Flashcard] = FlashcardsStore.defaultCards, deckID: UUID? = nil, startIndex: Int = 0, startEditing: Bool = false) {
         let store = FlashcardsStore(cards: cards, startIndex: startIndex)
         let viewModel = FlashcardsViewModel(
             store: store,

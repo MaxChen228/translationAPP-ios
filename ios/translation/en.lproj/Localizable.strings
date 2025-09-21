@@ -88,6 +88,38 @@
 "flashcards.empty" = "No cards yet";
 "flashcards.empty.hint" = "Add or import cards later.";
 
+/* Workspace status chips */
+"workspace.status.loading" = "Correcting…";
+"workspace.status.corrected" = "Corrected";
+"workspace.status.inProgress" = "In progress";
+"workspace.status.empty" = "Empty";
+
+/* Correction defaults */
+"content.sample.zh" = "我昨天去商店買水果。";
+"content.sample.en" = "I go to the shop yesterday to buy some fruits.";
+"content.error.emptyInput" = "Enter your English attempt before correcting.";
+
+/* Practice errors */
+"practice.error.notLocal" = "Not currently practicing a local bank.";
+"practice.error.storeMissing" = "Local bank data is unavailable.";
+"practice.error.noneRemaining" = "No unfinished items remain.";
+
+/* Backend errors */
+"error.backend.missing" = "BACKEND_URL is not set, cannot reach backend.";
+"error.chat.backendMissing" = "BACKEND_URL is not set, chat is unavailable.";
+
+/* Flashcard samples */
+"flashcards.sample1.front" = "# ameliorate\n\n- verb\n- to make something better; improve\n\n**Example**: *We need to ameliorate the working conditions.*";
+"flashcards.sample1.back" = "**中文**：改善、改進\n\n- 近義：improve, enhance\n- 反義：worsen\n\n> 記憶：a- (to) + melior (better)";
+"flashcards.sample1.backNote" = "備註：正式語氣，日常可用 improve";
+"flashcards.sample2.front" = "# ubiquitous\n\n- adjective\n- present, appearing, or found everywhere\n\n`Wi-Fi` is ubiquitous in modern cities.";
+"flashcards.sample2.back" = "**中文**：普遍存在的、無所不在的\n\n- 例：智慧型手機已經無所不在\n- 片語：ubiquitous presence";
+"flashcards.sample2.backNote" = "備註：口語亦可用 everywhere/commonly seen";
+"flashcards.sample3.front" = "# succinct\n\n- adjective\n- briefly and clearly expressed\n\n**Synonyms**: concise, terse";
+"flashcards.sample3.back" = "**中文**：簡潔的、言簡意賅的\n\n- 用法：a succinct summary\n- 小技巧：suc- (sub) + cinct (gird) → ‘束起來’ → 簡明";
+"flashcards.sample3.backNote" = "";
+"flashcards.sampleDeck.name" = "Sample Deck";
+
 /* Chat */
 "chat.title" = "AI Deep Chat";
 "chat.subtitle" = "Clarify your request with Gemini";

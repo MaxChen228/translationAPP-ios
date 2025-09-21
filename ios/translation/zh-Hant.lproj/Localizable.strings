@@ -115,6 +115,38 @@
 "flashcards.empty" = "尚無卡片";
 "flashcards.empty.hint" = "稍後可擴充為新增／匯入功能。";
 
+/* Workspace 狀態 */
+"workspace.status.loading" = "批改中…";
+"workspace.status.corrected" = "已批改";
+"workspace.status.inProgress" = "已輸入";
+"workspace.status.empty" = "空白";
+
+/* 批改預設內容 */
+"content.sample.zh" = "我昨天去商店買水果。";
+"content.sample.en" = "I go to the shop yesterday to buy some fruits.";
+"content.error.emptyInput" = "請先輸入你的英文嘗試再批改。";
+
+/* 題庫錯誤提示 */
+"practice.error.notLocal" = "目前不是本機題庫練習";
+"practice.error.storeMissing" = "本機題庫未綁定";
+"practice.error.noneRemaining" = "沒有未完成的題目";
+
+/* 後端錯誤 */
+"error.backend.missing" = "BACKEND_URL 未設定，無法連線後端。";
+"error.chat.backendMissing" = "BACKEND_URL 未設定，無法使用聊天。";
+
+/* 單字卡示例 */
+"flashcards.sample1.front" = "# ameliorate\n\n- verb\n- to make something better; improve\n\n**Example**: *We need to ameliorate the working conditions.*";
+"flashcards.sample1.back" = "**中文**：改善、改進\n\n- 近義：improve, enhance\n- 反義：worsen\n\n> 記憶：a- (to) + melior (better)";
+"flashcards.sample1.backNote" = "備註：正式語氣，日常可用 improve";
+"flashcards.sample2.front" = "# ubiquitous\n\n- adjective\n- present, appearing, or found everywhere\n\n`Wi‑Fi` is ubiquitous in modern cities.";
+"flashcards.sample2.back" = "**中文**：普遍存在的、無所不在的\n\n- 例：智慧型手機已經無所不在\n- 片語：ubiquitous presence";
+"flashcards.sample2.backNote" = "備註：口語亦可用 everywhere/commonly seen";
+"flashcards.sample3.front" = "# succinct\n\n- adjective\n- briefly and clearly expressed\n\n**Synonyms**: concise, terse";
+"flashcards.sample3.back" = "**中文**：簡潔的、言簡意賅的\n\n- 用法：a succinct summary\n- 小技巧：suc- (sub) + cinct (gird) → ‘束起來’ → 簡明";
+"flashcards.sample3.backNote" = "";
+"flashcards.sampleDeck.name" = "示例卡集";
+
 /* 聊天 */
 "chat.title" = "AI 深入訪談";
 "chat.subtitle" = "與 Gemini 聊聊，確認需求";

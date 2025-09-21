@@ -77,10 +77,10 @@ final class WorkspaceStore: ObservableObject {
 
     func statusText(for id: UUID) -> String {
         let vm = vm(for: id)
-        if vm.isLoading { return "批改中…" }
-        if vm.response != nil { return "已批改" }
-        if !(vm.inputZh.isEmpty && vm.inputEn.isEmpty) { return "已輸入" }
-        return "空白"
+        if vm.isLoading { return String(localized: "workspace.status.loading") }
+        if vm.response != nil { return String(localized: "workspace.status.corrected") }
+        if !(vm.inputZh.isEmpty && vm.inputEn.isEmpty) { return String(localized: "workspace.status.inProgress") }
+        return String(localized: "workspace.status.empty")
     }
 
     // MARK: - Persistence (list only; VM 狀態由 VM 自行持久化)

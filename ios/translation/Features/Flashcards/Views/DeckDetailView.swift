@@ -188,11 +188,8 @@ private extension DeckDetailView {
 
 #Preview {
     let store = FlashcardDecksStore()
-    let sampleCards: [Flashcard] = [
-        Flashcard(front: "示例正面 A", back: "example back A"),
-        Flashcard(front: "示例正面 B", back: "example back B")
-    ]
-    let deck = store.add(name: "示例卡集", cards: sampleCards)
+    let sampleCards = FlashcardsStore.defaultCards
+    let deck = store.add(name: String(localized: "flashcards.sampleDeck.name"), cards: sampleCards)
     return NavigationStack { DeckDetailView(deckID: deck.id) }
         .environmentObject(store)
 }

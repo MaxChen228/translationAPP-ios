@@ -1,7 +1,7 @@
 import SwiftUI
 
 @MainActor
-final class FlashcardsReviewCoordinator {
+class FlashcardsReviewCoordinator {
     private unowned let viewModel: FlashcardsViewModel
 
     init(viewModel: FlashcardsViewModel) {

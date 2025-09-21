@@ -94,8 +94,8 @@ final class CorrectionViewModel: ObservableObject {
     }
 
     func fillExample() {
-        inputZh = "我昨天去商店買水果。"
-        inputEn = "I go to the shop yesterday to buy some fruits."
+        inputZh = String(localized: "content.sample.zh")
+        inputEn = String(localized: "content.sample.en")
     }
 
     func requestFocusEn() {
@@ -112,7 +112,7 @@ final class CorrectionViewModel: ObservableObject {
                 id: UUID(),
                 span: "",
                 type: .pragmatic,
-                explainZh: "請先輸入你的英文嘗試再批改。",
+                explainZh: String(localized: "content.error.emptyInput"),
                 suggestion: nil,
                 hints: nil
             )
@@ -124,7 +124,7 @@ final class CorrectionViewModel: ObservableObject {
             return
         }
 
-        if inputZh.isEmpty { inputZh = "我昨天去商店買水果。" }
+        if inputZh.isEmpty { inputZh = String(localized: "content.sample.zh") }
 
         isLoading = true
         errorMessage = nil
@@ -198,11 +198,11 @@ final class CorrectionViewModel: ObservableObject {
     // 抽下一題（本機）：依目前練習的本機書本挑選未完成題
     func loadNextPractice() async {
         guard case .local(let bookName) = practiceSource else {
-            await MainActor.run { self.errorMessage = "目前不是本機題庫練習" }
+            await MainActor.run { self.errorMessage = String(localized: "practice.error.notLocal") }
             return
         }
         guard let bank = localBankStore, let progress = localProgressStore else {
-            await MainActor.run { self.errorMessage = "本機題庫未綁定" }
+            await MainActor.run { self.errorMessage = String(localized: "practice.error.storeMissing") }
             return
         }
         let items = bank.items(in: bookName)
@@ -210,7 +210,7 @@ final class CorrectionViewModel: ObservableObject {
             ?? items.first(where: { !progress.isCompleted(book: bookName, itemId: $0.id) }) {
             await MainActor.run { self.startLocalPractice(bookName: bookName, item: next, tag: next.tags?.first) }
         } else {
-            await MainActor.run { self.errorMessage = "沒有未完成的題目" }
+            await MainActor.run { self.errorMessage = String(localized: "practice.error.noneRemaining") }
         }
     }
 

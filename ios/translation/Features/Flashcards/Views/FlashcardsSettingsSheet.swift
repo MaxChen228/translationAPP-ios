@@ -2,7 +2,7 @@ import SwiftUI
 
 struct FlashcardsSettingsSheet: View {
     @Environment(\.dismiss) private var dismiss
-    @AppStorage("flashcards.reviewMode") private var modeRaw: String = FlashcardsReviewMode.browse.rawValue
+    @AppStorage("flashcards.reviewMode") private var modeRaw: String = FlashcardsReviewMode.browse.storageValue
     @Environment(\.locale) private var locale
     @ObservedObject var ttsStore: TTSSettingsStore
     var onOpenAudio: (() -> Void)? = nil
@@ -14,9 +14,8 @@ struct FlashcardsSettingsSheet: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("flashcards.settings.mode").dsType(DS.Font.caption).foregroundStyle(.secondary)
                 Picker("flashcards.settings.mode", selection: $modeRaw) {
-                    ForEach(FlashcardsReviewMode.allCases, id: \.rawValue) { m in
-                        let label: LocalizedStringKey = (m == .annotate) ? "flashcards.mode.annotate" : "flashcards.mode.browse"
-                        Text(label).tag(m.rawValue)
+                    ForEach(FlashcardsReviewMode.allCases, id: \.storageValue) { m in
+                        Text(m.labelKey).tag(m.storageValue)
                     }
                 }
                 .pickerStyle(.segmented)
@@ -84,7 +83,7 @@ struct FlashcardsSettingsSheet: View {
     }
 
     private var helpText: String {
-        if modeRaw == FlashcardsReviewMode.annotate.rawValue {
+        if FlashcardsReviewMode.fromStorage(modeRaw) == .annotate {
             return String(localized: "flashcards.settings.help.annotate", locale: locale)
         } else {
             return String(localized: "flashcards.settings.help.browse", locale: locale)

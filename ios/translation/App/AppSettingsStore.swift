@@ -21,10 +21,12 @@ final class AppSettingsStore: ObservableObject {
         "gemini-2.5-pro",
         "gemini-2.5-flash"
     ]
-    static let availableLanguages: [(code: String, label: String)] = [
-        ("zh", "中文"),
-        ("en", "英文")
-    ]
+    static var availableLanguages: [(code: String, label: String)] {
+        [
+            ("zh", String(localized: "settings.language.zh")),
+            ("en", String(localized: "settings.language.en"))
+        ]
+    }
 
     init() {
         let ud = UserDefaults.standard
@@ -44,4 +46,3 @@ final class AppSettingsStore: ObservableObject {
         return "\(ver) (\(build))"
     }
 }
-

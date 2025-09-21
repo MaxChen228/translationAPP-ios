@@ -64,7 +64,7 @@ enum AppConfig {
 
 final class UnavailableAIService: AIService {
     struct MissingBackendError: LocalizedError {
-        var errorDescription: String? { "BACKEND_URL 未設定，無法連線後端。" }
+        var errorDescription: String? { String(localized: "error.backend.missing") }
     }
     func correct(zh: String, en: String) async throws -> AICorrectionResult {
         throw MissingBackendError()

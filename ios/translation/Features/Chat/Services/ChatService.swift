@@ -18,7 +18,7 @@ enum ChatServiceFactory {
 
 final class UnavailableChatService: ChatService {
     struct MissingBackendError: LocalizedError {
-        var errorDescription: String? { "BACKEND_URL 未設定，無法使用聊天。" }
+        var errorDescription: String? { String(localized: "error.chat.backendMissing") }
     }
     func send(messages: [ChatMessage]) async throws -> ChatTurnResponse { throw MissingBackendError() }
     func research(messages: [ChatMessage]) async throws -> ChatResearchResponse { throw MissingBackendError() }

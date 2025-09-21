@@ -22,4 +22,15 @@ enum Haptics {
         gen.impactOccurred()
         #endif
     }
+
+    static func light() {
+        lightTick()
+    }
+
+    static func medium() {
+        #if os(iOS)
+        let gen = UIImpactFeedbackGenerator(style: .medium)
+        gen.impactOccurred()
+        #endif
+    }
 }
