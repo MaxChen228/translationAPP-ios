@@ -44,6 +44,7 @@ final class FlashcardsStore: ObservableObject {
 struct FlashcardsView: View {
     @StateObject private var store: FlashcardsStore
     @StateObject private var viewModel: FlashcardsViewModel
+    @ObservedObject private var speechManager: FlashcardSpeechManager
     @EnvironmentObject private var decksStore: FlashcardDecksStore
     @EnvironmentObject private var progressStore: FlashcardProgressStore
     @EnvironmentObject private var bannerCenter: BannerCenter
@@ -63,6 +64,7 @@ struct FlashcardsView: View {
         )
         _store = StateObject(wrappedValue: store)
         _viewModel = StateObject(wrappedValue: viewModel)
+        _speechManager = ObservedObject(wrappedValue: viewModel.speechManager)
     }
 
     var body: some View {
@@ -131,7 +133,7 @@ struct FlashcardsView: View {
                                     }
                                 } overlay: {
                                     FlashcardsPlaySideButton(style: .outline, diameter: 28) {
-                                        let manager = viewModel.speechManager
+                                        let manager = speechManager
                                         if store.showBack {
                                             let text = viewModel.backTextToSpeak(for: card)
                                             viewModel.speak(text: text, lang: manager.settings.backLang)
@@ -142,7 +144,7 @@ struct FlashcardsView: View {
                                 }
                             }
                         }
-                        .onTapGesture { flipTapped() }
+                        .onTapGesture { viewModel.flipCurrentCard() }
                         .offset(x: viewModel.dragX)
                         .rotationEffect(.degrees(Double(max(-10, min(10, viewModel.dragX * 0.06)))))
                         .frame(maxWidth: .infinity)
@@ -189,15 +191,15 @@ struct FlashcardsView: View {
                             DSQuickActionIconButton(
                                 systemName: "arrow.uturn.left",
                                 labelKey: "flashcards.prev",
-                                action: { prevButtonTapped() },
+                                action: { viewModel.handlePrevTapped() },
                                 shape: .circle,
                                 style: .outline,
                                 size: 44
                             )
                             Spacer()
                             DSQuickActionIconButton(
-                                systemName: (viewModel.speechManager.isPlaying && !viewModel.speechManager.isPaused) ? "pause.fill" : "play.fill",
-                                labelKey: (viewModel.speechManager.isPlaying && !viewModel.speechManager.isPaused) ? "tts.pause" : "tts.play",
+                                systemName: (speechManager.isPlaying && !speechManager.isPaused) ? "pause.fill" : "play.fill",
+                                labelKey: (speechManager.isPlaying && !speechManager.isPaused) ? "tts.pause" : "tts.play",
                                 action: { viewModel.ttsToggle() },
                                 shape: .circle,
                                 style: .filled,
@@ -232,13 +234,13 @@ struct FlashcardsView: View {
             Button(String(localized: "action.cancel", locale: locale), role: .cancel) {}
         }
         .sheet(isPresented: binding(\.showSettings)) {
-            FlashcardsSettingsSheet(ttsStore: viewModel.speechManager.ttsStore, onOpenAudio: { viewModel.showAudioSheet = true })
+            FlashcardsSettingsSheet(ttsStore: speechManager.ttsStore, onOpenAudio: { viewModel.showAudioSheet = true })
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
                 .presentationContentInteraction(.scrolls)
         }
         .sheet(isPresented: binding(\.showAudioSheet)) {
-            FlashcardsAudioSettingsSheet(store: viewModel.speechManager.ttsStore) { settings in
+            FlashcardsAudioSettingsSheet(store: speechManager.ttsStore) { settings in
                 viewModel.startTTS(with: settings)
             }
             .presentationDetents([.height(360)])
@@ -252,7 +254,7 @@ struct FlashcardsView: View {
             Text("flashcards.emptyDeckReset.message")
         }
         // 移除底部迷你播放器，改用右下角播放按鈕
-        .onChange(of: viewModel.speechManager.currentCardIndex, initial: false) { _, newValue in
+        .onChange(of: speechManager.currentCardIndex, initial: false) { _, newValue in
             if let v = newValue, v >= 0, v < store.cards.count {
                 DSMotion.run(DS.AnimationToken.subtle) {
                     store.index = v
@@ -260,7 +262,7 @@ struct FlashcardsView: View {
                 }
             }
         }
-        .onChange(of: viewModel.speechManager.currentFace, initial: false) { _, face in
+        .onChange(of: speechManager.currentFace, initial: false) { _, face in
             switch face {
             case .front?:
                 DSMotion.run(DS.AnimationToken.subtle) { store.showBack = false }
@@ -283,40 +285,6 @@ private extension FlashcardsView {
             get: { viewModel[keyPath: keyPath] },
             set: { viewModel[keyPath: keyPath] = $0 }
         )
-    }
-
-    func prevButtonTapped() {
-        goToPreviousAnimated(restartAudio: viewModel.isAudioActive)
-    }
-
-    func goToPreviousAnimated(restartAudio: Bool) {
-        viewModel.swipePreview = nil
-        guard !store.cards.isEmpty else { return }
-        let dir: CGFloat = 1
-        DSMotion.run(DS.AnimationToken.tossOut) { viewModel.dragX = dir * 800 }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
-            store.prev()
-            store.showBack = false
-            viewModel.dragX = -dir * 450
-            DSMotion.run(DS.AnimationToken.bouncy) { viewModel.dragX = 0 }
-            if restartAudio {
-                let settings = viewModel.lastTTSSettings ?? viewModel.speechManager.settings
-                viewModel.speechManager.stop()
-                viewModel.startTTS(with: settings)
-            }
-        }
-    }
-
-    func flipTapped() {
-        store.flip()
-        guard let card = store.current, viewModel.isAudioActive else { return }
-        let manager = viewModel.speechManager
-        if store.showBack {
-            let text = viewModel.backTextToSpeak(for: card)
-            viewModel.speak(text: text, lang: manager.settings.backLang)
-        } else {
-            viewModel.speak(text: card.front, lang: manager.settings.frontLang)
-        }
     }
 }
 

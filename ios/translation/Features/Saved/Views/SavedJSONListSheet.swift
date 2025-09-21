@@ -95,7 +95,7 @@ struct SavedJSONListSheet: View {
                         onCopy: { copyJSON(row.rawJSON) },
                         onDelete: { deleteRow(row.id) }
                     )
-                    .swipeActions(edge: .leading, allowsFullSwipe: activeStash == .right) {
+                    .swipeActions(edge: .trailing, allowsFullSwipe: activeStash == .right) {
                         if activeStash == .right {
                             Button {
                                 move(row, to: .left)
@@ -105,7 +105,7 @@ struct SavedJSONListSheet: View {
                             .tint(DS.Brand.scheme.provence)
                         }
                     }
-                    .swipeActions(edge: .trailing, allowsFullSwipe: activeStash == .left) {
+                    .swipeActions(edge: .leading, allowsFullSwipe: activeStash == .left) {
                         if activeStash == .left {
                             Button {
                                 move(row, to: .right)
@@ -113,12 +113,6 @@ struct SavedJSONListSheet: View {
                                 Label(String(localized: "saved.moveRight", locale: locale), systemImage: "arrow.uturn.forward.circle")
                             }
                             .tint(DS.Brand.scheme.classicBlue)
-                        }
-
-                        Button(role: .destructive) {
-                            deleteRow(row.id)
-                        } label: {
-                            Label(String(localized: "action.delete", locale: locale), systemImage: "trash")
                         }
                     }
                     .listRowInsets(.init(top: 0, leading: DS.Spacing.lg, bottom: DS.Spacing.md, trailing: DS.Spacing.lg))
@@ -303,23 +297,27 @@ private struct SavedErrorRowCard: View {
     var body: some View {
         DSCard(fill: DS.Palette.surface) {
             VStack(alignment: .leading, spacing: 8) {
-                HStack(spacing: 8) {
-                    summaryContent
-                    Spacer(minLength: 0)
-                    Image(systemName: "chevron.down")
-                        .rotationEffect(.degrees(expanded ? 180 : 0))
-                        .foregroundStyle(.tertiary)
-                        .dsAnimation(DS.AnimationToken.subtle, value: expanded)
+                Button(action: onToggle) {
+                    HStack(spacing: 8) {
+                        summaryContent
+                        Spacer(minLength: 0)
+                        Image(systemName: "chevron.down")
+                            .rotationEffect(.degrees(expanded ? 180 : 0))
+                            .foregroundStyle(.tertiary)
+                            .dsAnimation(DS.AnimationToken.subtle, value: expanded)
+                    }
+                    .contentShape(Rectangle())
                 }
-                .contentShape(Rectangle())
-                .onTapGesture { onToggle() }
+                .buttonStyle(.plain)
 
                 if expanded {
                     expandedContent
-                        .transition(DSTransition.fade)
+                        .transition(DSTransition.cardExpand)
                 }
             }
         }
+        .contentShape(Rectangle())
+        .animation(DS.AnimationToken.subtle, value: expanded)
     }
 
     private var summaryContent: some View {

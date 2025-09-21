@@ -239,6 +239,12 @@ enum DSTransition {
         .move(edge: .trailing).combined(with: .opacity)
     }
     static var fade: AnyTransition { .opacity }
+    static var cardExpand: AnyTransition {
+        .asymmetric(
+            insertion: .move(edge: .top).combined(with: .opacity),
+            removal: .move(edge: .top).combined(with: .opacity)
+        )
+    }
 }
 
 // MARK: - Components

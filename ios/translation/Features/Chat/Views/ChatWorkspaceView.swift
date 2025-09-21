@@ -414,12 +414,12 @@ private struct ChatBubble: View {
         HStack(alignment: .top) {
             if isUser {
                 Spacer(minLength: 24)
-                ChatMessageContainer(style: .user, isUser: true) {
-                    messageContent
+                ChatMessageContainer(style: .user) {
+                    messageContent(style: .user)
                 }
             } else {
-                ChatMessageContainer(style: .assistant, isUser: false) {
-                    messageContent
+                ChatMessageContainer(style: .assistant) {
+                    messageContent(style: .assistant)
                 }
                 Spacer(minLength: 24)
             }
@@ -427,8 +427,8 @@ private struct ChatBubble: View {
     }
 
     @ViewBuilder
-    private var messageContent: some View {
-        RichText(message: message, isUser: isUser)
+    private func messageContent(style: ChatMessageStyle) -> some View {
+        RichText(message: message, isUser: isUser, style: style)
 
         if !message.attachments.isEmpty {
             AttachmentGallery(attachments: message.attachments, isUser: isUser)
@@ -438,26 +438,33 @@ private struct ChatBubble: View {
 
 private struct ChatMessageContainer<Content: View>: View {
     var style: ChatMessageStyle
-    var isUser: Bool
     private let contentBuilder: ContentBuilder
 
-    init(style: ChatMessageStyle, isUser: Bool, @ViewBuilder content: @escaping ContentBuilder) {
+    init(style: ChatMessageStyle, @ViewBuilder content: @escaping ContentBuilder) {
         self.style = style
-        self.isUser = isUser
         self.contentBuilder = content
     }
 
     typealias ContentBuilder = () -> Content
 
     var body: some View {
-        VStack(alignment: isUser ? .trailing : .leading, spacing: DS.Spacing.sm) {
+        let content = VStack(alignment: style.stackAlignment, spacing: DS.Spacing.sm) {
             contentBuilder()
         }
         .padding(style.contentInsets)
-        .frame(maxWidth: style.maxWidth ?? .infinity, alignment: isUser ? .trailing : .leading)
         .background(background)
         .overlay(border)
-        .applyingShadow(style.shadow)
+
+        if style.fillsWidth {
+            content
+                .frame(maxWidth: .infinity, alignment: style.contentAlignment)
+                .applyingShadow(style.shadow)
+        } else {
+            content
+                .fixedSize(horizontal: true, vertical: false)
+                .frame(maxWidth: style.maxWidth, alignment: style.contentAlignment)
+                .applyingShadow(style.shadow)
+        }
     }
 
     @ViewBuilder
@@ -492,6 +499,9 @@ private struct ChatMessageStyle {
     var shadow: Shadow?
     var cornerRadius: CGFloat
     var maxWidth: CGFloat?
+    var stackAlignment: HorizontalAlignment
+    var contentAlignment: Alignment
+    var fillsWidth: Bool
 
     static let user = ChatMessageStyle(
         contentInsets: EdgeInsets(top: DS.Spacing.sm2, leading: DS.Spacing.md, bottom: DS.Spacing.sm2, trailing: DS.Spacing.md),
@@ -505,7 +515,10 @@ private struct ChatMessageStyle {
             y: DS.Shadow.card.y / 2
         ),
         cornerRadius: DS.Radius.lg,
-        maxWidth: 320
+        maxWidth: 320,
+        stackAlignment: .trailing,
+        contentAlignment: .trailing,
+        fillsWidth: false
     )
 
     static let assistant = ChatMessageStyle(
@@ -515,7 +528,10 @@ private struct ChatMessageStyle {
         borderWidth: 0,
         shadow: nil,
         cornerRadius: DS.Radius.lg,
-        maxWidth: nil
+        maxWidth: nil,
+        stackAlignment: .leading,
+        contentAlignment: .leading,
+        fillsWidth: true
     )
 }
 
@@ -533,24 +549,44 @@ private extension View {
 private struct RichText: View {
     var message: ChatMessage
     var isUser: Bool
+    var style: ChatMessageStyle
 
     var body: some View {
-        ChatMarkdownText(markdown: message.content, isUser: isUser)
+        ChatMarkdownText(
+            markdown: message.content,
+            isUser: isUser,
+            fillsWidth: style.fillsWidth,
+            horizontalAlignment: style.stackAlignment
+        )
     }
 }
 
 private struct ChatMarkdownText: View {
     var markdown: String
     var isUser: Bool
+    var fillsWidth: Bool
+    var horizontalAlignment: HorizontalAlignment
+
+    private var frameAlignment: Alignment {
+        if horizontalAlignment == .trailing { return .trailing }
+        if horizontalAlignment == .center { return .center }
+        return .leading
+    }
+
+    private var textAlignment: TextAlignment {
+        if horizontalAlignment == .trailing { return .trailing }
+        if horizontalAlignment == .center { return .center }
+        return .leading
+    }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: DS.Spacing.sm) {
+        VStack(alignment: horizontalAlignment, spacing: DS.Spacing.sm) {
             ForEach(Array(blocks.enumerated()), id: \.offset) { _, block in
                 blockView(block)
-                    .frame(maxWidth: .infinity, alignment: isUser ? .trailing : .leading)
+                    .frame(maxWidth: fillsWidth ? .infinity : nil, alignment: frameAlignment)
             }
         }
-        .frame(maxWidth: .infinity, alignment: isUser ? .trailing : .leading)
+        .frame(maxWidth: fillsWidth ? .infinity : nil, alignment: frameAlignment)
     }
 
     private enum MarkdownBlock {
@@ -630,7 +666,7 @@ private struct ChatMarkdownText: View {
         case .paragraph(let text):
             attributedText(text)
                 .dsType(DS.Font.body, lineSpacing: 6)
-                .multilineTextAlignment(isUser ? .trailing : .leading)
+                .multilineTextAlignment(textAlignment)
                 .foregroundStyle(isUser ? DS.Palette.onPrimary : .primary)
         case .bullets(let items):
             VStack(alignment: .leading, spacing: 6) {
