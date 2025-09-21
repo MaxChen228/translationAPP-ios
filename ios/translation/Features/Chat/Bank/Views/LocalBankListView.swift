@@ -9,16 +9,61 @@ struct LocalBankListView: View {
     @EnvironmentObject private var localBank: LocalBankStore
     @EnvironmentObject private var localProgress: LocalBankProgressStore
     @State private var expanded: Set<String> = []
+    @State private var selectedDifficulties: Set<Int> = []
+    @State private var selectedTags: Set<String> = []
+    @State private var sortOption: BankItemSortOption = .defaultOrder
     @Environment(\.locale) private var locale
 
+    private var filteredAndSortedItems: [BankItem] {
+        let allItems = localBank.items(in: bookName)
+
+        // Apply filters
+        var filtered = allItems
+
+        // Difficulty filter
+        if !selectedDifficulties.isEmpty {
+            filtered = filtered.filter { selectedDifficulties.contains($0.difficulty) }
+        }
+
+        // Tag filter
+        if !selectedTags.isEmpty {
+            filtered = filtered.filter { item in
+                guard let tags = item.tags else { return false }
+                return !Set(tags).isDisjoint(with: selectedTags)
+            }
+        }
+
+        // Apply sorting
+        return BankItemSortPicker.sortItems(filtered, by: sortOption, progressStore: localProgress, bookName: bookName)
+    }
+
+    private var difficultyStats: [(Int, Int)] {
+        let allItems = localBank.items(in: bookName)
+        let grouped = Dictionary(grouping: allItems, by: { $0.difficulty })
+        return (1...5).compactMap { difficulty in
+            guard let items = grouped[difficulty], !items.isEmpty else { return nil }
+            return (difficulty, items.count)
+        }
+    }
+
+    private var tagStats: [(String, Int)] {
+        let allItems = localBank.items(in: bookName)
+        let allTags = allItems.compactMap { $0.tags }.flatMap { $0 }
+        let grouped = Dictionary(grouping: allTags, by: { $0 })
+        return grouped.compactMap { tag, occurrences in
+            (tag, occurrences.count)
+        }.sorted { $0.0 < $1.0 }
+    }
+
     var body: some View {
-        let items = localBank.items(in: bookName)
+        let items = filteredAndSortedItems
+        let allItems = localBank.items(in: bookName)
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 16) {
                 // 頂部進度摘要：顯示「已完成 / 題數」
-                if !items.isEmpty {
-                    let done = items.filter { localProgress.isCompleted(book: bookName, itemId: $0.id) }.count
-                    let total = items.count
+                if !allItems.isEmpty {
+                    let done = allItems.filter { localProgress.isCompleted(book: bookName, itemId: $0.id) }.count
+                    let total = allItems.count
                     DSOutlineCard {
                         HStack(alignment: .center) {
                             Text(String(localized: "label.progress", locale: locale))
@@ -34,7 +79,77 @@ struct LocalBankListView: View {
                         .padding(.vertical, 2)
                     }
                 }
-                if items.isEmpty {
+
+                // Filter and Sort Controls
+                if !allItems.isEmpty {
+                    VStack(spacing: DS.Spacing.sm) {
+                        // Filter chips row
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                // All filter (clear filters)
+                                DSFilterChip(
+                                    label: "filter.all",
+                                    count: allItems.count,
+                                    color: DS.Palette.neutral,
+                                    selected: selectedDifficulties.isEmpty && selectedTags.isEmpty
+                                ) {
+                                    selectedDifficulties.removeAll()
+                                    selectedTags.removeAll()
+                                }
+
+                                // Difficulty filters
+                                ForEach(difficultyStats, id: \.0) { difficulty, count in
+                                    DSDifficultyFilterChip(
+                                        difficulty: difficulty,
+                                        count: count,
+                                        selected: selectedDifficulties.contains(difficulty)
+                                    ) {
+                                        if selectedDifficulties.contains(difficulty) {
+                                            selectedDifficulties.remove(difficulty)
+                                        } else {
+                                            selectedDifficulties.insert(difficulty)
+                                        }
+                                    }
+                                }
+
+                                // Tag filters
+                                ForEach(tagStats, id: \.0) { tag, count in
+                                    DSTagFilterChip(
+                                        tag: tag,
+                                        count: count,
+                                        selected: selectedTags.contains(tag)
+                                    ) {
+                                        if selectedTags.contains(tag) {
+                                            selectedTags.remove(tag)
+                                        } else {
+                                            selectedTags.insert(tag)
+                                        }
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 2)
+                        }
+
+                        // Sort control
+                        HStack {
+                            if items.count != allItems.count {
+                                Text(String(format: String(localized: "filter.showing", locale: locale), items.count, allItems.count))
+                                    .dsType(DS.Font.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            BankItemSortPicker(selectedSort: $sortOption)
+                        }
+                    }
+                }
+
+                if items.isEmpty && !allItems.isEmpty {
+                    EmptyStateCard(
+                        title: String(localized: "filter.noResults", locale: locale),
+                        subtitle: String(localized: "filter.noResults.hint", locale: locale),
+                        iconSystemName: "line.3.horizontal.decrease.circle"
+                    )
+                } else if allItems.isEmpty {
                     EmptyStateCard(title: String(localized: "bank.book.empty", locale: locale), subtitle: String(localized: "bank.book.empty.hint", locale: locale), iconSystemName: "text.book.closed")
                 }
                 ForEach(items.indices, id: \.self) { i in

@@ -247,6 +247,19 @@
 "results.errors.subtitle" = "Tap items to focus highlights";
 "results.empty" = "No errors detected.";
 "result.switcher.original" = "Original";
+
+/* Filter and Sort */
+"filter.all" = "All";
+"filter.showing" = "Showing %d / %d items";
+"filter.noResults" = "No matching results";
+"filter.noResults.hint" = "Adjust filters or clear all";
+"action.sort" = "Sort";
+"sort.default" = "Default order";
+"sort.difficulty.lowToHigh" = "Difficulty: Easy → Hard";
+"sort.difficulty.highToLow" = "Difficulty: Hard → Easy";
+"sort.completion.incomplete" = "Incomplete first";
+"sort.completion.complete" = "Completed first";
+"sort.tags.alphabetical" = "Tags: A-Z";
 "result.switcher.corrected" = "Corrected";
 "error.suggestion" = "Suggestion";
 "action.save" = "Save";

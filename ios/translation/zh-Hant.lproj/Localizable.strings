@@ -247,6 +247,19 @@
 "workspace.status.input" = "已輸入";
 "workspace.status.empty" = "空白";
 
+/* 篩選與排序 */
+"filter.all" = "全部";
+"filter.showing" = "顯示 %d / %d 項";
+"filter.noResults" = "沒有符合條件的結果";
+"filter.noResults.hint" = "請調整篩選條件或清除篩選";
+"action.sort" = "排序";
+"sort.default" = "預設順序";
+"sort.difficulty.lowToHigh" = "難度：易→難";
+"sort.difficulty.highToLow" = "難度：難→易";
+"sort.completion.incomplete" = "未完成優先";
+"sort.completion.complete" = "已完成優先";
+"sort.tags.alphabetical" = "標籤：A-Z";
+
 /* 橫幅：批改完成 */
 "banner.correctionDone.title" = "批改完成";
 "banner.correctionDone.action" = "查看";
