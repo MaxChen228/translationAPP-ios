@@ -46,9 +46,7 @@ struct NestedTagFilterView: View {
         .overlay(alignment: .topTrailing) {
             if filterState.hasActiveFilters {
                 Button("清除全部") {
-                    DSMotion.run(DS.AnimationToken.subtle) {
-                        filterState.clear()
-                    }
+                    filterState.clear()
                 }
                 .buttonStyle(DSSecondaryButtonCompact())
             }
@@ -69,9 +67,7 @@ struct NestedTagFilterView: View {
                                 tag: tag,
                                 count: tagStats[tag] ?? 0
                             ) {
-                                DSMotion.run(DS.AnimationToken.subtle) {
-                                    filterState.toggleTag(tag)
-                                }
+                                filterState.toggleTag(tag)
                             }
                         }
                     }
@@ -119,22 +115,23 @@ struct ExpandableTagCategoryView: View {
 
                 if isExpanded {
                     tagGrid
-                        .transition(DSTransition.cardExpand)
+                        .transition(.asymmetric(
+                            insertion: .scale(scale: 0.95).combined(with: .opacity),
+                            removal: .scale(scale: 0.95).combined(with: .opacity)
+                        ))
                 }
             }
         }
-        .dsAnimation(DS.AnimationToken.bouncy, value: isExpanded)
-        .dsAnimation(DS.AnimationToken.subtle, value: isCategorySelected)
+        .animation(DS.AnimationToken.snappy, value: isExpanded)
+        .animation(DS.AnimationToken.subtle, value: isCategorySelected)
     }
 
     private var categoryHeader: some View {
         Button {
-            DSMotion.run(DS.AnimationToken.bouncy) {
-                if filterState.isExpanded.contains(category) {
-                    filterState.isExpanded.remove(category)
-                } else {
-                    filterState.isExpanded.insert(category)
-                }
+            if filterState.isExpanded.contains(category) {
+                filterState.isExpanded.remove(category)
+            } else {
+                filterState.isExpanded.insert(category)
             }
         } label: {
             HStack(spacing: DS.Spacing.sm2) {
@@ -171,9 +168,7 @@ struct ExpandableTagCategoryView: View {
         .buttonStyle(.plain)
         .contextMenu {
             Button(isCategorySelected ? "取消選擇分類" : "選擇整個分類") {
-                DSMotion.run(DS.AnimationToken.subtle) {
-                    filterState.toggleCategory(category)
-                }
+                filterState.toggleCategory(category)
             }
         }
     }
@@ -195,18 +190,27 @@ struct ExpandableTagCategoryView: View {
     }
 
     private var tagGrid: some View {
-        LazyVGrid(columns: [
-            GridItem(.adaptive(minimum: 120, maximum: 180), spacing: 8)
-        ], spacing: 8) {
-            ForEach(categoryTags, id: \.self) { tag in
-                CategoryTagChip(
-                    tag: tag,
-                    count: tagStats[tag] ?? 0,
-                    category: category,
-                    isSelected: filterState.selectedTags.contains(tag)
-                ) {
-                    DSMotion.run(DS.AnimationToken.subtle) {
-                        filterState.toggleTag(tag)
+        let selectedTagsSet = filterState.selectedTags
+
+        return LazyVStack(spacing: 8) {
+            let columns = 2
+            ForEach(0..<(categoryTags.count + columns - 1) / columns, id: \.self) { row in
+                HStack(spacing: 8) {
+                    ForEach(0..<columns, id: \.self) { col in
+                        let index = row * columns + col
+                        if index < categoryTags.count {
+                            let tag = categoryTags[index]
+                            CategoryTagChip(
+                                tag: tag,
+                                count: tagStats[tag] ?? 0,
+                                category: category,
+                                isSelected: selectedTagsSet.contains(tag)
+                            ) {
+                                filterState.toggleTag(tag)
+                            }
+                        } else {
+                            Spacer()
+                        }
                     }
                 }
             }
