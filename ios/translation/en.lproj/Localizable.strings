@@ -19,8 +19,12 @@
 "settings.banner.seconds" = "Seconds";
 "settings.banner.test" = "Test Banner";
 
-"settings.model.title" = "Gemini Model";
-"settings.model.subtitle" = "For future use";
+"settings.aiModels.title" = "AI Model Settings";
+"settings.aiModels.subtitle" = "Choose models for different functions";
+"settings.aiModels.correction" = "English Correction Model";
+"settings.aiModels.deckGeneration" = "Deck Generation Model";
+"settings.aiModels.chatResponse" = "Chat Response Model";
+"settings.aiModels.research" = "Research Model";
 
 "settings.language.title" = "Language";
 "settings.language.subtitle" = "For future use";

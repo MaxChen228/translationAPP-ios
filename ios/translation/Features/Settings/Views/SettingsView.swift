@@ -40,15 +40,63 @@ struct SettingsView: View {
                     }
                 }
 
-                DSSectionHeader(titleKey: "settings.model.title", subtitleKey: "settings.model.subtitle", accentUnderline: true)
+                DSSectionHeader(titleKey: "settings.aiModels.title", subtitleKey: "settings.aiModels.subtitle", accentUnderline: true)
                 DSOutlineCard {
-                    Picker("Model", selection: Binding(get: { settings.geminiModel }, set: { settings.geminiModel = $0 })) {
-                        ForEach(AppSettingsStore.availableModels, id: \.self) { m in
-                            Text(m)
+                    VStack(alignment: .leading, spacing: 16) {
+                        // Correction Model
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("settings.aiModels.correction").dsType(DS.Font.body).foregroundStyle(.primary)
+                            Picker("Correction Model", selection: Binding(get: { settings.correctionModel }, set: { settings.correctionModel = $0 })) {
+                                ForEach(AppSettingsStore.availableModels, id: \.self) { m in
+                                    Text(m).tag(m)
+                                }
+                            }
+                            .pickerStyle(.segmented)
+                            .tint(DS.Palette.primary)
+                        }
+
+                        DSSeparator()
+
+                        // Deck Generation Model
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("settings.aiModels.deckGeneration").dsType(DS.Font.body).foregroundStyle(.primary)
+                            Picker("Deck Generation Model", selection: Binding(get: { settings.deckGenerationModel }, set: { settings.deckGenerationModel = $0 })) {
+                                ForEach(AppSettingsStore.availableModels, id: \.self) { m in
+                                    Text(m).tag(m)
+                                }
+                            }
+                            .pickerStyle(.segmented)
+                            .tint(DS.Palette.primary)
+                        }
+
+                        DSSeparator()
+
+                        // Chat Response Model
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("settings.aiModels.chatResponse").dsType(DS.Font.body).foregroundStyle(.primary)
+                            Picker("Chat Response Model", selection: Binding(get: { settings.chatResponseModel }, set: { settings.chatResponseModel = $0 })) {
+                                ForEach(AppSettingsStore.availableModels, id: \.self) { m in
+                                    Text(m).tag(m)
+                                }
+                            }
+                            .pickerStyle(.segmented)
+                            .tint(DS.Palette.primary)
+                        }
+
+                        DSSeparator()
+
+                        // Research Model
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("settings.aiModels.research").dsType(DS.Font.body).foregroundStyle(.primary)
+                            Picker("Research Model", selection: Binding(get: { settings.researchModel }, set: { settings.researchModel = $0 })) {
+                                ForEach(AppSettingsStore.availableModels, id: \.self) { m in
+                                    Text(m).tag(m)
+                                }
+                            }
+                            .pickerStyle(.segmented)
+                            .tint(DS.Palette.primary)
                         }
                     }
-                    .pickerStyle(.segmented)
-                    .tint(DS.Palette.primary)
                 }
 
                 DSSectionHeader(titleKey: "settings.language.title", subtitleKey: "settings.language.subtitle", accentUnderline: true)

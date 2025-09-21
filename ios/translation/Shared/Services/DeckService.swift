@@ -83,7 +83,7 @@ final class DeckServiceHTTP: DeckService {
     }
 
     func makeDeck(name: String, items: [DeckMakeRequest.Item]) async throws -> (name: String, cards: [Flashcard]) {
-        let model = UserDefaults.standard.string(forKey: "settings.geminiModel")
+        let model = UserDefaults.standard.string(forKey: "settings.deckGenerationModel")
         let req = DeckMakeRequest(name: name, items: items, model: model)
         var urlReq = URLRequest(url: try endpointURL())
         urlReq.httpMethod = "POST"

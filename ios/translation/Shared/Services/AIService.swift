@@ -132,8 +132,8 @@ final class AIServiceHTTP: AIService {
         let hintDTOs: [HintDTO]? = hints?.map { h in
             HintDTO(category: h.category.rawValue, text: h.text)
         }
-        // 從設定讀取選擇的 gemini model（若無則為 nil）
-        let model = UserDefaults.standard.string(forKey: "settings.geminiModel")
+        // 從設定讀取糾錯專用的 gemini model
+        let model = UserDefaults.standard.string(forKey: "settings.correctionModel")
         req.httpBody = try JSONEncoder().encode(RequestBody(zh: zh, en: en, bankItemId: bankItemId, deviceId: deviceId, hints: hintDTOs, suggestion: suggestion, model: model))
 
         let (data, resp) = try await session.data(for: req)

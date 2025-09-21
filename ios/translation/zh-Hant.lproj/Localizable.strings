@@ -19,8 +19,12 @@
 "settings.banner.seconds" = "秒數";
 "settings.banner.test" = "測試橫幅";
 
-"settings.model.title" = "Gemini Model";
-"settings.model.subtitle" = "供未來使用";
+"settings.aiModels.title" = "AI 模型設定";
+"settings.aiModels.subtitle" = "針對不同功能個別選擇模型";
+"settings.aiModels.correction" = "英文糾錯模型";
+"settings.aiModels.deckGeneration" = "卡片生成模型";
+"settings.aiModels.chatResponse" = "對話回應模型";
+"settings.aiModels.research" = "詞彙研究模型";
 
 "settings.language.title" = "語言";
 "settings.language.subtitle" = "供未來使用";

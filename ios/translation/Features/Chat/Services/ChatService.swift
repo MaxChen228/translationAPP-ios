@@ -63,13 +63,15 @@ final class ChatServiceHTTP: ChatService {
     }
 
     func send(messages: [ChatMessage]) async throws -> ChatTurnResponse {
-        let dto = try await postTurn(messages: MessageList(messages: messages))
+        let model = UserDefaults.standard.string(forKey: "settings.chatResponseModel")
+        let dto = try await postTurn(messages: MessageList(messages: messages, model: model))
         let state = ChatTurnResponse.State(rawValue: dto.state) ?? .gathering
         return ChatTurnResponse(reply: dto.reply, state: state, checklist: dto.checklist)
     }
 
     func research(messages: [ChatMessage]) async throws -> ChatResearchResponse {
-        let dto = try await postResearch(messages: MessageList(messages: messages))
+        let model = UserDefaults.standard.string(forKey: "settings.researchModel")
+        let dto = try await postResearch(messages: MessageList(messages: messages, model: model))
         let items = dto.items.map { item in
             ChatResearchItem(
                 term: item.term,
@@ -86,13 +88,16 @@ final class ChatServiceHTTP: ChatService {
 
     private struct MessageList: Codable {
         let messages: [MessageDTO]
-        init(messages: [ChatMessage]) {
+        let model: String?
+
+        init(messages: [ChatMessage], model: String? = nil) {
             self.messages = messages.map { message in
                 let attachments = message.attachments.isEmpty ? nil : message.attachments.map { attachment in
                     AttachmentDTO(type: attachment.kind.rawValue, mimeType: attachment.mimeType, data: attachment.data.base64EncodedString())
                 }
                 return MessageDTO(role: message.role.rawValue, content: message.content, attachments: attachments)
             }
+            self.model = model
         }
     }
 
