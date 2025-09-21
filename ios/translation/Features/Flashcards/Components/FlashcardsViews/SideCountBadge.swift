@@ -7,15 +7,18 @@ struct SideCountBadge: View {
 
     var body: some View {
         Text("\(count)")
-            .font(.headline).bold()
-            .foregroundStyle(filled ? Color.white : .primary)
-            .padding(.vertical, 6)
-            .padding(.horizontal, 10)
+            .dsType(DS.Font.labelMd)
+            .fontWeight(.medium)
+            .foregroundStyle(color)
+            .padding(.vertical, DS.Spacing.xs)
+            .padding(.horizontal, DS.Spacing.sm)
             .background(
-                Capsule().fill(filled ? color : color.opacity(0.12))
+                RoundedRectangle(cornerRadius: DS.Radius.xs, style: .continuous)
+                    .stroke(color, lineWidth: DS.BorderWidth.regular)
             )
-            .overlay(
-                Capsule().stroke(color.opacity(filled ? 0.0 : 0.6), lineWidth: DS.BorderWidth.regular)
-            )
+            .opacity(filled ? 1.0 : 0.6)
+            .scaleEffect(filled ? 1.1 : 1.0)
+            .dsAnimation(DS.AnimationToken.bouncy, value: filled)
+            .dsAnimation(DS.AnimationToken.subtle, value: count)
     }
 }

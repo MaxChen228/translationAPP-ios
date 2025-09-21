@@ -4,6 +4,11 @@ import SwiftUI
 
 enum SpeechFace: String, Codable { case front, back }
 
+protocol SpeechEngineDelegate: AnyObject {
+    func speechEngine(_ engine: SpeechEngine, didCompleteCardAt index: Int)
+    func speechEngineDidCompleteAllCards(_ engine: SpeechEngine)
+}
+
 struct SpeechItem: Identifiable {
     let id = UUID()
     let text: String
@@ -13,6 +18,7 @@ struct SpeechItem: Identifiable {
     let postDelay: TimeInterval
     let cardIndex: Int?
     let face: SpeechFace?
+    let isCardEnd: Bool // 標記是否為卡片的最後一個項目
 }
 
 final class SpeechEngine: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
@@ -23,6 +29,8 @@ final class SpeechEngine: NSObject, ObservableObject, AVSpeechSynthesizerDelegat
     @Published private(set) var currentFace: SpeechFace? = nil
     @Published private(set) var totalItems: Int = 0
     @Published private(set) var level: Double = 0 // 0...1, real-time RMS approx
+
+    weak var delegate: SpeechEngineDelegate?
 
     private var queue: [SpeechItem] = []
     private let synth = AVSpeechSynthesizer()
@@ -134,11 +142,21 @@ final class SpeechEngine: NSObject, ObservableObject, AVSpeechSynthesizerDelegat
     }
 
     private func advance() {
+        // 檢查當前項目是否為卡片結束
+        if currentIndex < queue.count {
+            let currentItem = queue[currentIndex]
+            if currentItem.isCardEnd, let cardIndex = currentItem.cardIndex {
+                delegate?.speechEngine(self, didCompleteCardAt: cardIndex)
+            }
+        }
+
         currentIndex += 1
         level = 0
+
         if currentIndex < queue.count {
             playCurrent()
         } else {
+            delegate?.speechEngineDidCompleteAllCards(self)
             stop()
         }
     }

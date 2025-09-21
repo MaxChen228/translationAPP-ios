@@ -101,6 +101,7 @@
 "deck.browseCloud" = "瀏覽雲端單字卡";
 "flashcards.title" = "單字卡";
 "flashcards.subtitle" = "點擊卡片可翻面 (支援 Markdown)";
+"flashcards.progress" = "進度";
 "flashcards.prev" = "上一張";
 "flashcards.showFront" = "看正面";
 "flashcards.showBack" = "看背面";

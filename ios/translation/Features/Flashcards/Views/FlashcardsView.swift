@@ -84,7 +84,13 @@ struct FlashcardsView: View {
                     width: geo.size.width,
                     index: store.index,
                     total: store.cards.count,
-                    onClose: { dismiss() },
+                    sessionRightCount: viewModel.sessionRightCount,
+                    sessionWrongCount: viewModel.sessionWrongCount,
+                    onClose: {
+                        // 退出時停止播放，防止後台繼續
+                        viewModel.audio.stopPlayback()
+                        dismiss()
+                    },
                     onOpenSettings: { viewModel.showSettings = true }
                 )
 
@@ -107,15 +113,6 @@ struct FlashcardsView: View {
                             }
                         }
                     } else {
-                        if mode == .annotate {
-                            let highlight = viewModel.swipePreview
-                            HStack {
-                                SideCountBadge(count: viewModel.sessionWrongCount, color: DS.Palette.warning, filled: highlight == .unfamiliar)
-                                Spacer()
-                                SideCountBadge(count: viewModel.sessionRightCount, color: DS.Palette.success, filled: highlight == .familiar)
-                            }
-                            .padding(.horizontal, DS.Spacing.lg)
-                        }
 
                         ZStack {
                             let preview = (mode == .annotate) ? viewModel.swipePreview : nil
@@ -171,6 +168,13 @@ struct FlashcardsView: View {
                                 if abs(translation) > threshold {
                                     let dir: CGFloat = translation > 0 ? 1 : -1
                                     let outcome: AnnotateFeedback = dir > 0 ? .familiar : .unfamiliar
+
+                                    // 用戶手動操作優先，停止自動播放邏輯
+                                    let wasAutoPlaying = speechManager.isPlaying
+                                    if wasAutoPlaying {
+                                        speechManager.completedCardIndex = nil  // 清除待處理的自動完成事件
+                                    }
+
                                     DSMotion.run(DS.AnimationToken.tossOut) { viewModel.dragX = dir * 800 }
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
                                         if mode == .annotate {
@@ -181,6 +185,12 @@ struct FlashcardsView: View {
                                         store.showBack = false
                                         viewModel.dragX = -dir * 450
                                         DSMotion.run(DS.AnimationToken.bouncy) { viewModel.dragX = 0 }
+
+                                        // 如果之前在播放，重新同步播放位置
+                                        if wasAutoPlaying {
+                                            viewModel.audio.restartMaintainingSettings()
+                                        }
+
                                         if reachedEnd {
                                             viewModel.completeSession(
                                                 bannerCenter: bannerCenter,
@@ -197,6 +207,7 @@ struct FlashcardsView: View {
 
                         Spacer(minLength: DS.Spacing.md)
 
+                        // 簡潔的底部控制區域
                         HStack {
                             DSQuickActionIconButton(
                                 systemName: "arrow.uturn.left",
@@ -206,14 +217,16 @@ struct FlashcardsView: View {
                                 style: .outline,
                                 size: 44
                             )
+
                             Spacer()
+
                             DSQuickActionIconButton(
                                 systemName: (speechManager.isPlaying && !speechManager.isPaused) ? "pause.fill" : "play.fill",
                                 labelKey: (speechManager.isPlaying && !speechManager.isPaused) ? "tts.pause" : "tts.play",
                                 action: { viewModel.ttsToggle() },
                                 shape: .circle,
-                                style: .filled,
-                                size: 44
+                                style: .outline,
+                                size: 48
                             )
                         }
                         .padding(.horizontal, DS.Spacing.lg)
@@ -285,6 +298,55 @@ struct FlashcardsView: View {
         .onChange(of: store.index, initial: false) { _, _ in
             // New card selected: clear previous composed cache to avoid stale playback
             viewModel.resetComposedBackCache()
+        }
+        .onChange(of: speechManager.completedCardIndex, initial: false) { _, completedIndex in
+            guard let completedIndex else { return }
+
+            // 檢查是否與當前卡片索引匹配（避免舊事件影響）
+            guard completedIndex == store.index else {
+                speechManager.completedCardIndex = nil
+                return
+            }
+
+            // 確保仍在播放狀態（避免已停止播放後的延遲事件）
+            guard speechManager.isPlaying else {
+                speechManager.completedCardIndex = nil
+                return
+            }
+
+            // 自動歸類為不熟悉
+            if mode == .annotate {
+                viewModel.adjustProficiency(.unfamiliar, mode: mode, progressStore: progressStore)
+            }
+
+            // 自動前進到下一張卡片
+            DSMotion.run(DS.AnimationToken.subtle) {
+                let reachedEnd = viewModel.advance(mode: mode)
+                store.showBack = false
+
+                if reachedEnd {
+                    viewModel.completeSession(
+                        bannerCenter: bannerCenter,
+                        locale: locale,
+                        dismiss: { dismiss() }
+                    )
+                }
+            }
+
+            // 重置完成狀態
+            speechManager.completedCardIndex = nil
+        }
+        .onChange(of: speechManager.didCompleteAllCards, initial: false) { _, didComplete in
+            guard didComplete else { return }
+
+            // 播放完成，停止播放並顯示完成狀態
+            speechManager.didCompleteAllCards = false
+
+            viewModel.completeSession(
+                bannerCenter: bannerCenter,
+                locale: locale,
+                dismiss: { dismiss() }
+            )
         }
     }
 }

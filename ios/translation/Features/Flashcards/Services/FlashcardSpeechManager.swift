@@ -3,12 +3,19 @@ import SwiftUI
 import Combine
 
 @MainActor
-final class FlashcardSpeechManager: ObservableObject {
+final class FlashcardSpeechManager: ObservableObject, SpeechEngineDelegate {
     // Expose the underlying objects' Published properties
     @Published var isPlaying: Bool = false
     @Published var isPaused: Bool = false
     @Published var currentCardIndex: Int? = nil
     @Published var currentFace: SpeechFace? = nil
+
+    // 卡片完成事件
+    @Published var completedCardIndex: Int? = nil
+    @Published var didCompleteAllCards: Bool = false
+
+    // 用戶操作狀態，防止自動邏輯干擾
+    private var userOperationInProgress: Bool = false
 
     // Underlying components
     let speechEngine = SpeechEngine()
@@ -18,6 +25,9 @@ final class FlashcardSpeechManager: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     init() {
+        // Set up delegate
+        speechEngine.delegate = self
+
         // Monitor speech engine state changes
         speechEngine.$isPlaying
             .receive(on: DispatchQueue.main)
@@ -65,5 +75,29 @@ final class FlashcardSpeechManager: ObservableObject {
 
     func speak(text: String, lang: String, rate: Float, speech: SpeechEngine) {
         instantSpeaker.speak(text: text, lang: lang, rate: rate, speech: speech)
+    }
+
+    // MARK: - User Operation Control
+
+    func markUserOperationStart() {
+        userOperationInProgress = true
+        completedCardIndex = nil  // 清除待處理事件
+    }
+
+    func markUserOperationEnd() {
+        userOperationInProgress = false
+    }
+
+    // MARK: - SpeechEngineDelegate
+
+    func speechEngine(_ engine: SpeechEngine, didCompleteCardAt index: Int) {
+        // 如果用戶正在操作，忽略自動完成事件
+        guard !userOperationInProgress else { return }
+        completedCardIndex = index
+    }
+
+    func speechEngineDidCompleteAllCards(_ engine: SpeechEngine) {
+        guard !userOperationInProgress else { return }
+        didCompleteAllCards = true
     }
 }

@@ -20,19 +20,27 @@ struct FlashcardsFlipCard<Front: View, Back: View, Overlay: View>: View {
 
     @ViewBuilder
     private func faceCard<Content: View>(_ content: Content) -> some View {
-        DSCard(padding: DS.Spacing.lg) {
-            VStack(spacing: 0) {
-                Spacer(minLength: 0)
-                content
-                    .dsType(DS.Font.body)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                Spacer(minLength: 0)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        VStack(spacing: 0) {
+            Spacer(minLength: 0)
+            content
+                .dsType(DS.Font.body)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Spacer(minLength: 0)
         }
-        .frame(minHeight: 220)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(DS.Spacing.lg)
+        .background(DS.Palette.surface)
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
+                .stroke(DS.Palette.border, lineWidth: DS.BorderWidth.regular)
+        )
+        .frame(minHeight: 240)
         .frame(maxHeight: .infinity)
-        .overlay(alignment: .bottomTrailing) { overlay() }
+        .overlay(alignment: .bottomTrailing) {
+            overlay()
+                .padding(.trailing, DS.Spacing.md)
+                .padding(.bottom, DS.Spacing.md)
+        }
     }
 
     var body: some View {

@@ -3,7 +3,7 @@ import SwiftUI
 @MainActor
 class FlashcardsAudioController {
     private unowned let viewModel: FlashcardsViewModel
-
+    private var globalAudio: GlobalAudioSessionManager { GlobalAudioSessionManager.shared }
     private var speechManager: FlashcardSpeechManager { viewModel.speechManager }
 
     init(viewModel: FlashcardsViewModel) {
@@ -38,6 +38,11 @@ class FlashcardsAudioController {
 
     func jumpForward() {
         guard !viewModel.store.cards.isEmpty else { return }
+
+        // 清除待處理的播放完成事件，防止衝突
+        speechManager.completedCardIndex = nil
+        speechManager.didCompleteAllCards = false
+
         viewModel.store.next()
         viewModel.store.showBack = false
         restartMaintainingSettings()
@@ -45,6 +50,11 @@ class FlashcardsAudioController {
 
     func jumpBackward() {
         guard !viewModel.store.cards.isEmpty else { return }
+
+        // 清除待處理的播放完成事件，防止衝突
+        speechManager.completedCardIndex = nil
+        speechManager.didCompleteAllCards = false
+
         viewModel.store.prev()
         viewModel.store.showBack = false
         restartMaintainingSettings()

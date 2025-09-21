@@ -74,6 +74,7 @@
 "deck.browseCloud" = "Browse Cloud Decks";
 "flashcards.title" = "Flashcards";
 "flashcards.subtitle" = "Tap card to flip (Markdown supported)";
+"flashcards.progress" = "Progress";
 "flashcards.prev" = "Previous";
 "flashcards.showFront" = "Show Front";
 "flashcards.showBack" = "Show Back";

@@ -37,6 +37,8 @@ struct FlashcardsMarkdownText: View {
                 Text(processed)
             }
         }
+        .font(.custom("Songti SC", size: 20, relativeTo: .body))
+        .lineSpacing(6)
         .foregroundStyle(.primary)
         .textSelection(.enabled)
     }
