@@ -222,8 +222,8 @@ struct LocalBankListView: View {
                                         vm.startLocalPractice(bookName: bookName, item: item, tag: item.tags?.first)
                                         dismiss()
                                     }
-                                } label: { Label { Text("action.practice") } icon: { Image(systemName: "play.fill") } }
-                                    .buttonStyle(DSSecondaryButtonCompact())
+                                } label: { DSIconLabel(textKey: "action.practice", systemName: "play.fill") }
+                                    .buttonStyle(DSButton(style: .secondary, size: .compact))
                             }
                         }
                         HintListSection(
@@ -262,7 +262,7 @@ struct LocalBankListView: View {
                         Button("完成") {
                             showTagFilter = false
                         }
-                        .buttonStyle(DSSecondaryButtonCompact())
+                        .buttonStyle(DSButton(style: .secondary, size: .compact))
                     }
                 }
             }

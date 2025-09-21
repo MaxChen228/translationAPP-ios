@@ -444,4 +444,13 @@ extension View {
     func dsType(_ font: SwiftUI.Font, lineSpacing: CGFloat = 4, tracking: CGFloat = 0) -> some View {
         modifier(DSTypography(font: font, lineSpacing: lineSpacing, tracking: tracking))
     }
+
+    @ViewBuilder
+    func conditionalModifier<Content: View>(_ condition: Bool, transform: (Self) -> Content) -> some View {
+        if condition {
+            transform(self)
+        } else {
+            self
+        }
+    }
 }

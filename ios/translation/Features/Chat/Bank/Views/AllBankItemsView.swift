@@ -298,7 +298,7 @@ struct AllBankItemsView: View {
                                         Image(systemName: "play.fill")
                                     }
                                 }
-                                .buttonStyle(DSSecondaryButtonCompact())
+                                .buttonStyle(DSButton(style: .secondary, size: .compact))
                             }
                         }
 

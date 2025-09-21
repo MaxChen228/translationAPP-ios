@@ -37,7 +37,7 @@ struct DeckDetailView: View {
                         Text("deck.action.startReview")
                             .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(DSSecondaryButton())
+                    .buttonStyle(DSButton(style: .secondary, size: .full))
 
                     // 下：卡片簡略列表（新增改為懸浮按鈕，避免擁擠）
                     Text("deck.words.title").dsType(DS.Font.section)

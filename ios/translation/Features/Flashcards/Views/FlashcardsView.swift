@@ -118,11 +118,11 @@ struct FlashcardsView: View {
                             )
                             HStack(spacing: DS.Spacing.md) {
                                 Button(String(localized: "action.cancel", locale: locale)) { viewModel.cancelEdit() }
-                                    .buttonStyle(DSSecondaryButton())
+                                    .buttonStyle(DSButton(style: .secondary, size: .full))
                                 Button(String(localized: "action.save", locale: locale)) {
                                     viewModel.saveEdit(decksStore: decksStore, locale: locale)
                                 }
-                                .buttonStyle(DSPrimaryButton())
+                                .buttonStyle(DSButton(style: .primary, size: .full))
                                 .disabled(viewModel.validationError(locale: locale) != nil)
                             }
                         }

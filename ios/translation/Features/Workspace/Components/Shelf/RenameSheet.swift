@@ -26,7 +26,7 @@ struct RenameSheet: View {
                     if !trimmed.isEmpty { onDone(trimmed) }
                     dismiss()
                 }
-                .buttonStyle(DSPrimaryButton())
+                .buttonStyle(DSButton(style: .primary, size: .full))
                 .frame(width: DS.ButtonSize.standard)
             }
         }

@@ -127,7 +127,7 @@ struct BankItemDetailView: View {
                         }
                         .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(DSPrimaryButton())
+                    .buttonStyle(DSButton(style: .primary, size: .full))
                 }
             }
             .padding(.horizontal, DS.Spacing.lg)

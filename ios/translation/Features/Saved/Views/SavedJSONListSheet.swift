@@ -96,7 +96,7 @@ struct SavedJSONListSheet: View {
     private var controlBar: some View {
         HStack(spacing: DS.Spacing.md) {
             Button(String(localized: "saved.clear", locale: locale), role: .destructive) { store.clear(activeStash) }
-                .buttonStyle(DSSecondaryButtonCompact())
+                .buttonStyle(DSButton(style: .secondary, size: .compact))
                 .disabled(isSaving)
 
             Spacer(minLength: 0)
@@ -142,7 +142,7 @@ struct SavedJSONListSheet: View {
                     showSaveDeckSheet = true
                 }
             } label: { Text("saved.saveDeck") }
-                .buttonStyle(DSSecondaryButtonCompact())
+                .buttonStyle(DSButton(style: .secondary, size: .compact))
                 .disabled(isSaving || filteredDecoded.isEmpty)
         }
     }

@@ -37,7 +37,7 @@ struct BannerHost: View {
                     if let t = item.actionTitle {
                         Spacer(minLength: 8)
                         Button(t) { item.action?(); DSMotion.run(DS.AnimationToken.subtle) { center.banner = nil } }
-                            .buttonStyle(DSSecondaryButtonCompact())
+                            .buttonStyle(DSButton(style: .secondary, size: .compact))
                     }
                 }
                 .padding(.horizontal, DS.Spacing.md2)

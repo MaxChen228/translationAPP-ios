@@ -71,7 +71,7 @@ struct FlashcardsAudioSettingsSheet: View {
                     onStart(store.settings)
                     dismiss()
                 }
-                .buttonStyle(DSPrimaryButton())
+                .buttonStyle(DSButton(style: .primary, size: .full))
                 .frame(width: 160)
             }
         }

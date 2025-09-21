@@ -112,7 +112,7 @@ struct ContinuationBanner: View {
             Button(action: onResume) {
                 Text("chat.continuation.resume")
             }
-            .buttonStyle(DSSecondaryButtonCompact())
+            .buttonStyle(DSButton(style: .secondary, size: .compact))
 
             Button(action: onDismiss) {
                 Image(systemName: "xmark")

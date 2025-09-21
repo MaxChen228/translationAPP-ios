@@ -66,12 +66,12 @@ private struct SaveActionBar: ViewModifier {
                             DSMotion.run(DS.AnimationToken.subtle) { didSave = true }
                         } label: {
                             if didSave {
-                                Label { Text("action.saved") } icon: { Image(systemName: "checkmark.seal.fill") }
+                                DSIconLabel(textKey: "action.saved", systemName: "checkmark.seal.fill")
                             } else {
-                                Label { Text("action.save") } icon: { Image(systemName: "tray.and.arrow.down") }
+                                DSIconLabel(textKey: "action.save", systemName: "tray.and.arrow.down")
                             }
                         }
-                        .buttonStyle(DSSecondaryButtonCompact())
+                        .buttonStyle(DSButton(style: .secondary, size: .compact))
                         .disabled(didSave)
                     }
                 }

@@ -29,7 +29,7 @@ struct ErrorDetailPopover: View {
                         Label(String(localized: "error.applySuggestion", locale: locale), systemImage: "arrow.right.circle.fill")
                             .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(DSPrimaryButton())
+                    .buttonStyle(DSButton(style: .primary, size: .full))
                 }
             }
         }

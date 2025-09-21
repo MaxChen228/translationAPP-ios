@@ -60,7 +60,7 @@ struct ResultsSectionView: View {
                     Image(systemName: "square.and.arrow.down")
                 }
             }
-            .buttonStyle(DSSecondaryButton())
+            .buttonStyle(DSButton(style: .secondary, size: .full))
             .frame(maxWidth: .infinity)
         }
     }

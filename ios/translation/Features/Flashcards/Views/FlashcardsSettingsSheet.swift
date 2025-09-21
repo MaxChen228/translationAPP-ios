@@ -73,7 +73,7 @@ struct FlashcardsSettingsSheet: View {
             }
             HStack { Spacer()
                 Button(String(localized: "action.done", locale: locale)) { dismiss() }
-                    .buttonStyle(DSSecondaryButton())
+                    .buttonStyle(DSButton(style: .secondary, size: .full))
                     .frame(width: 100)
             }
         }

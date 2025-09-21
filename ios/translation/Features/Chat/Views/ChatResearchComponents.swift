@@ -23,7 +23,7 @@ struct ChatChecklistCard: View {
                     Button(action: onResearch) {
                         Label("chat.research", systemImage: "doc.text.magnifyingglass")
                     }
-                    .buttonStyle(DSSecondaryButtonCompact())
+                    .buttonStyle(DSButton(style: .secondary, size: .compact))
                     .disabled(!isResearchButtonEnabled)
                 }
             }
@@ -191,7 +191,7 @@ struct ResearchItemCard: View {
                         Label(String(localized: "chat.research.save"), systemImage: "tray.and.arrow.down")
                     }
                 }
-                .buttonStyle(DSSecondaryButtonCompact())
+                .buttonStyle(DSButton(style: .secondary, size: .compact))
                 .disabled(isSaved)
             }
         }

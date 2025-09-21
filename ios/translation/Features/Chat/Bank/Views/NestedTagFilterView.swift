@@ -51,7 +51,7 @@ struct NestedTagFilterView: View {
                 Button("清除全部") {
                     filterState.clear()
                 }
-                .buttonStyle(DSSecondaryButtonCompact())
+                .buttonStyle(DSButton(style: .secondary, size: .compact))
             }
         }
     }

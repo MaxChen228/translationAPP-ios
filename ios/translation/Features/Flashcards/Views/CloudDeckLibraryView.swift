@@ -30,8 +30,8 @@ struct CloudDeckLibraryView: View {
                     Text(String(format: String(localized: "deck.cards.count", locale: locale), d.count)).dsType(DS.Font.caption).foregroundStyle(.secondary)
                                 }
                                 Spacer(minLength: 0)
-                                Button { Task { await copyDeck(d) } } label: { Label { Text("cloud.copyToLocal") } icon: { Image(systemName: "arrow.down.doc.fill") } }
-                                    .buttonStyle(DSSecondaryButtonCompact())
+                                Button { Task { await copyDeck(d) } } label: { DSIconLabel(textKey: "cloud.copyToLocal", systemName: "arrow.down.doc.fill") }
+                                    .buttonStyle(DSButton(style: .secondary, size: .compact))
                             }
                             .padding(.vertical, 6)
                         }

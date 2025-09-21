@@ -151,7 +151,7 @@ struct SavedErrorRowCard: View {
                     Label(String(localized: "action.copy", locale: locale), systemImage: "doc.on.doc")
                 }
             }
-            .buttonStyle(DSSecondaryButtonCompact())
+            .buttonStyle(DSButton(style: .secondary, size: .compact))
 
             Spacer(minLength: 0)
 
@@ -160,7 +160,7 @@ struct SavedErrorRowCard: View {
             } label: {
                 Label(String(localized: "action.delete", locale: locale), systemImage: "trash")
             }
-            .buttonStyle(DSSecondaryButtonCompact())
+            .buttonStyle(DSButton(style: .secondary, size: .compact))
             .confirmationDialog(String(localized: "saved.delete.confirm", locale: locale), isPresented: $showDeleteConfirm, actions: {
                 Button(String(localized: "action.delete", locale: locale), role: .destructive) { onDelete() }
             })

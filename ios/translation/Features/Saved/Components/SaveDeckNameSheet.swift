@@ -33,7 +33,7 @@ struct SaveDeckNameSheet: View {
                     onAction(.cancel)
                     dismiss()
                 } label: { Text("action.cancel") }
-                .buttonStyle(DSSecondaryButtonCompact())
+                .buttonStyle(DSButton(style: .secondary, size: .compact))
                 .disabled(isSaving)
 
                 Spacer()
@@ -48,7 +48,7 @@ struct SaveDeckNameSheet: View {
                         Text("action.save")
                     }
                 }
-                .buttonStyle(DSPrimaryButtonCompact())
+                .buttonStyle(DSButton(style: .primary, size: .compact))
                 .disabled(isSaving)
             }
         }

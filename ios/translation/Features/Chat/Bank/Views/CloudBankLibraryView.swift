@@ -31,8 +31,8 @@ struct CloudBankLibraryView: View {
                     Text(String(format: String(localized: "bank.book.count", locale: locale), b.count)).dsType(DS.Font.caption).foregroundStyle(.secondary)
                                 }
                                 Spacer(minLength: 0)
-                                Button { Task { await copyBook(b) } } label: { Label { Text("cloud.copyToLocal") } icon: { Image(systemName: "arrow.down.doc.fill") } }
-                                    .buttonStyle(DSSecondaryButtonCompact())
+                                Button { Task { await copyBook(b) } } label: { DSIconLabel(textKey: "cloud.copyToLocal", systemName: "arrow.down.doc.fill") }
+                                    .buttonStyle(DSButton(style: .secondary, size: .compact))
                             }
                             .padding(.vertical, 6)
                         }

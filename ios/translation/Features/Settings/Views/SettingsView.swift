@@ -17,7 +17,7 @@ struct SettingsView: View {
                         Text("settings.flashcards.reset.hint").dsType(DS.Font.caption).foregroundStyle(.secondary)
                         HStack { Spacer()
                             Button(role: .destructive) { showResetConfirm = true } label: { Text("settings.flashcards.resetAll") }
-                                .buttonStyle(DSSecondaryButton())
+                                .buttonStyle(DSButton(style: .secondary, size: .full))
                         }
                     }
                 }
@@ -35,7 +35,7 @@ struct SettingsView: View {
                         HStack {
                             Spacer()
                             Button(action: { bannerCenter.show(title: String(localized: "settings.banner.test"), subtitle: String(format: "%.1fs", settings.bannerSeconds)) }) { Text("settings.banner.test") }
-                            .buttonStyle(DSSecondaryButtonCompact())
+                            .buttonStyle(DSButton(style: .secondary, size: .compact))
                         }
                     }
                 }
@@ -131,7 +131,7 @@ struct SettingsView: View {
                                 Haptics.success()
                                 bannerCenter.show(title: String(localized: "msg.copiedDeviceID"))
                             }) { Text("action.copy") }
-                            .buttonStyle(DSSecondaryButtonCompact())
+                            .buttonStyle(DSButton(style: .secondary, size: .compact))
                         }
                         DSSeparator()
                         HStack {

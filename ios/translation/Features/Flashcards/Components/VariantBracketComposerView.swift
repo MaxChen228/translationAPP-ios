@@ -52,7 +52,7 @@ struct VariantBracketComposerView: View {
                 Button { copyCurrent(parsed.elements) } label: {
                     Image(systemName: "doc.on.doc")
                 }
-                .buttonStyle(DSSecondaryButtonCompact())
+                .buttonStyle(DSButton(style: .secondary, size: .compact))
                 .accessibilityLabel(Text("a11y.copyCurrentComposition"))
 
                 Text(currentCombinedText(elements: parsed.elements))

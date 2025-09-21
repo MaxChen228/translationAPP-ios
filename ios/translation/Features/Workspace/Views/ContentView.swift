@@ -31,9 +31,9 @@ struct ContentView: View {
                         NavigationLink {
                             BankBooksView(vm: vm)
                         } label: {
-                            Label { Text("content.bank") } icon: { Image(systemName: "books.vertical") }
+                            DSIconLabel(textKey: "content.bank", systemName: "books.vertical")
                         }
-                        .buttonStyle(DSSecondaryButton())
+                        .buttonStyle(DSButton(style: .secondary, size: .full))
                         .frame(width: DS.ButtonSize.small)
                     }
                     ChinesePromptView(text: vm.inputZh)
@@ -99,12 +99,12 @@ struct ContentView: View {
                                         Text("content.correcting")
                                     }
                                 } else {
-                                    Label { Text("content.correct") } icon: { Image(systemName: "checkmark.seal.fill") }
+                                    DSIconLabel(textKey: "content.correct", systemName: "checkmark.seal.fill")
                                 }
                             }
                             .frame(maxWidth: .infinity)
                         }
-                        .buttonStyle(DSPrimaryButton())
+                        .buttonStyle(DSButton(style: .primary, size: .full))
                         .disabled(vm.isLoading)
 
                         // 下一題（略過已完成）：需有題庫關聯與 BACKEND_URL
@@ -112,11 +112,11 @@ struct ContentView: View {
                             Task { await vm.loadNextPractice() }
                             focused = .en
                         } label: {
-                            Label { Text("content.next") } icon: { Image(systemName: "arrow.right.circle.fill") }
+                            DSIconLabel(textKey: "content.next", systemName: "arrow.right.circle.fill")
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.9)
                         }
-                        .buttonStyle(DSSecondaryButton())
+                        .buttonStyle(DSButton(style: .secondary, size: .full))
                         .disabled(vm.isLoading || vm.currentBankItemId == nil)
 
                         Button(role: .destructive) {
@@ -125,7 +125,7 @@ struct ContentView: View {
                             Image(systemName: "trash")
                                 .frame(width: DS.IconSize.toolbarIcon, height: DS.IconSize.toolbarIcon)
                         }
-                        .buttonStyle(DSSecondaryButton())
+                        .buttonStyle(DSButton(style: .secondary, size: .full))
                         .frame(width: DS.ButtonSize.compact)
                         .disabled(vm.isLoading)
                     }
