@@ -37,7 +37,7 @@ struct DeckDetailView: View {
                         Text("deck.action.startReview")
                             .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(DSPrimaryButton())
+                    .buttonStyle(DSSecondaryButton())
 
                     // 下：卡片簡略列表（新增改為懸浮按鈕，避免擁擠）
                     Text("deck.words.title").dsType(DS.Font.section)
@@ -146,7 +146,8 @@ private struct CardPreviewRow: View {
         DSOutlineCard {
             VStack(alignment: .leading, spacing: 6) {
                 Text(card.front)
-                    .dsType(DS.Font.section)
+                    .font(.custom("Songti SC", size: 18, relativeTo: .body))
+                    .fontWeight(.medium)
                     .foregroundStyle(.primary)
                     .lineLimit(1)
                     .frame(maxWidth: .infinity, alignment: .leading)
