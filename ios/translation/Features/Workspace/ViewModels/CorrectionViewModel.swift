@@ -207,6 +207,8 @@ final class CorrectionViewModel: ObservableObject {
         selectedErrorID = nil
         filterType = nil
         cardMode = .original
+        // 記錄練習開始時間
+        practiceStartTime = Date()
         requestFocusEn()
     }
 
@@ -275,5 +277,32 @@ final class CorrectionViewModel: ObservableObject {
         if let data = try? JSONEncoder().encode(practicedHints) {
             ud.set(data, forKey: keyHints)
         }
+    }
+
+    // 保存練習記錄
+    func savePracticeRecord() {
+        guard let response = self.response,
+              let store = practiceRecordsStore else { return }
+
+        let startTime = practiceStartTime ?? Date()
+        let bankBookName: String? = if case .local(let bookName) = practiceSource { bookName } else { nil }
+
+        let record = PracticeRecord(
+            createdAt: startTime,
+            completedAt: Date(),
+            bankItemId: currentBankItemId,
+            bankBookName: bankBookName,
+            practiceTag: currentPracticeTag,
+            chineseText: inputZh,
+            englishInput: inputEn,
+            hints: practicedHints,
+            teacherSuggestion: currentBankSuggestionText,
+            correctedText: response.corrected,
+            score: response.score,
+            errors: response.errors
+        )
+
+        store.add(record)
+        AppLog.aiInfo("Practice record saved: score=\(response.score), errors=\(response.errors.count)")
     }
 }

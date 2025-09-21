@@ -112,7 +112,6 @@ struct PracticeRecord: Codable, Identifiable, Equatable {
 
     // 元數據
     let attemptCount: Int
-    let workspaceId: String
 
     init(
         id: UUID = UUID(),
@@ -128,8 +127,7 @@ struct PracticeRecord: Codable, Identifiable, Equatable {
         correctedText: String,
         score: Int,
         errors: [ErrorItem],
-        attemptCount: Int = 1,
-        workspaceId: String
+        attemptCount: Int = 1
     ) {
         self.id = id
         self.createdAt = createdAt
@@ -145,6 +143,5 @@ struct PracticeRecord: Codable, Identifiable, Equatable {
         self.score = score
         self.errors = errors
         self.attemptCount = attemptCount
-        self.workspaceId = workspaceId
     }
 }

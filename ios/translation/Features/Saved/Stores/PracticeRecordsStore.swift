@@ -27,9 +27,6 @@ final class PracticeRecordsStore: ObservableObject {
         records.first { $0.id == id }
     }
 
-    func getRecords(for workspaceId: String) -> [PracticeRecord] {
-        records.filter { $0.workspaceId == workspaceId }
-    }
 
     func getRecords(for bankBookName: String) -> [PracticeRecord] {
         records.filter { $0.bankBookName == bankBookName }
