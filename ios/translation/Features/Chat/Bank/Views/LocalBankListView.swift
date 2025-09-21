@@ -10,8 +10,9 @@ struct LocalBankListView: View {
     @EnvironmentObject private var localProgress: LocalBankProgressStore
     @State private var expanded: Set<String> = []
     @State private var selectedDifficulties: Set<Int> = []
-    @State private var selectedTags: Set<String> = []
+    @State private var tagFilterState = TagFilterState()
     @State private var sortOption: BankItemSortOption = .defaultOrder
+    @State private var showTagFilter: Bool = false
     @Environment(\.locale) private var locale
 
     private var filteredAndSortedItems: [BankItem] {
@@ -25,11 +26,11 @@ struct LocalBankListView: View {
             filtered = filtered.filter { selectedDifficulties.contains($0.difficulty) }
         }
 
-        // Tag filter
-        if !selectedTags.isEmpty {
+        // Tag filter using new nested filter
+        if tagFilterState.hasActiveFilters {
             filtered = filtered.filter { item in
-                guard let tags = item.tags else { return false }
-                return !Set(tags).isDisjoint(with: selectedTags)
+                guard let tags = item.tags, !tags.isEmpty else { return false }
+                return tagFilterState.matches(tags: tags)
             }
         }
 
@@ -46,13 +47,11 @@ struct LocalBankListView: View {
         }
     }
 
-    private var tagStats: [(String, Int)] {
+    private var tagStats: [String: Int] {
         let allItems = localBank.items(in: bookName)
         let allTags = allItems.compactMap { $0.tags }.flatMap { $0 }
         let grouped = Dictionary(grouping: allTags, by: { $0 })
-        return grouped.compactMap { tag, occurrences in
-            (tag, occurrences.count)
-        }.sorted { $0.0 < $1.0 }
+        return grouped.mapValues { $0.count }
     }
 
     var body: some View {
@@ -83,7 +82,7 @@ struct LocalBankListView: View {
                 // Filter and Sort Controls
                 if !allItems.isEmpty {
                     VStack(spacing: DS.Spacing.sm) {
-                        // Filter chips row
+                        // Quick filter chips row
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 8) {
                                 // All filter (clear filters)
@@ -91,10 +90,10 @@ struct LocalBankListView: View {
                                     label: "filter.all",
                                     count: allItems.count,
                                     color: DS.Palette.neutral,
-                                    selected: selectedDifficulties.isEmpty && selectedTags.isEmpty
+                                    selected: selectedDifficulties.isEmpty && !tagFilterState.hasActiveFilters
                                 ) {
                                     selectedDifficulties.removeAll()
-                                    selectedTags.removeAll()
+                                    tagFilterState.clear()
                                 }
 
                                 // Difficulty filters
@@ -112,20 +111,35 @@ struct LocalBankListView: View {
                                     }
                                 }
 
-                                // Tag filters
-                                ForEach(tagStats, id: \.0) { tag, count in
-                                    DSTagFilterChip(
-                                        tag: tag,
-                                        count: count,
-                                        selected: selectedTags.contains(tag)
-                                    ) {
-                                        if selectedTags.contains(tag) {
-                                            selectedTags.remove(tag)
-                                        } else {
-                                            selectedTags.insert(tag)
+                                // Advanced tag filter button
+                                Button {
+                                    showTagFilter = true
+                                } label: {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "tag")
+                                        Text("標籤篩選")
+                                        if tagFilterState.hasActiveFilters {
+                                            Text("(\(tagFilterState.selectedTags.count))")
+                                                .dsType(DS.Font.caption)
                                         }
                                     }
+                                    .dsType(DS.Font.labelSm)
+                                    .foregroundStyle(tagFilterState.hasActiveFilters ? DS.Palette.primary : .primary)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 6)
+                                    .background(
+                                        Capsule()
+                                            .fill(tagFilterState.hasActiveFilters ? DS.Palette.primary.opacity(DS.Opacity.fill) : DS.Palette.surface)
+                                    )
+                                    .overlay(
+                                        Capsule()
+                                            .stroke(
+                                                tagFilterState.hasActiveFilters ? DS.Palette.primary.opacity(0.3) : DS.Palette.border.opacity(DS.Opacity.border),
+                                                lineWidth: DS.BorderWidth.thin
+                                            )
+                                    )
                                 }
+                                .buttonStyle(.plain)
                             }
                             .padding(.horizontal, 2)
                         }
@@ -216,6 +230,32 @@ struct LocalBankListView: View {
         }
         .background(DS.Palette.background)
         .navigationTitle(bookName)
+        .sheet(isPresented: $showTagFilter) {
+            NavigationStack {
+                ScrollView {
+                    NestedTagFilterView(
+                        filterState: $tagFilterState,
+                        tagStats: tagStats
+                    )
+                    .padding(.horizontal, DS.Spacing.lg)
+                    .padding(.top, DS.Spacing.lg)
+                    .padding(.bottom, DS.Spacing.lg)
+                }
+                .background(DS.Palette.background)
+                .navigationTitle("標籤篩選")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("完成") {
+                            showTagFilter = false
+                        }
+                        .buttonStyle(DSSecondaryButtonCompact())
+                    }
+                }
+            }
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
     }
 }
 

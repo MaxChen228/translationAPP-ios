@@ -46,10 +46,18 @@ final class CorrectionViewModel: ObservableObject {
     @Published var practiceSource: PracticeSource? = nil
     weak var localBankStore: LocalBankStore? = nil
     weak var localProgressStore: LocalBankProgressStore? = nil
+    weak var practiceRecordsStore: PracticeRecordsStore? = nil
+
+    // 練習會話追蹤
+    private var practiceStartTime: Date? = nil
 
     func bindLocalBankStores(localBank: LocalBankStore, progress: LocalBankProgressStore) {
         self.localBankStore = localBank
         self.localProgressStore = progress
+    }
+
+    func bindPracticeRecordsStore(_ store: PracticeRecordsStore) {
+        self.practiceRecordsStore = store
     }
 
 

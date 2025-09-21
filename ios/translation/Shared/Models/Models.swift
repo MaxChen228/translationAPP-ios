@@ -87,3 +87,64 @@ struct BankItem: Codable, Identifiable, Equatable {
     // 後端若帶 completed（需附 deviceId 查詢）
     var completed: Bool? = nil
 }
+
+// 練習記錄：保存完整的練習會話數據
+struct PracticeRecord: Codable, Identifiable, Equatable {
+    let id: UUID
+    let createdAt: Date
+    let completedAt: Date
+
+    // 練習來源信息
+    let bankItemId: String?
+    let bankBookName: String?
+    let practiceTag: String?
+
+    // 練習內容
+    let chineseText: String
+    let englishInput: String
+    let hints: [BankHint]
+    let teacherSuggestion: String?
+
+    // 批改結果
+    let correctedText: String
+    let score: Int
+    let errors: [ErrorItem]
+
+    // 元數據
+    let attemptCount: Int
+    let workspaceId: String
+
+    init(
+        id: UUID = UUID(),
+        createdAt: Date = Date(),
+        completedAt: Date = Date(),
+        bankItemId: String? = nil,
+        bankBookName: String? = nil,
+        practiceTag: String? = nil,
+        chineseText: String,
+        englishInput: String,
+        hints: [BankHint] = [],
+        teacherSuggestion: String? = nil,
+        correctedText: String,
+        score: Int,
+        errors: [ErrorItem],
+        attemptCount: Int = 1,
+        workspaceId: String
+    ) {
+        self.id = id
+        self.createdAt = createdAt
+        self.completedAt = completedAt
+        self.bankItemId = bankItemId
+        self.bankBookName = bankBookName
+        self.practiceTag = practiceTag
+        self.chineseText = chineseText
+        self.englishInput = englishInput
+        self.hints = hints
+        self.teacherSuggestion = teacherSuggestion
+        self.correctedText = correctedText
+        self.score = score
+        self.errors = errors
+        self.attemptCount = attemptCount
+        self.workspaceId = workspaceId
+    }
+}
