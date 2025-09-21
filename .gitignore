@@ -9,8 +9,12 @@ backend/bank.json
 # iOS/Xcode
 ios/build/
 ios/DerivedData/
+.build/
+DerivedData/
 *.xcworkspace/
 *.xcuserdatad/
 ios/*.dSYM
 ios/*.ipa
 *.mobileprovision
+*.swiftinterface*
+*.sdkstatcache
