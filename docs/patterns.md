@@ -25,9 +25,11 @@
 
 ## UI/UX 與 Design System
 
-- 儘量使用 Design System 元件（`DSCard`, `DSPrimaryButton`, `DSTextArea` 等），可在 `DesignSystem.swift` 中新增 token。
+- 儘量使用 Design System 元件（`DSCard`, `DSButton`, `DSTextArea` 等），可在 `DesignSystem.swift` 中新增 token。
 - 需要動畫時使用 `DSMotion.run` 與 `DS.AnimationToken`，保持一致的動態表現。
 - 全域 Banner 透過 `BannerCenter.show()`；避免在單一 View 內直接修改 Banner state。
+- 新增按鈕/卡片時優先使用 `DSButton(style:size:)` 與 `DSCardTitle`，避免重新建立主要/次要樣式或手刻 HStack 排版。
+- 間距、圓角、邊框請採用 `DS.Spacing`、`DS.Radius`、`DS.BorderWidth` 等 token，不再直接寫 `CGFloat` 魔術數字；需髮絲線效果時改用 `DS.Metrics.hairline`。
 
 ## 加入新功能時的建議流程
 

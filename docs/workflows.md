@@ -23,7 +23,22 @@
 | Saved JSON 清單 | `Features/Saved/Views/SavedJSONListSheet.swift`、`Features/Saved/Stores/SavedErrorsStore.swift` | 提供儲存錯誤列表與匯出功能。 |
 | 匯出為單字卡 | `DeckService.swift` | 透過 `/make_deck` 建立新 Deck，新增欄位時同步更新 DTO。 |
 
-## 3. 單字卡與 TTS
+## 3. 練習日曆與練習記錄
+
+| 任務 | 主要檔案 | 說明 |
+| ---- | -------- | ---- |
+| 顯示月曆與日卡片 | `Features/Calendar/Views/CalendarView.swift` | 使用 `DSCalendarGrid` 呈現月曆，提供上/下個月及「回到今天」快速操作，並以 `DayDetailView` 顯示所選日期統計。 |
+| 月份導覽與統計 | `Features/Calendar/ViewModels/CalendarViewModel.swift` | 每次月份切換時重新計算每日練習摘要，並與 `PracticeRecordsStore` 綁定以同步最新紀錄。 |
+| 日曆統計排版 | `Features/Calendar/Views/DayDetailView.swift` | 展開所選日期練習次數、平均分數、錯誤類別等摘要，使用 Design System 分段呈現。 |
+| 練習紀錄資料源 | `Features/Saved/Stores/PracticeRecordsStore.swift` | 儲存批改結果、提供 `getStatistics()` 與 `getRecordsGroupedByDate()` 等接口給日曆與列表使用。 |
+
+| 任務 | 主要檔案 | 說明 |
+| ---- | -------- | ---- |
+| 練習記錄清單 | `Features/Saved/Views/PracticeRecordsListView.swift` | 以 `DSOutlineCard` + `DSCardTitle` 組成統計區塊與單筆卡片，支援錯誤數徽章、題庫來源標示及批次清除。 |
+| 計算清單統計 | `PracticeRecordsStore.getStatistics()` | 回傳總練習數、平均分數與累計錯誤，供列表頁面顯示。 |
+| 刪除與批次清空 | `PracticeRecordsListView` | 透過 `confirmationDialog` 呼叫 `store.clearAll()`，並提供 context menu 單筆刪除。 |
+
+## 4. 單字卡與 TTS
 
 | 任務 | 主要檔案 | 說明 |
 | ---- | -------- | ---- |
@@ -31,7 +46,7 @@
 | 單字卡 UI | `Features/Flashcards/Views/FlashcardDecksView.swift`、`Features/Flashcards/Views/DeckDetailView.swift` | 展示 Deck 與卡片細節。 |
 | TTS 撥放邏輯 | `Shared/Services/SpeechEngine.swift`、`Shared/Services/InstantSpeaker.swift`、`Shared/Services/PlaybackBuilder.swift`、`Shared/Services/TTSSettings.swift` | 組合語音佇列、控制播放行為與設定；新增語音參數時須調整這些檔案。 |
 
-## 4. 聊天與研究助理
+## 5. 聊天與研究助理
 
 | 任務 | 主要檔案 | 說明 |
 | ---- | -------- | ---- |
@@ -39,12 +54,12 @@
 | HTTP 交握 | `Features/Chat/Services/ChatService.swift` | `ChatServiceHTTP` 會將圖片附件轉換為 base64、附上每個流程的模型設定，並對 500/422 錯誤做本地化轉換。 |
 | 研究輸出模型 | `Features/Chat/Models/ChatModels.swift` | `ChatResearchResponse.items` 轉成 `ChatResearchItem(term/explanation/context/type)`；若後端回傳空陣列會拋錯提醒使用者補充資訊。 |
 
-## 5. 通知與 Banner
+## 6. 通知與 Banner
 
 - `DesignSystem/BannerCenter.swift` 處理全域 Banner 顯示與自動關閉，`App/translationApp.swift` 透過 Notification 觸發成功/失敗 Banner。
 - 要新增新的 Banner 類型，可在對應事件發送 `NotificationCenter` 通知，並於 `translationApp` 加入新的 `onReceive`。
 
-## 6. 設定與偏好
+## 7. 設定與偏好
 
 - `App/AppSettingsStore.swift`：儲存使用者的 LLM 模型、Banner 時間、語言。
 - `Shared/Services/TTSSettings.swift`：管理 TTS 相關設定（語速、語言、間隔、變體填充）。

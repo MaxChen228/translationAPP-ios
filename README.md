@@ -12,7 +12,7 @@ SwiftUI iOS App：提供中英翻譯批改、錯誤高亮、Workspace 多工、�
 
 ## 目錄概覽
 - `ios/translation/App/`：App 生命週期、全域設定與路由（`translationApp.swift`, `AppSettingsStore.swift` 等）。
-- `ios/translation/DesignSystem/`：Design System 與共用 UI 元件（`DesignSystem.swift`, `Components/DS*`），新增日曆元件 `DSCalendarCell`、`DSCalendarGrid`。
+- `ios/translation/DesignSystem/`：Design System 與共用 UI 元件（`DesignSystem.swift`, `Components/DS*`），包含月曆元件 `DSCalendarCell`、`DSCalendarGrid` 與最新的 `DSButton`、`DSCardTitle`。
 - `ios/translation/Features/`：依領域拆分的模組（Workspace、Bank、Flashcards、Saved、Chat、Settings、**Calendar**）。
 - `ios/translation/Shared/`：跨模組共享的模型、服務、工具與通用 View。新增 `PracticeRecordsStore` 練習記錄管理。
 - `ios/translation/Resources/`：資源與在地化字串。
@@ -60,7 +60,9 @@ App 透過 Info.plist 的 `BACKEND_URL` 讀取後端位址（由 `AppConfig` 使
 - 單字卡（FlashcardDecksView → DeckDetailView → FlashcardsView）
   - 管理多 Deck；複習支援左右滑、翻面、標注模式；迷你播放器與 TTS 設定（語速/語言/間隔/順序）。
 - **練習日曆（CalendarView）**
-  - 月曆介面顯示每日練習活動；點選日期查看詳細統計；自動計算練習次數與平均分數；整合練習記錄資料視覺化。
+  - 月曆介面使用外框式卡片呈現每日練習活動；點選日期顯示詳細統計與練習摘要；支援快速跳回今天並整合練習記錄視覺化。
+- 練習記錄（PracticeRecordsListView.swift）
+  - 以 DSOutlineCard 呈現清單、統計與批改摘要，提供批次清除、錯誤數量徽章與題庫來源標示。
 
 ## 專案結構
 - 原始碼：`ios/translation/`
@@ -99,7 +101,8 @@ App 透過 Info.plist 的 `BACKEND_URL` 讀取後端位址（由 `AppConfig` 使
 ## 設計系統（Design System）
 - 字型載入：`FontLoader.registerBundledFonts()`
 - Palette/Spacing/Radius/Animations：`DesignSystem.swift` 與 `components/DS*.swift`
-- 常見自訂：細邊框、髮絲線、次要按鈕尺寸等 token 已封裝為組件屬性
+- `DSButton` 統一原本零散的主要/次要按鈕樣式，透過 `style`（primary/secondary）與 `size`（full/compact）參數套用。
+- `DSCardTitle`、`DSOutlineCard` 與新增的尺寸 token / hairline 設定，協助避免魔術數字並維持卡片排版一致。
 
 ## 測試
 - 單元：`ios/translationTests/`（Swift Testing）

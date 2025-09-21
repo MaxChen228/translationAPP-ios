@@ -52,7 +52,9 @@
 
 - **NestedTagFilterView** (`Features/Chat/Bank/Views/NestedTagFilterView.swift`)：**新增**階層式標籤篩選器，將 63 個標籤組織為 5 大類別，支援展開/收合與統計顯示。
 
-- **Design System 元件**：`DesignSystem/Components/DS*` 定義 Button、Card、色彩與動畫 Token，確保視覺一致。新增 `DSCalendarCell` 與 `DSCalendarGrid` 提供日曆功能的專用元件。
+- **Design System 元件**：`DesignSystem/Components/DS*` 定義 Button、Card、色彩與動畫 Token，確保視覺一致。`DSButton` 取代舊有主要/次要按鈕家族、`DSCardTitle` 統一卡片抬頭排版，並搭配新增的 spacing/border token 與 `DSCalendarCell`、`DSCalendarGrid` 支援日曆介面。
+- **PracticeRecordsListView** (`Features/Saved/Views/PracticeRecordsListView.swift`)
+  - 以 `DSOutlineCard` 呈現練習清單、統計資訊與批改摘要，支援錯誤數徽章、題庫來源標籤與批次清除對話框。
 
 ## 語音與播放架構
 
