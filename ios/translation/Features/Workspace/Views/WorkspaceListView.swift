@@ -336,6 +336,8 @@ private struct QuickActionsRow: View {
                         } label: { BankBooksEntryCard().frame(width: 220) }
                             .buttonStyle(DSCardLinkStyle())
                     }
+                    NavigationLink { CalendarView() } label: { CalendarEntryCard().frame(width: 220) }
+                        .buttonStyle(DSCardLinkStyle())
                     NavigationLink { SettingsView() } label: { SettingsEntryCard().frame(width: 220) }
                         .buttonStyle(DSCardLinkStyle())
                 }
