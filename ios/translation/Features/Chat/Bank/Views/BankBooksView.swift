@@ -154,7 +154,7 @@ struct BankBooksView: View {
         .onAppear { AppLog.uiInfo("[books] appear (local)=\(localBank.books.count)") }
         .sheet(isPresented: $showRandomSettings) {
             RandomPracticeSettingsSheet()
-                .presentationDetents([.height(180)])
+                .presentationDetents([.medium, .large])
         }
         .sheet(item: $renamingFolder) { f in
             RenameSheet(name: f.name) { new in bankFolders.rename(f.id, to: new) }
@@ -204,17 +204,23 @@ struct BankBooksView: View {
     }
 
     private func pickRandomItem() -> (String, BankItem)? {
-        // Collect all eligible items across all local books
+        let filterState = randomSettings.filterState
+
         var pool: [(String, BankItem)] = []
-        for b in localBank.books {
-            for it in b.items {
-                if randomSettings.excludeCompleted && localProgress.isCompleted(book: b.name, itemId: it.id) { continue }
-                pool.append((b.name, it))
+        for book in localBank.books {
+            for item in book.items {
+                if randomSettings.excludeCompleted && localProgress.isCompleted(book: book.name, itemId: item.id) {
+                    continue
+                }
+                if filterState.hasActiveFilters {
+                    guard let tags = item.tags, !tags.isEmpty else { continue }
+                    guard filterState.matches(tags: tags) else { continue }
+                }
+                pool.append((book.name, item))
             }
         }
-        guard !pool.isEmpty else { return nil }
-        let idx = Int.random(in: 0..<pool.count)
-        return pool[idx]
+
+        return pool.randomElement()
     }
 }
 
