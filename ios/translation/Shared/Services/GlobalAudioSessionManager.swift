@@ -16,6 +16,7 @@ final class GlobalAudioSessionManager: ObservableObject {
 
     // MARK: - Navigation Support
     @Published var shouldShowMiniPlayer: Bool = false
+    @Published var isInActiveSession: Bool = false // 追蹤是否在活躍的練習頁面中
     private var onReturnToSession: (() -> Void)?
 
     private var cancellables = Set<AnyCancellable>()
@@ -35,11 +36,11 @@ final class GlobalAudioSessionManager: ObservableObject {
             .assign(to: \.isActive, on: self)
             .store(in: &cancellables)
 
-        // 監控迷你播放器顯示狀態
+        // 監控迷你播放器顯示狀態 - 只在非活躍練習頁面時顯示
         $isActive
-            .combineLatest($currentSession)
-            .map { isActive, session in
-                return isActive && session != nil
+            .combineLatest($currentSession, $isInActiveSession)
+            .map { isActive, session, inActiveSession in
+                return isActive && session != nil && !inActiveSession
             }
             .receive(on: DispatchQueue.main)
             .assign(to: \.shouldShowMiniPlayer, on: self)
@@ -74,6 +75,17 @@ final class GlobalAudioSessionManager: ObservableObject {
         speechManager.stop()
         currentSession = nil
         onReturnToSession = nil
+        isInActiveSession = false
+    }
+
+    /// 標記進入活躍練習頁面
+    func enterActiveSession() {
+        isInActiveSession = true
+    }
+
+    /// 標記離開活躍練習頁面
+    func exitActiveSession() {
+        isInActiveSession = false
     }
 
     /// 回到原始會話頁面
@@ -83,7 +95,7 @@ final class GlobalAudioSessionManager: ObservableObject {
 
     // MARK: - Audio Controls (Delegate to SpeechManager)
 
-    func startTTS(with settings: TTSSettings, queue: [SpeechItem]) {
+    func startTTS(queue: [SpeechItem]) {
         speechManager.play(queue: queue)
     }
 

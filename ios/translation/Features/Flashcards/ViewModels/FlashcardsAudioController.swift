@@ -16,6 +16,8 @@ class FlashcardsAudioController {
         let queue = PlaybackBuilder.buildQueue(cards: viewModel.store.cards, startIndex: viewModel.store.index, settings: settings)
         speechManager.play(queue: queue)
         viewModel.lastTTSSettings = settings
+
+        // 不在這裡創建全局會話，只在退出頁面時創建
     }
 
     func speak(text: String, lang: String) {
@@ -70,5 +72,7 @@ class FlashcardsAudioController {
     func stopPlayback() {
         guard isActive else { return }
         speechManager.stop()
+        // 結束全局會話
+        globalAudio.endSession()
     }
 }

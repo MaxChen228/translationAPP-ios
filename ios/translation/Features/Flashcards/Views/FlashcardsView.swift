@@ -52,6 +52,7 @@ struct FlashcardsView: View {
     @StateObject private var store: FlashcardsStore
     @StateObject private var viewModel: FlashcardsViewModel
     @ObservedObject private var speechManager: FlashcardSpeechManager
+    @ObservedObject private var globalAudio = GlobalAudioSessionManager.shared
     @EnvironmentObject private var decksStore: FlashcardDecksStore
     @EnvironmentObject private var progressStore: FlashcardProgressStore
     @EnvironmentObject private var bannerCenter: BannerCenter
@@ -75,6 +76,9 @@ struct FlashcardsView: View {
         _store = StateObject(wrappedValue: store)
         _viewModel = StateObject(wrappedValue: viewModel)
         _speechManager = ObservedObject(wrappedValue: viewModel.speechManager)
+
+        // 立即標記為活躍練習頁面，防止迷你播放器顯示
+        GlobalAudioSessionManager.shared.enterActiveSession()
     }
 
     var body: some View {
@@ -87,8 +91,18 @@ struct FlashcardsView: View {
                     sessionRightCount: viewModel.sessionRightCount,
                     sessionWrongCount: viewModel.sessionWrongCount,
                     onClose: {
-                        // 退出時停止播放，防止後台繼續
-                        viewModel.audio.stopPlayback()
+                        // 退出時不停止播放，讓音頻繼續在背景播放
+                        // 設定全局會話信息，以便回到原始頁面
+                        if speechManager.isPlaying {
+                            globalAudio.startSession(
+                                deckName: viewModel.title,
+                                deckID: viewModel.deckID,
+                                totalCards: store.cards.count
+                            ) {
+                                // 回到此 FlashcardsView - 這裡需要導航邏輯
+                                // 暫時保留空實現，稍後會通過 RouterStore 實現
+                            }
+                        }
                         dismiss()
                     },
                     onOpenSettings: { viewModel.showSettings = true }
@@ -249,6 +263,12 @@ struct FlashcardsView: View {
         .toolbar { }
         .onAppear {
             viewModel.handleOnAppear(progressStore: progressStore)
+            // 標記進入活躍練習頁面
+            globalAudio.enterActiveSession()
+        }
+        .onDisappear {
+            // 標記離開活躍練習頁面
+            globalAudio.exitActiveSession()
         }
         .alert(Text("flashcards.alert.delete"), isPresented: binding(\.showDeleteConfirm)) {
             Button(String(localized: "action.delete", locale: locale), role: .destructive) {
@@ -283,6 +303,8 @@ struct FlashcardsView: View {
                     store.index = v
                     store.showBack = false
                 }
+                // 更新全局會話進度
+                globalAudio.updateSessionProgress(currentIndex: v)
             }
         }
         .onChange(of: speechManager.currentFace, initial: false) { _, face in
