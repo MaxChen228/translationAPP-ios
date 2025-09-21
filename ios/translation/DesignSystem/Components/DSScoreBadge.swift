@@ -34,12 +34,8 @@ struct DSScoreBadge: View {
         Text("\(score)")
             .dsType(style.fontSize)
             .fontWeight(.semibold)
-            .foregroundStyle(DS.Palette.onPrimary)
+            .foregroundStyle(scoreColor)
             .padding(style.padding)
-            .background(
-                Capsule()
-                    .fill(scoreColor)
-            )
             .overlay(
                 Capsule()
                     .stroke(scoreColor.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.hairline)

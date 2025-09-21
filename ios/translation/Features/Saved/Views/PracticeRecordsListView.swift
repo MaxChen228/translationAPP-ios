@@ -9,10 +9,10 @@ struct PracticeRecordsListView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(alignment: .leading, spacing: DS.Spacing.lg) {
+                VStack(alignment: .leading, spacing: DS.Spacing.xl) {
                     if store.records.isEmpty {
                         DSOutlineCard {
-                            VStack(spacing: DS.Spacing.md) {
+                            VStack(spacing: DS.Spacing.lg) {
                                 Image(systemName: "doc.text")
                                     .font(.largeTitle)
                                     .foregroundStyle(.secondary)
@@ -24,7 +24,7 @@ struct PracticeRecordsListView: View {
                                     .foregroundStyle(.secondary)
                                     .multilineTextAlignment(.center)
                             }
-                            .padding(DS.Spacing.lg)
+                            .padding(DS.Spacing.xl)
                         }
                     } else {
                         statsSection
@@ -61,11 +61,11 @@ struct PracticeRecordsListView: View {
 
     private var statsSection: some View {
         DSOutlineCard {
-            VStack(alignment: .leading, spacing: DS.Spacing.sm) {
+            VStack(alignment: .leading, spacing: DS.Spacing.md) {
                 DSSectionHeader(titleKey: "practice.records.stats.title", subtitleKey: "practice.records.stats.subtitle", accentUnderline: true)
 
                 let stats = store.getStatistics()
-                HStack(spacing: DS.Spacing.lg) {
+                HStack(spacing: DS.Spacing.xl) {
                     DSStatItem(
                         icon: "doc.text",
                         label: "總記錄",
@@ -82,18 +82,21 @@ struct PracticeRecordsListView: View {
                         value: "\(stats.totalErrors)"
                     )
                 }
+                .padding(.top, DS.Spacing.xs)
             }
         }
     }
 
     private var recordsList: some View {
-        VStack(alignment: .leading, spacing: DS.Spacing.md) {
+        VStack(alignment: .leading, spacing: DS.Spacing.lg) {
             DSSectionHeader(titleKey: "practice.records.list.title", subtitleKey: "practice.records.list.subtitle", accentUnderline: true)
 
-            ForEach(store.records.sorted { $0.createdAt > $1.createdAt }) { record in
-                PracticeRecordCard(record: record) {
-                    recordToDelete = record
-                    showDeleteConfirmation = true
+            LazyVStack(spacing: DS.Spacing.md) {
+                ForEach(store.records.sorted { $0.createdAt > $1.createdAt }) { record in
+                    PracticeRecordCard(record: record) {
+                        recordToDelete = record
+                        showDeleteConfirmation = true
+                    }
                 }
             }
         }
@@ -109,61 +112,68 @@ private struct PracticeRecordCard: View {
         DSOutlineCard {
             VStack(alignment: .leading, spacing: DS.Spacing.md) {
                 // Header with date and score
-                HStack {
-                    VStack(alignment: .leading, spacing: DS.Spacing.xs) {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
                         Text(record.createdAt, style: .date)
                             .dsType(DS.Font.caption)
                             .foregroundStyle(.secondary)
                         Text(record.createdAt, style: .time)
                             .dsType(DS.Font.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.tertiary)
                     }
                     Spacer()
                     HStack(spacing: DS.Spacing.sm) {
-                        DSScoreBadge(score: record.score)
-                        Text("\(record.errors.count)")
-                            .dsType(DS.Font.caption)
-                            .foregroundStyle(.secondary)
-                        Image(systemName: "exclamationmark.triangle")
-                            .dsType(DS.Font.caption)
-                            .foregroundStyle(.secondary)
+                        DSScoreBadge(score: record.score, style: .compact)
+                        if record.errors.count > 0 {
+                            HStack(spacing: DS.Spacing.xs2) {
+                                Text("\(record.errors.count)")
+                                    .dsType(DS.Font.caption)
+                                    .foregroundStyle(.secondary)
+                                Image(systemName: "exclamationmark.triangle")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
                     }
                 }
 
-                DSSeparator(color: DS.Palette.border.opacity(DS.Opacity.hairline))
+                DSSeparator(color: DS.Palette.border.opacity(0.08))
 
                 // Chinese text section
-                VStack(alignment: .leading, spacing: DS.Spacing.xs) {
+                VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
                     Text("中文原文")
                         .dsType(DS.Font.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.tertiary)
                     Text(record.chineseText)
-                        .dsType(DS.Font.serifBody, lineSpacing: 6, tracking: 0.1)
+                        .dsType(DS.Font.serifBody, lineSpacing: 4, tracking: 0.05)
                         .lineLimit(2)
+                        .foregroundStyle(.primary)
                 }
 
                 // English text section
-                VStack(alignment: .leading, spacing: DS.Spacing.xs) {
+                VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
                     Text("英文翻譯")
                         .dsType(DS.Font.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.tertiary)
                     Text(record.englishInput)
-                        .dsType(DS.Font.body)
+                        .dsType(DS.Font.body, lineSpacing: 2)
                         .lineLimit(2)
+                        .foregroundStyle(.secondary)
                 }
 
                 // Bank book name if available
                 if let bankBookName = record.bankBookName {
-                    HStack(spacing: DS.Spacing.xs) {
+                    HStack(spacing: DS.Spacing.xs2) {
                         Image(systemName: "book")
-                            .dsType(DS.Font.caption)
-                            .foregroundStyle(.secondary)
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
                         Text(bankBookName)
                             .dsType(DS.Font.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.tertiary)
                     }
                 }
             }
+            .padding(DS.Spacing.md)
         }
         .contextMenu {
             Button("delete", role: .destructive) {

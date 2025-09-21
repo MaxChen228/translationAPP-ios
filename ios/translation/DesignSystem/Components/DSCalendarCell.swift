@@ -12,39 +12,49 @@ struct DSCalendarCell: View {
             return DS.Palette.subdued.opacity(0.4)
         }
         if day.isToday {
-            return DS.Palette.onPrimary
+            return DS.Palette.primary
         }
         if isSelected {
-            return DS.Palette.onPrimary
+            return DS.Palette.primary
         }
         return DS.Palette.primary
     }
 
     private var backgroundColor: Color {
-        if day.isToday {
-            return DS.Palette.primary
-        }
-        if isSelected {
-            return DS.Palette.primary.opacity(0.8)
-        }
-        if day.hasActivity {
-            return DS.Palette.primary.opacity(DS.Opacity.fill)
-        }
         return Color.clear
     }
 
     private var borderColor: Color? {
-        if day.hasActivity && !day.isToday && !isSelected {
+        if day.isToday {
+            return DS.Palette.primary
+        }
+        if isSelected {
+            return DS.Palette.primary
+        }
+        if day.hasActivity {
             return DS.Palette.primary.opacity(DS.Opacity.border)
         }
         return nil
+    }
+
+    private var borderWidth: CGFloat {
+        if day.isToday {
+            return DS.BorderWidth.regular
+        }
+        if isSelected {
+            return DS.BorderWidth.regular * 1.5
+        }
+        if day.hasActivity {
+            return DS.BorderWidth.hairline
+        }
+        return 0
     }
 
     var body: some View {
         Button(action: onTap) {
             VStack(spacing: DS.Spacing.xs) {
                 Text("\(day.dayNumber)")
-                    .dsType(DS.Font.labelSm)
+                    .dsType(day.isToday ? DS.Font.serifBody : DS.Font.labelSm)
                     .fontWeight(day.isToday ? .semibold : .medium)
                     .foregroundStyle(textColor)
 
@@ -59,7 +69,8 @@ struct DSCalendarCell: View {
         .buttonStyle(DSCalendarCellStyle(
             isSelected: isSelected,
             backgroundColor: backgroundColor,
-            borderColor: borderColor
+            borderColor: borderColor,
+            borderWidth: borderWidth
         ))
         .contentShape(Circle())
     }
@@ -82,11 +93,7 @@ private struct DSCalendarActivityIndicator: View {
 
     var body: some View {
         Circle()
-            .fill(indicatorColor)
+            .stroke(indicatorColor, lineWidth: DS.BorderWidth.thin)
             .frame(width: indicatorSize, height: indicatorSize)
-            .overlay(
-                Circle()
-                    .stroke(DS.Palette.onPrimary.opacity(DS.Opacity.hairline), lineWidth: DS.BorderWidth.hairline)
-            )
     }
 }

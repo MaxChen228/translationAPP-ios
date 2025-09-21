@@ -100,6 +100,7 @@ struct DSCalendarCellStyle: ButtonStyle {
     let isSelected: Bool
     let backgroundColor: Color
     let borderColor: Color?
+    let borderWidth: CGFloat
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -109,15 +110,14 @@ struct DSCalendarCellStyle: ButtonStyle {
                     .fill(backgroundColor)
                     .overlay(
                         Group {
-                            if let borderColor {
+                            if let borderColor, borderWidth > 0 {
                                 Circle()
-                                    .stroke(borderColor, lineWidth: DS.BorderWidth.regular)
+                                    .stroke(borderColor, lineWidth: borderWidth)
                             }
                         }
                     )
             )
             .scaleEffect(configuration.isPressed ? 0.96 : 1)
-            .opacity(configuration.isPressed ? 0.9 : 1)
             .dsAnimation(DS.AnimationToken.subtle, value: configuration.isPressed)
             .dsAnimation(DS.AnimationToken.subtle, value: isSelected)
     }
