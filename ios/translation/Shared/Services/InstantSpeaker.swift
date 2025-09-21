@@ -18,6 +18,7 @@ final class InstantSpeaker: NSObject, ObservableObject, AVSpeechSynthesizerDeleg
     private var pendingResume: DispatchWorkItem?
     private var pausedByInstant: Bool = false
     private var bufferWindow: TimeInterval
+    private weak var pausedSpeechEngine: SpeechEngine?
 
     override init() {
         // Default buffer window 0.7s (per decision: B)
@@ -43,6 +44,9 @@ final class InstantSpeaker: NSObject, ObservableObject, AVSpeechSynthesizerDeleg
         if let speech, speech.isPlaying && !speech.isPaused {
             speech.pause()
             pausedByInstant = true
+            pausedSpeechEngine = speech
+        } else {
+            pausedSpeechEngine = nil
         }
 
         // Stop any current instant speaking and start fresh
@@ -51,7 +55,7 @@ final class InstantSpeaker: NSObject, ObservableObject, AVSpeechSynthesizerDeleg
 
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmed.isEmpty {
-            scheduleResumeIfNeeded(speech)
+            scheduleResumeIfNeeded(pausedSpeechEngine)
             return
         }
 
@@ -68,7 +72,7 @@ final class InstantSpeaker: NSObject, ObservableObject, AVSpeechSynthesizerDeleg
         pendingResume?.cancel(); pendingResume = nil
         if synth.isSpeaking { synth.stopSpeaking(at: .immediate) }
         isSpeaking = false
-        scheduleResumeIfNeeded(speech)
+        scheduleResumeIfNeeded(pausedSpeechEngine)
     }
 
     // MARK: - AVSpeechSynthesizerDelegate
@@ -77,7 +81,7 @@ final class InstantSpeaker: NSObject, ObservableObject, AVSpeechSynthesizerDeleg
             guard let self else { return }
             self.isSpeaking = false
             // Schedule buffered resume (decision B)
-            self.scheduleResumeIfNeeded(nil)
+            self.scheduleResumeIfNeeded(self.pausedSpeechEngine)
         }
     }
 
@@ -97,6 +101,7 @@ final class InstantSpeaker: NSObject, ObservableObject, AVSpeechSynthesizerDeleg
             guard let self else { return }
             if let s = speechRef, s.isPlaying { s.resume() }
             self.pausedByInstant = false
+            self.pausedSpeechEngine = nil
         }
         pendingResume = work
         DispatchQueue.main.asyncAfter(deadline: .now() + bufferWindow, execute: work)
