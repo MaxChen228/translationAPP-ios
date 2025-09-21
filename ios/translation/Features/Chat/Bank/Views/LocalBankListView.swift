@@ -210,7 +210,12 @@ struct LocalBankListView: View {
                             }
                             Spacer(minLength: 0)
                             if localProgress.isCompleted(book: bookName, itemId: item.id) {
-                                CompletionBadge()
+                                NavigationLink {
+                                    BankPracticeRecordsView(bookName: bookName, item: item)
+                                } label: {
+                                    CompletionBadge(showsChevron: true)
+                                }
+                                .buttonStyle(.plain)
                             } else {
                                 Button {
                                     if let onPractice {
@@ -270,11 +275,16 @@ struct LocalBankListView: View {
 
 // 重用遠端清單的完成徽章樣式
 private struct CompletionBadge: View {
+    var showsChevron: Bool = false
     @Environment(\.locale) private var locale
     var body: some View {
         HStack(spacing: 6) {
             Image(systemName: "checkmark.seal.fill")
             Text(String(localized: "label.completed", locale: locale))
+            if showsChevron {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: DS.IconSize.chevronSm, weight: .semibold))
+            }
         }
         .font(.subheadline)
         .foregroundStyle(DS.Palette.primary)

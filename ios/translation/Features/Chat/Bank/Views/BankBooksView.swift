@@ -49,13 +49,11 @@ struct BankBooksView: View {
                             Button(String(localized: "action.delete", locale: locale), role: .destructive) { _ = bankFolders.removeFolder(folder.id) }
                         }
                         .onDrop(of: [.text], delegate: BookIntoFolderDropDelegate(folderID: folder.id, folders: bankFolders, editController: editController))
-                        .highPriorityGesture(
+                        .simultaneousGesture(
+                            editController.isEditing ?
                             TapGesture().onEnded {
-                                if editController.isEditing {
-                                    editController.exitEditMode()
-                                }
-                            },
-                            including: .gesture
+                                editController.exitEditMode()
+                            } : nil
                         )
                     }
                     Button { _ = bankFolders.addFolder(name: String(localized: "folder.new", locale: locale)) } label: { NewBankFolderCard() }
@@ -170,13 +168,11 @@ struct BankBooksView: View {
                             indexOf: { name in bankOrder.indexInRoot(name, root: orderedRootBooks.map { $0.name }) },
                             move: { id, to in bankOrder.moveInRoot(id: id, to: to, root: orderedRootBooks.map { $0.name }) }
                         ))
-                        .highPriorityGesture(
+                        .simultaneousGesture(
+                            editController.isEditing ?
                             TapGesture().onEnded {
-                                if editController.isEditing {
-                                    editController.exitEditMode()
-                                }
-                            },
-                            including: .gesture
+                                editController.exitEditMode()
+                            } : nil
                         )
                         }
                     }

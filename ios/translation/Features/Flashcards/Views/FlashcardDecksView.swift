@@ -32,13 +32,11 @@ struct FlashcardDecksView: View {
                             Button(String(localized: "action.delete", locale: locale), role: .destructive) { _ = deckFolders.removeFolder(folder.id) }
                         }
                         .onDrop(of: [.text], delegate: DeckIntoFolderDropDelegate(folderID: folder.id, folders: deckFolders, editController: editController))
-                        .highPriorityGesture(
+                        .simultaneousGesture(
+                            editController.isEditing ?
                             TapGesture().onEnded {
-                                if editController.isEditing {
-                                    editController.exitEditMode()
-                                }
-                            },
-                            including: .gesture
+                                editController.exitEditMode()
+                            } : nil
                         )
                     }
                     Button { _ = deckFolders.addFolder(name: String(localized: "folder.new", locale: locale)) } label: { NewDeckFolderCard() }
@@ -114,13 +112,11 @@ struct FlashcardDecksView: View {
                             move: { id, to, root in deckOrder.move(id: id, to: to, rootIDs: root) },
                             editController: editController
                         ))
-                        .highPriorityGesture(
+                        .simultaneousGesture(
+                            editController.isEditing ?
                             TapGesture().onEnded {
-                                if editController.isEditing {
-                                    editController.exitEditMode()
-                                }
-                            },
-                            including: .gesture
+                                editController.exitEditMode()
+                            } : nil
                         )
                     }
                 }

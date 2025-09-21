@@ -265,13 +265,11 @@ private struct WorkspaceItemLink: View {
             return NSItemProvider(object: ws.id.uuidString as NSString)
         }
         .onDrop(of: [.text], delegate: ReorderDropDelegate(item: ws, store: store, editController: editController))
-        .highPriorityGesture(
+        .simultaneousGesture(
+            editController.isEditing ?
             TapGesture().onEnded {
-                if editController.isEditing {
-                    editController.exitEditMode()
-                }
-            },
-            including: .gesture
+                editController.exitEditMode()
+            } : nil
         )
     }
 }
