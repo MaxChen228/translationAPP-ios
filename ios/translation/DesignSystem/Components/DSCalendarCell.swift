@@ -5,11 +5,9 @@ struct DSCalendarCell: View {
     let isSelected: Bool
     let onTap: () -> Void
 
-    private var cellSize: CGFloat { DS.IconSize.calendarCell }
-
     private var textColor: Color {
         if !day.isCurrentMonth {
-            return DS.Palette.subdued.opacity(0.4)
+            return DS.Palette.subdued.opacity(0.45)
         }
         if day.isToday {
             return DS.Palette.primary
@@ -17,10 +15,13 @@ struct DSCalendarCell: View {
         if isSelected {
             return DS.Palette.primary
         }
-        return DS.Palette.primary
+        return DS.Palette.subdued
     }
 
     private var backgroundColor: Color {
+        if isSelected {
+            return DS.Palette.primary.opacity(DS.Opacity.fill)
+        }
         return Color.clear
     }
 
@@ -29,7 +30,7 @@ struct DSCalendarCell: View {
             return DS.Palette.primary
         }
         if isSelected {
-            return DS.Palette.primary
+            return DS.Palette.primary.opacity(DS.Opacity.border)
         }
         if day.hasActivity {
             return DS.Palette.primary.opacity(DS.Opacity.border)
@@ -42,7 +43,7 @@ struct DSCalendarCell: View {
             return DS.BorderWidth.regular
         }
         if isSelected {
-            return DS.BorderWidth.regular * 1.5
+            return DS.BorderWidth.thin
         }
         if day.hasActivity {
             return DS.BorderWidth.hairline

@@ -3,16 +3,12 @@ import SwiftUI
 struct DayDetailView: View {
     let stats: DayPracticeStats
 
-    private var dateFormatter: DateFormatter {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .long
-        formatter.timeStyle = .none
-        return formatter
-    }
-
     var body: some View {
-        VStack(alignment: .leading, spacing: DS.Spacing.md) {
+        VStack(alignment: .leading, spacing: DS.Spacing.lg) {
             headerSection
+
+            DSSeparator(color: DS.Palette.border.opacity(DS.Opacity.hairline))
+
             statsGrid
 
             if stats.count > 1 {
@@ -22,10 +18,12 @@ struct DayDetailView: View {
     }
 
     private var headerSection: some View {
-        HStack {
-            Text(dateFormatter.string(from: stats.date))
-                .dsType(DS.Font.section)
-                .fontWeight(.semibold)
+        HStack(alignment: .center, spacing: DS.Spacing.md) {
+            DSCardTitle(
+                icon: "calendar",
+                titleText: formattedDate,
+                showChevron: false
+            )
 
             Spacer()
 
@@ -34,21 +32,25 @@ struct DayDetailView: View {
     }
 
     private var scoreIndicator: some View {
-        HStack(spacing: DS.Spacing.xs) {
+        HStack(spacing: DS.Spacing.xs2) {
             Image(systemName: "chart.line.uptrend.xyaxis")
-                .dsType(DS.Font.caption)
+                .font(.caption)
                 .foregroundStyle(scoreColor)
 
-            Text("\(Int(stats.averageScore))")
+            Text(averageScoreText)
                 .dsType(DS.Font.labelMd)
                 .fontWeight(.semibold)
                 .foregroundStyle(scoreColor)
         }
-        .padding(.horizontal, DS.Spacing.xs2)
-        .padding(.vertical, DS.Spacing.xs2)
+        .padding(.horizontal, DS.Spacing.sm)
+        .padding(.vertical, DS.Spacing.xs)
         .background(
             Capsule()
                 .fill(scoreColor.opacity(DS.Opacity.fill))
+        )
+        .overlay(
+            Capsule()
+                .stroke(scoreColor.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.hairline)
         )
     }
 
@@ -57,7 +59,7 @@ struct DayDetailView: View {
     }
 
     private var statsGrid: some View {
-        HStack(spacing: DS.Spacing.lg) {
+        HStack(spacing: DS.Spacing.xl) {
             DSStatItem(
                 icon: "doc.text",
                 label: "練習題數",
@@ -88,6 +90,17 @@ struct DayDetailView: View {
                 .dsType(DS.Font.caption)
                 .foregroundStyle(DS.Palette.subdued)
         }
+    }
+
+    private var formattedDate: String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .long
+        formatter.timeStyle = .none
+        return formatter.string(from: stats.date)
+    }
+
+    private var averageScoreText: String {
+        String(format: "%.1f", stats.averageScore)
     }
 
     private var formattedPracticeTime: String {
