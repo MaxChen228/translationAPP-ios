@@ -100,12 +100,6 @@ struct ChatWorkspaceView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .background(DS.Palette.background)
-
-                if shouldShowEmptyState {
-                    ChatEmptyStateView(onSuggestionTap: handleSuggestion)
-                        .padding(.horizontal, DS.Spacing.md)
-                        .padding(.top, DS.Spacing.lg)
-                }
             }
             .contentShape(Rectangle())
             .simultaneousGesture(TapGesture().onEnded { dismissKeyboard() })
@@ -204,11 +198,6 @@ struct ChatWorkspaceView: View {
         viewModel.messages.contains { $0.role == .user } || !viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.researchResult != nil || (viewModel.checklist?.isEmpty == false) || !pendingAttachments.isEmpty
     }
 
-    private var shouldShowEmptyState: Bool {
-        !viewModel.messages.contains { $0.role == .user }
-            && viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && pendingAttachments.isEmpty
-    }
 
     @MainActor
     private func scrollToLatest(_ proxy: ScrollViewProxy, animated: Bool = true) {
@@ -228,11 +217,6 @@ struct ChatWorkspaceView: View {
         if let checklist = viewModel.checklist, !checklist.isEmpty { return .checklist }
         if let last = viewModel.messages.last { return .message(last.id) }
         return nil
-    }
-
-    private func handleSuggestion(_ suggestion: String) {
-        viewModel.inputText = suggestion
-        isComposerFocused = true
     }
 
     private func dismissKeyboard() {
@@ -1084,80 +1068,6 @@ private struct ChatStateBadge: View {
     }
 }
 
-private struct ChatEmptyStateView: View {
-    @Environment(\.locale) private var locale
-    var onSuggestionTap: (String) -> Void
-
-    private struct SuggestionItem: Identifiable {
-        let id = UUID()
-        let key: String
-
-        var localizedKey: LocalizedStringKey { LocalizedStringKey(key) }
-        var resource: LocalizedStringResource { LocalizedStringResource(stringLiteral: key) }
-        var localizationValue: String.LocalizationValue { String.LocalizationValue(stringLiteral: key) }
-    }
-
-    private struct SuggestionRow: View {
-        var item: SuggestionItem
-        var locale: Locale
-        var onTap: (String) -> Void
-
-        var body: some View {
-            Button {
-                let suggestion = String(localized: item.localizationValue, locale: locale)
-                onTap(suggestion)
-            } label: {
-                HStack(alignment: .center, spacing: 10) {
-                    Image(systemName: "sparkles")
-                        .foregroundStyle(DS.Brand.scheme.provence)
-                    Text(item.localizedKey)
-                        .dsType(DS.Font.body)
-                    Spacer(minLength: 0)
-                }
-                .padding(.vertical, DS.Spacing.sm2)
-                .padding(.horizontal, DS.Spacing.md)
-                .background(
-                    RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
-                        .fill(DS.Brand.scheme.babyBlue.opacity(DS.Opacity.fill))
-                )
-            }
-            .buttonStyle(.plain)
-        }
-    }
-
-    private let suggestions: [SuggestionItem] = [
-        SuggestionItem(key: "chat.empty.suggestion1"),
-        SuggestionItem(key: "chat.empty.suggestion2"),
-        SuggestionItem(key: "chat.empty.suggestion3")
-    ]
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: DS.Spacing.md) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text("chat.empty.title")
-                    .dsType(DS.Font.serifTitle)
-                Text("chat.empty.subtitle")
-                    .dsType(DS.Font.body, lineSpacing: 4)
-                    .foregroundStyle(.secondary)
-            }
-
-            VStack(alignment: .leading, spacing: 8) {
-                ForEach(suggestions) { item in
-                    SuggestionRow(item: item, locale: locale, onTap: onSuggestionTap)
-                }
-            }
-        }
-        .padding(DS.Spacing.lg)
-        .background(
-            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                .fill(DS.Palette.surface)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                .stroke(DS.Palette.border.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.thin)
-        )
-    }
-}
 
 private struct ErrorBanner: View {
     var text: String
