@@ -64,7 +64,7 @@ struct BankBooksView: View {
                                 NavigationLink {
                                     AllBankItemsView(vm: vm, onPractice: onPracticeLocal)
                                 } label: {
-                                    DSQuickActionIconGlyph(systemName: "list.bullet", size: 28)
+                                    DSQuickActionIconGlyph(systemName: "list.bullet", shape: .circle, size: 28)
                                 }
                                 .accessibilityLabel("瀏覽所有題庫")
                                 RandomPracticeToolbarButton { runRandomPractice() }
