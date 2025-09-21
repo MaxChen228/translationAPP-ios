@@ -73,10 +73,11 @@ struct SavedJSONListSheet: View {
     }
 
     private var populatedState: some View {
-        ScrollView {
+        VStack(spacing: 0) {
             controlBar
                 .padding(.horizontal, DS.Spacing.lg)
                 .padding(.top, DS.Spacing.lg)
+                .padding(.bottom, DS.Spacing.md)
 
             ZStack(alignment: .top) {
                 if activeStash == .left {
@@ -89,6 +90,7 @@ struct SavedJSONListSheet: View {
             }
             .dsAnimation(DS.AnimationToken.snappy, value: activeStash)
         }
+        .background(DS.Palette.background)
     }
 
     private var controlBar: some View {
@@ -244,38 +246,50 @@ private extension SavedJSONListSheet {
             }
             .frame(maxWidth: .infinity, minHeight: 300)
         } else {
-            LazyVStack(alignment: .leading, spacing: DS.Spacing.md) {
+            List {
                 ForEach(rows) { row in
-                    SwipeableRow(
-                        allowLeft: stash == .right,
-                        allowRight: stash == .left,
-                        onTriggerLeft: {
-                            store.move(row.id, to: .left)
-                            Haptics.success()
+                    SavedErrorRowCard(
+                        row: row,
+                        expanded: expanded.contains(row.id),
+                        onToggle: {
+                            DSMotion.run(DS.AnimationToken.subtle) {
+                                if expanded.contains(row.id) { expanded.remove(row.id) }
+                                else { expanded.insert(row.id) }
+                            }
                         },
-                        onTriggerRight: {
-                            store.move(row.id, to: .right)
-                            Haptics.success()
+                        onCopy: { copyJSON(row.rawJSON) },
+                        onDelete: { deleteRow(row.id) }
+                    )
+                    .swipeActions(edge: .leading, allowsFullSwipe: stash == .left) {
+                        if stash == .left {
+                            Button {
+                                store.move(row.id, to: .right)
+                                Haptics.success()
+                            } label: {
+                                Label(String(localized: "saved.moveRight", locale: locale), systemImage: "arrow.uturn.forward.circle")
+                            }
+                            .tint(DS.Brand.scheme.classicBlue)
                         }
-                    ) {
-                        SavedErrorRowCard(
-                            row: row,
-                            expanded: expanded.contains(row.id),
-                            onToggle: {
-                                DSMotion.run(DS.AnimationToken.subtle) {
-                                    if expanded.contains(row.id) { expanded.remove(row.id) }
-                                    else { expanded.insert(row.id) }
-                                }
-                            },
-                            onCopy: { copyJSON(row.rawJSON) },
-                            onDelete: { deleteRow(row.id) }
-                        )
                     }
+                    .swipeActions(edge: .trailing, allowsFullSwipe: stash == .right) {
+                        if stash == .right {
+                            Button {
+                                store.move(row.id, to: .left)
+                                Haptics.success()
+                            } label: {
+                                Label(String(localized: "saved.moveLeft", locale: locale), systemImage: "arrow.uturn.backward.circle")
+                            }
+                            .tint(DS.Brand.scheme.provence)
+                        }
+                    }
+                    .listRowInsets(.init(top: 0, leading: DS.Spacing.lg, bottom: DS.Spacing.md, trailing: DS.Spacing.lg))
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
                 }
             }
-            .padding(.horizontal, DS.Spacing.lg)
-            .padding(.top, DS.Spacing.md)
-            .padding(.bottom, DS.Spacing.lg)
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
+            .background(DS.Palette.background)
             .dsAnimation(DS.AnimationToken.reorder, value: rows.map { $0.id })
         }
     }
