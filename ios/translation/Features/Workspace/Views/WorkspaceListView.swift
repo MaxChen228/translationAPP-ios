@@ -92,6 +92,8 @@ struct WorkspaceListView: View {
                 store.localBankStore = localBank
                 store.localProgressStore = localProgress
                 store.practiceRecordsStore = practiceRecords
+                // Rebind all existing ViewModels to ensure they have the latest store references
+                store.rebindAllStores()
             }
         }
         // 只在 ScrollView 範圍處理後備 drop；避免多層干擾

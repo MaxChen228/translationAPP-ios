@@ -34,14 +34,7 @@ final class WorkspaceStore: ObservableObject {
         if let vm = viewModels[id] { return vm }
         let vm = CorrectionViewModel(service: service, workspaceID: id.uuidString)
 
-        // Bind stores if available
-        if let localBank = localBankStore, let localProgress = localProgressStore {
-            vm.bindLocalBankStores(localBank: localBank, progress: localProgress)
-        }
-        if let practiceRecords = practiceRecordsStore {
-            vm.bindPracticeRecordsStore(practiceRecords)
-        }
-
+        bindStores(to: vm)
         viewModels[id] = vm
         return vm
     }
@@ -54,14 +47,7 @@ final class WorkspaceStore: ObservableObject {
         // 準備 VM（將自動載入其持久化狀態）
         let vm = CorrectionViewModel(service: AIServiceFactory.makeDefault(), workspaceID: ws.id.uuidString)
 
-        // Bind stores if available
-        if let localBank = localBankStore, let localProgress = localProgressStore {
-            vm.bindLocalBankStores(localBank: localBank, progress: localProgress)
-        }
-        if let practiceRecords = practiceRecordsStore {
-            vm.bindPracticeRecordsStore(practiceRecords)
-        }
-
+        bindStores(to: vm)
         viewModels[ws.id] = vm
         return ws
     }
@@ -105,6 +91,22 @@ final class WorkspaceStore: ObservableObject {
         if vm.response != nil { return String(localized: "workspace.status.corrected") }
         if !(vm.inputZh.isEmpty && vm.inputEn.isEmpty) { return String(localized: "workspace.status.inProgress") }
         return String(localized: "workspace.status.empty")
+    }
+
+    // MARK: - Store binding
+    private func bindStores(to vm: CorrectionViewModel) {
+        if let localBank = localBankStore, let localProgress = localProgressStore {
+            vm.bindLocalBankStores(localBank: localBank, progress: localProgress)
+        }
+        if let practiceRecords = practiceRecordsStore {
+            vm.bindPracticeRecordsStore(practiceRecords)
+        }
+    }
+
+    func rebindAllStores() {
+        for vm in viewModels.values {
+            bindStores(to: vm)
+        }
     }
 
     // MARK: - Persistence (list only; VM 狀態由 VM 自行持久化)
