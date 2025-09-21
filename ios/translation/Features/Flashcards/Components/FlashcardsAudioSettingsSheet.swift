@@ -16,10 +16,10 @@ struct FlashcardsAudioSettingsSheet: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("tts.order").dsType(DS.Font.caption).foregroundStyle(.secondary)
                     Picker("tts.order", selection: Binding(get: { s.readOrder }, set: { store.settings.readOrder = $0 })) {
-                        Text("tts.order.front").tag(ReadOrder.frontOnly)
-                        Text("tts.order.back").tag(ReadOrder.backOnly)
-                        Text("tts.order.frontThenBack").tag(ReadOrder.frontThenBack)
-                        Text("tts.order.backThenFront").tag(ReadOrder.backThenFront)
+                        Text(ReadOrder.frontOnly.displayName).tag(ReadOrder.frontOnly)
+                        Text(ReadOrder.backOnly.displayName).tag(ReadOrder.backOnly)
+                        Text(ReadOrder.frontThenBack.displayName).tag(ReadOrder.frontThenBack)
+                        Text(ReadOrder.backThenFront.displayName).tag(ReadOrder.backThenFront)
                     }
                     .tint(DS.Palette.primary)
                     .pickerStyle(.segmented)
@@ -57,8 +57,8 @@ struct FlashcardsAudioSettingsSheet: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("tts.variantFill").dsType(DS.Font.caption).foregroundStyle(.secondary)
                     Picker("tts.variantFill", selection: Binding(get: { store.settings.variantFill }, set: { store.settings.variantFill = $0 })) {
-                        Text("tts.fill.random").tag(VariantFill.random)
-                        Text("tts.fill.wrap").tag(VariantFill.wrap)
+                        Text(VariantFill.random.displayName).tag(VariantFill.random)
+                        Text(VariantFill.wrap.displayName).tag(VariantFill.wrap)
                     }
                     .tint(DS.Palette.primary)
                     .pickerStyle(.segmented)

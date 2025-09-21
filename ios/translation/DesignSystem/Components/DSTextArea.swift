@@ -7,6 +7,7 @@ struct DSTextArea: View {
     var placeholder: String
     var isFocused: Bool = false
     var ruled: Bool = false
+    var disableAutocorrection: Bool = false
 
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -27,6 +28,8 @@ struct DSTextArea: View {
                 .font(DS.Font.body)
                 .scrollContentBackground(.hidden)
                 .background(Color.clear)
+                .autocorrectionDisabled(disableAutocorrection)
+                .textInputAutocapitalization(disableAutocorrection ? .never : .sentences)
         }
         .padding(8)
         .background(

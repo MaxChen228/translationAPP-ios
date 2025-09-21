@@ -111,9 +111,16 @@ struct SavedJSONListSheet: View {
                     size: 32
                 )
                 .disabled(activeStash == .left)
-                Text("\(currentCount) / \(otherCount)")
-                    .dsType(DS.Font.caption)
-                    .foregroundStyle(.secondary)
+                HStack(spacing: 4) {
+                    if activeStash == .left {
+                        Text(String(localized: "saved.stash.left", locale: locale))
+                    } else {
+                        Text(String(localized: "saved.stash.right", locale: locale))
+                    }
+                    Text("\(currentCount)")
+                }
+                .dsType(DS.Font.caption)
+                .foregroundStyle(.secondary)
                 DSQuickActionIconButton(
                     systemName: "chevron.right",
                     labelKey: "saved.switchRight",

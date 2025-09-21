@@ -2,14 +2,35 @@ import Foundation
 import SwiftUI
 
 enum ReadOrder: String, CaseIterable, Codable, Identifiable {
-    case frontOnly = "Front"
-    case backOnly = "Back"
-    case frontThenBack = "Front→Back"
-    case backThenFront = "Back→Front"
+    case frontOnly = "front"
+    case backOnly = "back"
+    case frontThenBack = "frontThenBack"
+    case backThenFront = "backThenFront"
+
     var id: String { rawValue }
+
+    var displayName: LocalizedStringKey {
+        switch self {
+        case .frontOnly: return "tts.order.front"
+        case .backOnly: return "tts.order.back"
+        case .frontThenBack: return "tts.order.frontThenBack"
+        case .backThenFront: return "tts.order.backThenFront"
+        }
+    }
 }
 
-enum VariantFill: String, CaseIterable, Codable, Identifiable { case random, wrap; var id: String { rawValue } }
+enum VariantFill: String, CaseIterable, Codable, Identifiable {
+    case random, wrap
+
+    var id: String { rawValue }
+
+    var displayName: LocalizedStringKey {
+        switch self {
+        case .random: return "tts.fill.random"
+        case .wrap: return "tts.fill.wrap"
+        }
+    }
+}
 
 struct TTSSettings: Codable, Equatable {
     var readOrder: ReadOrder = .frontThenBack

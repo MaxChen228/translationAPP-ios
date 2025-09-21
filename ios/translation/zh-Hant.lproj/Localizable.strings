@@ -211,11 +211,13 @@
 "tts.pause" = "暫停音訊";
 
 /* 已儲存 JSON */
-"nav.savedJSON" = "已儲存 JSON";
-"saved.clear" = "清空";
+"nav.savedJSON" = "暫存區";
+"saved.clear" = "清除全部";
 "saved.saveDeck" = "儲存單字卡";
-"saved.switchLeft" = "切換到左側收藏";
-"saved.switchRight" = "切換到右側收藏";
+"saved.switchLeft" = "切換至左側暫存";
+"saved.switchRight" = "切換至右側暫存";
+"saved.moveLeft" = "移至左側";
+"saved.moveRight" = "移至右側";
 "deck.untitled" = "未命名";
 "saved.empty" = "尚未儲存任何項目";
 "saved.unparsable" = "資料格式錯誤，無法讀取";
@@ -224,14 +226,17 @@
 "label.enCorrectedPrefix" = "修正版：";
 "action.copyJSON" = "複製JSON";
 "action.copied" = "已複製";
-"saved.confirm.delete" = "確定要刪除這筆紀錄嗎？";
+"saved.confirm.delete" = "確定要刪除這筆記錄嗎？";
+"saved.delete.confirm" = "確定要刪除這個項目嗎？";
+"saved.stash.left" = "左側";
+"saved.stash.right" = "右側";
 "action.delete" = "刪除";
 "action.back" = "返回";
 "action.cancel" = "取消";
 "action.edit" = "編輯";
 "action.done" = "完成";
 "loading.making" = "製作中…";
-"saved.saveDeck.prompt" = "將以下項目整理為卡片集：";
+"saved.saveDeck.prompt" = "從以下項目建立卡片集：";
 "saved.source.correction" = "批改";
 "saved.source.research" = "研究";
 "saved.deckName.placeholder" = "卡片集名稱";

@@ -32,7 +32,7 @@ struct SaveDeckNameSheet: View {
                 Button(role: .cancel) {
                     onAction(.cancel)
                     dismiss()
-                } label: { Text("action.cancel", tableName: nil, bundle: .main) }
+                } label: { Text("action.cancel") }
                 .buttonStyle(DSSecondaryButtonCompact())
                 .disabled(isSaving)
 
@@ -45,7 +45,7 @@ struct SaveDeckNameSheet: View {
                     if isSaving {
                         ProgressView()
                     } else {
-                        Text("action.save", tableName: nil, bundle: .main)
+                        Text("action.save")
                     }
                 }
                 .buttonStyle(DSPrimaryButtonCompact())

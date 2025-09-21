@@ -45,7 +45,7 @@ struct ContentView: View {
 
                     DSSectionHeader(titleKey: "content.en.title", subtitleKey: "content.en.subtitle", accentUnderline: true)
                     DSCard {
-                        DSTextArea(text: $vm.inputEn, minHeight: 140, placeholder: String(localized: "content.en.placeholder", locale: locale), isFocused: focused == .en, ruled: true)
+                        DSTextArea(text: $vm.inputEn, minHeight: 140, placeholder: String(localized: "content.en.placeholder", locale: locale), isFocused: focused == .en, ruled: true, disableAutocorrection: true)
                             .focused($focused, equals: .en)
                     }
 

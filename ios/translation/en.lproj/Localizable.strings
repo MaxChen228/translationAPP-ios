@@ -184,11 +184,13 @@
 "tts.pause" = "Pause audio";
 
 /* Saved JSON */
-"nav.savedJSON" = "Saved JSON";
+"nav.savedJSON" = "Stash";
 "saved.clear" = "Clear";
 "saved.saveDeck" = "Save Deck";
-"saved.switchLeft" = "Switch to left stash";
-"saved.switchRight" = "Switch to right stash";
+"saved.switchLeft" = "Switch to Left";
+"saved.switchRight" = "Switch to Right";
+"saved.moveLeft" = "Move to Left";
+"saved.moveRight" = "Move to Right";
 "deck.untitled" = "Untitled";
 "saved.empty" = "No saved items yet";
 "saved.unparsable" = "Cannot read this data format";
@@ -198,13 +200,16 @@
 "action.copyJSON" = "Copy JSON";
 "action.copied" = "Copied";
 "saved.confirm.delete" = "Delete this record?";
+"saved.delete.confirm" = "Delete this item?";
+"saved.stash.left" = "Left";
+"saved.stash.right" = "Right";
 "action.delete" = "Delete";
 "action.back" = "Back";
 "action.cancel" = "Cancel";
 "action.edit" = "Edit";
 "action.done" = "Done";
 "loading.making" = "Making…";
-"saved.saveDeck.prompt" = "Items to make into a deck:";
+"saved.saveDeck.prompt" = "Create deck from:";
 "saved.source.correction" = "Correction";
 "saved.source.research" = "Research";
 "saved.deckName.placeholder" = "Deck name";
