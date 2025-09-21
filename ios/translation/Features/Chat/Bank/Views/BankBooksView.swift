@@ -64,11 +64,7 @@ struct BankBooksView: View {
                                 NavigationLink {
                                     AllBankItemsView(vm: vm, onPractice: onPracticeLocal)
                                 } label: {
-                                    Image(systemName: "list.bullet")
-                                        .font(.system(size: 16, weight: .medium))
-                                        .frame(width: 28, height: 28)
-                                        .background(DS.Palette.surface, in: Circle())
-                                        .overlay(Circle().stroke(DS.Palette.border.opacity(0.3), lineWidth: DS.BorderWidth.thin))
+                                    DSQuickActionIconGlyph(systemName: "list.bullet", size: 28)
                                 }
                                 .accessibilityLabel("瀏覽所有題庫")
                                 RandomPracticeToolbarButton { runRandomPractice() }

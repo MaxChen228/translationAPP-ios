@@ -11,6 +11,17 @@ private func difficultyToRoman(_ difficulty: Int) -> String {
     }
 }
 
+private func difficultyColor(_ difficulty: Int) -> Color {
+    switch difficulty {
+    case 1: return DS.Palette.success
+    case 2: return DS.Brand.scheme.cornhusk
+    case 3: return DS.Brand.scheme.peachQuartz
+    case 4: return DS.Palette.warning
+    case 5: return DS.Palette.danger
+    default: return DS.Palette.neutral
+    }
+}
+
 struct AllBankItemsView: View {
     @ObservedObject var vm: CorrectionViewModel
     // Optional override: when provided, caller controls where the practice item goes
@@ -111,198 +122,202 @@ struct AllBankItemsView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: DS.Spacing.lg) {
-            // Progress indicator showing total items (using original design)
-            if !allItemsWithBook.isEmpty {
-                let total = filteredAndSortedItems.count
-                DSOutlineCard {
-                    HStack(alignment: .center) {
-                        Text(String(localized: "label.progress", locale: locale))
-                            .dsType(DS.Font.caption)
-                            .foregroundStyle(.secondary)
-                        ProgressView(value: 0, total: Double(max(total, 1)))
-                            .tint(DS.Palette.primary)
-                            .frame(maxWidth: .infinity)
-                            .padding(.horizontal, 8)
-                        Text("0 / \(total)")
-                            .dsType(DS.Font.caption)
-                    }
-                    .padding(.vertical, 2)
-                }
-            }
+        let items = filteredAndSortedItems
+        let allItems = allItemsWithBook
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 16) {
+                // Progress indicator showing total items (using original design)
+                if !allItems.isEmpty {
+                    let completed = items.filter { item, bookName in
+                        localProgress.isCompleted(book: bookName, itemId: item.id)
+                    }.count
+                    let total = items.count
 
-            // Filter and Sort Controls (using original layout from LocalBankListView)
-            if !allItemsWithBook.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        // All items chip (like original design)
-                        DSFilterChip(
-                            label: "全部",
-                            count: allItemsWithBook.count,
-                            color: DS.Palette.primary,
-                            selected: selectedDifficulties.isEmpty && !tagFilterState.hasActiveFilters,
-                            action: {
-                                selectedDifficulties.removeAll()
-                                tagFilterState.clear()
-                            }
-                        )
-
-                        // Difficulty filters (using Roman numerals)
-                        ForEach(difficultyStats, id: \.0) { difficulty, count in
-                            DSDifficultyFilterChip(
-                                difficulty: difficulty,
-                                count: count,
-                                selected: selectedDifficulties.contains(difficulty)
-                            ) {
-                                if selectedDifficulties.contains(difficulty) {
-                                    selectedDifficulties.remove(difficulty)
-                                } else {
-                                    selectedDifficulties.insert(difficulty)
-                                }
-                            }
+                    DSOutlineCard {
+                        HStack(alignment: .center) {
+                            Text(String(localized: "label.progress", locale: locale))
+                                .dsType(DS.Font.caption)
+                                .foregroundStyle(.secondary)
+                            ProgressView(value: Double(completed), total: Double(max(total, 1)))
+                                .tint(DS.Palette.primary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.horizontal, 8)
+                            Text("\(completed) / \(total)")
+                                .dsType(DS.Font.caption)
                         }
+                        .padding(.vertical, 2)
                     }
-                    .padding(.horizontal, 2)
                 }
 
-                HStack {
-                    // Sort picker (original style)
-                    BankItemSortPicker(selectedSort: $sortOption)
-
-                    Spacer()
-
-                    // Tag filter button
-                    Button("標籤篩選") {
-                        showTagFilter = true
-                    }
-                    .buttonStyle(DSSecondaryButtonCompact())
-                }
-            }
-
-            // Items list using original card design
-            if filteredAndSortedItems.isEmpty {
-                EmptyStateCard(
-                    title: localBank.books.isEmpty ? String(localized: "bank.local.empty", locale: locale) : "無符合條件的項目",
-                    subtitle: localBank.books.isEmpty ? String(localized: "cloud.books.subtitle", locale: locale) : "請調整篩選條件",
-                    iconSystemName: "books.vertical"
-                )
-            } else {
-                ScrollView {
-                    LazyVStack(spacing: DS.Spacing.sm2) {
-                        ForEach(filteredAndSortedItems, id: \.0.id) { item, bookName in
-                            VStack(alignment: .leading, spacing: DS.Spacing.xs) {
-                                // Chinese text card
-                                VStack(alignment: .leading, spacing: DS.Spacing.xs) {
-                                    HStack {
-                                        // Book name indicator
-                                        Text(bookName)
-                                            .dsType(DS.Font.caption)
-                                            .foregroundStyle(.secondary)
-                                        Spacer()
-                                        // Difficulty badge using original design
-                                        Text(difficultyToRoman(item.difficulty))
-                                            .dsType(DS.Font.labelSm)
-                                            .foregroundStyle(DS.Palette.primary.opacity(0.8))
-                                            .padding(.horizontal, 8)
-                                            .padding(.vertical, 2)
-                                            .background(
-                                                Capsule().fill(DS.Palette.primary.opacity(0.1))
-                                            )
-                                    }
-
-                                    Text(item.zh)
-                                        .dsType(DS.Font.body)
-                                        .foregroundStyle(.primary)
-                                        .multilineTextAlignment(.leading)
+                // Filter and Sort Controls
+                if !allItems.isEmpty {
+                    VStack(spacing: DS.Spacing.sm) {
+                        // Quick filter chips row
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                // All filter (clear filters)
+                                DSFilterChip(
+                                    label: "filter.all",
+                                    count: allItems.count,
+                                    color: DS.Palette.neutral,
+                                    selected: selectedDifficulties.isEmpty && !tagFilterState.hasActiveFilters
+                                ) {
+                                    selectedDifficulties.removeAll()
+                                    tagFilterState.clear()
                                 }
-                                .padding(DS.Spacing.md)
-                                .background(DS.Palette.surface, in: RoundedRectangle(cornerRadius: DS.Radius.lg))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                                        .stroke(DS.Palette.border.opacity(DS.Opacity.muted), lineWidth: DS.BorderWidth.regular)
-                                        .background(DS.Palette.surface.opacity(0.0001))
-                                )
 
-                                // Bottom row with tags and practice button (original design)
-                                HStack(alignment: .center, spacing: 8) {
-                                    HStack(spacing: 8) {
-                                        if let tags = item.tags, !tags.isEmpty {
-                                            Text(tags.joined(separator: ", "))
-                                                .dsType(DS.Font.caption)
-                                                .foregroundStyle(.secondary)
-                                        }
-                                    }
-                                    Spacer(minLength: 0)
-                                    if localProgress.isCompleted(book: bookName, itemId: item.id) {
-                                        CompletionBadge()
-                                    } else {
-                                        Button {
-                                            handlePractice(bookName: bookName, item: item, tag: item.tags?.first)
-                                        } label: {
-                                            Text(String(localized: "action.practice", locale: locale))
-                                                .dsType(DS.Font.caption)
-                                                .foregroundStyle(DS.Palette.primary)
-                                        }
-                                        .buttonStyle(DSSecondaryButtonCompact())
-                                    }
-                                }
-                                .padding(.horizontal, DS.Spacing.md)
-
-                                // Expandable hints section (original design)
-                                if !item.hints.isEmpty {
-                                    DisclosureGroup(
-                                        isExpanded: Binding(
-                                            get: { expanded.contains(item.id) },
-                                            set: { isExpanded in
-                                                if isExpanded {
-                                                    expanded.insert(item.id)
-                                                } else {
-                                                    expanded.remove(item.id)
-                                                }
-                                            }
-                                        )
+                                // Difficulty filters
+                                ForEach(difficultyStats, id: \.0) { difficulty, count in
+                                    DSDifficultyFilterChip(
+                                        difficulty: difficulty,
+                                        count: count,
+                                        selected: selectedDifficulties.contains(difficulty)
                                     ) {
-                                        VStack(alignment: .leading, spacing: DS.Spacing.xs) {
-                                            ForEach(item.hints, id: \.id) { hint in
-                                                HStack(spacing: 8) {
-                                                    Circle()
-                                                        .fill(hint.category.color)
-                                                        .frame(width: 8, height: 8)
-                                                    Text(hint.text)
-                                                        .dsType(DS.Font.caption)
-                                                        .foregroundStyle(.secondary)
-                                                    Spacer()
-                                                }
-                                            }
+                                        if selectedDifficulties.contains(difficulty) {
+                                            selectedDifficulties.remove(difficulty)
+                                        } else {
+                                            selectedDifficulties.insert(difficulty)
                                         }
-                                        .padding(.horizontal, DS.Spacing.md)
-                                        .padding(.bottom, DS.Spacing.sm)
-                                    } label: {
-                                        HStack {
-                                            Image(systemName: "lightbulb")
-                                                .foregroundStyle(DS.Palette.primary)
-                                            Text(String(localized: "hints.title", locale: locale))
-                                                .dsType(DS.Font.caption)
-                                            Text("\(item.hints.count)")
-                                                .dsType(DS.Font.caption)
-                                                .foregroundStyle(.secondary)
-                                            Spacer()
-                                        }
-                                        .padding(.horizontal, DS.Spacing.md)
-                                        .padding(.vertical, DS.Spacing.sm)
-                                        .background(DS.Palette.surface.opacity(0.5))
                                     }
-                                    .dsAnimation(DS.AnimationToken.subtle, value: expanded.contains(item.id))
                                 }
+
+                                // Advanced tag filter button
+                                Button {
+                                    showTagFilter = true
+                                } label: {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "tag")
+                                        Text("標籤篩選")
+                                        if tagFilterState.hasActiveFilters {
+                                            Text("(\(tagFilterState.selectedTags.count))")
+                                                .dsType(DS.Font.caption)
+                                        }
+                                    }
+                                    .dsType(DS.Font.labelSm)
+                                    .foregroundStyle(tagFilterState.hasActiveFilters ? DS.Palette.primary : .primary)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 6)
+                                    .background(
+                                        Capsule()
+                                            .fill(tagFilterState.hasActiveFilters ? DS.Palette.primary.opacity(DS.Opacity.fill) : DS.Palette.surface)
+                                    )
+                                    .overlay(
+                                        Capsule()
+                                            .stroke(
+                                                tagFilterState.hasActiveFilters ? DS.Palette.primary.opacity(0.3) : DS.Palette.border.opacity(DS.Opacity.border),
+                                                lineWidth: DS.BorderWidth.thin
+                                            )
+                                    )
+                                }
+                                .buttonStyle(.plain)
                             }
+                            .padding(.horizontal, 2)
+                        }
+
+                        // Sort control
+                        HStack {
+                            if items.count != allItems.count {
+                                Text(String(format: String(localized: "filter.showing", locale: locale), items.count, allItems.count))
+                                    .dsType(DS.Font.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            BankItemSortPicker(selectedSort: $sortOption)
                         }
                     }
-                    .padding(.bottom, DS.Spacing.lg)
+                }
+
+                // Empty states
+                if items.isEmpty && !allItems.isEmpty {
+                    EmptyStateCard(
+                        title: String(localized: "filter.noResults", locale: locale),
+                        subtitle: String(localized: "filter.noResults.hint", locale: locale),
+                        iconSystemName: "line.3.horizontal.decrease.circle"
+                    )
+                } else if allItems.isEmpty {
+                    EmptyStateCard(
+                        title: localBank.books.isEmpty ? String(localized: "bank.local.empty", locale: locale) : "無符合條件的項目",
+                        subtitle: localBank.books.isEmpty ? String(localized: "cloud.books.subtitle", locale: locale) : "請調整篩選條件",
+                        iconSystemName: "books.vertical"
+                    )
+                }
+
+                // Items list using exact LocalBankListView structure
+                ForEach(items.indices, id: \.self) { i in
+                    if i > 0 {
+                        DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.border)).padding(.vertical, DS.Spacing.sm)
+                    }
+                    let (item, bookName) = items[i]
+                    VStack(alignment: .leading, spacing: 10) {
+                        // Main content card - Chinese text
+                        Text(item.zh)
+                            .dsType(DS.Font.serifTitle, lineSpacing: 6, tracking: 0.1)
+                            .padding(.vertical, 12)
+                            .padding(.horizontal, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
+                                    .stroke(DS.Palette.border.opacity(DS.Opacity.muted), lineWidth: DS.BorderWidth.regular)
+                                    .background(DS.Palette.surface.opacity(0.0001))
+                            )
+
+                        // Bottom row with difficulty, tags, and practice button
+                        HStack(alignment: .center, spacing: 8) {
+                            HStack(spacing: 8) {
+                                // Difficulty badge
+                                Text(difficultyToRoman(item.difficulty))
+                                    .dsType(DS.Font.labelSm)
+                                    .foregroundStyle(DS.Palette.primary.opacity(0.8))
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 2)
+                                    .background(
+                                        Capsule().fill(DS.Palette.primary.opacity(0.1))
+                                    )
+
+                                // Book name
+                                Text(bookName)
+                                    .dsType(DS.Font.caption)
+                                    .foregroundStyle(.secondary)
+
+                                // Tags
+                                if let tags = item.tags, !tags.isEmpty {
+                                    Text(tags.joined(separator: ", "))
+                                        .dsType(DS.Font.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                            Spacer(minLength: 0)
+                            if localProgress.isCompleted(book: bookName, itemId: item.id) {
+                                CompletionBadge()
+                            } else {
+                                Button {
+                                    handlePractice(bookName: bookName, item: item, tag: item.tags?.first)
+                                } label: {
+                                    Label {
+                                        Text(String(localized: "action.practice", locale: locale))
+                                    } icon: {
+                                        Image(systemName: "play.fill")
+                                    }
+                                }
+                                .buttonStyle(DSSecondaryButtonCompact())
+                            }
+                        }
+
+                        // Hints section
+                        HintListSection(
+                            hints: item.hints,
+                            isExpanded: Binding(
+                                get: { expanded.contains(item.id) },
+                                set: { v in if v { expanded.insert(item.id) } else { expanded.remove(item.id) } }
+                            )
+                        )
+                    }
+                    .padding(.vertical, 6)
                 }
             }
+            .padding(.horizontal, DS.Spacing.lg)
+            .padding(.top, DS.Spacing.lg)
+            .padding(.bottom, DS.Spacing.lg)
         }
-        .padding(.horizontal, DS.Spacing.lg)
-        .padding(.top, DS.Spacing.lg)
         .background(DS.Palette.background)
         .navigationTitle("所有題庫")
         .navigationBarTitleDisplayMode(.large)
@@ -344,20 +359,20 @@ struct AllBankItemsView: View {
     }
 }
 
-// Completion badge for completed items
+// Completion badge for completed items (matching LocalBankListView style)
 private struct CompletionBadge: View {
     @Environment(\.locale) private var locale
     var body: some View {
         HStack(spacing: 6) {
             Image(systemName: "checkmark.seal.fill")
-                .font(.caption)
-                .foregroundStyle(DS.Palette.success)
             Text(String(localized: "label.completed", locale: locale))
-                .dsType(DS.Font.caption)
-                .foregroundStyle(DS.Palette.success)
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(DS.Palette.success.opacity(0.1), in: Capsule())
+        .font(.subheadline)
+        .foregroundStyle(DS.Palette.primary)
+        .padding(.vertical, 6)
+        .padding(.horizontal, 10)
+        .background(Capsule().fill(Color.clear))
+        .overlay(Capsule().stroke(DS.Palette.primary.opacity(DS.Opacity.strong), lineWidth: DS.BorderWidth.regular))
+        .accessibilityLabel(Text("label.completed"))
     }
 }
