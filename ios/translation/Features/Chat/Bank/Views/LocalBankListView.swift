@@ -68,7 +68,7 @@ struct LocalBankListView: View {
     var body: some View {
         let items = filteredAndSortedItems
         let allItems = localBank.items(in: bookName)
-        ScrollView {
+        DSScrollContainer {
             LazyVStack(alignment: .leading, spacing: 16) {
                 // 頂部進度摘要：顯示「已完成 / 題數」
                 if !allItems.isEmpty {
@@ -237,11 +237,7 @@ struct LocalBankListView: View {
                     .padding(.vertical, 6)
                 }
             }
-            .padding(.horizontal, DS.Spacing.lg)
-            .padding(.top, DS.Spacing.lg)
-            .padding(.bottom, DS.Spacing.lg)
         }
-        .background(DS.Palette.background)
         .navigationTitle(bookName)
         .sheet(isPresented: $showTagFilter) {
             NavigationStack {

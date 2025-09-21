@@ -11,7 +11,7 @@ struct CloudBankLibraryView: View {
     @Environment(\.locale) private var locale
 
     var body: some View {
-        ScrollView {
+        DSScrollContainer {
             VStack(alignment: .leading, spacing: DS.Spacing.lg) {
                 if isLoading { ProgressView().frame(maxWidth: .infinity, alignment: .center) }
                 if let error { ErrorStateCard(title: error) }
@@ -39,11 +39,7 @@ struct CloudBankLibraryView: View {
                     }
                 }
             }
-            .padding(.horizontal, DS.Spacing.lg)
-            .padding(.top, DS.Spacing.lg)
-            .padding(.bottom, DS.Spacing.lg)
         }
-        .background(DS.Palette.background)
         .navigationTitle(Text("nav.cloudBooks"))
         .task { await load() }
         .refreshable { await load() }

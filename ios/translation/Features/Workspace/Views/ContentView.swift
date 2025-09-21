@@ -23,7 +23,7 @@ struct ContentView: View {
 
     @Environment(\.locale) private var locale
     var body: some View {
-        ScrollView {
+        DSScrollContainer {
             VStack(alignment: .leading, spacing: DS.Spacing.lg) {
                     HStack(alignment: .firstTextBaseline) {
                         DSSectionHeader(titleKey: "content.zh.title", subtitleKey: "content.zh.subtitle", accentUnderline: true)
@@ -131,12 +131,8 @@ struct ContentView: View {
                     }
                     .padding(.top, DS.Spacing.md)
                 }
-                .padding(.horizontal, DS.Spacing.lg)
-                .padding(.top, DS.Spacing.lg)
-                .padding(.bottom, DS.Spacing.lg)
             }
             .disabled(vm.isLoading)
-            .background(DS.Palette.background)
             .navigationTitle(Text("nav.translate"))
             .toolbar {
                 ToolbarItemGroup(placement: .keyboard) {
