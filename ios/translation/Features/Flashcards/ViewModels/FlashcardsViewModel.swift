@@ -27,7 +27,7 @@ final class FlashcardsViewModel: ObservableObject {
     let deckID: UUID?
     let originalCards: [Flashcard]
     let startEditingOnAppear: Bool
-    let speechManager = FlashcardSpeechManager()
+    var speechManager: FlashcardSpeechManager { GlobalAudioSessionManager.shared.speechManager }
     lazy var review = FlashcardsReviewCoordinator(viewModel: self)
     lazy var audio = FlashcardsAudioController(viewModel: self)
     let store: FlashcardsStore

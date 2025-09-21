@@ -24,6 +24,7 @@ struct TranslationApp: App {
     @StateObject private var router = RouterStore()
     @StateObject private var settings = AppSettingsStore()
     @StateObject private var randomSettings = RandomPracticeStore()
+    @StateObject private var globalAudio = GlobalAudioSessionManager.shared
     init() {
         FontLoader.registerBundledFonts()
         AppLog.aiInfo("App launched")
@@ -66,6 +67,13 @@ struct TranslationApp: App {
                     .environmentObject(router)
                 BannerHost()
                     .environmentObject(bannerCenter)
+
+                // 全局迷你播放器 - 顯示在底部
+                VStack {
+                    Spacer()
+                    GlobalAudioMiniPlayerView()
+                }
+                .environmentObject(globalAudio)
             }
                 .environmentObject(savedStore)
                 .environmentObject(decksStore)
