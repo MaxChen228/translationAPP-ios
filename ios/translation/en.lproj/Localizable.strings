@@ -53,7 +53,7 @@
 "cloud.books.title" = "Cloud Banks";
 "cloud.books.subtitle" = "Browse curated banks and copy to local";
 "cloud.books.empty" = "No cloud banks";
-"cloud.common.retry" = "Try again later or check backend settings.";
+"cloud.common.retry" = "Please try again or check connection.";
 "cloud.copyToLocal" = "Copy to Local";
 "nav.cloudDecks" = "Browse Decks";
 "nav.cloudBooks" = "Browse Banks";
@@ -91,7 +91,7 @@
 "flashcards.annotate.familiar" = "Familiar";
 "flashcards.annotate.unfamiliar" = "Unfamiliar";
 "flashcards.empty" = "No cards yet";
-"flashcards.empty.hint" = "Add or import cards later.";
+"flashcards.empty.hint" = "Add cards to begin studying.";
 
 /* Workspace status chips */
 "workspace.status.loading" = "Correcting…";
@@ -102,16 +102,16 @@
 /* Correction defaults */
 "content.sample.zh" = "我昨天去商店買水果。";
 "content.sample.en" = "I go to the shop yesterday to buy some fruits.";
-"content.error.emptyInput" = "Enter your English attempt before correcting.";
+"content.error.emptyInput" = "Please enter your English practice before grading.";
 
 /* Practice errors */
 "practice.error.notLocal" = "Not currently practicing a local bank.";
 "practice.error.storeMissing" = "Local bank data is unavailable.";
-"practice.error.noneRemaining" = "No unfinished items remain.";
+"practice.error.noneRemaining" = "Practice session completed.";
 
 /* Backend errors */
-"error.backend.missing" = "BACKEND_URL is not set, cannot reach backend.";
-"error.chat.backendMissing" = "BACKEND_URL is not set, chat is unavailable.";
+"error.backend.missing" = "Network unavailable. Please check connection.";
+"error.chat.backendMissing" = "Network unavailable. Chat is currently unavailable.";
 
 /* Flashcard samples */
 "flashcards.sample1.front" = "# ameliorate\n\n- verb\n- to make something better; improve\n\n**Example**: *We need to ameliorate the working conditions.*";
@@ -128,8 +128,7 @@
 /* Chat */
 "chat.title" = "AI Deep Chat";
 "chat.subtitle" = "Clarify your request with Gemini";
-"chat.greeting" = "Hi! I'm ready to help—what should we explore today?";
-"chat.reset" = "Reset";
+"chat.greeting" = "Hello! I'm your research assistant, and I'm delighted to assist you.\n\nTo better help you, please provide the content you'd like me to research. For example:\n\n- Articles or sentences that need revision suggestions\n- Specific vocabulary for **flashcard** creation\n- In-depth analysis of grammar structures or pragmatic issues\n\nI'll help you organize relevant information and provide professional insights based on your content.";
 "chat.placeholder" = "Type a message";
 "chat.reset" = "Reset conversation";
 "chat.send" = "Send";
@@ -191,8 +190,8 @@
 "saved.switchLeft" = "Switch to left stash";
 "saved.switchRight" = "Switch to right stash";
 "deck.untitled" = "Untitled";
-"saved.empty" = "No saved errors";
-"saved.unparsable" = "Unable to parse this record";
+"saved.empty" = "No saved items yet";
+"saved.unparsable" = "Cannot read this data format";
 "label.zhPrefix" = "Chinese: ";
 "label.enOriginalPrefix" = "Original: ";
 "label.enCorrectedPrefix" = "Corrected: ";
@@ -219,10 +218,10 @@
 "deck.new" = "New Deck";
 "flashcards.mode.browse" = "Browse";
 "flashcards.mode.annotate" = "Annotate";
-"banner.backend.missing.title" = "Backend not configured";
-"banner.backend.missing.subtitle" = "Please set BACKEND_URL";
+"banner.backend.missing.title" = "Network unavailable";
+"banner.backend.missing.subtitle" = "Please check connection settings";
 "action.practice" = "Practice";
-"bank.book.empty" = "This local book is empty";
+"bank.book.empty" = "This local bank is empty";
 "bank.book.empty.hint" = "Browse cloud banks and copy to local.";
 "flashcards.validator.frontEmpty" = "Front cannot be empty";
 "flashcards.validator.backSingleLine" = "Back must be a single line";
@@ -233,14 +232,14 @@
 "content.zh.title" = "Chinese Prompt";
 "content.zh.subtitle" = "Enter the sentence to translate";
 "content.bank" = "Bank";
-"content.en.title" = "My English";
-"content.en.subtitle" = "Type your attempt, then grade";
+"content.en.title" = "English Practice";
+"content.en.subtitle" = "Enter your translation, then grade";
 "content.en.placeholder" = "e.g., I go to the shop yesterday to buy some fruits.";
 "content.correct" = "Grade";
 "content.correcting" = "Grading…";
 "content.next" = "Next";
 "results.errors.title" = "Errors";
-"results.errors.subtitle" = "Tap to focus the highlight";
+"results.errors.subtitle" = "Tap items to focus highlights";
 "results.empty" = "No errors detected.";
 "result.switcher.original" = "Original";
 "result.switcher.corrected" = "Corrected";
@@ -254,8 +253,8 @@
 "chips.all" = "All";
 "a11y.openSavedJSON" = "Open saved error JSON";
 "a11y.copyCurrentComposition" = "Copy current composition";
-"banner.backend.missing.title" = "Backend not configured";
-"banner.backend.missing.subtitle" = "Please set BACKEND_URL";
+"banner.backend.missing.title" = "Network unavailable";
+"banner.backend.missing.subtitle" = "Please check connection settings";
 
 /* Workspace status */
 "workspace.status.loading" = "Grading…";
@@ -282,7 +281,7 @@
 "bank.random.title" = "Random";
 "bank.random.settings" = "Random Settings";
 "bank.random.excludeCompleted" = "Exclude completed";
-"banner.random.noneEligible" = "No eligible items";
+"banner.random.noneEligible" = "No qualifying items available";
 "bank.folders.empty" = "No folders";
 "bank.local.empty" = "No local banks";
 "bank.folder.count" = "%d books";
@@ -299,7 +298,7 @@
 
 /* Deck folder empty state */
 "deck.folder.empty" = "No decks in this folder";
-"deck.folder.hint" = "Drag decks from the root list here.";
+"deck.folder.hint" = "Drag deck collections here to organize.";
 "deck.cards.count" = "%d cards";
 "folder.decks.count" = "%d decks";
 "banner.deckSaved.title" = "Deck saved";

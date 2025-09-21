@@ -1,17 +1,17 @@
 /* 導覽 */
 "nav.settings" = "設定";
-"nav.workspace" = "Workspace";
-"nav.bank" = "題庫本";
+"nav.workspace" = "工作區";
+"nav.bank" = "題庫";
 
 /* 快速功能 */
 "quick.title" = "快速功能";
 "quick.flashcards.title" = "單字卡";
 "quick.flashcards.subtitle" = "Markdown 正反面";
-"quick.bank.title" = "題庫本";
-"quick.bank.subtitle" = "本機題庫（離線）／雲端瀏覽複製";
+"quick.bank.title" = "題庫";
+"quick.bank.subtitle" = "本機題庫（離線）/ 雲端瀏覽";
 "quick.settings.title" = "設定";
 "quick.settings.subtitle" = "Banner 與 Model 等";
-"quick.addWorkspace" = "新增 Workspace";
+"quick.addWorkspace" = "新增工作區";
 
 /* 設定 */
 "settings.banner.title" = "Banner";
@@ -44,14 +44,14 @@
 "content.zh.title" = "中文原文";
 "content.zh.subtitle" = "輸入要翻成英文的句子";
 "content.bank" = "題庫";
-"content.en.title" = "我的英文";
-"content.en.subtitle" = "先輸入你的嘗試，再按下批改";
-"content.en.placeholder" = "例如：I go to the shop yesterday to buy some fruits.";
+"content.en.title" = "英文練習";
+"content.en.subtitle" = "輸入您的翻譯，然後批改";
+"content.en.placeholder" = "範例：I go to the shop yesterday to buy some fruits.";
 "content.correct" = "批改";
 "content.correcting" = "批改中…";
 "content.next" = "下一題";
 "results.errors.title" = "錯誤列表";
-"results.errors.subtitle" = "點擊項目聚焦對應高亮";
+"results.errors.subtitle" = "點擊項目可聚焦對應高亮";
 "results.empty" = "未偵測到錯誤。";
 "result.switcher.original" = "原文";
 "result.switcher.corrected" = "修正版";
@@ -59,7 +59,7 @@
 "action.save" = "儲存";
 "action.saved" = "已儲存";
 "loading.correcting" = "正在批改…";
-"prompt.empty" = "尚未選擇題目";
+"prompt.empty" = "請選擇練習題目";
 "hints.title" = "提示";
 "hints.empty" = "目前沒有提示";
 "chips.all" = "全部";
@@ -80,7 +80,7 @@
 "cloud.books.title" = "雲端題庫本";
 "cloud.books.subtitle" = "瀏覽精選題庫，複製到本機使用";
 "cloud.books.empty" = "目前沒有雲端題庫本";
-"cloud.common.retry" = "稍後再試，或檢查後端設定。";
+"cloud.common.retry" = "請稍後再試或檢查連線。";
 "cloud.copyToLocal" = "複製到本機";
 "nav.cloudDecks" = "瀏覽單字卡集";
 "nav.cloudBooks" = "瀏覽題庫本";
@@ -118,7 +118,7 @@
 "flashcards.annotate.familiar" = "熟悉";
 "flashcards.annotate.unfamiliar" = "不熟悉";
 "flashcards.empty" = "尚無卡片";
-"flashcards.empty.hint" = "稍後可擴充為新增／匯入功能。";
+"flashcards.empty.hint" = "新增卡片以開始學習。";
 
 /* Workspace 狀態 */
 "workspace.status.loading" = "批改中…";
@@ -129,16 +129,16 @@
 /* 批改預設內容 */
 "content.sample.zh" = "我昨天去商店買水果。";
 "content.sample.en" = "I go to the shop yesterday to buy some fruits.";
-"content.error.emptyInput" = "請先輸入你的英文嘗試再批改。";
+"content.error.emptyInput" = "請先輸入您的英文練習再批改。";
 
 /* 題庫錯誤提示 */
 "practice.error.notLocal" = "目前不是本機題庫練習";
 "practice.error.storeMissing" = "本機題庫未綁定";
-"practice.error.noneRemaining" = "沒有未完成的題目";
+"practice.error.noneRemaining" = "練習已完成，表現優秀。";
 
 /* 後端錯誤 */
-"error.backend.missing" = "BACKEND_URL 未設定，無法連線後端。";
-"error.chat.backendMissing" = "BACKEND_URL 未設定，無法使用聊天。";
+"error.backend.missing" = "網路無法連線，請檢查設定。";
+"error.chat.backendMissing" = "網路無法連線，聊天功能暫時無法使用。";
 
 /* 單字卡示例 */
 "flashcards.sample1.front" = "# ameliorate\n\n- verb\n- to make something better; improve\n\n**Example**: *We need to ameliorate the working conditions.*";
@@ -155,8 +155,7 @@
 /* 聊天 */
 "chat.title" = "AI 深入訪談";
 "chat.subtitle" = "與 Gemini 聊聊，確認需求";
-"chat.greeting" = "嗨！我是你的研究助手，需要我幫忙什麼？";
-"chat.reset" = "重新開始";
+"chat.greeting" = "您好！我是您的研究助手，很高興能為您服務。\n\n為了能更好地協助您，請提供您希望我研究的內容。例如：\n\n- 一段文章或幾個句子需要修改建議\n- 想製作成**單字卡**的特定詞彙\n- 語法結構或語用問題的深入分析\n\n我會根據您提供的內容，協助您整理相關資訊並提供專業建議。";
 "chat.placeholder" = "輸入訊息";
 "chat.reset" = "重新開始對話";
 "chat.send" = "送出";
@@ -181,8 +180,8 @@
 "chat.continuation.subtitle" = "您上次離開時AI正在回應，要繼續嗎？";
 "chat.continuation.resume" = "繼續";
 "chat.background.active" = "後台生成中";
-"chat.empty.title" = "準備好了，等你開口";
-"chat.empty.subtitle" = "輸入你的句子、問題或想法，也可以先從下面的範例開始。";
+"chat.empty.title" = "準備就緒，等待您的指示";
+"chat.empty.subtitle" = "輸入您的句子、問題或想法，也可以從下方範例開始。";
 "chat.empty.suggestion1" = "幫我把這段中文翻成自然的英文。";
 "chat.empty.suggestion2" = "幫我檢查這封英文郵件的語氣與清楚度。";
 "chat.empty.suggestion3" = "幫我準備使用者訪談的追問問題。";
@@ -218,8 +217,8 @@
 "saved.switchLeft" = "切換到左側收藏";
 "saved.switchRight" = "切換到右側收藏";
 "deck.untitled" = "未命名";
-"saved.empty" = "尚未儲存任何錯誤";
-"saved.unparsable" = "無法解析此筆資料";
+"saved.empty" = "尚未儲存任何項目";
+"saved.unparsable" = "資料格式錯誤，無法讀取";
 "label.zhPrefix" = "中文：";
 "label.enOriginalPrefix" = "原句：";
 "label.enCorrectedPrefix" = "修正版：";
@@ -232,7 +231,7 @@
 "action.edit" = "編輯";
 "action.done" = "完成";
 "loading.making" = "製作中…";
-"saved.saveDeck.prompt" = "將下列筆數整理為卡片集：";
+"saved.saveDeck.prompt" = "將以下項目整理為卡片集：";
 "saved.source.correction" = "批改";
 "saved.source.research" = "研究";
 "saved.deckName.placeholder" = "卡片集名稱";
@@ -253,16 +252,16 @@
 "banner.tts.error.title" = "TTS 錯誤";
 "banner.researchSaved.title" = "已加入暫存";
 /* 首頁 */
-"home.workspaces" = "Workspace";
+"home.workspaces" = "工作區";
 
 /* 題庫（本機） */
 "bank.folders.title" = "資料夾";
-"bank.local.title" = "題庫本";
+"bank.local.title" = "本機題庫";
 "bank.browseCloud" = "瀏覽雲端題庫";
 "bank.random.title" = "隨機出題";
 "bank.random.settings" = "出題設定";
 "bank.random.excludeCompleted" = "排除已完成";
-"banner.random.noneEligible" = "沒有可抽的題目";
+"banner.random.noneEligible" = "沒有符合條件的題目";
 "bank.folders.empty" = "尚無資料夾";
 "bank.local.empty" = "目前沒有題庫本";
 "bank.folder.count" = "共 %d 本";
@@ -279,7 +278,7 @@
 
 /* 單字卡資料夾空狀態 */
 "deck.folder.empty" = "資料夾內尚無單字卡集";
-"deck.folder.hint" = "從根清單拖曳卡片到此資料夾即可收納。";
+"deck.folder.hint" = "將卡片集拖曳至此資料夾以進行整理。";
 "deck.cards.count" = "共 %d 張";
 "folder.decks.count" = "共 %d 個";
 "banner.deckSaved.title" = "已儲存單字卡";
@@ -298,11 +297,11 @@
 "deck.new" = "新單字卡集";
 "flashcards.mode.browse" = "瀏覽";
 "flashcards.mode.annotate" = "標注";
-"banner.backend.missing.title" = "未設定後端";
-"banner.backend.missing.subtitle" = "請先設定 BACKEND_URL";
+"banner.backend.missing.title" = "網路無法連線";
+"banner.backend.missing.subtitle" = "請檢查連線設定";
 "action.practice" = "練習";
-"bank.book.empty" = "本機書本為空";
-"bank.book.empty.hint" = "請從雲端瀏覽並複製題庫到本機。";
+"bank.book.empty" = "本機題庫為空";
+"bank.book.empty.hint" = "從雲端瀏覽並複製題庫到本機。";
 "settings.flashcards.title" = "單字卡";
 "settings.flashcards.subtitle" = "熟悉度與重置";
 "settings.flashcards.resetAll" = "重置熟悉度";

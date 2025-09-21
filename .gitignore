@@ -5,3 +5,12 @@ backend/.env
 __pycache__/
 *.pyc
 backend/bank.json
+
+# iOS/Xcode
+ios/build/
+ios/DerivedData/
+*.xcworkspace/
+*.xcuserdatad/
+ios/*.dSYM
+ios/*.ipa
+*.mobileprovision
