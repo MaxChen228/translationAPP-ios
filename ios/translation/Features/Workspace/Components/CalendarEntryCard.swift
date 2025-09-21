@@ -16,18 +16,11 @@ struct CalendarEntryCard: View {
     var body: some View {
         DSOutlineCard {
             VStack(alignment: .leading, spacing: DS.Spacing.md) {
-                HStack(spacing: 10) {
-                    Image(systemName: "calendar")
-                        .font(.title3)
-                        .foregroundStyle(DS.Brand.scheme.provence.opacity(0.85))
-                        .frame(width: DS.IconSize.cardIcon)
-                    Text("quick.calendar.title")
-                        .dsType(DS.Font.serifBody)
-                        .fontWeight(.semibold)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .foregroundStyle(.tertiary)
-                }
+                DSCardTitle(
+                    icon: "calendar",
+                    title: "quick.calendar.title",
+                    accentColor: DS.Brand.scheme.provence
+                )
                 DSSeparator(color: DS.Palette.border.opacity(0.12))
                 Text(subtitleText)
                     .dsType(DS.Font.caption)
