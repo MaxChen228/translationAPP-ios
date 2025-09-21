@@ -18,3 +18,9 @@ ios/*.ipa
 *.mobileprovision
 *.swiftinterface*
 *.sdkstatcache
+
+# Fonts (use system fonts instead)
+*.ttc
+*.ttf
+*.otf
+ios/translation/Resources/Fonts/
