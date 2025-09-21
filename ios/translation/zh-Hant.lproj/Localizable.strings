@@ -11,6 +11,9 @@
 "quick.bank.subtitle" = "本機題庫（離線）/ 雲端瀏覽";
 "quick.settings.title" = "設定";
 "quick.settings.subtitle" = "Banner 與 Model 等";
+"quick.calendar.title" = "練習日曆";
+"quick.calendar.subtitle.active" = "檢視練習歷程與統計";
+"quick.calendar.subtitle.empty" = "記錄您的練習進度";
 "quick.addWorkspace" = "新增工作區";
 
 /* 設定 */

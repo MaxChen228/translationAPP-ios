@@ -5,7 +5,7 @@
 ## 目錄結構
 
 - `ios/translation/App/translationApp.swift`：App 進入點，註冊字型、建置 UINavigationBar 樣式，初始化所有 EnvironmentObject，並監聽批改/語音錯誤通知。
-- `ios/translation/Features/`：依領域拆分的模組（Workspace、Bank、Flashcards、Saved、Chat、Settings）；每個模組底下再細分 Views / Stores / Components / Utilities。
+- `ios/translation/Features/`：依領域拆分的模組（Workspace、Bank、Flashcards、Saved、Chat、Settings、Calendar）；每個模組底下再細分 Views / Stores / Components / Utilities。
 - `ios/translation/DesignSystem/`：視覺樣式與共用 UI 元件，如 `DesignSystem.swift` 與 `Components/DS*.swift`。
 - `ios/translation/Shared/`：跨模組共享的模型、服務、工具與通用 View。
 - `ios/translation/Resources/`：Assets、字型、Locale 字串等資源。
@@ -20,7 +20,9 @@
 ## 狀態管理與持久化
 
 - **WorkspaceStore** (`Features/Workspace/Stores/WorkspaceStore.swift`)：管理 Workspace 清單，內含記憶化的 `CorrectionViewModel` 實例。Workspace 名稱與排序持久化在 UserDefaults。
-- **CorrectionViewModel** (`Features/Workspace/ViewModels/CorrectionViewModel.swift`)：每個 Workspace 的核心狀態（中文/英文輸入、批改結果、錯誤高亮、題庫練習資訊）。會以 `workspace.<id>.` 前綴將輸入與結果儲存在 UserDefaults。
+- **CorrectionViewModel** (`Features/Workspace/ViewModels/CorrectionViewModel.swift`)：每個 Workspace 的核心狀態（中文/英文輸入、批改結果、錯誤高亮、題庫練習資訊）。會以 `workspace.<id>.` 前綴將輸入與結果儲存在 UserDefaults。現已整合練習記錄功能，自動追蹤練習開始時間與儲存完成記錄。
+- **PracticeRecordsStore** (`Features/Saved/Stores/PracticeRecordsStore.swift`)：**新增**練習記錄管理系統，儲存練習時間、分數、題目等詳細資訊，為日曆功能提供資料支援。
+- **CalendarViewModel** (`Features/Calendar/ViewModels/CalendarViewModel.swift`)：**新增**日曆狀態管理，處理月份導覽、練習統計計算、與 PracticeRecordsStore 的資料綁定。
 - **SavedErrorsStore**、**FlashcardDecksStore**、**LocalBankStore**、**LocalBankProgressStore** 等 store 均以 UserDefaults 持久化 JSON，提供本機資料（分佈在 `Features/Saved/Stores`、`Features/Flashcards/Stores`、`Features/Bank/Stores`）。
 - **AppSettingsStore** (`App/AppSettingsStore.swift`) 透過 `@Published` 與 UserDefaults 維持使用者設定（Banner 時間、LLM 模型、語系）。
 - **RandomPracticeStore** (`Features/Settings/Stores/RandomPracticeStore.swift`) 以 `@AppStorage` 簡化布林設定。
@@ -46,7 +48,11 @@
 
 - **BankBooksView / FlashcardsView 等**：分別提供題庫瀏覽、儲存錯誤 / 單字卡列表、TTS 撥放介面。
 
-- **Design System 元件**：`DesignSystem/Components/DS*` 定義 Button、Card、色彩與動畫 Token，確保視覺一致。
+- **CalendarView** (`Features/Calendar/Views/CalendarView.swift`)：**新增**練習日曆主要介面，包含月曆網格、日期選擇、詳細統計卡片與導覽控制。
+
+- **NestedTagFilterView** (`Features/Chat/Bank/Views/NestedTagFilterView.swift`)：**新增**階層式標籤篩選器，將 63 個標籤組織為 5 大類別，支援展開/收合與統計顯示。
+
+- **Design System 元件**：`DesignSystem/Components/DS*` 定義 Button、Card、色彩與動畫 Token，確保視覺一致。新增 `DSCalendarCell` 與 `DSCalendarGrid` 提供日曆功能的專用元件。
 
 ## 語音與播放架構
 
@@ -65,3 +71,5 @@
 - 背景批改／聊天流程高度倚賴後端 DTO 結構。任何 API 變更請同步調整 `AIServiceHTTP.ErrorDTO` 與聊天相關 DTO（`ChatTurnResponse`、`ChatResearchItem` 等），並更新此文件。
 - 如需新增長期持久化資料，優先考慮建立獨立 Store class 以保持 `CorrectionViewModel` 簡潔。
 - 新增視圖時建議放入對應的 `Features/<Module>/Views` / `Components` 子資料夾，並於 `docs/workflows.md` 補充對應關聯。
+- **練習記錄系統**：新增的 `PracticeRecordsStore` 與 `CalendarViewModel` 緊密整合，修改練習記錄結構時需同步更新日曆統計邏輯。
+- **標籤系統**：`TagRegistry` 維護 63 個統一標籤的分類，後端若新增標籤需同步更新此註冊表以確保篩選功能正常運作。

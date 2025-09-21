@@ -94,3 +94,31 @@ struct DSCardLinkStyle: ButtonStyle {
             .dsAnimation(DS.AnimationToken.snappy, value: configuration.isPressed)
     }
 }
+
+// 日曆格子按鈕樣式：圓形按鈕，支援選中與按壓狀態
+struct DSCalendarCellStyle: ButtonStyle {
+    let isSelected: Bool
+    let backgroundColor: Color
+    let borderColor: Color?
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .frame(width: DS.IconSize.calendarCell, height: DS.IconSize.calendarCell)
+            .background(
+                Circle()
+                    .fill(backgroundColor)
+                    .overlay(
+                        Group {
+                            if let borderColor {
+                                Circle()
+                                    .stroke(borderColor, lineWidth: DS.BorderWidth.regular)
+                            }
+                        }
+                    )
+            )
+            .scaleEffect(configuration.isPressed ? 0.96 : 1)
+            .opacity(configuration.isPressed ? 0.9 : 1)
+            .dsAnimation(DS.AnimationToken.subtle, value: configuration.isPressed)
+            .dsAnimation(DS.AnimationToken.subtle, value: isSelected)
+    }
+}

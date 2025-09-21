@@ -12,9 +12,9 @@ SwiftUI iOS App：提供中英翻譯批改、錯誤高亮、Workspace 多工、�
 
 ## 目錄概覽
 - `ios/translation/App/`：App 生命週期、全域設定與路由（`translationApp.swift`, `AppSettingsStore.swift` 等）。
-- `ios/translation/DesignSystem/`：Design System 與共用 UI 元件（`DesignSystem.swift`, `Components/DS*`）。
-- `ios/translation/Features/`：依領域拆分的模組（Workspace、Bank、Flashcards、Saved、Chat、Settings）。
-- `ios/translation/Shared/`：跨模組共享的模型、服務、工具與通用 View。
+- `ios/translation/DesignSystem/`：Design System 與共用 UI 元件（`DesignSystem.swift`, `Components/DS*`），新增日曆元件 `DSCalendarCell`、`DSCalendarGrid`。
+- `ios/translation/Features/`：依領域拆分的模組（Workspace、Bank、Flashcards、Saved、Chat、Settings、**Calendar**）。
+- `ios/translation/Shared/`：跨模組共享的模型、服務、工具與通用 View。新增 `PracticeRecordsStore` 練習記錄管理。
 - `ios/translation/Resources/`：資源與在地化字串。
 
 ## 環境需求
@@ -50,15 +50,17 @@ App 透過 Info.plist 的 `BACKEND_URL` 讀取後端位址（由 `AppConfig` 使
 
 ## 主要畫面與流程
 - Workspace 清單（components/WorkspaceListView.swift）
-  - 多個 Workspace 平行編輯，支援拖曳、重新命名、刪除；可開啟 Saved JSON 清單。
+  - 多個 Workspace 平行編輯，支援拖曳、重新命名、刪除；可開啟 Saved JSON 清單。新增 `CalendarEntryCard` 快速進入日曆檢視。
 - 翻譯批改（ContentView.swift）
-  - 顯示中文原文/英文嘗試；提交批改後顯示修正版、分數與錯誤清單；兩側文字高亮可對位到同一筆錯誤。
+  - 顯示中文原文/英文嘗試；提交批改後顯示修正版、分數與錯誤清單；兩側文字高亮可對位到同一筆錯誤。現已整合練習記錄系統。
 - 題庫本（本機；components/BankBooksView.swift → LocalBankListView）
-  - 以本機為主、離線可用；可從雲端精選書本複製到本機。
+  - 以本機為主、離線可用；可從雲端精選書本複製到本機。新增階層式標籤篩選器 `NestedTagFilterView`，重設計 `AllBankItemsView` 統一介面風格。
 - 已儲存 JSON（components/SavedJSONListSheet.swift）
   - 檢視/複製/刪除；可一鍵呼叫 `/make_deck` 轉成單字卡集。
 - 單字卡（FlashcardDecksView → DeckDetailView → FlashcardsView）
   - 管理多 Deck；複習支援左右滑、翻面、標注模式；迷你播放器與 TTS 設定（語速/語言/間隔/順序）。
+- **練習日曆（CalendarView）**
+  - 月曆介面顯示每日練習活動；點選日期查看詳細統計；自動計算練習次數與平均分數；整合練習記錄資料視覺化。
 
 ## 專案結構
 - 原始碼：`ios/translation/`

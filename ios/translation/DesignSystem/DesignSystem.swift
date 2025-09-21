@@ -149,6 +149,15 @@ enum DS {
         static var scoreAngular: AngularGradient {
             AngularGradient(gradient: Gradient(colors: [success, caution, warning, danger]), center: .center)
         }
+
+        static func scoreColor(for score: Double) -> Color {
+            switch score {
+            case 90...: return success
+            case 70..<90: return warning
+            case 50..<70: return caution
+            default: return danger
+            }
+        }
     }
 
     enum FontFamily {
@@ -204,6 +213,19 @@ enum DS {
     enum IconSize {
         static let chevronSm: CGFloat = 13
         static let chevronMd: CGFloat = 14
+        static let calendarCell: CGFloat = 40
+        static let activityIndicatorBase: CGFloat = 4
+    }
+
+    enum CalendarMetrics {
+        static func activityIndicatorSize(for count: Int) -> CGFloat {
+            switch count {
+            case 1: return DS.IconSize.activityIndicatorBase
+            case 2...5: return DS.IconSize.activityIndicatorBase + 1
+            case 6...10: return DS.IconSize.activityIndicatorBase + 2
+            default: return DS.IconSize.activityIndicatorBase + 3
+            }
+        }
     }
 
     // UIKit font helpers for measurement/layout parity

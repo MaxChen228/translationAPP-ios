@@ -19,9 +19,9 @@ struct DSCalendarGrid: View {
         LazyVGrid(columns: columns, spacing: 0) {
             ForEach(weekdaySymbols, id: \.self) { symbol in
                 Text(symbol)
-                    .font(DS.Font.caption)
+                    .dsType(DS.Font.caption)
                     .foregroundStyle(DS.Palette.subdued)
-                    .frame(height: 20)
+                    .frame(height: DS.Spacing.lg)
             }
         }
     }

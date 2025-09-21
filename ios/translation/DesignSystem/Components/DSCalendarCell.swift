@@ -5,7 +5,7 @@ struct DSCalendarCell: View {
     let isSelected: Bool
     let onTap: () -> Void
 
-    private var cellSize: CGFloat { 40 }
+    private var cellSize: CGFloat { DS.IconSize.calendarCell }
 
     private var textColor: Color {
         if !day.isCurrentMonth {
@@ -42,42 +42,30 @@ struct DSCalendarCell: View {
 
     var body: some View {
         Button(action: onTap) {
-            ZStack {
-                Circle()
-                    .fill(backgroundColor)
-                    .overlay(
-                        Group {
-                            if let borderColor {
-                                Circle()
-                                    .stroke(borderColor, lineWidth: DS.BorderWidth.regular)
-                            }
-                        }
+            VStack(spacing: DS.Spacing.xs) {
+                Text("\(day.dayNumber)")
+                    .dsType(DS.Font.labelSm)
+                    .fontWeight(day.isToday ? .semibold : .medium)
+                    .foregroundStyle(textColor)
+
+                if day.hasActivity {
+                    DSCalendarActivityIndicator(
+                        count: day.practiceCount,
+                        averageScore: day.averageScore
                     )
-
-                VStack(spacing: 2) {
-                    Text("\(day.dayNumber)")
-                        .font(DS.Font.labelSm)
-                        .fontWeight(day.isToday ? .semibold : .medium)
-                        .foregroundStyle(textColor)
-
-                    if day.hasActivity {
-                        DSActivityIndicator(
-                            count: day.practiceCount,
-                            averageScore: day.averageScore
-                        )
-                    }
                 }
             }
-            .frame(width: cellSize, height: cellSize)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(DSCalendarCellStyle(
+            isSelected: isSelected,
+            backgroundColor: backgroundColor,
+            borderColor: borderColor
+        ))
         .contentShape(Circle())
-        .dsAnimation(DS.AnimationToken.subtle, value: isSelected)
-        .dsAnimation(DS.AnimationToken.subtle, value: day.hasActivity)
     }
 }
 
-private struct DSActivityIndicator: View {
+private struct DSCalendarActivityIndicator: View {
     let count: Int
     let averageScore: Double?
 
@@ -85,22 +73,11 @@ private struct DSActivityIndicator: View {
         guard let score = averageScore else {
             return DS.Palette.neutral
         }
-
-        switch score {
-        case 90...: return DS.Palette.success
-        case 70..<90: return DS.Palette.warning
-        case 50..<70: return DS.Palette.caution
-        default: return DS.Palette.danger
-        }
+        return DS.Palette.scoreColor(for: score)
     }
 
     private var indicatorSize: CGFloat {
-        switch count {
-        case 1: return 4
-        case 2...5: return 5
-        case 6...10: return 6
-        default: return 7
-        }
+        DS.CalendarMetrics.activityIndicatorSize(for: count)
     }
 
     var body: some View {
@@ -109,7 +86,7 @@ private struct DSActivityIndicator: View {
             .frame(width: indicatorSize, height: indicatorSize)
             .overlay(
                 Circle()
-                    .stroke(Color.white.opacity(0.3), lineWidth: 0.5)
+                    .stroke(DS.Palette.onPrimary.opacity(DS.Opacity.hairline), lineWidth: DS.BorderWidth.hairline)
             )
     }
 }
