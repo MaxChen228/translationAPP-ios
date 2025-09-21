@@ -257,18 +257,11 @@ private struct FlashcardsEntryCard: View {
     var body: some View {
         DSOutlineCard {
             VStack(alignment: .leading, spacing: DS.Spacing.md) {
-                HStack(spacing: 10) {
-                    Image(systemName: "rectangle.on.rectangle.angled")
-                        .font(.title3)
-                        .foregroundStyle(DS.Brand.scheme.provence.opacity(0.85))
-                        .frame(width: DS.IconSize.cardIcon)
-                    Text("quick.flashcards.title")
-                        .dsType(DS.Font.serifBody)
-                        .fontWeight(.semibold)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .foregroundStyle(.tertiary)
-                }
+                DSCardTitle(
+                    icon: "rectangle.on.rectangle.angled",
+                    title: "quick.flashcards.title",
+                    accentColor: DS.Brand.scheme.provence
+                )
                 DSSeparator(color: DS.Palette.border.opacity(0.12))
                 Text("quick.flashcards.subtitle")
                     .dsType(DS.Font.caption)
@@ -284,18 +277,11 @@ private struct ChatEntryCard: View {
     var body: some View {
         DSOutlineCard {
             VStack(alignment: .leading, spacing: DS.Spacing.md) {
-                HStack(spacing: 10) {
-                    Image(systemName: "bubble.left.and.bubble.right.fill")
-                        .font(.title3)
-                        .foregroundStyle(DS.Brand.scheme.classicBlue.opacity(0.85))
-                        .frame(width: DS.IconSize.cardIcon)
-                    Text("chat.title")
-                        .dsType(DS.Font.serifBody)
-                        .fontWeight(.semibold)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .foregroundStyle(.tertiary)
-                }
+                DSCardTitle(
+                    icon: "bubble.left.and.bubble.right.fill",
+                    title: "chat.title",
+                    accentColor: DS.Brand.scheme.classicBlue
+                )
                 DSSeparator(color: DS.Palette.border.opacity(0.12))
                 Text("chat.subtitle")
                     .dsType(DS.Font.caption)
@@ -352,18 +338,11 @@ private struct BankBooksEntryCard: View {
     var body: some View {
         DSOutlineCard {
             VStack(alignment: .leading, spacing: DS.Spacing.md) {
-                HStack(spacing: 10) {
-                    Image(systemName: "books.vertical")
-                        .font(.title3)
-                        .foregroundStyle(DS.Brand.scheme.stucco.opacity(0.85))
-                        .frame(width: DS.IconSize.cardIcon)
-                    Text("quick.bank.title")
-                        .dsType(DS.Font.serifBody)
-                        .fontWeight(.semibold)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .foregroundStyle(.tertiary)
-                }
+                DSCardTitle(
+                    icon: "books.vertical",
+                    title: "quick.bank.title",
+                    accentColor: DS.Brand.scheme.stucco
+                )
                 DSSeparator(color: DS.Palette.border.opacity(0.12))
                 Text("quick.bank.subtitle")
                     .dsType(DS.Font.caption)
@@ -379,18 +358,11 @@ private struct SettingsEntryCard: View {
     var body: some View {
         DSOutlineCard {
             VStack(alignment: .leading, spacing: DS.Spacing.md) {
-                HStack(spacing: 10) {
-                    Image(systemName: "gearshape")
-                        .font(.title3)
-                        .foregroundStyle(DS.Palette.primary.opacity(0.85))
-                        .frame(width: DS.IconSize.cardIcon)
-                    Text("quick.settings.title")
-                        .dsType(DS.Font.serifBody)
-                        .fontWeight(.semibold)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .foregroundStyle(.tertiary)
-                }
+                DSCardTitle(
+                    icon: "gearshape",
+                    title: "quick.settings.title",
+                    accentColor: DS.Palette.primary
+                )
                 DSSeparator(color: DS.Palette.border.opacity(0.12))
                 Text("quick.settings.subtitle")
                     .dsType(DS.Font.caption)

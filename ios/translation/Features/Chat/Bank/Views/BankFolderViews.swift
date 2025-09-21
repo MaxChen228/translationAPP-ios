@@ -6,18 +6,11 @@ struct BankFolderCard: View {
     var body: some View {
         DSOutlineCard {
             VStack(alignment: .leading, spacing: DS.Spacing.md) {
-                HStack(spacing: 10) {
-                    Image(systemName: "folder")
-                        .font(.title3)
-                        .foregroundStyle(DS.Brand.scheme.stucco.opacity(0.85))
-                        .frame(width: DS.IconSize.cardIcon)
-                    Text(folder.name)
-                        .dsType(DS.Font.serifBody)
-                        .fontWeight(.semibold)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .foregroundStyle(.tertiary)
-                }
+                DSCardTitle(
+                    icon: "folder",
+                    titleText: folder.name,
+                    accentColor: DS.Brand.scheme.stucco
+                )
                 DSSeparator(color: DS.Palette.border.opacity(0.12))
                 Text(String(format: String(localized: "bank.folder.count", locale: locale), folder.bookNames.count))
                     .dsType(DS.Font.caption)

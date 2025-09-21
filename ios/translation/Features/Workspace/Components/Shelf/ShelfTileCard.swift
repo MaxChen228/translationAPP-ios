@@ -13,23 +13,12 @@ struct ShelfTileCard: View {
     var body: some View {
         DSOutlineCard {
             VStack(alignment: .leading, spacing: DS.Spacing.md) {
-                HStack(spacing: 10) {
-                    if let icon = iconSystemName {
-                        Image(systemName: icon)
-                            .font(.title3)
-                            .foregroundStyle(accentColor.opacity(0.85))
-                            .frame(width: DS.IconSize.cardIcon)
-                    }
-                    Text(title)
-                        .dsType(DS.Font.serifBody)
-                        .fontWeight(.semibold)
-                        .lineLimit(1)
-                    Spacer()
-                    if showChevron {
-                        Image(systemName: "chevron.right")
-                            .foregroundStyle(.tertiary)
-                    }
-                }
+                DSCardTitle(
+                    icon: iconSystemName,
+                    titleText: title,
+                    accentColor: accentColor,
+                    showChevron: showChevron
+                )
                 if subtitle != nil || countText != nil {
                     DSSeparator(color: DS.Palette.border.opacity(0.12))
                 }
