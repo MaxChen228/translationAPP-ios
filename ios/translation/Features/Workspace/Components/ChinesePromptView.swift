@@ -28,7 +28,7 @@ struct ChinesePromptView: View {
                     )
                     .overlay(alignment: .leading) {
                         LinearGradient(colors: [DS.Brand.scheme.cornhusk, DS.Brand.scheme.peachQuartz], startPoint: .top, endPoint: .bottom)
-                            .frame(width: 3)
+                            .frame(width: DS.IconSize.dividerThin)
                             .clipShape(RoundedRectangle(cornerRadius: 1.5, style: .continuous))
                             .padding(.vertical, 6)
                     }

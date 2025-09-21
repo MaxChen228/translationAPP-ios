@@ -22,7 +22,7 @@ struct ScoreRingView: View {
                     .foregroundStyle(.secondary)
             }
         }
-        .frame(width: 96, height: 96)
+        .frame(width: DS.IconSize.scoreRing, height: DS.IconSize.scoreRing)
         .padding(.vertical, 4)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(String(format: String(localized: "a11y.scoreLabel", locale: locale), score))

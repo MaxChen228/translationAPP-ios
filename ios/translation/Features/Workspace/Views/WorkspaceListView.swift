@@ -228,7 +228,7 @@ private struct WorkspaceCard: View {
                         .foregroundStyle(.tertiary)
                 }
             }
-            .frame(minHeight: 104)
+            .frame(minHeight: DS.CardSize.minHeightStandard)
         }
         // 扁平化：去陰影（改用 DSOutlineCard）且不再加第二層彩色描邊
     }
@@ -240,7 +240,7 @@ private struct AddWorkspaceCard: View {
             Image(systemName: "plus").font(.title2)
             Text("quick.addWorkspace").dsType(DS.Font.caption).foregroundStyle(.secondary)
         }
-        .frame(minHeight: 96)
+        .frame(minHeight: DS.CardSize.minHeightCompact)
         .frame(maxWidth: .infinity)
         .padding(DS.Spacing.md)
         .overlay(
@@ -261,7 +261,7 @@ private struct FlashcardsEntryCard: View {
                     Image(systemName: "rectangle.on.rectangle.angled")
                         .font(.title3)
                         .foregroundStyle(DS.Brand.scheme.provence.opacity(0.85))
-                        .frame(width: 28)
+                        .frame(width: DS.IconSize.cardIcon)
                     Text("quick.flashcards.title")
                         .dsType(DS.Font.serifBody)
                         .fontWeight(.semibold)
@@ -274,7 +274,7 @@ private struct FlashcardsEntryCard: View {
                     .dsType(DS.Font.caption)
                     .foregroundStyle(.secondary)
             }
-            .frame(minHeight: 104)
+            .frame(minHeight: DS.CardSize.minHeightStandard)
         }
     }
 }
@@ -288,7 +288,7 @@ private struct ChatEntryCard: View {
                     Image(systemName: "bubble.left.and.bubble.right.fill")
                         .font(.title3)
                         .foregroundStyle(DS.Brand.scheme.classicBlue.opacity(0.85))
-                        .frame(width: 28)
+                        .frame(width: DS.IconSize.cardIcon)
                     Text("chat.title")
                         .dsType(DS.Font.serifBody)
                         .fontWeight(.semibold)
@@ -301,7 +301,7 @@ private struct ChatEntryCard: View {
                     .dsType(DS.Font.caption)
                     .foregroundStyle(.secondary)
             }
-            .frame(minHeight: 104)
+            .frame(minHeight: DS.CardSize.minHeightStandard)
         }
     }
 }
@@ -318,9 +318,9 @@ private struct QuickActionsRow: View {
             DSSectionHeader(titleKey: "quick.title", subtitleKey: nil, accentUnderline: true)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    NavigationLink { ChatWorkspaceView(viewModel: chatViewModel) } label: { ChatEntryCard().frame(width: 220) }
+                    NavigationLink { ChatWorkspaceView(viewModel: chatViewModel) } label: { ChatEntryCard().frame(width: DS.IconSize.entryCardWidth) }
                         .buttonStyle(DSCardLinkStyle())
-                    NavigationLink { FlashcardDecksView() } label: { FlashcardsEntryCard().frame(width: 220) }
+                    NavigationLink { FlashcardDecksView() } label: { FlashcardsEntryCard().frame(width: DS.IconSize.entryCardWidth) }
                         .buttonStyle(DSCardLinkStyle())
                     if let first = store.workspaces.first {
                         NavigationLink {
@@ -333,12 +333,12 @@ private struct QuickActionsRow: View {
                                 newVM.startLocalPractice(bookName: bookName, item: item, tag: tag)
                                 router.open(workspaceID: newWS.id)
                             })
-                        } label: { BankBooksEntryCard().frame(width: 220) }
+                        } label: { BankBooksEntryCard().frame(width: DS.IconSize.entryCardWidth) }
                             .buttonStyle(DSCardLinkStyle())
                     }
-                    NavigationLink { CalendarView() } label: { CalendarEntryCard().frame(width: 220) }
+                    NavigationLink { CalendarView() } label: { CalendarEntryCard().frame(width: DS.IconSize.entryCardWidth) }
                         .buttonStyle(DSCardLinkStyle())
-                    NavigationLink { SettingsView() } label: { SettingsEntryCard().frame(width: 220) }
+                    NavigationLink { SettingsView() } label: { SettingsEntryCard().frame(width: DS.IconSize.entryCardWidth) }
                         .buttonStyle(DSCardLinkStyle())
                 }
                 .padding(.horizontal, 2)
@@ -356,7 +356,7 @@ private struct BankBooksEntryCard: View {
                     Image(systemName: "books.vertical")
                         .font(.title3)
                         .foregroundStyle(DS.Brand.scheme.stucco.opacity(0.85))
-                        .frame(width: 28)
+                        .frame(width: DS.IconSize.cardIcon)
                     Text("quick.bank.title")
                         .dsType(DS.Font.serifBody)
                         .fontWeight(.semibold)
@@ -369,7 +369,7 @@ private struct BankBooksEntryCard: View {
                     .dsType(DS.Font.caption)
                     .foregroundStyle(.secondary)
             }
-            .frame(minHeight: 104)
+            .frame(minHeight: DS.CardSize.minHeightStandard)
         }
     }
 }
@@ -383,7 +383,7 @@ private struct SettingsEntryCard: View {
                     Image(systemName: "gearshape")
                         .font(.title3)
                         .foregroundStyle(DS.Palette.primary.opacity(0.85))
-                        .frame(width: 28)
+                        .frame(width: DS.IconSize.cardIcon)
                     Text("quick.settings.title")
                         .dsType(DS.Font.serifBody)
                         .fontWeight(.semibold)
@@ -396,7 +396,7 @@ private struct SettingsEntryCard: View {
                     .dsType(DS.Font.caption)
                     .foregroundStyle(.secondary)
             }
-            .frame(minHeight: 104)
+            .frame(minHeight: DS.CardSize.minHeightStandard)
         }
     }
 }
@@ -442,7 +442,7 @@ private struct RenameWorkspaceSheet: View {
                     dismiss()
                 }
                 .buttonStyle(DSPrimaryButton())
-                .frame(width: 120)
+                .frame(width: DS.ButtonSize.standard)
             }
         }
         .padding(16)

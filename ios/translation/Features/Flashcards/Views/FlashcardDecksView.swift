@@ -186,7 +186,7 @@ private struct NewDeckCard: View {
             Image(systemName: "doc.badge.plus").font(.title3)
             Text(String(localized: "deck.new", locale: locale)).dsType(DS.Font.caption).foregroundStyle(.secondary)
         }
-        .frame(minHeight: 96)
+        .frame(minHeight: DS.CardSize.minHeightCompact)
         .frame(maxWidth: .infinity)
         .padding(DS.Spacing.md)
         .overlay(
@@ -207,7 +207,7 @@ private struct BrowseCloudCard: View {
             Image(systemName: "icloud.and.arrow.down").font(.title3)
             Text(titleKey).dsType(DS.Font.caption).foregroundStyle(.secondary)
         }
-        .frame(minHeight: 96)
+        .frame(minHeight: DS.CardSize.minHeightCompact)
         .frame(maxWidth: .infinity)
         .padding(DS.Spacing.md)
         .overlay(

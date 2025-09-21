@@ -34,7 +34,7 @@ struct ContentView: View {
                             Label { Text("content.bank") } icon: { Image(systemName: "books.vertical") }
                         }
                         .buttonStyle(DSSecondaryButton())
-                        .frame(width: 92)
+                        .frame(width: DS.ButtonSize.small)
                     }
                     ChinesePromptView(text: vm.inputZh)
 
@@ -123,10 +123,10 @@ struct ContentView: View {
                             vm.reset()
                         } label: {
                             Image(systemName: "trash")
-                                .frame(width: 44, height: 44)
+                                .frame(width: DS.IconSize.toolbarIcon, height: DS.IconSize.toolbarIcon)
                         }
                         .buttonStyle(DSSecondaryButton())
-                        .frame(width: 64)
+                        .frame(width: DS.ButtonSize.compact)
                         .disabled(vm.isLoading)
                     }
                     .padding(.top, DS.Spacing.md)

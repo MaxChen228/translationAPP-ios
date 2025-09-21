@@ -215,6 +215,38 @@ enum DS {
         static let chevronMd: CGFloat = 14
         static let calendarCell: CGFloat = 40
         static let activityIndicatorBase: CGFloat = 4
+
+        // 卡片與組件圖標尺寸
+        static let cardIcon: CGFloat = 28           // 卡片標題圖標寬度
+        static let playButton: CGFloat = 40         // 播放按鈕尺寸
+        static let controlButton: CGFloat = 32      // 控制按鈕尺寸
+        static let toolbarIcon: CGFloat = 44        // 工具列按鈕尺寸
+        static let avatar: CGFloat = 72             // 頭像尺寸
+        static let scoreRing: CGFloat = 96          // 分數環形圖尺寸
+
+        // 指示器與分隔線
+        static let indicatorSmall: CGFloat = 6      // 小指示器
+        static let indicatorMedium: CGFloat = 8     // 中指示器
+        static let dividerThin: CGFloat = 3         // 細分隔線寬度
+        static let progressBar: CGFloat = 10        // 進度條高度
+
+        // 佈局相關寬度
+        static let entryCardWidth: CGFloat = 220    // 入口卡片寬度
+        static let settingsSlider: CGFloat = 160    // 設定滑桿寬度
+    }
+
+    enum ButtonSize {
+        static let compact: CGFloat = 64            // 緊湊按鈕寬度
+        static let small: CGFloat = 92              // 小按鈕寬度
+        static let medium: CGFloat = 100            // 中按鈕寬度
+        static let standard: CGFloat = 120          // 標準按鈕寬度
+    }
+
+    enum CardSize {
+        static let minHeightStandard: CGFloat = 104 // 標準卡片最小高度
+        static let minHeightCompact: CGFloat = 96   // 緊湊卡片最小高度
+        static let minHeightLarge: CGFloat = 240    // 大卡片最小高度
+        static let dividerHeight: CGFloat = 42      // 分隔器高度
     }
 
     enum CalendarMetrics {

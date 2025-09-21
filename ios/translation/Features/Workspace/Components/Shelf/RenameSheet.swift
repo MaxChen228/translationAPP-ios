@@ -27,7 +27,7 @@ struct RenameSheet: View {
                     dismiss()
                 }
                 .buttonStyle(DSPrimaryButton())
-                .frame(width: 120)
+                .frame(width: DS.ButtonSize.standard)
             }
         }
         .padding(16)

@@ -38,7 +38,7 @@ struct ErrorItemRow: View {
                 .overlay(
                     Rectangle()
                         .fill(theme.base)
-                        .frame(width: 3)
+                        .frame(width: DS.IconSize.dividerThin)
                         .clipShape(RoundedRectangle(cornerRadius: 2, style: .continuous))
                         .padding(.vertical, 6), alignment: .leading
                 )

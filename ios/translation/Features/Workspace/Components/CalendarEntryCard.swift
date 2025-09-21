@@ -20,7 +20,7 @@ struct CalendarEntryCard: View {
                     Image(systemName: "calendar")
                         .font(.title3)
                         .foregroundStyle(DS.Brand.scheme.provence.opacity(0.85))
-                        .frame(width: 28)
+                        .frame(width: DS.IconSize.cardIcon)
                     Text("quick.calendar.title")
                         .dsType(DS.Font.serifBody)
                         .fontWeight(.semibold)
@@ -33,7 +33,7 @@ struct CalendarEntryCard: View {
                     .dsType(DS.Font.caption)
                     .foregroundStyle(.secondary)
             }
-            .frame(minHeight: 104)
+            .frame(minHeight: DS.CardSize.minHeightStandard)
         }
     }
 

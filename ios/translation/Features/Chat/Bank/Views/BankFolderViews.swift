@@ -10,7 +10,7 @@ struct BankFolderCard: View {
                     Image(systemName: "folder")
                         .font(.title3)
                         .foregroundStyle(DS.Brand.scheme.stucco.opacity(0.85))
-                        .frame(width: 28)
+                        .frame(width: DS.IconSize.cardIcon)
                     Text(folder.name)
                         .dsType(DS.Font.serifBody)
                         .fontWeight(.semibold)
@@ -23,7 +23,7 @@ struct BankFolderCard: View {
                     .dsType(DS.Font.caption)
                     .foregroundStyle(.secondary)
             }
-            .frame(minHeight: 104)
+            .frame(minHeight: DS.CardSize.minHeightStandard)
         }
     }
 }
@@ -35,7 +35,7 @@ struct NewBankFolderCard: View {
             Image(systemName: "folder.badge.plus").font(.title3)
             Text("folder.new").dsType(DS.Font.caption).foregroundStyle(.secondary)
         }
-        .frame(minHeight: 96)
+        .frame(minHeight: DS.CardSize.minHeightCompact)
         .frame(maxWidth: .infinity)
         .padding(DS.Spacing.md)
         .overlay(

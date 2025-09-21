@@ -18,7 +18,7 @@ struct ShelfTileCard: View {
                         Image(systemName: icon)
                             .font(.title3)
                             .foregroundStyle(accentColor.opacity(0.85))
-                            .frame(width: 28)
+                            .frame(width: DS.IconSize.cardIcon)
                     }
                     Text(title)
                         .dsType(DS.Font.serifBody)
@@ -47,7 +47,7 @@ struct ShelfTileCard: View {
                         .padding(.top, 2)
                 }
             }
-            .frame(minHeight: 104)
+            .frame(minHeight: DS.CardSize.minHeightStandard)
         }
     }
 }
