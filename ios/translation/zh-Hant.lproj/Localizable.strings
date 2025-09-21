@@ -306,8 +306,11 @@
 "bank.random.title" = "隨機出題";
 "bank.random.settings" = "出題設定";
 "bank.random.excludeCompleted" = "排除已完成";
+"bank.random.difficulty.title" = "難度篩選";
 "bank.random.tags.empty.title" = "目前沒有帶標籤的題目";
 "bank.random.tags.empty.subtitle" = "請確認本機題庫已設定標籤，或清除標籤篩選。";
+"tag.filter.selectAll" = "全選";
+"tag.filter.selectAllInfo" = "已選擇全部標籤，將不套用任何篩選條件。";
 "banner.random.noneEligible" = "沒有符合條件的題目";
 "bank.folders.empty" = "尚無資料夾";
 "bank.local.empty" = "目前沒有題庫本";

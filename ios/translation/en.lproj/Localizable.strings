@@ -323,8 +323,11 @@
 "bank.random.title" = "Random";
 "bank.random.settings" = "Random Settings";
 "bank.random.excludeCompleted" = "Exclude completed";
+"bank.random.difficulty.title" = "Difficulty Filter";
 "bank.random.tags.empty.title" = "No tagged items available";
 "bank.random.tags.empty.subtitle" = "Add tags to your local bank or clear the filter to keep using random practice.";
+"tag.filter.selectAll" = "Select All";
+"tag.filter.selectAllInfo" = "All tags will be included; no additional filters applied.";
 "banner.random.noneEligible" = "No qualifying items available";
 "bank.folders.empty" = "No folders";
 "bank.local.empty" = "No local banks";

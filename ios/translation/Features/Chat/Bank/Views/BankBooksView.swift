@@ -205,10 +205,14 @@ struct BankBooksView: View {
 
     private func pickRandomItem() -> (String, BankItem)? {
         let filterState = randomSettings.filterState
+        let selectedDifficulties = randomSettings.selectedDifficulties
 
         var pool: [(String, BankItem)] = []
         for book in localBank.books {
             for item in book.items {
+                if !selectedDifficulties.isEmpty && !selectedDifficulties.contains(item.difficulty) {
+                    continue
+                }
                 if randomSettings.excludeCompleted && localProgress.isCompleted(book: book.name, itemId: item.id) {
                     continue
                 }

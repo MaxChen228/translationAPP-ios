@@ -36,6 +36,21 @@ struct RandomPracticeSettingsSheet: View {
             }
     }
 
+    private var allItems: [BankItem] {
+        localBank.books.flatMap { $0.items }
+    }
+
+    private var difficultyStats: [(difficulty: Int, count: Int)] {
+        let grouped = Dictionary(grouping: allItems, by: { $0.difficulty })
+        return (1...5).map { difficulty in
+            (difficulty, grouped[difficulty]?.count ?? 0)
+        }
+    }
+
+    private var totalItemCount: Int {
+        allItems.count
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -45,6 +60,41 @@ struct RandomPracticeSettingsSheet: View {
                     DSOutlineCard {
                         Toggle(isOn: $settings.excludeCompleted) {
                             Text("bank.random.excludeCompleted")
+                        }
+                    }
+
+                    if totalItemCount > 0 {
+                        VStack(alignment: .leading, spacing: DS.Spacing.xs) {
+                            Text("bank.random.difficulty.title")
+                                .dsType(DS.Font.caption)
+                                .foregroundStyle(.secondary)
+
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 8) {
+                                    DSFilterChip(
+                                        label: "filter.all",
+                                        count: totalItemCount,
+                                        color: DS.Palette.neutral,
+                                        selected: settings.selectedDifficulties.isEmpty
+                                    ) {
+                                        settings.selectedDifficulties.removeAll()
+                                    }
+
+                                    ForEach(difficultyStats, id: \.difficulty) { stat in
+                                        let isDisabled = stat.count == 0
+                                        DSDifficultyFilterChip(
+                                            difficulty: stat.difficulty,
+                                            count: stat.count,
+                                            selected: settings.selectedDifficulties.contains(stat.difficulty)
+                                        ) {
+                                            toggleDifficulty(stat.difficulty)
+                                        }
+                                        .opacity(isDisabled ? 0.35 : 1)
+                                        .disabled(isDisabled)
+                                    }
+                                }
+                                .padding(.horizontal, 2)
+                            }
                         }
                     }
 
@@ -78,5 +128,13 @@ struct RandomPracticeSettingsSheet: View {
             }
         }
         .presentationDragIndicator(.visible)
+    }
+
+    private func toggleDifficulty(_ difficulty: Int) {
+        if settings.selectedDifficulties.contains(difficulty) {
+            settings.selectedDifficulties.remove(difficulty)
+        } else {
+            settings.selectedDifficulties.insert(difficulty)
+        }
     }
 }

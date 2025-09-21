@@ -8,6 +8,8 @@ final class RandomPracticeStore: ObservableObject {
         static let selectedTags = "random.selectedTags"
         static let selectedCategories = "random.selectedCategories"
         static let filterMode = "random.filterMode"
+        static let selectsAll = "random.tags.selectAll"
+        static let selectedDifficulties = "random.selectedDifficulties"
     }
 
     @Published var excludeCompleted: Bool {
@@ -18,12 +20,17 @@ final class RandomPracticeStore: ObservableObject {
         didSet { persistFilterState() }
     }
 
+    @Published var selectedDifficulties: Set<Int> {
+        didSet { persistSelectedDifficulties() }
+    }
+
     private let defaults: UserDefaults
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         self.excludeCompleted = defaults.object(forKey: StorageKey.excludeCompleted) as? Bool ?? true
         self.filterState = RandomPracticeStore.loadFilterState(defaults: defaults)
+        self.selectedDifficulties = RandomPracticeStore.loadSelectedDifficulties(defaults: defaults)
     }
 
     private func persistExcludeCompleted() {
@@ -38,29 +45,46 @@ final class RandomPracticeStore: ObservableObject {
         defaults.set(selectedCategories, forKey: StorageKey.selectedCategories)
 
         defaults.set(filterState.filterMode.rawValue, forKey: StorageKey.filterMode)
+        defaults.set(filterState.selectsAll, forKey: StorageKey.selectsAll)
+    }
+
+    private func persistSelectedDifficulties() {
+        let values = Array(selectedDifficulties)
+        defaults.set(values, forKey: StorageKey.selectedDifficulties)
     }
 
     private static func loadFilterState(defaults: UserDefaults) -> TagFilterState {
         var state = TagFilterState()
 
-        if let storedTags = defaults.array(forKey: StorageKey.selectedTags) as? [String] {
-            state.selectedTags = Set(storedTags)
-        }
+        state.selectsAll = defaults.bool(forKey: StorageKey.selectsAll)
 
-        if let storedCategories = defaults.array(forKey: StorageKey.selectedCategories) as? [String] {
-            let categories = storedCategories.compactMap { TagCategory(rawValue: $0) }
-            state.selectedCategories = Set(categories)
-        }
+        if !state.selectsAll {
+            if let storedTags = defaults.array(forKey: StorageKey.selectedTags) as? [String] {
+                state.selectedTags = Set(storedTags)
+            }
 
-        if let storedMode = defaults.string(forKey: StorageKey.filterMode),
-           let mode = TagFilterMode(rawValue: storedMode) {
-            state.filterMode = mode
+            if let storedCategories = defaults.array(forKey: StorageKey.selectedCategories) as? [String] {
+                let categories = storedCategories.compactMap { TagCategory(rawValue: $0) }
+                state.selectedCategories = Set(categories)
+            }
+
+            if let storedMode = defaults.string(forKey: StorageKey.filterMode),
+               let mode = TagFilterMode(rawValue: storedMode) {
+                state.filterMode = mode
+            }
         }
 
         // Ensure category selections stay in sync with tag selections.
         syncCategories(&state)
 
         return state
+    }
+
+    private static func loadSelectedDifficulties(defaults: UserDefaults) -> Set<Int> {
+        if let stored = defaults.array(forKey: StorageKey.selectedDifficulties) as? [Int] {
+            return Set(stored)
+        }
+        return []
     }
 
     private static func syncCategories(_ state: inout TagFilterState) {
