@@ -8,7 +8,6 @@ final class RandomPracticeStore: ObservableObject {
         static let selectedTags = "random.selectedTags"
         static let selectedCategories = "random.selectedCategories"
         static let filterMode = "random.filterMode"
-        static let selectsAll = "random.tags.selectAll"
         static let selectedDifficulties = "random.selectedDifficulties"
     }
 
@@ -45,7 +44,6 @@ final class RandomPracticeStore: ObservableObject {
         defaults.set(selectedCategories, forKey: StorageKey.selectedCategories)
 
         defaults.set(filterState.filterMode.rawValue, forKey: StorageKey.filterMode)
-        defaults.set(filterState.selectsAll, forKey: StorageKey.selectsAll)
     }
 
     private func persistSelectedDifficulties() {
@@ -56,22 +54,18 @@ final class RandomPracticeStore: ObservableObject {
     private static func loadFilterState(defaults: UserDefaults) -> TagFilterState {
         var state = TagFilterState()
 
-        state.selectsAll = defaults.bool(forKey: StorageKey.selectsAll)
+        if let storedTags = defaults.array(forKey: StorageKey.selectedTags) as? [String] {
+            state.selectedTags = Set(storedTags)
+        }
 
-        if !state.selectsAll {
-            if let storedTags = defaults.array(forKey: StorageKey.selectedTags) as? [String] {
-                state.selectedTags = Set(storedTags)
-            }
+        if let storedCategories = defaults.array(forKey: StorageKey.selectedCategories) as? [String] {
+            let categories = storedCategories.compactMap { TagCategory(rawValue: $0) }
+            state.selectedCategories = Set(categories)
+        }
 
-            if let storedCategories = defaults.array(forKey: StorageKey.selectedCategories) as? [String] {
-                let categories = storedCategories.compactMap { TagCategory(rawValue: $0) }
-                state.selectedCategories = Set(categories)
-            }
-
-            if let storedMode = defaults.string(forKey: StorageKey.filterMode),
-               let mode = TagFilterMode(rawValue: storedMode) {
-                state.filterMode = mode
-            }
+        if let storedMode = defaults.string(forKey: StorageKey.filterMode),
+           let mode = TagFilterMode(rawValue: storedMode) {
+            state.filterMode = mode
         }
 
         // Ensure category selections stay in sync with tag selections.

@@ -26,23 +26,14 @@ struct NestedTagFilterView: View {
                 activeFiltersCard
             }
 
-            if filterState.selectsAll {
-                DSCard(padding: DS.Spacing.sm) {
-                    Text("tag.filter.selectAllInfo")
-                        .dsType(DS.Font.caption)
-                        .foregroundStyle(.secondary)
-                }
-                .transition(DSTransition.cardExpand)
-            } else {
-                LazyVStack(spacing: DS.Spacing.md) {
-                    ForEach(TagCategory.allCases) { category in
-                        ExpandableTagCategoryView(
-                            category: category,
-                            filterState: $filterState,
-                            tagStats: tagStats,
-                            categoryCount: categoryStats[category] ?? 0
-                        )
-                    }
+            LazyVStack(spacing: DS.Spacing.md) {
+                ForEach(TagCategory.allCases) { category in
+                    ExpandableTagCategoryView(
+                        category: category,
+                        filterState: $filterState,
+                        tagStats: tagStats,
+                        categoryCount: categoryStats[category] ?? 0
+                    )
                 }
             }
         }
@@ -55,47 +46,13 @@ struct NestedTagFilterView: View {
             accentLines: 1
         )
         .overlay(alignment: .topTrailing) {
-            HStack(spacing: DS.Spacing.sm) {
-                selectAllToggle
-                if filterState.hasActiveFilters {
-                    Button("清除全部") {
-                        filterState.clear()
-                    }
-                    .buttonStyle(DSButton(style: .secondary, size: .compact))
+            if filterState.hasActiveFilters {
+                Button("清除全部") {
+                    filterState.clear()
                 }
+                .buttonStyle(DSButton(style: .secondary, size: .compact))
             }
         }
-    }
-
-    private var selectAllToggle: some View {
-        Button {
-            toggleSelectAll()
-        } label: {
-            HStack(spacing: DS.Spacing.xs) {
-                Image(systemName: filterState.selectsAll ? "checkmark.square.fill" : "square")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(filterState.selectsAll ? DS.Palette.primary : DS.Palette.border)
-                Text("tag.filter.selectAll")
-                    .dsType(DS.Font.labelSm)
-                    .foregroundStyle(.primary)
-            }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
-            .background(
-                Capsule().fill(filterState.selectsAll ? DS.Palette.primary.opacity(DS.Opacity.fill) : DS.Palette.surface)
-            )
-            .overlay(
-                Capsule().stroke(
-                    filterState.selectsAll ? DS.Palette.primary.opacity(0.4) : DS.Palette.border.opacity(DS.Opacity.border),
-                    lineWidth: DS.BorderWidth.thin
-                )
-            )
-        }
-        .buttonStyle(.plain)
-    }
-
-    private func toggleSelectAll() {
-        filterState.setSelectAll(!filterState.selectsAll)
     }
 
     private var activeFiltersCard: some View {

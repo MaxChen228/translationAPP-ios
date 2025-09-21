@@ -20,6 +20,7 @@
 ## 狀態管理與持久化
 
 - **WorkspaceStore** (`Features/Workspace/Stores/WorkspaceStore.swift`)：管理 Workspace 清單，內含記憶化的 `CorrectionViewModel` 實例。Workspace 名稱與排序持久化在 UserDefaults。
+- **QuickActionsStore** (`Features/Workspace/Stores/QuickActionsStore.swift`)：管理首頁快速入口的順序與類型，支援新增/刪除/排序並以 UserDefaults 持久化，可重複建立相同入口。
 - **CorrectionViewModel** (`Features/Workspace/ViewModels/CorrectionViewModel.swift`)：每個 Workspace 的核心狀態（中文/英文輸入、批改結果、錯誤高亮、題庫練習資訊）。會以 `workspace.<id>.` 前綴將輸入與結果儲存在 UserDefaults。現已整合練習記錄功能，自動追蹤練習開始時間與儲存完成記錄。
 - **PracticeRecordsStore** (`Features/Saved/Stores/PracticeRecordsStore.swift`)：**新增**練習記錄管理系統，儲存練習時間、分數、題目等詳細資訊，為日曆功能提供資料支援。
 - **CalendarViewModel** (`Features/Calendar/ViewModels/CalendarViewModel.swift`)：**新增**日曆狀態管理，處理月份導覽、練習統計計算、與 PracticeRecordsStore 的資料綁定。

@@ -123,28 +123,17 @@ struct TagFilterState {
     var selectedTags: Set<String> = []
     var filterMode: TagFilterMode = .intersection
     var isExpanded: Set<TagCategory> = []
-    var selectsAll: Bool = false
 
     var hasActiveFilters: Bool {
-        !selectsAll && (!selectedCategories.isEmpty || !selectedTags.isEmpty)
+        !selectedCategories.isEmpty || !selectedTags.isEmpty
     }
 
     mutating func clear() {
-        selectsAll = false
         selectedCategories.removeAll()
         selectedTags.removeAll()
     }
 
-    mutating func setSelectAll(_ newValue: Bool) {
-        selectsAll = newValue
-        if newValue {
-            selectedCategories.removeAll()
-            selectedTags.removeAll()
-        }
-    }
-
     mutating func toggleCategory(_ category: TagCategory) {
-        selectsAll = false
         if selectedCategories.contains(category) {
             selectedCategories.remove(category)
             for tag in TagRegistry.tags(for: category) {
@@ -159,7 +148,6 @@ struct TagFilterState {
     }
 
     mutating func toggleTag(_ tag: String) {
-        selectsAll = false
         if selectedTags.contains(tag) {
             selectedTags.remove(tag)
             if let category = TagRegistry.category(for: tag) {
@@ -180,7 +168,6 @@ struct TagFilterState {
     }
 
     func matches(tags: [String]) -> Bool {
-        if selectsAll { return true }
         guard hasActiveFilters else { return true }
 
         switch filterMode {

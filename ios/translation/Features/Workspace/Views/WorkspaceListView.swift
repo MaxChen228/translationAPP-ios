@@ -7,6 +7,7 @@ struct WorkspaceListView: View {
     @EnvironmentObject private var localBank: LocalBankStore
     @EnvironmentObject private var localProgress: LocalBankProgressStore
     @EnvironmentObject private var practiceRecords: PracticeRecordsStore
+    @EnvironmentObject private var quickActions: QuickActionsStore
     @EnvironmentObject private var router: RouterStore
     @EnvironmentObject private var bannerCenter: BannerCenter
     @Environment(\.locale) private var locale
@@ -22,13 +23,19 @@ struct WorkspaceListView: View {
     @State private var path: [Route] = []
     // 拖曳中的項目（以 ID 辨識）。供重排使用。
     @State private var draggingID: UUID? = nil
+    @State private var isEditingQuickActions = false
 
     var body: some View {
         NavigationStack(path: $path) {
             ScrollView {
                 VStack(alignment: .leading, spacing: DS.Spacing.lg) {
                     // 快速功能保留 Row 形式，但使用一致的區塊標題
-                    QuickActionsRow(store: store)
+                    QuickActionsRow(
+                        store: store,
+                        isEditing: $isEditingQuickActions,
+                        onToggleEditing: toggleQuickActionsEditing,
+                        onRequestAdd: handleAddQuickAction
+                    )
 
                     // 快速功能與 Workspaces 間加上 hairline 分隔
                     DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.border))
@@ -86,6 +93,11 @@ struct WorkspaceListView: View {
                 }
                 .presentationDetents([.height(180)])
             }
+            .sheet(isPresented: $showQuickActionPicker) {
+                QuickActionPickerView(isPresented: $showQuickActionPicker) { type in
+                    quickActions.append(type)
+                }
+            }
             .onAppear {
                 draggingID = nil
                 // Bind stores to WorkspaceStore
@@ -108,6 +120,22 @@ struct WorkspaceListView: View {
     private func startRename(_ ws: Workspace) {
         newName = ws.name
         renaming = ws
+    }
+
+    private func toggleQuickActionsEditing() {
+        if isEditingQuickActions {
+            showQuickActionPicker = false
+        }
+        isEditingQuickActions.toggle()
+    }
+
+    @State private var showQuickActionPicker = false
+
+    private func handleAddQuickAction() {
+        if !isEditingQuickActions {
+            isEditingQuickActions = true
+        }
+        showQuickActionPicker = true
     }
 }
 
@@ -252,6 +280,27 @@ private struct AddWorkspaceCard: View {
     }
 }
 
+private struct AddQuickActionCard: View {
+    @Environment(\.locale) private var locale
+    var body: some View {
+        VStack(spacing: 8) {
+            Image(systemName: "plus.circle").font(.title2)
+            Text(String(localized: "quick.addEntry", locale: locale))
+                .dsType(DS.Font.caption)
+                .foregroundStyle(.secondary)
+        }
+        .frame(minHeight: DS.CardSize.minHeightCompact)
+        .frame(maxWidth: .infinity)
+        .padding(DS.Spacing.md)
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
+                .stroke(style: StrokeStyle(lineWidth: DS.BorderWidth.regular, dash: [5, 4]))
+                .foregroundStyle(DS.Palette.border.opacity(0.45))
+        )
+        .contentShape(RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous))
+    }
+}
+
 private struct FlashcardsEntryCard: View {
     @Environment(\.locale) private var locale
     var body: some View {
@@ -294,41 +343,125 @@ private struct ChatEntryCard: View {
 
 private struct QuickActionsRow: View {
     @ObservedObject var store: WorkspaceStore
+    @Binding var isEditing: Bool
+    var onToggleEditing: () -> Void
+    var onRequestAdd: () -> Void
+
+    @EnvironmentObject private var quickActions: QuickActionsStore
     @EnvironmentObject private var router: RouterStore
     @EnvironmentObject private var localBank: LocalBankStore
     @EnvironmentObject private var localProgress: LocalBankProgressStore
     @Environment(\.locale) private var locale
-    @StateObject private var chatViewModel = ChatViewModel()
+    @StateObject private var sharedChatViewModel = ChatViewModel()
+
     var body: some View {
+        let isEmpty = quickActions.items.isEmpty
         VStack(alignment: .leading, spacing: 8) {
-            DSSectionHeader(titleKey: "quick.title", subtitleKey: nil, accentUnderline: true)
+            header(isEmpty: isEmpty)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    NavigationLink { ChatWorkspaceView(viewModel: chatViewModel) } label: { ChatEntryCard().frame(width: DS.IconSize.entryCardWidth) }
-                        .buttonStyle(DSCardLinkStyle())
-                    NavigationLink { FlashcardDecksView() } label: { FlashcardsEntryCard().frame(width: DS.IconSize.entryCardWidth) }
-                        .buttonStyle(DSCardLinkStyle())
-                    if let first = store.workspaces.first {
-                        NavigationLink {
-                            // Home-level entry to Bank -> when picking a local practice item, create a new workspace
-                            BankBooksView(vm: store.vm(for: first.id), onPracticeLocal: { bookName, item, tag in
-                                let newWS = store.addWorkspace()
-                                let newVM = store.vm(for: newWS.id)
-                                // Local practice: ensure VM has local stores for completion/next
-                                newVM.bindLocalBankStores(localBank: localBank, progress: localProgress)
-                                newVM.startLocalPractice(bookName: bookName, item: item, tag: tag)
-                                router.open(workspaceID: newWS.id)
-                            })
-                        } label: { BankBooksEntryCard().frame(width: DS.IconSize.entryCardWidth) }
-                            .buttonStyle(DSCardLinkStyle())
+                    ForEach(quickActions.items) { item in
+                        quickActionTile(for: item)
                     }
-                    NavigationLink { CalendarView() } label: { CalendarEntryCard().frame(width: DS.IconSize.entryCardWidth) }
-                        .buttonStyle(DSCardLinkStyle())
-                    NavigationLink { SettingsView() } label: { SettingsEntryCard().frame(width: DS.IconSize.entryCardWidth) }
-                        .buttonStyle(DSCardLinkStyle())
+                    if isEditing || isEmpty {
+                        AddQuickActionCard()
+                            .frame(width: DS.IconSize.entryCardWidth)
+                            .onTapGesture { onRequestAdd() }
+                    }
                 }
                 .padding(.horizontal, 2)
             }
+        }
+    }
+
+    private func header(isEmpty: Bool) -> some View {
+        DSSectionHeader(titleKey: "quick.title", subtitleKey: nil, accentUnderline: true)
+            .overlay(alignment: .topTrailing) {
+                if isEmpty {
+                    Button(String(localized: "quick.addEntry", locale: locale)) {
+                        if !isEditing { onToggleEditing() }
+                        onRequestAdd()
+                    }
+                    .buttonStyle(DSButton(style: .secondary, size: .compact))
+                    .padding(.top, 4)
+                } else {
+                    Button(isEditing ? String(localized: "action.done", locale: locale) : String(localized: "action.edit", locale: locale)) {
+                        onToggleEditing()
+                    }
+                    .buttonStyle(DSButton(style: .secondary, size: .compact))
+                    .padding(.top, 4)
+                }
+            }
+    }
+
+    @ViewBuilder
+    private func quickActionTile(for item: QuickActionItem) -> some View {
+        let card = cardView(for: item)
+            .frame(width: DS.IconSize.entryCardWidth)
+
+        if isEditing {
+            card
+                .overlay(alignment: .topTrailing) {
+                    Button(role: .destructive) {
+                        quickActions.remove(id: item.id)
+                    } label: {
+                        Image(systemName: "minus.circle.fill")
+                            .font(.system(size: 20))
+                            .foregroundStyle(Color.red)
+                            .padding(6)
+                    }
+                    .buttonStyle(.plain)
+                }
+        } else {
+            navigationWrapper(for: item) {
+                card
+            }
+            .buttonStyle(DSCardLinkStyle())
+        }
+    }
+
+    @ViewBuilder
+    private func cardView(for item: QuickActionItem) -> some View {
+        switch item.type {
+        case .chat:
+            ChatEntryCard()
+        case .flashcards:
+            FlashcardsEntryCard()
+        case .bank:
+            BankBooksEntryCard()
+        case .calendar:
+            CalendarEntryCard()
+        case .settings:
+            SettingsEntryCard()
+        }
+    }
+
+    @ViewBuilder
+    private func navigationWrapper<Content: View>(for item: QuickActionItem, @ViewBuilder content: () -> Content) -> some View {
+        switch item.type {
+        case .chat:
+            NavigationLink { ChatWorkspaceView(viewModel: sharedChatViewModel) } label: { content() }
+        case .flashcards:
+            NavigationLink { FlashcardDecksView() } label: { content() }
+        case .bank:
+            if let workspace = store.workspaces.first {
+                NavigationLink {
+                    BankBooksView(vm: store.vm(for: workspace.id), onPracticeLocal: { bookName, item, tag in
+                        let newWorkspace = store.addWorkspace()
+                        let newVM = store.vm(for: newWorkspace.id)
+                        newVM.bindLocalBankStores(localBank: localBank, progress: localProgress)
+                        newVM.startLocalPractice(bookName: bookName, item: item, tag: tag)
+                        router.open(workspaceID: newWorkspace.id)
+                    })
+                } label: { content() }
+            } else {
+                content()
+                    .opacity(0.5)
+            }
+        case .calendar:
+            NavigationLink { CalendarView() } label: { content() }
+        case .settings:
+            NavigationLink { SettingsView() } label: { content() }
         }
     }
 }

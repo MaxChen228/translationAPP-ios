@@ -49,6 +49,8 @@ App 透過 Info.plist 的 `BACKEND_URL` 讀取後端位址（由 `AppConfig` 使
 注意：必須先設定 `BACKEND_URL`，否則批改、雲端瀏覽與單字卡產生會顯示錯誤提示（Banner），不再提供本地 Mock。
 
 ## 主要畫面與流程
+- 快速功能列（`ios/translation/Features/Workspace/Views/WorkspaceListView.swift` → `QuickActionsRow`）
+  - 橫向卡片可自訂順序與內容；支援編輯模式刪除、重加入口，使用 QuickActionsStore 持久化設定。
 - Workspace 清單（components/WorkspaceListView.swift）
   - 多個 Workspace 平行編輯，支援拖曳、重新命名、刪除；可開啟 Saved JSON 清單。新增 `CalendarEntryCard` 快速進入日曆檢視。
 - 翻譯批改（ContentView.swift）

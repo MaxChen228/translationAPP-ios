@@ -17,6 +17,7 @@ struct RandomSettingsToolbarButton: View {
 struct RandomPracticeSettingsSheet: View {
     @EnvironmentObject private var settings: RandomPracticeStore
     @EnvironmentObject private var localBank: LocalBankStore
+    @EnvironmentObject private var localProgress: LocalBankProgressStore
     @Environment(\.dismiss) private var dismiss
 
     private var filterBinding: Binding<TagFilterState> {
@@ -49,6 +50,27 @@ struct RandomPracticeSettingsSheet: View {
 
     private var totalItemCount: Int {
         allItems.count
+    }
+
+    private var eligibleItemCount: Int {
+        let filterState = settings.filterState
+        let selectedDifficulties = settings.selectedDifficulties
+
+        return localBank.books.reduce(into: 0) { acc, book in
+            for item in book.items {
+                if !selectedDifficulties.isEmpty && !selectedDifficulties.contains(item.difficulty) {
+                    continue
+                }
+                if settings.excludeCompleted && localProgress.isCompleted(book: book.name, itemId: item.id) {
+                    continue
+                }
+                if filterState.hasActiveFilters {
+                    guard let tags = item.tags, !tags.isEmpty else { continue }
+                    guard filterState.matches(tags: tags) else { continue }
+                }
+                acc += 1
+            }
+        }
     }
 
     var body: some View {
@@ -96,6 +118,12 @@ struct RandomPracticeSettingsSheet: View {
                                 .padding(.horizontal, 2)
                             }
                         }
+                    }
+
+                    if totalItemCount > 0 {
+                        Text(String(format: String(localized: "bank.random.eligibleCount"), Int64(eligibleItemCount)))
+                            .dsType(DS.Font.caption)
+                            .foregroundStyle(eligibleItemCount == 0 ? DS.Palette.danger : .secondary)
                     }
 
                     if tagStats.isEmpty {
