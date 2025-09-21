@@ -29,7 +29,7 @@
 
 - **批改**：`Shared/Services/AIService.swift` 定義 `AIService` protocol 與 `AIServiceHTTP` 實作，負責呼叫 `/correct`，處理 `ErrorDTO` 回應並建立高亮範圍。若 `BACKEND_URL` 未設定，改用 `UnavailableAIService` 丟出提示。
 - **題庫與卡片**：`Shared/Services/CloudLibraryService.swift` 取得 `/cloud/books`、`/cloud/decks`；`Shared/Services/DeckService.swift` 封裝 `/make_deck`。兩者均會在缺少 `BACKEND_URL` 時直接 `fatalError` 或回傳錯誤，提醒需先設定環境。
-- **聊天**：`Features/Chat/Services/ChatService.swift` 實作 `/chat/respond` 與 `/chat/research`，並將錯誤結構轉換為前端 `ErrorItem`。
+- **聊天**：`Features/Chat/Services/ChatService.swift` 實作 `/chat/respond` 與 `/chat/research`，並將 LLM 回傳轉換為 `ChatTurnResponse`（含 `state`/`checklist`）及 `ChatResearchItem`（term/explanation/context/type），並在傳送時自動將圖片附件編碼為 base64 以配合後端的 inline data。
 
 所有 HTTP service 都採用 `URLSession` + Codable DTO，並在傳送請求前自動加入使用者選擇的 LLM 模型（`settings.geminiModel`）。
 
@@ -62,6 +62,6 @@
 
 ## 變更依賴與注意事項
 
-- 背景批改／聊天流程高度倚賴後端 DTO 結構。任何 API 變更請同步調整 `AIServiceHTTP.ErrorDTO` 或對應聊天 DTO，並更新此文件。
+- 背景批改／聊天流程高度倚賴後端 DTO 結構。任何 API 變更請同步調整 `AIServiceHTTP.ErrorDTO` 與聊天相關 DTO（`ChatTurnResponse`、`ChatResearchItem` 等），並更新此文件。
 - 如需新增長期持久化資料，優先考慮建立獨立 Store class 以保持 `CorrectionViewModel` 簡潔。
 - 新增視圖時建議放入對應的 `Features/<Module>/Views` / `Components` 子資料夾，並於 `docs/workflows.md` 補充對應關聯。

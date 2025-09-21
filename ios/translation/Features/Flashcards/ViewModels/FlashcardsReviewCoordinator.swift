@@ -25,6 +25,11 @@ class FlashcardsReviewCoordinator {
     func adjustProficiency(_ outcome: AnnotateFeedback, mode: FlashcardsReviewMode, progressStore: FlashcardProgressStore) {
         guard mode == .annotate else { return }
         guard let deckID = viewModel.deckID, let current = viewModel.store.current else { return }
+
+        // 記錄當前狀態以便回滾
+        let previousState = progressStore.isFamiliar(deckID: deckID, cardID: current.id)
+        viewModel.annotationHistory.append((cardID: current.id, previousState: previousState, action: outcome))
+
         switch outcome {
         case .familiar:
             progressStore.markFamiliar(deckID: deckID, cardID: current.id)
@@ -60,6 +65,7 @@ class FlashcardsReviewCoordinator {
         viewModel.collectedUnfamiliar.removeAll()
         viewModel.sessionRightCount = 0
         viewModel.sessionWrongCount = 0
+        viewModel.annotationHistory.removeAll()
         applyUnfamiliarFilterIfNeeded(progressStore: progressStore)
     }
 

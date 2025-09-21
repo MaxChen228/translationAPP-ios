@@ -20,6 +20,9 @@ final class FlashcardsViewModel: ObservableObject {
     @Published var sessionRightCount: Int = 0
     @Published var sessionWrongCount: Int = 0
 
+    // 操作歷史，用於支援 Back 按鈕回滾標注操作
+    var annotationHistory: [(cardID: UUID, previousState: Bool?, action: AnnotateFeedback)] = []
+
     let title: String
     let deckID: UUID?
     let originalCards: [Flashcard]
@@ -30,6 +33,34 @@ final class FlashcardsViewModel: ObservableObject {
     let store: FlashcardsStore
 
     enum ReviewPhase { case allOnce, unfamiliarLoop }
+
+    func rollbackLastAnnotation(progressStore: FlashcardProgressStore) {
+        guard !annotationHistory.isEmpty,
+              let deckID = deckID else { return }
+
+        let lastAction = annotationHistory.removeLast()
+
+        // 回滾進度狀態
+        if let previousState = lastAction.previousState {
+            if previousState {
+                progressStore.markFamiliar(deckID: deckID, cardID: lastAction.cardID)
+            } else {
+                progressStore.markUnfamiliar(deckID: deckID, cardID: lastAction.cardID)
+            }
+        }
+
+        // 回滾計數器
+        switch lastAction.action {
+        case .familiar:
+            sessionRightCount = max(0, sessionRightCount - 1)
+            collectedUnfamiliar.insert(lastAction.cardID)
+        case .unfamiliar:
+            sessionWrongCount = max(0, sessionWrongCount - 1)
+            if phase == .allOnce {
+                collectedUnfamiliar.remove(lastAction.cardID)
+            }
+        }
+    }
 
     init(store: FlashcardsStore,
          title: String,

@@ -1,7 +1,12 @@
 import SwiftUI
 
 extension FlashcardsViewModel {
-    func handlePrevTapped() {
+    func handlePrevTapped(mode: FlashcardsReviewMode, progressStore: FlashcardProgressStore) {
+        // 在標注模式下，需要回滾上一個操作
+        if mode == .annotate && !annotationHistory.isEmpty {
+            rollbackLastAnnotation(progressStore: progressStore)
+        }
+
         goToPreviousAnimated(restartAudio: isAudioActive)
     }
 
@@ -26,15 +31,6 @@ extension FlashcardsViewModel {
         store.flip()
         if isAudioActive {
             audio.stopPlayback()
-            return
-        }
-        guard let card = store.current else { return }
-        let manager = speechManager
-        if store.showBack {
-            let text = backTextToSpeak(for: card)
-            speak(text: text, lang: manager.settings.backLang)
-        } else {
-            speak(text: card.front, lang: manager.settings.frontLang)
         }
     }
 

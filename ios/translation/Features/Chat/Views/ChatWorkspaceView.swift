@@ -172,7 +172,7 @@ struct ChatWorkspaceView: View {
         }
         .padding(.horizontal, DS.Spacing.md)
         .padding(.vertical, DS.Spacing.sm)
-        .background(DS.Palette.surfaceAlt)
+        .padding(.bottom, DS.Spacing.xs)
         .onChange(of: pendingPhotoItem) { _, newValue in
             guard let item = newValue else { return }
             handleSelectedPhotoItem(item)

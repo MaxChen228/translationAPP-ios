@@ -201,7 +201,7 @@ struct FlashcardsView: View {
                             DSQuickActionIconButton(
                                 systemName: "arrow.uturn.left",
                                 labelKey: "flashcards.prev",
-                                action: { viewModel.handlePrevTapped() },
+                                action: { viewModel.handlePrevTapped(mode: mode, progressStore: progressStore) },
                                 shape: .circle,
                                 style: .outline,
                                 size: 44

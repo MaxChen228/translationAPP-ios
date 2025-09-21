@@ -35,9 +35,9 @@
 
 | 任務 | 主要檔案 | 說明 |
 | ---- | -------- | ---- |
-| 聊天 UI 與狀態 | `Features/Chat/ViewModels/ChatViewModel.swift`、`Features/Chat/Views/ChatWorkspaceView.swift` | `ChatViewModel` 管理訊息列表、狀態、`/chat/research` 結果。 |
-| HTTP 交握 | `Features/Chat/Services/ChatService.swift` | `ChatServiceHTTP` 負責編碼訊息、解析回應並轉換為前端模型。 |
-| 錯誤資料共享 | `AIServiceHTTP.ErrorDTO` + `ChatServiceHTTP.ResearchResponseDTO` | 兩處使用同一錯誤資料結構；後端欄位改動需同步更新。 |
+| 聊天 UI 與狀態 | `Features/Chat/ViewModels/ChatViewModel.swift`、`Features/Chat/Views/ChatWorkspaceView.swift` | 管理訊息列表、`state`/`checklist`、研究結果展示，並依 `AppSettingsStore` 的模型設定觸發研究。 |
+| HTTP 交握 | `Features/Chat/Services/ChatService.swift` | `ChatServiceHTTP` 會將圖片附件轉換為 base64、附上每個流程的模型設定，並對 500/422 錯誤做本地化轉換。 |
+| 研究輸出模型 | `Features/Chat/Models/ChatModels.swift` | `ChatResearchResponse.items` 轉成 `ChatResearchItem(term/explanation/context/type)`；若後端回傳空陣列會拋錯提醒使用者補充資訊。 |
 
 ## 5. 通知與 Banner
 
