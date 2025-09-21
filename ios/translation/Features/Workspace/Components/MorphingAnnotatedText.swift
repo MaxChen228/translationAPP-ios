@@ -23,29 +23,15 @@ struct MorphingAnnotatedText: UIViewRepresentable {
     func sizeThatFits(_ proposal: ProposedViewSize, uiView: MTContainerView, context: Context) -> CGSize {
         let width = max(1, Int((proposal.width ?? UIScreen.main.bounds.width)))
         // Measure without depending on current UITextView state to avoid 0 height.
-        let measured = Self.measureHeight(original: originalText,
-                                          corrected: correctedText,
-                                          font: font,
-                                          lineSpacing: lineSpacing,
-                                          width: CGFloat(width))
+        let measured = TextMeasurement.measureHeight(original: originalText,
+                                                   corrected: correctedText,
+                                                   font: font,
+                                                   lineSpacing: lineSpacing,
+                                                   width: CGFloat(width))
         AppLog.uiDebug("[sizeThatFits] proposedW=\(width) measuredH=\(measured)")
         return CGSize(width: CGFloat(width), height: measured)
     }
 
-    static func measureHeight(original: String, corrected: String, font: UIFont, lineSpacing: CGFloat, width: CGFloat) -> CGFloat {
-        // If width is extremely small (first pass), return a conservative single-line height
-        let minLine = ceil(font.lineHeight + lineSpacing)
-        if width < 50 { return max(minLine, 30) }
-        func height(for text: String) -> CGFloat {
-            let p = NSMutableParagraphStyle(); p.lineSpacing = lineSpacing
-            let attr = NSAttributedString(string: text, attributes: [.font: font, .paragraphStyle: p])
-            var rect = attr.boundingRect(with: CGSize(width: width, height: .greatestFiniteMagnitude),
-                                         options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
-            rect.size.height = ceil(rect.size.height) + 2 // small safety padding
-            return max(rect.size.height, minLine)
-        }
-        return max(height(for: original), height(for: corrected))
-    }
 
     func makeUIView(context: Context) -> MTContainerView {
         let view = MTContainerView()
@@ -195,16 +181,16 @@ final class MTContainerView: UIView {
         layoutIfNeeded()
 
         // Map colors per highlight id (independent of geometry)
-        fromColors = Self.colorsMap(for: originalHighlights)
-        toColors = Self.colorsMap(for: correctedHighlights)
+        fromColors = TextMeasurement.colorsMap(for: originalHighlights)
+        toColors = TextMeasurement.colorsMap(for: correctedHighlights)
 
         // If size is not yet valid, defer rect computation and animation to layoutSubviews
         if bounds.width <= 0 || bounds.height <= 0 {
             needsRectComputeOnLayout = true
             if animated { pendingAnimateSwitch = true; pendingTargetCorrected = showingCorrected }
         } else {
-            fromRects = Self.computeRects(in: fromTextView, text: original, highlights: originalHighlights)
-            toRects = Self.computeRects(in: toTextView, text: corrected, highlights: correctedHighlights)
+            fromRects = TextMeasurement.computeRects(in: fromTextView, text: original, highlights: originalHighlights)
+            toRects = TextMeasurement.computeRects(in: toTextView, text: corrected, highlights: correctedHighlights)
         }
 
         // Ensure subviews layering: keep overlay behind
@@ -247,8 +233,8 @@ final class MTContainerView: UIView {
             invalidateIntrinsicContentSize()
             if bounds.width > 0 && bounds.height > 0 {
                 // recompute rects for final width
-                fromRects = Self.computeRects(in: fromTextView, text: lastOriginalText, highlights: lastOriginalHighlights)
-                toRects = Self.computeRects(in: toTextView, text: lastCorrectedText, highlights: lastCorrectedHighlights)
+                fromRects = TextMeasurement.computeRects(in: fromTextView, text: lastOriginalText, highlights: lastOriginalHighlights)
+                toRects = TextMeasurement.computeRects(in: toTextView, text: lastCorrectedText, highlights: lastCorrectedHighlights)
                 layoutHighlightLayers(selectedID: lastSelectedID, immediate: true)
                 needsRectComputeOnLayout = false
                 if pendingAnimateSwitch {
@@ -262,11 +248,11 @@ final class MTContainerView: UIView {
 
     override var intrinsicContentSize: CGSize {
         let width = max(1, Int(self.bounds.width))
-        let h = MorphingAnnotatedText.measureHeight(original: lastOriginalText,
-                                                    corrected: lastCorrectedText,
-                                                    font: fromTextView.font ?? DS.DSUIFont.serifBody(),
-                                                    lineSpacing: paraStyle.lineSpacing,
-                                                    width: CGFloat(width))
+        let h = TextMeasurement.measureHeight(original: lastOriginalText,
+                                             corrected: lastCorrectedText,
+                                             font: fromTextView.font ?? DS.DSUIFont.serifBody(),
+                                             lineSpacing: paraStyle.lineSpacing,
+                                             width: CGFloat(width))
         AppLog.uiDebug("[intrinsic] width=\(width) height=\(h)")
         return CGSize(width: UIView.noIntrinsicMetric, height: h)
     }
@@ -481,46 +467,9 @@ final class MTContainerView: UIView {
         }
     }
 
-    // Compute enclosing rects per highlight id using TextKit layout
-    private static func computeRects(in textView: UITextView, text: String, highlights: [Highlight]) -> [UUID: [CGRect]] {
-        guard textView.bounds.width > 0 && textView.bounds.height > 0 else { return [:] }
-        let lm = textView.layoutManager
-        let tc = textView.textContainer
-
-        var result: [UUID: [CGRect]] = [:]
-
-        for h in highlights {
-            let range = NSRange(h.range, in: text)
-            // Convert to glyph range
-            let glyphRange = lm.glyphRange(forCharacterRange: range, actualCharacterRange: nil)
-            var rects: [CGRect] = []
-            lm.enumerateEnclosingRects(forGlyphRange: glyphRange, withinSelectedGlyphRange: NSRange(location: NSNotFound, length: 0), in: tc) { r, _ in
-                // Convert from container coords to view coords
-                // UITextView's text is inset by textContainerInset and lineFragmentPadding already set to 0
-                // When scroll is enabled and content is shorter, contentOffset will be zero (top-aligned).
-                // Translate by inset only.
-                var converted = r.offsetBy(dx: textView.textContainerInset.left - textView.contentOffset.x,
-                                            dy: textView.textContainerInset.top - textView.contentOffset.y)
-                // Make highlight tighter to text by shrinking vertically a bit
-                let lineHeight = textView.font?.lineHeight ?? converted.height
-                let shrink = max(1, min(3, lineHeight * 0.12))
-                converted = converted.insetBy(dx: 0, dy: shrink)
-                rects.append(converted.integral)
-            }
-            result[h.id] = rects
-        }
-        let used = lm.usedRect(for: tc)
-        AppLog.uiDebug("[rects] used.h=\(used.height) inset=\(textView.textContainerInset) offset=\(textView.contentOffset) rectsCount=\(result.values.reduce(0){$0+$1.count})")
-        return result
-    }
 
     // Intentionally no intrinsicContentSize; SwiftUI queries sizeThatFits for accurate height.
 
-    private static func colorsMap(for highlights: [Highlight]) -> [UUID: UIColor] {
-        var map: [UUID: UIColor] = [:]
-        for h in highlights { map[h.id] = UIColor(h.type.color) }
-        return map
-    }
 
     private func colorFor(id: UUID) -> UIColor? {
         if currentShowingCorrected {
