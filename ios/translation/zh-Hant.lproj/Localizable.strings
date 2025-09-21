@@ -64,6 +64,7 @@
 "hints.empty" = "目前沒有提示";
 "chips.all" = "全部";
 "a11y.openSavedJSON" = "查看已儲存的錯誤 JSON";
+"a11y.openPracticeRecords" = "查看練習記錄";
 "a11y.copyCurrentComposition" = "複製目前組合";
 
 /* 錯誤類型 */
@@ -140,6 +141,24 @@
 /* Banner messages */
 "banner.practice.saved.title" = "練習記錄已儲存";
 "banner.practice.saved.subtitle" = "已成功儲存到本機";
+
+/* Practice Records */
+"practice.records.title" = "練習記錄";
+"practice.records.empty.title" = "尚無練習記錄";
+"practice.records.empty.subtitle" = "完成翻譯練習並點擊儲存按鈕即可查看記錄";
+"practice.records.stats.title" = "統計";
+"practice.records.stats.subtitle" = "練習表現總覽";
+"practice.records.stats.total" = "總記錄";
+"practice.records.stats.avgScore" = "平均分數";
+"practice.records.stats.totalErrors" = "總錯誤數";
+"practice.records.list.title" = "練習記錄";
+"practice.records.list.subtitle" = "按時間順序排列";
+"practice.records.card.chinese" = "中文原文";
+"practice.records.card.english" = "英文翻譯";
+"practice.records.clear.all" = "清除全部";
+"practice.records.clear.confirm.title" = "確認清除";
+"practice.records.clear.confirm.message" = "此操作將永久刪除所有練習記錄，無法復原。";
+"practice.records.clear.confirm.action" = "確認刪除";
 
 /* 後端錯誤 */
 "error.backend.missing" = "網路無法連線，請檢查設定。";

@@ -114,6 +114,24 @@
 "banner.practice.saved.title" = "Practice Record Saved";
 "banner.practice.saved.subtitle" = "Successfully saved to local storage";
 
+/* Practice Records */
+"practice.records.title" = "Practice Records";
+"practice.records.empty.title" = "No Practice Records";
+"practice.records.empty.subtitle" = "Complete translation exercises and save them to view records here";
+"practice.records.stats.title" = "Statistics";
+"practice.records.stats.subtitle" = "Practice performance overview";
+"practice.records.stats.total" = "Total Records";
+"practice.records.stats.avgScore" = "Average Score";
+"practice.records.stats.totalErrors" = "Total Errors";
+"practice.records.list.title" = "Practice Records";
+"practice.records.list.subtitle" = "Sorted by time";
+"practice.records.card.chinese" = "Chinese Text";
+"practice.records.card.english" = "English Translation";
+"practice.records.clear.all" = "Clear All";
+"practice.records.clear.confirm.title" = "Confirm Clear";
+"practice.records.clear.confirm.message" = "This will permanently delete all practice records and cannot be undone.";
+"practice.records.clear.confirm.action" = "Delete All";
+
 /* Backend errors */
 "error.backend.missing" = "Network unavailable. Please check connection.";
 "error.chat.backendMissing" = "Network unavailable. Chat is currently unavailable.";
@@ -275,6 +293,7 @@
 "hints.empty" = "No hints yet";
 "chips.all" = "All";
 "a11y.openSavedJSON" = "Open saved error JSON";
+"a11y.openPracticeRecords" = "Open practice records";
 "a11y.copyCurrentComposition" = "Copy current composition";
 "banner.backend.missing.title" = "Network unavailable";
 "banner.backend.missing.subtitle" = "Please check connection settings";

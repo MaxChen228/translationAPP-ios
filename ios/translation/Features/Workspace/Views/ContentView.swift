@@ -147,7 +147,14 @@ struct ContentView: View {
                         Image(systemName: "keyboard.chevron.compact.down")
                     }
                 }
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    NavigationLink {
+                        PracticeRecordsListView()
+                    } label: {
+                        Image(systemName: "doc.text")
+                    }
+                    .accessibilityLabel(Text("a11y.openPracticeRecords"))
+
                     NavigationLink {
                         SavedJSONListSheet()
                             .environmentObject(savedStore)

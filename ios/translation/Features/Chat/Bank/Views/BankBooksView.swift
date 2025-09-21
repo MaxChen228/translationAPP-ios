@@ -61,6 +61,16 @@ struct BankBooksView: View {
                     DSSectionHeader(titleKey: "bank.local.title", accentUnderline: true)
                         .overlay(alignment: .topTrailing) {
                             HStack(spacing: DS.Spacing.sm) {
+                                NavigationLink {
+                                    AllBankItemsView(vm: vm, onPractice: onPracticeLocal)
+                                } label: {
+                                    Image(systemName: "list.bullet")
+                                        .font(.system(size: 16, weight: .medium))
+                                        .frame(width: 28, height: 28)
+                                        .background(DS.Palette.surface, in: Circle())
+                                        .overlay(Circle().stroke(DS.Palette.border.opacity(0.3), lineWidth: DS.BorderWidth.thin))
+                                }
+                                .accessibilityLabel("瀏覽所有題庫")
                                 RandomPracticeToolbarButton { runRandomPractice() }
                                 RandomSettingsToolbarButton { showRandomSettings = true }
                             }
