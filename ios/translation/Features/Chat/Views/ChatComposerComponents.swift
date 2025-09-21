@@ -1,5 +1,7 @@
 import SwiftUI
 import UIKit
+import OSLog
+import QuartzCore
 
 struct AdaptiveComposer: View {
     @Binding var text: String
@@ -68,7 +70,9 @@ struct AdaptiveComposer: View {
         .accessibilityHint("Enter your message here")
         .contentShape(Rectangle())
         .onTapGesture {
+            AppLog.chatDebug("AdaptiveComposer tap gesture - current isFocused: \(isFocused)")
             if !isFocused {
+                AppLog.chatDebug("Setting isFocused to true from tap gesture")
                 isFocused = true
             }
         }
@@ -119,9 +123,11 @@ struct GrowingTextView: UIViewRepresentable {
     func updateUIView(_ uiView: UITextView, context: Context) {
         // Store the current first responder status to avoid unnecessary changes
         let wasFirstResponder = uiView.isFirstResponder
+        AppLog.chatDebug("updateUIView - isFocused: \(isFocused), wasFirstResponder: \(wasFirstResponder), text: '\(text)'")
 
         // Update text if different (prevent cursor jumping)
         if uiView.text != text {
+            AppLog.chatDebug("Updating UITextView text from '\(uiView.text ?? "")' to '\(text)'")
             let selectedRange = uiView.selectedRange
             uiView.text = text
             // Restore cursor position if still valid
@@ -139,24 +145,46 @@ struct GrowingTextView: UIViewRepresentable {
         // Only handle focus changes if there's actually a change needed
         // This prevents unnecessary resignFirstResponder calls during typing
         if isFocused && !wasFirstResponder {
+            AppLog.chatDebug("Becoming first responder")
             uiView.becomeFirstResponder()
         } else if !isFocused && wasFirstResponder {
-            uiView.resignFirstResponder()
+            // Don't resign first responder if there's text (user might be typing)
+            // This prevents the keyboard from disappearing during text input
+            if text.isEmpty {
+                AppLog.chatDebug("Resigning first responder (text is empty)")
+                uiView.resignFirstResponder()
+            } else {
+                AppLog.chatDebug("NOT resigning first responder (text exists: '\(text)')")
+                // Keep the focus if there's text - user is likely still typing
+            }
         }
 
-        // Update height calculation with proper width
-        context.coordinator.updateHeight(for: uiView, availableWidth: availableWidth)
+        // Don't update height here to prevent AttributeGraph cycles
+        // Height updates are handled in textViewDidChange only
     }
 
     final class Coordinator: NSObject, UITextViewDelegate {
         var parent: GrowingTextView
         private var lastCalculatedHeight: CGFloat = 0
+        private var heightUpdateWorkItem: DispatchWorkItem?
 
         init(parent: GrowingTextView) {
             self.parent = parent
         }
 
         func updateHeight(for textView: UITextView, availableWidth: CGFloat) {
+            // Cancel previous height update to prevent rapid updates
+            heightUpdateWorkItem?.cancel()
+
+            let workItem = DispatchWorkItem { [weak self] in
+                self?.updateHeightSync(for: textView, availableWidth: availableWidth)
+            }
+
+            heightUpdateWorkItem = workItem
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.01, execute: workItem)
+        }
+
+        func updateHeightSync(for textView: UITextView, availableWidth: CGFloat) {
             let size = textView.sizeThatFits(CGSize(
                 width: availableWidth,
                 height: .greatestFiniteMagnitude
@@ -167,38 +195,61 @@ struct GrowingTextView: UIViewRepresentable {
 
             if abs(newHeight - lastCalculatedHeight) > 0.5 {
                 lastCalculatedHeight = newHeight
+                AppLog.chatDebug("Height changing from \(parent.calculatedHeight) to \(newHeight)")
 
-                DispatchQueue.main.async {
-                    self.parent.calculatedHeight = newHeight
-                    textView.isScrollEnabled = shouldScroll
-                }
+                // Update synchronously in the current transaction
+                parent.calculatedHeight = newHeight
+                textView.isScrollEnabled = shouldScroll
             }
         }
 
         func textViewDidChange(_ textView: UITextView) {
-            // Update text without affecting focus state
             let newText = textView.text ?? ""
-            if parent.text != newText {
-                parent.text = newText
+            AppLog.chatDebug("textViewDidChange - old: '\(parent.text)', new: '\(newText)'")
+
+            // Batch all state updates together to prevent AttributeGraph cycles
+            DispatchQueue.main.async {
+                // Use implicit transaction to batch state updates
+                CATransaction.begin()
+                CATransaction.setDisableActions(true)
+
+                // Update text if different
+                if self.parent.text != newText {
+                    self.parent.text = newText
+                    AppLog.chatDebug("Updated parent text to: '\(newText)'")
+                }
+
+                // Ensure focus state is correct when typing
+                if !self.parent.isFocused && textView.isFirstResponder {
+                    AppLog.chatDebug("Text changed while not focused - setting isFocused to true")
+                    self.parent.isFocused = true
+                }
+
+                // Update height in the same transaction
+                self.updateHeightSync(for: textView, availableWidth: self.parent.availableWidth)
+
+                CATransaction.commit()
             }
-            updateHeight(for: textView, availableWidth: parent.availableWidth)
         }
 
         func textViewDidBeginEditing(_ textView: UITextView) {
-            // Only update SwiftUI state if it's actually different
-            // Use async to avoid blocking the UI
+            AppLog.chatDebug("textViewDidBeginEditing - current isFocused: \(parent.isFocused)")
+            // Focus state is primarily managed in textViewDidChange to avoid conflicts
+            // Only update if we're sure we need to
             if !parent.isFocused {
                 DispatchQueue.main.async {
+                    AppLog.chatDebug("Setting isFocused to true from didBeginEditing")
                     self.parent.isFocused = true
                 }
             }
         }
 
         func textViewDidEndEditing(_ textView: UITextView) {
-            // Only update SwiftUI state if it's actually different
-            // Use async to avoid blocking the UI
+            AppLog.chatDebug("textViewDidEndEditing - current isFocused: \(parent.isFocused)")
+            // Only update focus if we're sure editing ended
             if parent.isFocused {
                 DispatchQueue.main.async {
+                    AppLog.chatDebug("Setting isFocused to false from didEndEditing")
                     self.parent.isFocused = false
                 }
             }
