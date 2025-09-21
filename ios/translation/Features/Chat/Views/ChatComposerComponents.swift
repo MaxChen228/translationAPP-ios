@@ -8,18 +8,18 @@ struct AdaptiveComposer: View {
 
     private var minHeight: CGFloat {
         switch dynamicTypeSize {
-        case .xSmall, .small: return 36
-        case .medium: return 38
-        case .large: return 40
-        case .xLarge: return 42
-        case .xxLarge: return 44
-        case .xxxLarge: return 48
-        default: return 52
+        case .xSmall, .small: return 32
+        case .medium: return 34
+        case .large: return 36
+        case .xLarge: return 38
+        case .xxLarge: return 40
+        case .xxxLarge: return 42
+        default: return 44
         }
     }
 
     private var maxHeight: CGFloat {
-        minHeight * 5
+        minHeight * 3.5  // 約3.5行，而非5行
     }
 
 
@@ -30,8 +30,8 @@ struct AdaptiveComposer: View {
                 Text("chat.placeholder")
                     .dsType(DS.Font.body)
                     .foregroundStyle(DS.Palette.subdued)
-                    .padding(.top, 8)
-                    .padding(.horizontal, 12)
+                    .padding(.top, 6)
+                    .padding(.horizontal, 16)
                     .accessibilityHidden(true)
                     .allowsHitTesting(false)
             }
@@ -41,14 +41,14 @@ struct AdaptiveComposer: View {
                 .dsType(DS.Font.body)
                 .focused($isFocused)
                 .frame(minHeight: minHeight, maxHeight: maxHeight)
-                .padding(.horizontal, 4)
-                .padding(.vertical, 4)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 6)
                 .scrollContentBackground(.hidden)
                 .background(Color.clear)
                 .accessibilityLabel("Message input")
                 .accessibilityHint("Type your message here")
         }
-        .frame(minHeight: minHeight + 16, maxHeight: maxHeight + 16)
+        .frame(minHeight: minHeight + 12, maxHeight: maxHeight + 12)
         .background(
             RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
                 .fill(DS.Palette.surface)
