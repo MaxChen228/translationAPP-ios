@@ -43,8 +43,7 @@ struct NestedTagFilterView: View {
         DSSectionHeader(
             verbatimTitle: "篩選標籤",
             accentUnderline: true,
-            accentLines: 2,
-            accentSpacing: 2
+            accentLines: 1
         )
         .overlay(alignment: .topTrailing) {
             if filterState.hasActiveFilters {
