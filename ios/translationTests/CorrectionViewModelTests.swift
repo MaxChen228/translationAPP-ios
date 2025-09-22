@@ -118,6 +118,25 @@ private extension CorrectionViewModelTests {
         AIResponse(corrected: "I went to school.", score: 78, errors: [sampleError])
     }
 
+    var secondaryError: ErrorItem {
+        ErrorItem(
+            id: UUID(uuidString: "FFFFFFFF-1111-2222-3333-444444444444")!,
+            span: "school",
+            type: .syntactic,
+            explainZh: "句型需調整",
+            suggestion: nil,
+            hints: ErrorHints(before: "to ", after: " and", occurrence: nil)
+        )
+    }
+
+    var multiErrorResponse: AIResponse {
+        AIResponse(
+            corrected: "I went to school and learn.",
+            score: 65,
+            errors: [sampleError, secondaryError]
+        )
+    }
+
     var sampleHint: BankHint {
         BankHint(category: .lexical, text: "改成過去式")
     }
@@ -204,6 +223,27 @@ struct CorrectionViewModelTests {
         let removed = Set(persistence.removedKeys)
         #expect(removed == expectedKeys)
         #expect(persistence.removeAllInvocations.contains { Set($0) == expectedKeys })
+    }
+
+    @Test("practicedHints updates persistence when modified")
+    func practicedHintsPersistChanges() {
+        let persistence = SpyWorkspaceStatePersistence()
+        let viewModel = CorrectionViewModel(
+            correctionRunner: UnusedCorrectionRunner(),
+            persistence: persistence,
+            workspaceID: "ws-hints"
+        )
+
+        let hints = [sampleHint]
+        viewModel.practicedHints = hints
+
+        let decoder = JSONDecoder()
+        let storedHints = persistence.readData(.practicedHints).flatMap { try? decoder.decode([BankHint].self, from: $0) }
+        #expect(storedHints == hints)
+
+        viewModel.practicedHints = []
+        #expect(persistence.readData(.practicedHints) == nil)
+        #expect(persistence.removedKeys.contains(.practicedHints))
     }
 
     @Test("startLocalPractice resets session and requests focus")
@@ -328,6 +368,41 @@ struct CorrectionViewModelTests {
         #expect(viewModel.correctedHighlights == expectedCorrected)
     }
 
+    @Test("filtered collections respect selected error type")
+    func filteredCollectionsRespectFilter() {
+        let persistence = SpyWorkspaceStatePersistence()
+        let viewModel = CorrectionViewModel(
+            correctionRunner: UnusedCorrectionRunner(),
+            persistence: persistence,
+            workspaceID: "ws-filters"
+        )
+
+        viewModel.inputEn = "I go to school and learn."
+        viewModel.response = multiErrorResponse
+
+        let fullHighlights = Highlighter.computeHighlights(text: viewModel.inputEn, errors: multiErrorResponse.errors)
+        let fullCorrected = Highlighter.computeHighlightsInCorrected(text: multiErrorResponse.corrected, errors: multiErrorResponse.errors)
+        viewModel.highlights = fullHighlights
+        viewModel.correctedHighlights = fullCorrected
+
+        #expect(viewModel.filteredErrors.count == 2)
+        #expect(viewModel.filteredHighlights == fullHighlights)
+        #expect(viewModel.filteredCorrectedHighlights == fullCorrected)
+
+        viewModel.filterType = .lexical
+        #expect(viewModel.filteredErrors == [sampleError])
+        #expect(viewModel.filteredHighlights == fullHighlights.filter { $0.type == .lexical })
+        #expect(viewModel.filteredCorrectedHighlights == fullCorrected.filter { $0.type == .lexical })
+
+        viewModel.filterType = .syntactic
+        #expect(viewModel.filteredErrors == [secondaryError])
+        #expect(viewModel.filteredHighlights == fullHighlights.filter { $0.type == .syntactic })
+        #expect(viewModel.filteredCorrectedHighlights.isEmpty)
+
+        viewModel.filterType = nil
+        #expect(viewModel.filteredErrors.count == 2)
+    }
+
     @Test("savePracticeRecord persists record and marks progress")
     func savePracticeRecordPersists() {
         let repository = TestPracticeRecordsRepository()
@@ -411,4 +486,3 @@ struct CorrectionViewModelTests {
         // Nothing to assert beyond ensuring no crash; verification handled implicitly.
     }
 }
-

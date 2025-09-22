@@ -169,7 +169,7 @@ DS.Font.serifBody   // 襯線正文（日曆用）
 - 不添加註解除非明確要求
 - 使用SF Symbols作為圖標
 - 優先使用existing patterns和元件
-- 保持View簡潔（<150行），超過時拆分子視圖
+- 保持View簡潔，超過時拆分子視圖
 - 使用 @State/@Binding 管理狀態
 - 優先 struct over class
 
