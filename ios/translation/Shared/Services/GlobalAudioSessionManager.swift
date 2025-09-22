@@ -119,7 +119,7 @@ final class GlobalAudioSessionManager: ObservableObject {
 
     func skipToNext() {
         speechManager.markUserOperationStart()
-        speechManager.speechEngine.skip()
+        speechManager.speechEngine.skipToNextCard()
         speechManager.markUserOperationEnd()
     }
 

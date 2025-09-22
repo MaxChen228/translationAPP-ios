@@ -134,37 +134,43 @@ struct FlashcardsView: View {
                                 FlashcardsClassificationCard(label: preview.label, color: preview.color)
                                     .dsAnimation(DS.AnimationToken.subtle, value: preview)
                             } else {
-                                FlashcardsFlipCard(isFlipped: store.showBack) {
-                                    VStack(alignment: .leading, spacing: 10) {
-                                        FlashcardsMarkdownText(card.front)
+                                let showEditButton = viewModel.deckID != nil && !viewModel.isEditing
+                                let extraTopPadding: CGFloat = showEditButton ? DS.Spacing.xl : .zero
+
+                                ZStack(alignment: .topTrailing) {
+                                    FlashcardsFlipCard(isFlipped: store.showBack) {
+                                        VStack(alignment: .leading, spacing: 10) {
+                                            FlashcardsMarkdownText(card.front)
+                                                .frame(maxWidth: .infinity, alignment: .leading)
+                                            if let note = card.frontNote, !note.isEmpty {
+                                                FlashcardsNoteText(text: note)
+                                            }
+                                        }
+                                        .padding(.top, extraTopPadding)
+                                    } back: {
+                                        VStack(alignment: .leading, spacing: 10) {
+                                            VariantBracketComposerView(card.back, onComposedChange: { s in
+                                                viewModel.recordBackComposition(for: card.id, text: s)
+                                            })
                                             .frame(maxWidth: .infinity, alignment: .leading)
-                                        if let note = card.frontNote, !note.isEmpty {
-                                            FlashcardsNoteText(text: note)
+                                            if let note = card.backNote, !note.isEmpty {
+                                                FlashcardsNoteText(text: note)
+                                            }
+                                        }
+                                        .padding(.top, extraTopPadding)
+                                    } overlay: {
+                                        FlashcardsPlaySideButton(style: .outline, diameter: 28) {
+                                            let manager = speechManager
+                                            if store.showBack {
+                                                let text = viewModel.backTextToSpeak(for: card)
+                                                viewModel.speak(text: text, lang: manager.settings.backLang)
+                                            } else {
+                                                viewModel.speak(text: card.front, lang: manager.settings.frontLang)
+                                            }
                                         }
                                     }
-                                } back: {
-                                    VStack(alignment: .leading, spacing: 10) {
-                                        VariantBracketComposerView(card.back, onComposedChange: { s in
-                                            viewModel.recordBackComposition(for: card.id, text: s)
-                                        })
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        if let note = card.backNote, !note.isEmpty {
-                                            FlashcardsNoteText(text: note)
-                                        }
-                                    }
-                                } overlay: {
-                                    FlashcardsPlaySideButton(style: .outline, diameter: 28) {
-                                        let manager = speechManager
-                                        if store.showBack {
-                                            let text = viewModel.backTextToSpeak(for: card)
-                                            viewModel.speak(text: text, lang: manager.settings.backLang)
-                                        } else {
-                                            viewModel.speak(text: card.front, lang: manager.settings.frontLang)
-                                        }
-                                    }
-                                }
-                                .overlay(alignment: .topTrailing) {
-                                    if viewModel.deckID != nil, !viewModel.isEditing {
+
+                                    if showEditButton {
                                         DSQuickActionIconButton(
                                             systemName: "square.and.pencil",
                                             labelKey: "action.edit",
