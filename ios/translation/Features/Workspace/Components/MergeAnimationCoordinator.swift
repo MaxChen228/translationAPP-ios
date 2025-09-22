@@ -179,6 +179,8 @@ struct MergeOverlayView: View {
     var body: some View {
         ZStack {
             if isFlipping {
+                let normalizedAngle = (flipAngle.truncatingRemainder(dividingBy: 360) + 360).truncatingRemainder(dividingBy: 360)
+                let isBackFace = normalizedAngle > 90 && normalizedAngle < 270
                 MergeAnimatingCard(error: context.bottomItem)
                     .frame(width: context.bottomFrame.width, height: context.bottomFrame.height)
                     .position(x: context.bottomFrame.midX, y: context.bottomFrame.midY)
@@ -187,6 +189,7 @@ struct MergeOverlayView: View {
                         axis: (x: 0, y: 1, z: 0),
                         perspective: 0.65
                     )
+                    .scaleEffect(x: isBackFace ? -1 : 1, y: 1)
             } else {
                 MergeAnimatingCard(error: context.bottomItem)
                     .frame(width: context.bottomFrame.width, height: context.bottomFrame.height)
