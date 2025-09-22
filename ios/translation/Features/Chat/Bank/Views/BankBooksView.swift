@@ -141,8 +141,7 @@ struct BankBooksView: View {
                                 showDeleteConfirm = true
                             }
                         }
-                        .onDrag {
-                            guard editController.isEditing else { return NSItemProvider() }
+                        .shelfConditionalDrag(editController.isEditing) {
                             editController.beginDragging(b.name)
                             return BookDragPayload.provider(for: b.name)
                         }

@@ -102,6 +102,10 @@ final class QuickActionsStore: ObservableObject {
         items.insert(item, at: idx)
     }
 
+    func index(of id: UUID) -> Int? {
+        items.firstIndex { $0.id == id }
+    }
+
     func resetToDefaults() {
         items = Self.defaultItems
     }

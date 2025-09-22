@@ -1,5 +1,4 @@
 import SwiftUI
-import UniformTypeIdentifiers
 
 struct WorkspaceListView: View {
     @StateObject private var store = WorkspaceStore()
@@ -22,7 +21,7 @@ struct WorkspaceListView: View {
     // Navigation via typed routes to avoid off-stage pushes
     private enum Route: Hashable { case workspace(UUID) }
     @State private var path: [Route] = []
-    @State private var isEditingQuickActions = false
+    @StateObject private var quickActionsEditController = ShelfEditController<UUID>()
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -31,7 +30,7 @@ struct WorkspaceListView: View {
                     // 快速功能保留 Row 形式，但使用一致的區塊標題
                     QuickActionsRow(
                         store: store,
-                        isEditing: $isEditingQuickActions,
+                        editController: quickActionsEditController,
                         onToggleEditing: toggleQuickActionsEditing,
                         onRequestAdd: handleAddQuickAction
                     )
@@ -129,6 +128,16 @@ struct WorkspaceListView: View {
             path.append(.workspace(id))
             router.openWorkspaceID = nil
         }
+        .onChange(of: quickActionsEditController.isEditing) { isEditing in
+            if isEditing {
+                workspaceEditController.exitEditMode()
+            }
+        }
+        .onChange(of: workspaceEditController.isEditing) { isEditing in
+            if isEditing {
+                quickActionsEditController.exitEditMode()
+            }
+        }
     }
 
     private func startRename(_ ws: Workspace) {
@@ -137,20 +146,20 @@ struct WorkspaceListView: View {
     }
 
     private func toggleQuickActionsEditing() {
-        if isEditingQuickActions {
+        if quickActionsEditController.isEditing {
             showQuickActionPicker = false
-        }
-        if !isEditingQuickActions {
+            quickActionsEditController.exitEditMode()
+        } else {
             workspaceEditController.exitEditMode()
+            quickActionsEditController.enterEditMode()
         }
-        isEditingQuickActions.toggle()
     }
 
     @State private var showQuickActionPicker = false
 
     private func handleAddQuickAction() {
-        if !isEditingQuickActions {
-            isEditingQuickActions = true
+        if !quickActionsEditController.isEditing {
+            quickActionsEditController.enterEditMode()
         }
         showQuickActionPicker = true
     }
@@ -259,8 +268,7 @@ private struct WorkspaceItemLink: View {
         }
         .buttonStyle(DSCardLinkStyle())
         .shelfWiggle(isActive: editController.isEditing)
-        .onDrag {
-            guard editController.isEditing else { return NSItemProvider() }
+        .shelfConditionalDrag(editController.isEditing) {
             editController.beginDragging(ws.id)
             return NSItemProvider(object: ws.id.uuidString as NSString)
         }
@@ -381,7 +389,7 @@ private struct ChatEntryCard: View {
 
 private struct QuickActionsRow: View {
     @ObservedObject var store: WorkspaceStore
-    @Binding var isEditing: Bool
+    @ObservedObject var editController: ShelfEditController<UUID>
     var onToggleEditing: () -> Void
     var onRequestAdd: () -> Void
 
@@ -401,13 +409,15 @@ private struct QuickActionsRow: View {
                     ForEach(quickActions.items) { item in
                         quickActionTile(for: item)
                     }
-                    if isEditing || isEmpty {
+                    if editController.isEditing || isEmpty {
                         AddQuickActionCard()
                             .frame(width: DS.IconSize.entryCardWidth)
                             .onTapGesture { onRequestAdd() }
+                            .onDrop(of: [.text], delegate: QuickActionAddToEndDropDelegate(store: quickActions, editController: editController))
                     }
                 }
                 .padding(.horizontal, 2)
+                .onDrop(of: [.text], delegate: QuickActionClearDragStateDropDelegate(editController: editController))
             }
         }
     }
@@ -417,13 +427,13 @@ private struct QuickActionsRow: View {
             .overlay(alignment: .topTrailing) {
                 if isEmpty {
                     Button(String(localized: "quick.addEntry", locale: locale)) {
-                        if !isEditing { onToggleEditing() }
+                        if !editController.isEditing { onToggleEditing() }
                         onRequestAdd()
                     }
                     .buttonStyle(DSButton(style: .secondary, size: .compact))
                     .padding(.top, 4)
                 } else {
-                    Button(isEditing ? String(localized: "action.done", locale: locale) : String(localized: "action.edit", locale: locale)) {
+                    Button(editController.isEditing ? String(localized: "action.done", locale: locale) : String(localized: "action.edit", locale: locale)) {
                         onToggleEditing()
                     }
                     .buttonStyle(DSButton(style: .secondary, size: .compact))
@@ -434,28 +444,58 @@ private struct QuickActionsRow: View {
 
     @ViewBuilder
     private func quickActionTile(for item: QuickActionItem) -> some View {
-        let card = cardView(for: item)
+        let baseCard = cardView(for: item)
             .frame(width: DS.IconSize.entryCardWidth)
 
-        if isEditing {
-            card
-                .overlay(alignment: .topTrailing) {
-                    Button(role: .destructive) {
-                        quickActions.remove(id: item.id)
-                    } label: {
-                        Image(systemName: "minus.circle.fill")
-                            .font(.system(size: 20))
-                            .foregroundStyle(Color.red)
-                            .padding(6)
-                    }
-                    .buttonStyle(.plain)
+        let editingCard = baseCard
+            .overlay(alignment: .topTrailing) {
+                Button(role: .destructive) {
+                    quickActions.remove(id: item.id)
+                } label: {
+                    Image(systemName: "minus.circle.fill")
+                        .font(.system(size: 20))
+                        .foregroundStyle(Color.red)
+                        .padding(6)
                 }
-        } else {
-            navigationWrapper(for: item) {
-                card
+                .buttonStyle(.plain)
             }
-            .buttonStyle(DSCardLinkStyle())
+            .contextMenu {
+                Button(String(localized: "action.done", locale: locale)) {
+                    editController.exitEditMode()
+                }
+                Button(String(localized: "action.delete", locale: locale), role: .destructive) {
+                    quickActions.remove(id: item.id)
+                }
+            }
+
+        let normalCard = navigationWrapper(for: item) {
+            baseCard
         }
+        .buttonStyle(DSCardLinkStyle())
+        .contextMenu {
+            Button(String(localized: "action.edit", locale: locale)) {
+                editController.enterEditMode()
+                Haptics.medium()
+            }
+            Button(String(localized: "action.delete", locale: locale), role: .destructive) {
+                quickActions.remove(id: item.id)
+            }
+        }
+
+        return Group {
+            if editController.isEditing {
+                editingCard
+            } else {
+                normalCard
+            }
+        }
+        .shelfWiggle(isActive: editController.isEditing)
+        .shelfConditionalDrag(editController.isEditing) {
+            editController.beginDragging(item.id)
+            return NSItemProvider(object: item.id.uuidString as NSString)
+        }
+        .simultaneousGesture(editController.isEditing ? TapGesture().onEnded { editController.exitEditMode() } : nil)
+        .onDrop(of: [.text], delegate: QuickActionDropDelegate(item: item, store: quickActions, editController: editController))
     }
 
     @ViewBuilder
@@ -575,5 +615,62 @@ private struct RenameWorkspaceSheet: View {
         }
         .padding(16)
         .background(DS.Palette.background)
+    }
+}
+
+private struct QuickActionDropDelegate: DropDelegate {
+    let item: QuickActionItem
+    let store: QuickActionsStore
+    let editController: ShelfEditController<UUID>
+
+    func validateDrop(info: DropInfo) -> Bool { editController.isEditing }
+    func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
+
+    func dropEntered(info: DropInfo) {
+        guard editController.isEditing,
+              let draggingID = editController.draggingID,
+              draggingID != item.id,
+              let from = store.index(of: draggingID),
+              let to = store.index(of: item.id) else { return }
+        if from != to {
+            store.move(from: from, to: to > from ? to + 1 : to)
+            Haptics.lightTick()
+        }
+    }
+
+    func performDrop(info: DropInfo) -> Bool {
+        guard editController.isEditing else { return false }
+        editController.endDragging()
+        Haptics.success()
+        return true
+    }
+}
+
+private struct QuickActionAddToEndDropDelegate: DropDelegate {
+    let store: QuickActionsStore
+    let editController: ShelfEditController<UUID>
+
+    func validateDrop(info: DropInfo) -> Bool { editController.isEditing }
+    func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
+    func dropEntered(info: DropInfo) { }
+
+    func performDrop(info: DropInfo) -> Bool {
+        guard editController.isEditing,
+              let draggingID = editController.draggingID,
+              let from = store.index(of: draggingID) else { return false }
+        store.move(from: from, to: store.items.count)
+        editController.endDragging()
+        Haptics.success()
+        return true
+    }
+}
+
+private struct QuickActionClearDragStateDropDelegate: DropDelegate {
+    let editController: ShelfEditController<UUID>
+    func validateDrop(info: DropInfo) -> Bool { editController.isEditing }
+    func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
+    func performDrop(info: DropInfo) -> Bool {
+        editController.endDragging()
+        return true
     }
 }

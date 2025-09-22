@@ -98,8 +98,7 @@ struct FlashcardDecksView: View {
                                 deckOrder.removeFromOrder("deck:\(deck.id.uuidString)")
                             }
                         }
-                        .onDrag {
-                            guard editController.isEditing else { return NSItemProvider() }
+                        .shelfConditionalDrag(editController.isEditing) {
                             editController.beginDragging(deck.id)
                             return DeckDragPayload.provider(for: deck.id)
                         }
