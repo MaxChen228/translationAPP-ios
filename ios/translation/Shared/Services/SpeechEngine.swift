@@ -4,6 +4,7 @@ import SwiftUI
 
 enum SpeechFace: String, Codable { case front, back }
 
+@MainActor
 protocol SpeechEngineDelegate: AnyObject {
     func speechEngine(_ engine: SpeechEngine, didCompleteCardAt index: Int)
     func speechEngineDidCompleteAllCards(_ engine: SpeechEngine)
@@ -21,6 +22,7 @@ struct SpeechItem: Identifiable {
     let isCardEnd: Bool // 標記是否為卡片的最後一個項目
 }
 
+@MainActor
 final class SpeechEngine: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
     @Published private(set) var isPlaying: Bool = false
     @Published private(set) var isPaused: Bool = false

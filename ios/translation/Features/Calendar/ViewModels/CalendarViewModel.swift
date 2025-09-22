@@ -54,7 +54,6 @@ final class CalendarViewModel: ObservableObject {
             return Self.createEmptyMonth(for: date)
         }
 
-        let monthEnd = calendar.date(byAdding: .day, value: monthRange.count - 1, to: monthStart)!
         let startWeekday = calendar.component(.weekday, from: monthStart)
         let daysFromPrevMonth = (startWeekday - calendar.firstWeekday + 7) % 7
 

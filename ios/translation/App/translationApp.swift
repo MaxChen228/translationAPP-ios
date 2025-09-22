@@ -130,9 +130,7 @@ struct TranslationApp: App {
                     let title = String(localized: "banner.tts.error.title", locale: locale)
                     bannerCenter.show(title: title, subtitle: err)
                 }
-                .onReceive(NotificationCenter.default.publisher(for: .practiceRecordSaved)) { note in
-                    let score = note.userInfo?["score"] as? Int ?? 0
-                    let errors = note.userInfo?["errors"] as? Int ?? 0
+                .onReceive(NotificationCenter.default.publisher(for: .practiceRecordSaved)) { _ in
                     let localeID = settings.language == "zh" ? "zh-Hant" : "en"
                     let locale = Locale(identifier: localeID)
                     let title = String(localized: "banner.practice.saved.title", locale: locale)

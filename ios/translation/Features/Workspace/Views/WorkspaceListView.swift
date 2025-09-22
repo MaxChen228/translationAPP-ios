@@ -128,12 +128,12 @@ struct WorkspaceListView: View {
             path.append(.workspace(id))
             router.openWorkspaceID = nil
         }
-        .onChange(of: quickActionsEditController.isEditing) { isEditing in
+        .onChange(of: quickActionsEditController.isEditing) { _, isEditing in
             if isEditing {
                 workspaceEditController.exitEditMode()
             }
         }
-        .onChange(of: workspaceEditController.isEditing) { isEditing in
+        .onChange(of: workspaceEditController.isEditing) { _, isEditing in
             if isEditing {
                 quickActionsEditController.exitEditMode()
             }
@@ -482,7 +482,7 @@ private struct QuickActionsRow: View {
             }
         }
 
-        return Group {
+        Group {
             if editController.isEditing {
                 editingCard
             } else {
