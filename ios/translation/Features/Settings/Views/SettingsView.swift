@@ -47,8 +47,8 @@ struct SettingsView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("settings.aiModels.correction").dsType(DS.Font.body).foregroundStyle(.primary)
                             Picker("Correction Model", selection: Binding(get: { settings.correctionModel }, set: { settings.correctionModel = $0 })) {
-                                ForEach(AppSettingsStore.availableModels, id: \.self) { m in
-                                    Text(m).tag(m)
+                                ForEach(AppSettingsStore.availableModels) { option in
+                                    Text(option.labelKey).tag(option.value)
                                 }
                             }
                             .pickerStyle(.segmented)
@@ -61,8 +61,8 @@ struct SettingsView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("settings.aiModels.deckGeneration").dsType(DS.Font.body).foregroundStyle(.primary)
                             Picker("Deck Generation Model", selection: Binding(get: { settings.deckGenerationModel }, set: { settings.deckGenerationModel = $0 })) {
-                                ForEach(AppSettingsStore.availableModels, id: \.self) { m in
-                                    Text(m).tag(m)
+                                ForEach(AppSettingsStore.availableModels) { option in
+                                    Text(option.labelKey).tag(option.value)
                                 }
                             }
                             .pickerStyle(.segmented)
@@ -75,8 +75,8 @@ struct SettingsView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("settings.aiModels.chatResponse").dsType(DS.Font.body).foregroundStyle(.primary)
                             Picker("Chat Response Model", selection: Binding(get: { settings.chatResponseModel }, set: { settings.chatResponseModel = $0 })) {
-                                ForEach(AppSettingsStore.availableModels, id: \.self) { m in
-                                    Text(m).tag(m)
+                                ForEach(AppSettingsStore.availableModels) { option in
+                                    Text(option.labelKey).tag(option.value)
                                 }
                             }
                             .pickerStyle(.segmented)
@@ -89,8 +89,8 @@ struct SettingsView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("settings.aiModels.research").dsType(DS.Font.body).foregroundStyle(.primary)
                             Picker("Research Model", selection: Binding(get: { settings.researchModel }, set: { settings.researchModel = $0 })) {
-                                ForEach(AppSettingsStore.availableModels, id: \.self) { m in
-                                    Text(m).tag(m)
+                                ForEach(AppSettingsStore.availableModels) { option in
+                                    Text(option.labelKey).tag(option.value)
                                 }
                             }
                             .pickerStyle(.segmented)

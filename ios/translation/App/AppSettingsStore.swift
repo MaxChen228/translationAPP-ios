@@ -33,10 +33,20 @@ final class AppSettingsStore: ObservableObject {
         didSet { UserDefaults.standard.set(researchModel, forKey: keyResearchModel) }
     }
 
-    static let availableModels: [String] = [
-        "gemini-2.5-pro",
-        "gemini-2.5-flash"
+    struct AIModelOption: Identifiable {
+        let value: String
+        let labelKey: LocalizedStringKey
+
+        var id: String { value }
+    }
+
+    static let availableModels: [AIModelOption] = [
+        AIModelOption(value: "gemini-2.5-flash-lite", labelKey: "settings.aiModels.option.lite"),
+        AIModelOption(value: "gemini-2.5-flash", labelKey: "settings.aiModels.option.flash"),
+        AIModelOption(value: "gemini-2.5-pro", labelKey: "settings.aiModels.option.pro")
     ]
+
+    private static let availableModelValues: Set<String> = Set(availableModels.map(\.value))
     static var availableLanguages: [(code: String, label: String)] {
         [
             ("zh", String(localized: "settings.language.zh")),
@@ -51,10 +61,10 @@ final class AppSettingsStore: ObservableObject {
         language = (ud.string(forKey: keyLang) ?? "zh")
 
         // Initialize individual model settings with smart defaults
-        correctionModel = ud.string(forKey: keyCorrectionModel) ?? "gemini-2.5-pro"  // High accuracy for correction
-        deckGenerationModel = ud.string(forKey: keyDeckGenerationModel) ?? "gemini-2.5-flash"  // Fast for deck generation
-        chatResponseModel = ud.string(forKey: keyChatResponseModel) ?? "gemini-2.5-flash"  // Fast for chat response
-        researchModel = ud.string(forKey: keyResearchModel) ?? "gemini-2.5-pro"  // High accuracy for research
+        correctionModel = AppSettingsStore.validatedModel(ud.string(forKey: keyCorrectionModel), fallback: "gemini-2.5-flash")  // Default to mid-tier speed/quality
+        deckGenerationModel = AppSettingsStore.validatedModel(ud.string(forKey: keyDeckGenerationModel), fallback: "gemini-2.5-flash")  // Default to mid-tier speed/quality
+        chatResponseModel = AppSettingsStore.validatedModel(ud.string(forKey: keyChatResponseModel), fallback: "gemini-2.5-flash")  // Default to mid-tier speed/quality
+        researchModel = AppSettingsStore.validatedModel(ud.string(forKey: keyResearchModel), fallback: "gemini-2.5-flash")  // Default to mid-tier speed/quality
     }
 
     var deviceID: String { DeviceID.current }
@@ -65,5 +75,12 @@ final class AppSettingsStore: ObservableObject {
         if ver.isEmpty { return build }
         if build.isEmpty { return ver }
         return "\(ver) (\(build))"
+    }
+}
+
+private extension AppSettingsStore {
+    static func validatedModel(_ stored: String?, fallback: String) -> String {
+        guard let stored, availableModelValues.contains(stored) else { return fallback }
+        return stored
     }
 }

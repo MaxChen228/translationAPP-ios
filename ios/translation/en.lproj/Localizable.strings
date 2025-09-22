@@ -29,6 +29,9 @@
 "settings.aiModels.deckGeneration" = "Deck Generation Model";
 "settings.aiModels.chatResponse" = "Chat Response Model";
 "settings.aiModels.research" = "Research Model";
+"settings.aiModels.option.lite" = "Lite";
+"settings.aiModels.option.flash" = "Flash";
+"settings.aiModels.option.pro" = "Pro";
 
 "settings.language.title" = "Language";
 "settings.language.subtitle" = "For future use";

@@ -29,6 +29,9 @@
 "settings.aiModels.deckGeneration" = "卡片生成模型";
 "settings.aiModels.chatResponse" = "對話回應模型";
 "settings.aiModels.research" = "詞彙研究模型";
+"settings.aiModels.option.lite" = "Lite";
+"settings.aiModels.option.flash" = "Flash";
+"settings.aiModels.option.pro" = "Pro";
 
 "settings.language.title" = "語言";
 "settings.language.subtitle" = "供未來使用";

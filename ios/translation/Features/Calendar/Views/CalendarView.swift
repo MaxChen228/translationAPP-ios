@@ -5,33 +5,31 @@ struct CalendarView: View {
     @EnvironmentObject private var practiceRecordsStore: PracticeRecordsStore
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: DS.Spacing.xl) {
-                    calendarCard
+        ScrollView {
+            VStack(spacing: DS.Spacing.xl) {
+                calendarCard
 
-                    if let selectedDay = viewModel.selectedDay, selectedDay.hasActivity,
-                       let stats = viewModel.dayStats[selectedDay.date] {
-                        DSCard {
-                            DayDetailView(stats: stats)
-                        }
-                        .transition(DSTransition.cardExpand)
+                if let selectedDay = viewModel.selectedDay, selectedDay.hasActivity,
+                   let stats = viewModel.dayStats[selectedDay.date] {
+                    DSCard {
+                        DayDetailView(stats: stats)
                     }
+                    .transition(DSTransition.cardExpand)
                 }
-                .padding(.horizontal, DS.Spacing.lg)
-                .padding(.vertical, DS.Spacing.lg)
             }
-            .navigationTitle("練習日曆")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    DSQuickActionIconButton(
-                        systemName: "calendar.badge.clock",
-                        labelKey: "回到今天",
-                        action: viewModel.navigateToToday,
-                        style: .tinted
-                    )
-                }
+            .padding(.horizontal, DS.Spacing.lg)
+            .padding(.vertical, DS.Spacing.lg)
+        }
+        .navigationTitle("練習日曆")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                DSQuickActionIconButton(
+                    systemName: "calendar.badge.clock",
+                    labelKey: "回到今天",
+                    action: viewModel.navigateToToday,
+                    style: .tinted
+                )
             }
         }
         .onAppear {
