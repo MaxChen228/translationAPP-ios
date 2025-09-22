@@ -17,12 +17,27 @@ final class WorkspaceStore: ObservableObject {
     // Keep strong references so tasks continue even離開詳情頁
     private var viewModels: [UUID: CorrectionViewModel] = [:]
 
+    // Dependency factories for collaborators
+    private let persistenceFactory: (UUID) -> CorrectionPersistence
+    private let practiceSessionFactory: () -> CorrectionPracticeSession
+    private let serviceFactory: () -> AIService
+    private let serviceAdapterFactory: (AIService) -> CorrectionServiceAdapter
+
     // Store references for dependency injection
     weak var localBankStore: LocalBankStore?
     weak var localProgressStore: LocalBankProgressStore?
     weak var practiceRecordsStore: PracticeRecordsStore?
 
-    init() {
+    init(
+        persistenceFactory: @escaping (UUID) -> CorrectionPersistence = { UserDefaultsCorrectionPersistence(workspaceID: $0.uuidString) },
+        practiceSessionFactory: @escaping () -> CorrectionPracticeSession = { DefaultCorrectionPracticeSession() },
+        serviceFactory: @escaping () -> AIService = { AIServiceFactory.makeDefault() },
+        serviceAdapterFactory: @escaping (AIService) -> CorrectionServiceAdapter = { DefaultCorrectionServiceAdapter(service: $0) }
+    ) {
+        self.persistenceFactory = persistenceFactory
+        self.practiceSessionFactory = practiceSessionFactory
+        self.serviceFactory = serviceFactory
+        self.serviceAdapterFactory = serviceAdapterFactory
         load()
         if workspaces.isEmpty {
             // 初次啟動預設 1 個
@@ -30,10 +45,17 @@ final class WorkspaceStore: ObservableObject {
         }
     }
 
-    func vm(for id: UUID, service: AIService = AIServiceFactory.makeDefault()) -> CorrectionViewModel {
+    func vm(for id: UUID, service: AIService? = nil) -> CorrectionViewModel {
         if let vm = viewModels[id] { return vm }
-        let vm = CorrectionViewModel(service: service, workspaceID: id.uuidString)
-
+        let persistence = persistenceFactory(id)
+        let practiceSession = practiceSessionFactory()
+        let adapter = serviceAdapterFactory(service ?? serviceFactory())
+        let vm = CorrectionViewModel(
+            workspaceID: id.uuidString,
+            persistence: persistence,
+            serviceAdapter: adapter,
+            practiceSession: practiceSession
+        )
         bindStores(to: vm)
         viewModels[id] = vm
         return vm
@@ -45,10 +67,7 @@ final class WorkspaceStore: ObservableObject {
         let ws = Workspace(id: UUID(), name: name ?? "Workspace \(index)")
         workspaces.append(ws)
         // 準備 VM（將自動載入其持久化狀態）
-        let vm = CorrectionViewModel(service: AIServiceFactory.makeDefault(), workspaceID: ws.id.uuidString)
-
-        bindStores(to: vm)
-        viewModels[ws.id] = vm
+        _ = self.vm(for: ws.id, service: serviceFactory())
         return ws
     }
 
