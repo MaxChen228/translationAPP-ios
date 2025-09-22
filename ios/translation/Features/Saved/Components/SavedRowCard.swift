@@ -137,33 +137,35 @@ struct SavedErrorRowCard: View {
     }
 
     private var footerActions: some View {
-        HStack(spacing: DS.Spacing.sm2) {
-            Button {
-                onCopy()
-                DSMotion.run(DS.AnimationToken.subtle) { didCopy = true }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-                    didCopy = false
+        DSFooterActionBar {
+            HStack(spacing: DS.Spacing.sm2) {
+                Button {
+                    onCopy()
+                    DSMotion.run(DS.AnimationToken.subtle) { didCopy = true }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                        didCopy = false
+                    }
+                } label: {
+                    if didCopy {
+                        Label(String(localized: "action.copied", locale: locale), systemImage: "checkmark")
+                    } else {
+                        Label(String(localized: "action.copy", locale: locale), systemImage: "doc.on.doc")
+                    }
                 }
-            } label: {
-                if didCopy {
-                    Label(String(localized: "action.copied", locale: locale), systemImage: "checkmark")
-                } else {
-                    Label(String(localized: "action.copy", locale: locale), systemImage: "doc.on.doc")
+                .buttonStyle(DSButton(style: .secondary, size: .compact))
+
+                Spacer(minLength: 0)
+
+                Button(role: .destructive) {
+                    showDeleteConfirm = true
+                } label: {
+                    Label(String(localized: "action.delete", locale: locale), systemImage: "trash")
                 }
+                .buttonStyle(DSButton(style: .secondary, size: .compact))
+                .confirmationDialog(String(localized: "saved.delete.confirm", locale: locale), isPresented: $showDeleteConfirm, actions: {
+                    Button(String(localized: "action.delete", locale: locale), role: .destructive) { onDelete() }
+                })
             }
-            .buttonStyle(DSButton(style: .secondary, size: .compact))
-
-            Spacer(minLength: 0)
-
-            Button(role: .destructive) {
-                showDeleteConfirm = true
-            } label: {
-                Label(String(localized: "action.delete", locale: locale), systemImage: "trash")
-            }
-            .buttonStyle(DSButton(style: .secondary, size: .compact))
-            .confirmationDialog(String(localized: "saved.delete.confirm", locale: locale), isPresented: $showDeleteConfirm, actions: {
-                Button(String(localized: "action.delete", locale: locale), role: .destructive) { onDelete() }
-            })
         }
     }
 
