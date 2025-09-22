@@ -24,25 +24,14 @@ struct DayDetailView: View {
         HStack(alignment: .center, spacing: DS.Spacing.lg) {
             HStack(alignment: .bottom, spacing: DS.Spacing.xs2) {
                 Text(formattedMonth)
-                    .font(.custom(
-                        DS.FontFamily.tangerineCandidates.first ?? "Tangerine-Bold",
-                        size: 60
-                    ))
-                    .kerning(1.4)
+                    .dsType(DS.Font.scriptHero, lineSpacing: 0, tracking: 1.4)
 
                 Text("/")
-                    .font(.custom(
-                        DS.FontFamily.tangerineCandidates.first ?? "Tangerine-Regular",
-                        size: 42
-                    ))
+                    .dsType(DS.Font.scriptLarge, lineSpacing: 0)
                     .baselineOffset(8)
 
                 Text(formattedDay)
-                    .font(.custom(
-                        DS.FontFamily.tangerineCandidates.first ?? "Tangerine-Regular",
-                        size: 40
-                    ))
-                    .kerning(1.0)
+                    .dsType(DS.Font.scriptLarge, lineSpacing: 0, tracking: 1.0)
             }
 
             Spacer(minLength: DS.Spacing.md)
@@ -74,7 +63,8 @@ struct DayDetailView: View {
     private func metricColumn(label: LocalizedStringKey, value: String) -> some View {
         VStack(spacing: DS.Spacing.xs) {
             Text(value)
-                .font(.system(size: 28, weight: .semibold, design: .serif))
+                .dsType(DS.Font.serifDisplay, lineSpacing: 0)
+                .fontWeight(.semibold)
                 .foregroundStyle(DS.Palette.primary)
 
             Text(label)
@@ -224,7 +214,8 @@ private struct AnimatedStreakBadge: View {
     private var badgeContent: some View {
         GeometryReader { geo in
             Text("\(streakDays)")
-                .font(.system(size: geo.size.width * 0.62, weight: .semibold, design: .serif))
+                .dsType(DS.Font.serifHero, lineSpacing: 0)
+                .fontWeight(.semibold)
                 .foregroundStyle(textGradient)
                 .shadow(color: Color.white.opacity(0.18), radius: 4, y: 1)
                 .frame(width: geo.size.width, height: geo.size.height)

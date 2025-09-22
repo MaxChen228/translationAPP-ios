@@ -234,9 +234,13 @@ enum DS {
         // Serif = Songti
         static let serifTitle = customOrSystemCandidates(FontFamily.songtiCandidates, size: 22, relativeTo: .title2)
         static let serifBody = customOrSystemCandidates(FontFamily.songtiCandidates, size: 17, relativeTo: .body)
+        static let serifDisplay = customOrSystemCandidates(FontFamily.songtiCandidates, size: 28, relativeTo: .title)
+        static let serifHero = customOrSystemCandidates(FontFamily.songtiCandidates, size: 52, relativeTo: .largeTitle)
 
         static let scriptDisplay = customOrSystemCandidates(FontFamily.tangerineCandidates, size: 34, relativeTo: .largeTitle)
         static let scriptTitle = customOrSystemCandidates(FontFamily.tangerineCandidates, size: 24, relativeTo: .title2)
+        static let scriptHero = customOrSystemCandidates(FontFamily.tangerineCandidates, size: 60, relativeTo: .largeTitle)
+        static let scriptLarge = customOrSystemCandidates(FontFamily.tangerineCandidates, size: 40, relativeTo: .title)
 
         // Monospace-like usage still use Avenir per requirement
         static let mono = customOrSystemCandidates(FontFamily.avenirCandidates, size: 15, relativeTo: .callout)
