@@ -1,24 +1,66 @@
 import Foundation
 import SwiftUI
 
-// Cloud curated content (read-only): decks and bank books
+// Cloud curated content (read-only): decks and bank courses/books
 // Requires BACKEND_URL; no mock fallback.
 
 struct CloudDeckSummary: Codable, Identifiable, Equatable { let id: String; let name: String; let count: Int }
 struct CloudDeckDetail: Codable, Equatable { let id: String; let name: String; let cards: [Flashcard] }
 
-struct CloudBookSummary: Codable, Identifiable, Equatable { var id: String { name }; let name: String; let count: Int }
-struct CloudBookDetail: Codable, Equatable, Identifiable {
-    var id: String { name }
-    let name: String
+struct CloudCourseSummary: Codable, Identifiable, Equatable {
+    let id: String
+    let title: String
+    let summary: String?
+    let coverImage: String?
+    let tags: [String]
+    let bookCount: Int
+}
+
+struct CloudCourseBook: Codable, Identifiable, Equatable {
+    let id: String
+    let title: String
+    let summary: String?
+    let coverImage: String?
+    let tags: [String]
+    let difficulty: Int?
+    let itemCount: Int
     let items: [BankItem]
+}
+
+struct CloudCourseDetail: Codable, Identifiable, Equatable {
+    let id: String
+    let title: String
+    let summary: String?
+    let coverImage: String?
+    let tags: [String]
+    let bookCount: Int
+    let books: [CloudCourseBook]
+}
+
+struct CloudSearchBookHit: Codable, Identifiable, Equatable {
+    let id: String
+    let title: String
+    let summary: String?
+    let coverImage: String?
+    let tags: [String]
+    let difficulty: Int?
+    let itemCount: Int
+    let courseId: String
+}
+
+struct CloudSearchResponse: Codable, Equatable {
+    let query: String
+    let courses: [CloudCourseSummary]
+    let books: [CloudSearchBookHit]
 }
 
 protocol CloudLibraryService {
     func fetchDecks() async throws -> [CloudDeckSummary]
     func fetchDeckDetail(id: String) async throws -> CloudDeckDetail
-    func fetchBooks() async throws -> [CloudBookSummary]
-    func fetchBook(name: String) async throws -> CloudBookDetail
+    func fetchCourses() async throws -> [CloudCourseSummary]
+    func fetchCourseDetail(id: String) async throws -> CloudCourseDetail
+    func fetchCourseBook(courseId: String, bookId: String) async throws -> CloudCourseBook
+    func search(query: String) async throws -> CloudSearchResponse
 }
 
 enum CloudLibraryServiceFactory {
@@ -51,21 +93,47 @@ final class CloudLibraryHTTP: CloudLibraryService {
         return try JSONDecoder().decode(CloudDeckDetail.self, from: data)
     }
 
-    func fetchBooks() async throws -> [CloudBookSummary] {
-        let url = base.appendingPathComponent("cloud").appendingPathComponent("books")
-        AppLog.uiInfo("[cloud] GET /cloud/books")
+    func fetchCourses() async throws -> [CloudCourseSummary] {
+        let url = base.appendingPathComponent("cloud").appendingPathComponent("courses")
+        AppLog.uiInfo("[cloud] GET /cloud/courses")
         let (data, resp) = try await URLSession.shared.data(from: url)
         guard let http = resp as? HTTPURLResponse, 200..<300 ~= http.statusCode else { throw URLError(.badServerResponse) }
-        return try JSONDecoder().decode([CloudBookSummary].self, from: data)
+        return try JSONDecoder().decode([CloudCourseSummary].self, from: data)
     }
 
-    func fetchBook(name: String) async throws -> CloudBookDetail {
-        // Append path components directly so the system handles encoding once
-        let url = base.appendingPathComponent("cloud").appendingPathComponent("books").appendingPathComponent(name)
-        AppLog.uiInfo("[cloud] GET /cloud/books/<name>")
+    func fetchCourseDetail(id: String) async throws -> CloudCourseDetail {
+        let url = base.appendingPathComponent("cloud").appendingPathComponent("courses").appendingPathComponent(id)
+        AppLog.uiInfo("[cloud] GET /cloud/courses/\(id)")
         let (data, resp) = try await URLSession.shared.data(from: url)
         guard let http = resp as? HTTPURLResponse, 200..<300 ~= http.statusCode else { throw URLError(.badServerResponse) }
-        return try JSONDecoder().decode(CloudBookDetail.self, from: data)
+        return try JSONDecoder().decode(CloudCourseDetail.self, from: data)
+    }
+
+    func fetchCourseBook(courseId: String, bookId: String) async throws -> CloudCourseBook {
+        let url = base
+            .appendingPathComponent("cloud")
+            .appendingPathComponent("courses")
+            .appendingPathComponent(courseId)
+            .appendingPathComponent("books")
+            .appendingPathComponent(bookId)
+        AppLog.uiInfo("[cloud] GET /cloud/courses/\(courseId)/books/\(bookId)")
+        let (data, resp) = try await URLSession.shared.data(from: url)
+        guard let http = resp as? HTTPURLResponse, 200..<300 ~= http.statusCode else { throw URLError(.badServerResponse) }
+        return try JSONDecoder().decode(CloudCourseBook.self, from: data)
+    }
+
+    func search(query: String) async throws -> CloudSearchResponse {
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            return CloudSearchResponse(query: "", courses: [], books: [])
+        }
+        var components = URLComponents(url: base.appendingPathComponent("cloud").appendingPathComponent("search"), resolvingAgainstBaseURL: false)
+        components?.queryItems = [URLQueryItem(name: "q", value: trimmed)]
+        guard let url = components?.url else { throw URLError(.badURL) }
+        AppLog.uiInfo("[cloud] GET /cloud/search?q=…")
+        let (data, resp) = try await URLSession.shared.data(from: url)
+        guard let http = resp as? HTTPURLResponse, 200..<300 ~= http.statusCode else { throw URLError(.badServerResponse) }
+        return try JSONDecoder().decode(CloudSearchResponse.self, from: data)
     }
 }
 

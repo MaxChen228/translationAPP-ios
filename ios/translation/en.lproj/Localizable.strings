@@ -61,7 +61,7 @@
 "cloud.books.subtitle" = "Browse curated banks and copy to local";
 "cloud.books.empty" = "No cloud banks";
 "cloud.common.retry" = "Please try again or check connection.";
-"cloud.copyToLocal" = "Copy to Local";
+"cloud.copyToLocal" = "Download";
 "cloud.preview" = "Preview";
 "nav.cloudDecks" = "Browse Decks";
 "nav.cloudBooks" = "Browse Banks";
@@ -337,7 +337,7 @@
 /* Bank (Local) */
 "bank.folders.title" = "Folders";
 "bank.local.title" = "Local Banks";
-"bank.browseCloud" = "Browse Cloud Banks";
+"bank.browseCloud" = "Browse Cloud Courses";
 "bank.random.title" = "Random";
 "bank.random.settings" = "Random Settings";
 "bank.random.excludeCompleted" = "Exclude completed";
@@ -380,3 +380,14 @@
 "flashcards.emptyDeckReset.message" = "No unfamiliar cards. Reset all to Unfamiliar and start?";
 "flashcards.emptyDeckReset.reset" = "Reset & Start";
 "flashcards.emptyDeckReset.cancel" = "Back";
+
+/* Cloud Courses */
+"nav.cloudCourses" = "Cloud Courses";
+"cloud.courses.title" = "Cloud Courses";
+"cloud.courses.subtitle" = "Download curated courses and practice libraries";
+"cloud.courses.empty" = "No cloud courses are available yet";
+"cloud.course.bookCount" = "%d collections";
+"cloud.course.bookItemCount" = "%d practice items";
+"cloud.course.bookDifficulty" = "Difficulty %d";
+"cloud.course.downloadAll" = "Download entire course";
+"cloud.course.downloadAll.success" = "Course downloaded";

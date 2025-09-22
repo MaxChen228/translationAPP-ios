@@ -89,7 +89,7 @@
 "cloud.books.subtitle" = "瀏覽精選題庫，複製到本機使用";
 "cloud.books.empty" = "目前沒有雲端題庫本";
 "cloud.common.retry" = "請稍後再試或檢查連線。";
-"cloud.copyToLocal" = "複製到本機";
+"cloud.copyToLocal" = "下載";
 "cloud.preview" = "預覽";
 "nav.cloudDecks" = "瀏覽單字卡集";
 "nav.cloudBooks" = "瀏覽題庫本";
@@ -317,7 +317,7 @@
 /* 題庫（本機） */
 "bank.folders.title" = "資料夾";
 "bank.local.title" = "本機題庫";
-"bank.browseCloud" = "瀏覽雲端題庫";
+"bank.browseCloud" = "瀏覽雲端課程";
 "bank.random.title" = "隨機出題";
 "bank.random.settings" = "出題設定";
 "bank.random.excludeCompleted" = "排除已完成";
@@ -379,3 +379,14 @@
 "flashcards.emptyDeckReset.message" = "目前沒有不熟悉的卡片，要重置為不熟悉並開始複習嗎？";
 "flashcards.emptyDeckReset.reset" = "重置並開始";
 "flashcards.emptyDeckReset.cancel" = "返回";
+
+/* 雲端課程 */
+"nav.cloudCourses" = "雲端課程";
+"cloud.courses.title" = "雲端課程";
+"cloud.courses.subtitle" = "下載官方策劃的課程與練習題庫";
+"cloud.courses.empty" = "目前沒有可用的雲端課程";
+"cloud.course.bookCount" = "共 %d 本題庫";
+"cloud.course.bookItemCount" = "含 %d 題";
+"cloud.course.bookDifficulty" = "難度 %d";
+"cloud.course.downloadAll" = "下載整個課程";
+"cloud.course.downloadAll.success" = "已下載整個課程";

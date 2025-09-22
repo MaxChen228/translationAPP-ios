@@ -87,9 +87,9 @@ struct BankBooksView: View {
                         }
                     LazyVGrid(columns: cols, spacing: DS.Spacing.sm2) {
                         // 瀏覽雲端精選（複製到本機）
-                        NavigationLink { CloudBankLibraryView(vm: vm) } label: {
-                            BrowseCloudCard(titleKey: "bank.browseCloud")
-                        }
+                                NavigationLink { CloudCourseLibraryView(vm: vm) } label: {
+                                    BrowseCloudCard(titleKey: "bank.browseCloud")
+                                }
                         .buttonStyle(.plain)
                         .disabled(editController.isEditing)
                         ForEach(orderedRootBooks) { b in
