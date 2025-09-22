@@ -61,7 +61,7 @@ struct DSButton: ButtonStyle {
         case .primary:
             shape.fill(DS.Palette.primaryGradient)
         case .secondary:
-            shape.stroke(DS.Palette.primary.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.regular)
+            shape.stroke(DS.Palette.primary.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.thin)
         }
     }
 }
@@ -87,7 +87,7 @@ struct DSCardLinkStyle: ButtonStyle {
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
             .overlay(
                 RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                    .stroke(DS.Palette.primary.opacity(configuration.isPressed ? DS.Opacity.strong : 0), lineWidth: DS.BorderWidth.regular)
+                    .stroke(DS.Palette.primary.opacity(configuration.isPressed ? DS.Opacity.strong : 0), lineWidth: DS.BorderWidth.thin)
             )
             .dsAnimation(DS.AnimationToken.snappy, value: configuration.isPressed)
     }

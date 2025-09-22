@@ -19,7 +19,7 @@ struct DSScoreBadge: View {
 
         var padding: EdgeInsets {
             switch self {
-            case .default: return EdgeInsets(top: DS.Spacing.xs, leading: DS.Spacing.xs2, bottom: DS.Spacing.xs, trailing: DS.Spacing.xs2)
+            case .default: return EdgeInsets(top: DS.Spacing.xs, leading: DS.Spacing.sm, bottom: DS.Spacing.xs, trailing: DS.Spacing.sm)
             case .compact: return EdgeInsets(top: 2, leading: DS.Spacing.xs, bottom: 2, trailing: DS.Spacing.xs)
             case .large: return EdgeInsets(top: DS.Spacing.xs, leading: DS.Spacing.sm, bottom: DS.Spacing.xs, trailing: DS.Spacing.sm)
             }

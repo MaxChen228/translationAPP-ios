@@ -14,7 +14,7 @@ struct ChinesePromptView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .overlay(
                         RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
-                            .stroke(DS.Palette.border.opacity(0.4), lineWidth: DS.BorderWidth.regular)
+                            .stroke(DS.Palette.border.opacity(0.4), lineWidth: DS.BorderWidth.thin)
                     )
             } else {
                 Text(text)
@@ -24,7 +24,7 @@ struct ChinesePromptView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .overlay(
                         RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
-                            .stroke(DS.Brand.scheme.babyBlue.opacity(0.45), lineWidth: DS.BorderWidth.regular)
+                            .stroke(DS.Brand.scheme.babyBlue.opacity(0.45), lineWidth: DS.BorderWidth.thin)
                     )
                     .overlay(alignment: .leading) {
                         LinearGradient(colors: [DS.Brand.scheme.cornhusk, DS.Brand.scheme.peachQuartz], startPoint: .top, endPoint: .bottom)

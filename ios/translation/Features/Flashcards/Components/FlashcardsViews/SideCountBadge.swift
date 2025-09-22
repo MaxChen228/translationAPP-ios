@@ -13,8 +13,8 @@ struct SideCountBadge: View {
             .padding(.vertical, DS.Spacing.xs)
             .padding(.horizontal, DS.Spacing.sm)
             .background(
-                RoundedRectangle(cornerRadius: DS.Radius.xs, style: .continuous)
-                    .stroke(color, lineWidth: DS.BorderWidth.regular)
+                RoundedRectangle(cornerRadius: DS.Radius.sm, style: .continuous)
+                    .stroke(color, lineWidth: DS.BorderWidth.thin)
             )
             .opacity(filled ? 1.0 : 0.6)
             .scaleEffect(filled ? 1.1 : 1.0)

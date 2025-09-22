@@ -32,7 +32,7 @@ struct FlashcardsFlipCard<Front: View, Back: View, Overlay: View>: View {
         .background(DS.Palette.surface)
         .overlay(
             RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
-                .stroke(DS.Palette.border, lineWidth: DS.BorderWidth.regular)
+                .stroke(DS.Palette.border, lineWidth: DS.BorderWidth.thin)
         )
         .frame(minHeight: 240)
         .frame(maxHeight: .infinity)

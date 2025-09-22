@@ -195,7 +195,7 @@ struct LocalBankListView: View {
                             .padding(.horizontal, 12)
                             .background(
                                 RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
-                                    .stroke(DS.Palette.border.opacity(DS.Opacity.muted), lineWidth: DS.BorderWidth.regular)
+                                    .stroke(DS.Palette.border.opacity(DS.Opacity.strong), lineWidth: DS.BorderWidth.thin)
                                     .background(DS.Palette.surface.opacity(0.0001))
                             )
                         HStack(alignment: .center, spacing: 8) {

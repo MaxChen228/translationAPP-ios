@@ -22,7 +22,7 @@ struct DayDetailView: View {
 
     private var headerSection: some View {
         HStack(alignment: .center, spacing: DS.Spacing.lg) {
-            HStack(alignment: .bottom, spacing: DS.Spacing.xs2) {
+            HStack(alignment: .bottom, spacing: DS.Spacing.sm) {
                 Text(formattedMonth)
                     .font(.custom(
                         DS.FontFamily.tangerineCandidates.first ?? "Tangerine-Bold",
@@ -144,7 +144,7 @@ private struct AnimatedStreakBadge: View {
     ]
 
     private let badgeSize: CGFloat = 88
-    private let outerLineWidth: CGFloat = DS.BorderWidth.emphatic
+    private let outerLineWidth: CGFloat = DS.BorderWidth.regular
     private let innerLineWidth: CGFloat = DS.BorderWidth.hairline
     private let innerInset: CGFloat = 8
     private let fillInset: CGFloat = 16

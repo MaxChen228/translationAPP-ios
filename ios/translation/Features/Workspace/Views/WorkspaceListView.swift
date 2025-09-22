@@ -243,7 +243,7 @@ private struct WorkspaceItemLink: View {
         if vm.isLoading { return DS.Palette.primary }
         if vm.response != nil { return DS.Brand.scheme.cornhusk }
         if !(vm.inputZh.isEmpty && vm.inputEn.isEmpty) { return DS.Brand.scheme.monument }
-        return DS.Palette.border.opacity(DS.Opacity.muted)
+        return DS.Palette.border.opacity(DS.Opacity.strong)
     }
 
     var body: some View {
@@ -572,7 +572,7 @@ private struct StatusBadge: View {
     var textKey: LocalizedStringKey
     var color: Color
     var body: some View {
-        DSBadge(style: .outline(color: color.opacity(DS.Opacity.strong), lineWidth: DS.BorderWidth.emphatic)) {
+        DSBadge(style: .outline(color: color.opacity(DS.Opacity.strong), lineWidth: DS.BorderWidth.regular)) {
             HStack(spacing: 8) {
                 Circle().fill(color).frame(width: 8, height: 8)
                 Text(textKey).dsType(DS.Font.caption).foregroundStyle(.secondary)
