@@ -20,13 +20,13 @@ struct CalendarView: View {
             .padding(.horizontal, DS.Spacing.lg)
             .padding(.vertical, DS.Spacing.lg)
         }
-        .navigationTitle("練習日曆")
+        .navigationTitle(Text("calendar.navigation.title"))
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 DSQuickActionIconButton(
                     systemName: "calendar.badge.clock",
-                    labelKey: "回到今天",
+                    labelKey: "calendar.action.today",
                     action: viewModel.navigateToToday,
                     style: .tinted
                 )
@@ -56,7 +56,7 @@ struct CalendarView: View {
         HStack(spacing: DS.Spacing.md) {
             DSQuickActionIconButton(
                 systemName: "chevron.left",
-                labelKey: "上個月",
+                labelKey: "calendar.action.previousMonth",
                 action: viewModel.navigateToPreviousMonth,
                 style: .outline
             )
@@ -71,7 +71,7 @@ struct CalendarView: View {
 
             DSQuickActionIconButton(
                 systemName: "chevron.right",
-                labelKey: "下個月",
+                labelKey: "calendar.action.nextMonth",
                 action: viewModel.navigateToNextMonth,
                 style: .outline
             )

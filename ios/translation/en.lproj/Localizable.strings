@@ -17,6 +17,18 @@
 "quick.addWorkspace" = "New Workspace";
 "quick.addEntry" = "Add Entry";
 
+/* Calendar */
+"calendar.navigation.title" = "Practice Calendar";
+"calendar.action.today" = "Today";
+"calendar.action.previousMonth" = "Previous Month";
+"calendar.action.nextMonth" = "Next Month";
+"calendar.metric.practiceCount" = "Practice Items";
+"calendar.metric.totalErrors" = "Total Errors";
+"calendar.metric.bestScore" = "Best Score";
+"calendar.practiceTime.lessThanOneMinute" = "Less than 1 minute";
+"calendar.practiceTime.totalFormat" = "Total practice time: %@";
+"calendar.streak.accessibility" = "Streak %d days";
+
 /* Settings */
 "settings.banner.title" = "Banner";
 "settings.banner.subtitle" = "Set banner display duration";
