@@ -17,11 +17,8 @@ struct ResultsSectionView: View {
     let onSave: (ErrorItem) -> Void
     let onSavePracticeRecord: () -> Void
 
-    // Merge mode props
-    let isMergeMode: Bool
-    let mergeSelection: [UUID]
-    let mergeInFlight: Bool
-    let mergedHighlightID: UUID?
+    @ObservedObject var mergeController: ErrorMergeController
+    @ObservedObject var session: CorrectionSessionStore
     let onEnterMergeMode: (UUID) -> Void
     let onToggleSelection: (UUID) -> Void
     let onMergeConfirm: @Sendable () async -> Void
@@ -51,22 +48,22 @@ struct ResultsSectionView: View {
             } else {
                 VStack(alignment: .leading, spacing: DS.Spacing.md) {
                     ForEach(errors) { err in
-                        let isSelected = mergeSelection.contains(err.id)
-                        let isDisabled = isMergeMode && !isSelected && mergeSelection.count >= 2
+                        let isSelected = mergeController.selection.contains(err.id)
+                        let isDisabled = mergeController.isMergeMode && !isSelected && mergeController.selection.count >= 2
                         let isHidden = mergeAnimator.isHidden(err.id)
                         ErrorItemRow(
                             err: err,
                             selected: selectedErrorID == err.id,
                             onSave: { item in onSave(item) },
-                            isMergeMode: isMergeMode,
+                            isMergeMode: mergeController.isMergeMode,
                             isMergeCandidate: isSelected,
                             isSelectedForMerge: isSelected,
                             isSelectionDisabled: isDisabled,
-                            isMerging: isHidden ? false : mergeInFlight,
+                            isMerging: isHidden ? false : mergeController.isMerging,
                             frameInResults: nil,
                             pinchProgress: 0,
                             pinchCentroid: .zero,
-                            isNewlyMerged: mergedHighlightID == err.id
+                            isNewlyMerged: mergeController.mergedHighlightID == err.id
                         )
                         .opacity(isHidden ? 0 : 1)
                         .allowsHitTesting(!isHidden)
@@ -81,14 +78,14 @@ struct ResultsSectionView: View {
                         )
                         .contentShape(Rectangle())
                         .onTapGesture {
-                            if isMergeMode {
+                            if mergeController.isMergeMode {
                                 onToggleSelection(err.id)
                             } else {
                                 selectedErrorID = err.id
                             }
                         }
                         .onLongPressGesture(minimumDuration: 0.4) {
-                            if !isMergeMode {
+                            if !mergeController.isMergeMode {
                                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                                 onEnterMergeMode(err.id)
                             }
@@ -108,15 +105,15 @@ struct ResultsSectionView: View {
             }
             .buttonStyle(DSButton(style: .secondary, size: .full))
             .frame(maxWidth: .infinity)
-            .disabled(isMergeMode)
+            .disabled(mergeController.isMergeMode)
         }
-        .padding(.bottom, isMergeMode ? DS.Spacing.xl : 0)
+        .padding(.bottom, mergeController.isMergeMode ? DS.Spacing.xl : 0)
         .overlay(alignment: .bottom) {
-            if isMergeMode {
+            if mergeController.isMergeMode {
                 MergeToolbar(
-                    selectionCount: mergeSelection.count,
-                    canMerge: mergeSelection.count == 2 && !mergeInFlight,
-                    inFlight: mergeInFlight,
+                    selectionCount: mergeController.selection.count,
+                    canMerge: mergeController.selection.count == 2 && !mergeController.isMerging,
+                    inFlight: mergeController.isMerging,
                     onMerge: onMergeConfirm,
                     onCancel: onCancelMerge
                 )
@@ -142,10 +139,10 @@ struct ResultsSectionView: View {
         .onPreferenceChange(ErrorRowFramePreferenceKey.self) { frames in
             mergeAnimator.updateRowFrames(frames, errors: res.errors)
         }
-        .onChange(of: mergeSelection) { _, newValue in
+        .onChange(of: mergeController.selection) { _, newValue in
             mergeAnimator.recordSelection(newValue)
         }
-        .onChange(of: mergeInFlight) { _, newValue in
+        .onChange(of: mergeController.isMerging) { _, newValue in
             mergeAnimator.mergeStateDidChange(isInFlight: newValue, errors: res.errors)
         }
         .onDisappear {

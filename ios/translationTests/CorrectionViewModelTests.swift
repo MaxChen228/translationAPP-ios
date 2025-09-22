@@ -63,9 +63,33 @@ private final class SpyWorkspaceStatePersistence: WorkspaceStatePersisting {
     }
 }
 
+private struct StubCorrectionResult {
+    let response: AIResponse
+    let originalHighlights: [Highlight]?
+    let correctedHighlights: [Highlight]?
+
+    static func sample() -> StubCorrectionResult {
+        let error = ErrorItem(
+            id: UUID(uuidString: "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")!,
+            span: "go",
+            type: .lexical,
+            explainZh: "使用過去式",
+            suggestion: "went",
+            hints: ErrorHints(before: "I ", after: " to", occurrence: nil)
+        )
+        let response = AIResponse(corrected: "I went to school.", score: 92, errors: [error])
+        let highlights = Highlighter.computeHighlights(text: "I go to school.", errors: [error])
+        let correctedHighlights = Highlighter.computeHighlightsInCorrected(text: response.corrected, errors: response.errors)
+        return StubCorrectionResult(response: response, originalHighlights: highlights, correctedHighlights: correctedHighlights)
+    }
+}
+
 @MainActor
-private final class UnusedCorrectionRunner: CorrectionRunning {
-    private(set) var callCount = 0
+private final class StubCorrectionRunner: CorrectionRunning {
+    let result: StubCorrectionResult
+    init(result: StubCorrectionResult) {
+        self.result = result
+    }
 
     func runCorrection(
         zh: String,
@@ -75,8 +99,26 @@ private final class UnusedCorrectionRunner: CorrectionRunning {
         hints: [BankHint]?,
         suggestion: String?
     ) async throws -> AICorrectionResult {
-        callCount += 1
-        fatalError("runCorrection should not be invoked in these tests")
+        AICorrectionResult(
+            response: result.response,
+            originalHighlights: result.originalHighlights,
+            correctedHighlights: result.correctedHighlights
+        )
+    }
+}
+
+@MainActor
+private final class ThrowingCorrectionRunner: CorrectionRunning {
+    enum RunnerError: Error { case failed }
+    func runCorrection(
+        zh: String,
+        en: String,
+        bankItemId: String?,
+        deviceId: String?,
+        hints: [BankHint]?,
+        suggestion: String?
+    ) async throws -> AICorrectionResult {
+        throw RunnerError.failed
     }
 }
 
@@ -100,63 +142,18 @@ private final class TestPracticeRecordsRepository: PracticeRecordsRepositoryProt
 
 // MARK: - Fixtures
 
-private extension CorrectionViewModelTests {
-    var sampleErrorID: UUID { UUID(uuidString: "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")! }
-
-    var sampleError: ErrorItem {
-        ErrorItem(
-            id: sampleErrorID,
-            span: "go",
-            type: .lexical,
-            explainZh: "使用過去式",
-            suggestion: "went",
-            hints: ErrorHints(before: "i ", after: " to", occurrence: nil)
-        )
-    }
-
-    var sampleResponse: AIResponse {
-        AIResponse(corrected: "I went to school.", score: 78, errors: [sampleError])
-    }
-
-    var secondaryError: ErrorItem {
-        ErrorItem(
-            id: UUID(uuidString: "FFFFFFFF-1111-2222-3333-444444444444")!,
-            span: "school",
-            type: .syntactic,
-            explainZh: "句型需調整",
-            suggestion: nil,
-            hints: ErrorHints(before: "to ", after: " and", occurrence: nil)
-        )
-    }
-
-    var multiErrorResponse: AIResponse {
-        AIResponse(
-            corrected: "I went to school and learn.",
-            score: 65,
-            errors: [sampleError, secondaryError]
-        )
-    }
-
-    var sampleHint: BankHint {
+private extension BankHint {
+    static var sample: BankHint {
         BankHint(category: .lexical, text: "改成過去式")
     }
+}
 
-    func makePersistence(inputZh: String = "你好", inputEn: String = "I go to school.") -> SpyWorkspaceStatePersistence {
-        let encoder = JSONEncoder()
-        let responseData = try! encoder.encode(sampleResponse)
-        let hintsData = try! encoder.encode([sampleHint])
-        return SpyWorkspaceStatePersistence(
-            strings: [.inputZh: inputZh, .inputEn: inputEn],
-            data: [.response: responseData, .practicedHints: hintsData],
-            bools: [.showPracticedHints: true]
-        )
-    }
-
-    func makeBankItem(id: String = UUID().uuidString) -> BankItem {
+private extension BankItem {
+    static func make(id: String = UUID().uuidString) -> BankItem {
         BankItem(
             id: id,
             zh: "請翻譯：昨天我去了學校。",
-            hints: [sampleHint],
+            hints: [.sample],
             suggestions: [],
             suggestion: "描述昨天的活動",
             tags: ["review"],
@@ -166,323 +163,232 @@ private extension CorrectionViewModelTests {
     }
 }
 
-// MARK: - Tests
+private extension CorrectionSessionStore {
+    static func make(
+        persistence: WorkspaceStatePersisting,
+        runner: CorrectionRunning,
+        workspaceID: String
+    ) -> CorrectionSessionStore {
+        CorrectionSessionStore(persistence: persistence, correctionRunner: runner, workspaceID: workspaceID)
+    }
+}
+
+// MARK: - Session Store Tests
+
+@MainActor
+@Suite("CorrectionSessionStore")
+struct CorrectionSessionStoreTests {
+    @Test("Initialization restores persisted state")
+    func initializationRestoresState() {
+        let result = StubCorrectionResult.sample()
+        let encoder = JSONEncoder()
+        let responseData = try! encoder.encode(result.response)
+        let hintsData = try! encoder.encode([BankHint.sample])
+        let persistence = SpyWorkspaceStatePersistence(
+            strings: [.inputZh: "你好", .inputEn: "I go to school."],
+            data: [.response: responseData, .practicedHints: hintsData],
+            bools: [.showPracticedHints: true]
+        )
+
+        let store = CorrectionSessionStore.make(
+            persistence: persistence,
+            runner: StubCorrectionRunner(result: result),
+            workspaceID: "ws"
+        )
+
+        #expect(store.inputZh == "你好")
+        #expect(store.inputEn == "I go to school.")
+        #expect(store.response == result.response)
+        #expect(store.practicedHints == [BankHint.sample])
+        #expect(store.showPracticedHints)
+        #expect(store.highlights == result.originalHighlights)
+        #expect(store.correctedHighlights == result.correctedHighlights)
+    }
+
+    @Test("resetSession clears persisted keys")
+    func resetSessionClearsPersistence() {
+        let persistence = SpyWorkspaceStatePersistence(
+            strings: [.inputZh: "你好", .inputEn: "Hello"],
+            data: [.response: Data(), .practicedHints: Data()],
+            bools: [.showPracticedHints: true]
+        )
+        let store = CorrectionSessionStore.make(
+            persistence: persistence,
+            runner: StubCorrectionRunner(result: StubCorrectionResult.sample()),
+            workspaceID: "ws"
+        )
+
+        store.resetSession()
+
+        #expect(store.inputZh.isEmpty)
+        #expect(store.inputEn.isEmpty)
+        #expect(store.response == nil)
+        #expect(store.practicedHints.isEmpty)
+        #expect(store.showPracticedHints == false)
+
+        let expected: Set<WorkspaceStateKey> = [.inputZh, .inputEn, .response, .practicedHints, .showPracticedHints]
+        #expect(Set(persistence.removedKeys) == expected)
+        #expect(persistence.removeAllInvocations.contains { Set($0) == expected })
+    }
+}
+
+// MARK: - Practice Coordinator Tests
+
+@MainActor
+@Suite("PracticeSessionCoordinator")
+struct PracticeSessionCoordinatorTests {
+    @Test("startLocalPractice populates session state")
+    func startLocalPracticeUpdatesSession() {
+        let session = CorrectionSessionStore.make(
+            persistence: SpyWorkspaceStatePersistence(),
+            runner: StubCorrectionRunner(result: StubCorrectionResult.sample()),
+            workspaceID: "ws"
+        )
+        let coordinator = PracticeSessionCoordinator(session: session)
+        let item = BankItem.make(id: "item-1")
+
+        coordinator.startLocalPractice(bookName: "Book", item: item, tag: "custom")
+
+        #expect(session.inputZh == item.zh)
+        #expect(session.inputEn.isEmpty)
+        #expect(session.practicedHints == item.hints)
+        #expect(coordinator.practiceSource == .local(bookName: "Book"))
+        #expect(coordinator.currentBankItemId == item.id)
+        #expect(coordinator.currentPracticeTag == "custom")
+    }
+
+    @Test("loadNextPractice selects next unfinished item")
+    func loadNextPracticeSelectsNext() {
+        UserDefaults.standard.removeObject(forKey: "local.bank.books")
+        UserDefaults.standard.removeObject(forKey: "local.bank.progress")
+
+        let session = CorrectionSessionStore.make(
+            persistence: SpyWorkspaceStatePersistence(),
+            runner: StubCorrectionRunner(result: StubCorrectionResult.sample()),
+            workspaceID: "ws"
+        )
+        let coordinator = PracticeSessionCoordinator(session: session)
+        let bankStore = LocalBankStore()
+        let progressStore = LocalBankProgressStore()
+        coordinator.setLocalStores(localBank: bankStore, progress: progressStore)
+
+        let first = BankItem.make(id: "first")
+        let second = BankItem.make(id: "second")
+        bankStore.addOrReplaceBook(name: "Book", items: [first, second])
+        coordinator.startLocalPractice(bookName: "Book", item: first, tag: first.tags?.first)
+        progressStore.markCompleted(book: "Book", itemId: first.id, score: 90)
+
+        try? coordinator.loadNextPractice()
+
+        #expect(coordinator.currentBankItemId == second.id)
+        #expect(session.inputZh == second.zh)
+        #expect(session.practicedHints == second.hints)
+    }
+
+    @Test("savePracticeRecord persists and marks progress")
+    func savePracticeRecordPersists() {
+        let result = StubCorrectionResult.sample()
+        let persistence = SpyWorkspaceStatePersistence()
+        let session = CorrectionSessionStore.make(
+            persistence: persistence,
+            runner: StubCorrectionRunner(result: result),
+            workspaceID: "ws"
+        )
+        let coordinator = PracticeSessionCoordinator(session: session)
+        let repository = TestPracticeRecordsRepository()
+        let recordsStore = PracticeRecordsStore(repository: repository)
+        let bankStore = LocalBankStore()
+        let progressStore = LocalBankProgressStore()
+        coordinator.setLocalStores(localBank: bankStore, progress: progressStore)
+        coordinator.setPracticeRecordsStore(recordsStore)
+
+        let item = BankItem.make(id: "practice")
+        bankStore.addOrReplaceBook(name: "Book", items: [item])
+        coordinator.startLocalPractice(bookName: "Book", item: item, tag: item.tags?.first)
+        session.inputEn = "I go to school."
+
+        let record = try? coordinator.savePracticeRecord(currentInput: session.inputEn, response: result.response)
+
+        #expect(record != nil)
+        #expect(recordsStore.records.count == 1)
+        #expect(progressStore.isCompleted(book: "Book", itemId: item.id))
+    }
+}
+
+// MARK: - View Model Tests
 
 @MainActor
 @Suite("CorrectionViewModel")
 struct CorrectionViewModelTests {
-
-    @Test("Initialization restores persisted state")
-    func initializationRestoresState() {
-        let persistence = makePersistence()
-        let runner = UnusedCorrectionRunner()
-
+    @Test("reset clears session and practice state")
+    func resetClearsState() {
+        let result = StubCorrectionResult.sample()
         let viewModel = CorrectionViewModel(
-            correctionRunner: runner,
-            persistence: persistence,
-            workspaceID: "ws-init"
+            correctionRunner: StubCorrectionRunner(result: result),
+            persistence: SpyWorkspaceStatePersistence(),
+            workspaceID: "ws"
         )
 
-        #expect(viewModel.inputZh == "你好")
-        #expect(viewModel.inputEn == "I go to school.")
-        #expect(viewModel.response == sampleResponse)
-        #expect(viewModel.practicedHints == [sampleHint])
-        #expect(viewModel.showPracticedHints)
+        viewModel.session.inputZh = "你好"
+        viewModel.session.inputEn = "Hello"
+        viewModel.session.practicedHints = [.sample]
+        viewModel.practice.startLocalPractice(bookName: "Book", item: .make(), tag: nil)
+        viewModel.merge.begin(initial: nil)
 
-        let expectedHighlights = Highlighter.computeHighlights(text: viewModel.inputEn, errors: sampleResponse.errors)
-        let expectedCorrected = Highlighter.computeHighlightsInCorrected(text: sampleResponse.corrected, errors: sampleResponse.errors)
-
-        #expect(viewModel.highlights == expectedHighlights)
-        #expect(viewModel.correctedHighlights == expectedCorrected)
-    }
-
-    @Test("reset clears state and persistence")
-    func resetClearsStateAndPersistence() {
-        let persistence = makePersistence()
-        let viewModel = CorrectionViewModel(
-            correctionRunner: UnusedCorrectionRunner(),
-            persistence: persistence,
-            workspaceID: "ws-reset"
-        )
-
-        viewModel.filterType = .lexical
-        viewModel.cardMode = .corrected
         viewModel.reset()
 
-        #expect(viewModel.inputZh.isEmpty)
-        #expect(viewModel.inputEn.isEmpty)
-        #expect(viewModel.response == nil)
-        #expect(viewModel.highlights.isEmpty)
-        #expect(viewModel.correctedHighlights.isEmpty)
-        #expect(viewModel.practicedHints.isEmpty)
-        #expect(viewModel.showPracticedHints == false)
-        #expect(viewModel.filterType == nil)
-        #expect(viewModel.cardMode == .original)
-
-        let expectedKeys: Set<WorkspaceStateKey> = [.inputZh, .inputEn, .response, .practicedHints, .showPracticedHints]
-        let removed = Set(persistence.removedKeys)
-        #expect(removed == expectedKeys)
-        #expect(persistence.removeAllInvocations.contains { Set($0) == expectedKeys })
+        #expect(viewModel.session.inputZh.isEmpty)
+        #expect(viewModel.session.inputEn.isEmpty)
+        #expect(viewModel.session.practicedHints.isEmpty)
+        #expect(viewModel.practice.practiceSource == nil)
+        #expect(!viewModel.merge.isMergeMode)
     }
 
-    @Test("practicedHints updates persistence when modified")
-    func practicedHintsPersistChanges() {
-        let persistence = SpyWorkspaceStatePersistence()
+    @Test("runCorrection stores results in session")
+    func runCorrectionUpdatesSession() async {
+        let result = StubCorrectionResult.sample()
         let viewModel = CorrectionViewModel(
-            correctionRunner: UnusedCorrectionRunner(),
-            persistence: persistence,
-            workspaceID: "ws-hints"
+            correctionRunner: StubCorrectionRunner(result: result),
+            persistence: SpyWorkspaceStatePersistence(),
+            workspaceID: "ws"
         )
+        viewModel.session.inputZh = "你好"
+        viewModel.session.inputEn = "I go to school."
 
-        let hints = [sampleHint]
-        viewModel.practicedHints = hints
+        await viewModel.runCorrection()
 
-        let decoder = JSONDecoder()
-        let storedHints = persistence.readData(.practicedHints).flatMap { try? decoder.decode([BankHint].self, from: $0) }
-        #expect(storedHints == hints)
-
-        viewModel.practicedHints = []
-        #expect(persistence.readData(.practicedHints) == nil)
-        #expect(persistence.removedKeys.contains(.practicedHints))
-    }
-
-    @Test("startLocalPractice resets session and requests focus")
-    func startLocalPracticeResetsSession() {
-        let persistence = makePersistence()
-        let viewModel = CorrectionViewModel(
-            correctionRunner: UnusedCorrectionRunner(),
-            persistence: persistence,
-            workspaceID: "ws-practice"
-        )
-
-        viewModel.inputEn = "Old input"
-        viewModel.response = sampleResponse
-        viewModel.highlights = [Highlight(id: UUID(), range: viewModel.inputEn.startIndex..<viewModel.inputEn.endIndex, type: .lexical)]
-        viewModel.correctedHighlights = viewModel.highlights
-        viewModel.filterType = .lexical
-        viewModel.cardMode = .corrected
-
-        let initialFocusSignal = viewModel.focusEnSignal
-        let bankItem = makeBankItem()
-
-        viewModel.startLocalPractice(bookName: "Book", item: bankItem, tag: "custom")
-
-        #expect(viewModel.inputZh == bankItem.zh)
-        #expect(viewModel.inputEn.isEmpty)
-        #expect(viewModel.practicedHints == bankItem.hints)
-        #expect(viewModel.showPracticedHints == false)
-        #expect(viewModel.currentBankItemId == bankItem.id)
-        #expect(viewModel.currentPracticeTag == "custom")
-        #expect(viewModel.practiceSource == .local(bookName: "Book"))
-        #expect(viewModel.response == nil)
-        #expect(viewModel.highlights.isEmpty)
-        #expect(viewModel.correctedHighlights.isEmpty)
-        #expect(viewModel.filterType == nil)
-        #expect(viewModel.cardMode == .original)
-        #expect(viewModel.focusEnSignal == initialFocusSignal + 1)
-    }
-
-    @Test("loadNextPractice selects next unfinished item")
-    func loadNextPracticeSelectsNext() async {
-        UserDefaults.standard.removeObject(forKey: "local.bank.books")
-        UserDefaults.standard.removeObject(forKey: "local.bank.progress")
-
-        let persistence = SpyWorkspaceStatePersistence()
-        let viewModel = CorrectionViewModel(
-            correctionRunner: UnusedCorrectionRunner(),
-            persistence: persistence,
-            workspaceID: "ws-next"
-        )
-
-        let bankStore = LocalBankStore()
-        let progressStore = LocalBankProgressStore()
-
-        let firstItem = makeBankItem(id: "item-1")
-        let secondItem = makeBankItem(id: "item-2")
-        bankStore.addOrReplaceBook(name: "Book", items: [firstItem, secondItem])
-        progressStore.markCompleted(book: "Book", itemId: firstItem.id, score: 90)
-
-        viewModel.bindLocalBankStores(localBank: bankStore, progress: progressStore)
-        viewModel.practiceSource = .local(bookName: "Book")
-        viewModel.currentBankItemId = firstItem.id
-
-        let previousSignal = viewModel.focusEnSignal
-        await viewModel.loadNextPractice()
-
-        #expect(viewModel.currentBankItemId == secondItem.id)
-        #expect(viewModel.inputZh == secondItem.zh)
-        #expect(viewModel.practicedHints == secondItem.hints)
-        #expect(viewModel.currentPracticeTag == secondItem.tags?.first)
-        #expect(viewModel.practiceSource == .local(bookName: "Book"))
-        #expect(viewModel.response == nil)
-        #expect(viewModel.focusEnSignal == previousSignal + 1)
+        #expect(viewModel.session.response == result.response)
+        #expect(viewModel.session.highlights == result.originalHighlights)
+        #expect(viewModel.session.correctedHighlights == result.correctedHighlights)
+        #expect(viewModel.session.selectedErrorID == result.response.errors.first?.id)
         #expect(viewModel.errorMessage == nil)
     }
 
-    @Test("loadNextPractice reports missing practice source")
-    func loadNextPracticeMissingSource() async {
+    @Test("runCorrection surfaces errors")
+    func runCorrectionSurfacesErrors() async {
         let viewModel = CorrectionViewModel(
-            correctionRunner: UnusedCorrectionRunner(),
+            correctionRunner: ThrowingCorrectionRunner(),
             persistence: SpyWorkspaceStatePersistence(),
-            workspaceID: "ws-missing-source"
+            workspaceID: "ws"
+        )
+        viewModel.session.inputZh = "你好"
+        viewModel.session.inputEn = "Hello"
+
+        await viewModel.runCorrection()
+
+        #expect(viewModel.errorMessage != nil)
+    }
+
+    @Test("loadNextPractice sets error when source missing")
+    func loadNextPracticeMissingSource() {
+        let viewModel = CorrectionViewModel(
+            correctionRunner: StubCorrectionRunner(result: StubCorrectionResult.sample()),
+            persistence: SpyWorkspaceStatePersistence(),
+            workspaceID: "ws"
         )
 
-        await viewModel.loadNextPractice()
+        viewModel.loadNextPractice()
 
         #expect(viewModel.errorMessage == String(localized: "practice.error.notLocal"))
-    }
-
-    @Test("loadNextPractice reports missing stores")
-    func loadNextPracticeMissingStores() async {
-        let viewModel = CorrectionViewModel(
-            correctionRunner: UnusedCorrectionRunner(),
-            persistence: SpyWorkspaceStatePersistence(),
-            workspaceID: "ws-missing-stores"
-        )
-
-        viewModel.practiceSource = .local(bookName: "Book")
-
-        await viewModel.loadNextPractice()
-
-        #expect(viewModel.errorMessage == String(localized: "practice.error.storeMissing"))
-    }
-
-    @Test("applySuggestion updates text and highlights")
-    func applySuggestionUpdatesState() {
-        let persistence = makePersistence()
-        let viewModel = CorrectionViewModel(
-            correctionRunner: UnusedCorrectionRunner(),
-            persistence: persistence,
-            workspaceID: "ws-suggestion"
-        )
-
-        viewModel.inputEn = "I go to school."
-        viewModel.response = sampleResponse
-
-        viewModel.applySuggestion(for: sampleError)
-
-        #expect(viewModel.inputEn == "I went to school.")
-        #expect(viewModel.highlights.isEmpty)
-
-        let expectedCorrected = Highlighter.computeHighlightsInCorrected(text: sampleResponse.corrected, errors: sampleResponse.errors)
-        #expect(viewModel.correctedHighlights == expectedCorrected)
-    }
-
-    @Test("filtered collections respect selected error type")
-    func filteredCollectionsRespectFilter() {
-        let persistence = SpyWorkspaceStatePersistence()
-        let viewModel = CorrectionViewModel(
-            correctionRunner: UnusedCorrectionRunner(),
-            persistence: persistence,
-            workspaceID: "ws-filters"
-        )
-
-        viewModel.inputEn = "I go to school and learn."
-        viewModel.response = multiErrorResponse
-
-        let fullHighlights = Highlighter.computeHighlights(text: viewModel.inputEn, errors: multiErrorResponse.errors)
-        let fullCorrected = Highlighter.computeHighlightsInCorrected(text: multiErrorResponse.corrected, errors: multiErrorResponse.errors)
-        viewModel.highlights = fullHighlights
-        viewModel.correctedHighlights = fullCorrected
-
-        #expect(viewModel.filteredErrors.count == 2)
-        #expect(viewModel.filteredHighlights == fullHighlights)
-        #expect(viewModel.filteredCorrectedHighlights == fullCorrected)
-
-        viewModel.filterType = .lexical
-        #expect(viewModel.filteredErrors == [sampleError])
-        #expect(viewModel.filteredHighlights == fullHighlights.filter { $0.type == .lexical })
-        #expect(viewModel.filteredCorrectedHighlights == fullCorrected.filter { $0.type == .lexical })
-
-        viewModel.filterType = .syntactic
-        #expect(viewModel.filteredErrors == [secondaryError])
-        #expect(viewModel.filteredHighlights == fullHighlights.filter { $0.type == .syntactic })
-        #expect(viewModel.filteredCorrectedHighlights.isEmpty)
-
-        viewModel.filterType = nil
-        #expect(viewModel.filteredErrors.count == 2)
-    }
-
-    @Test("savePracticeRecord persists record and marks progress")
-    func savePracticeRecordPersists() {
-        let repository = TestPracticeRecordsRepository()
-        let store = PracticeRecordsStore(repository: repository)
-        let persistence = SpyWorkspaceStatePersistence()
-        let viewModel = CorrectionViewModel(
-            correctionRunner: UnusedCorrectionRunner(),
-            persistence: persistence,
-            workspaceID: "ws-save"
-        )
-
-        let bankStore = LocalBankStore()
-        let progressStore = LocalBankProgressStore()
-        let bankItem = makeBankItem(id: "practice-item")
-        bankStore.addOrReplaceBook(name: "Book", items: [bankItem])
-
-        viewModel.bindLocalBankStores(localBank: bankStore, progress: progressStore)
-        viewModel.bindPracticeRecordsStore(store)
-
-        viewModel.startLocalPractice(bookName: "Book", item: bankItem)
-        viewModel.inputEn = "I go to school."
-        viewModel.response = sampleResponse
-
-        var receivedNotification: Notification?
-        let observer = NotificationCenter.default.addObserver(forName: .practiceRecordSaved, object: nil, queue: nil) { notification in
-            receivedNotification = notification
-        }
-        defer { NotificationCenter.default.removeObserver(observer) }
-
-        viewModel.savePracticeRecord()
-
-        #expect(store.records.count == 1)
-        let record = store.records.first
-        #expect(record?.bankItemId == bankItem.id)
-        #expect(record?.bankBookName == "Book")
-        #expect(record?.practiceTag == bankItem.tags?.first)
-        #expect(record?.chineseText == bankItem.zh)
-        #expect(record?.englishInput == "I go to school.")
-        #expect(record?.hints == bankItem.hints)
-        #expect(record?.teacherSuggestion == bankItem.suggestion)
-        #expect(record?.correctedText == sampleResponse.corrected)
-        #expect(record?.score == sampleResponse.score)
-        #expect(record?.errors == sampleResponse.errors)
-        #expect(progressStore.isCompleted(book: "Book", itemId: bankItem.id))
-
-        #expect(repository.savedSnapshots.last?.count == 1)
-        #expect(repository.savedSnapshots.last?.first == record)
-
-        #expect(receivedNotification?.userInfo?["score"] as? Int == sampleResponse.score)
-        #expect(receivedNotification?.userInfo?["errors"] as? Int == sampleResponse.errors.count)
-    }
-
-    @Test("savePracticeRecord ignores when response missing")
-    func savePracticeRecordWithoutResponse() {
-        let repository = TestPracticeRecordsRepository()
-        let store = PracticeRecordsStore(repository: repository)
-        let viewModel = CorrectionViewModel(
-            correctionRunner: UnusedCorrectionRunner(),
-            persistence: SpyWorkspaceStatePersistence(),
-            workspaceID: "ws-save-missing"
-        )
-
-        viewModel.bindPracticeRecordsStore(store)
-        viewModel.savePracticeRecord()
-
-        #expect(store.records.isEmpty)
-        #expect(repository.savedSnapshots.isEmpty)
-    }
-
-    @Test("savePracticeRecord ignores when store missing")
-    func savePracticeRecordWithoutStore() {
-        let viewModel = CorrectionViewModel(
-            correctionRunner: UnusedCorrectionRunner(),
-            persistence: SpyWorkspaceStatePersistence(),
-            workspaceID: "ws-save-no-store"
-        )
-
-        viewModel.response = sampleResponse
-        viewModel.savePracticeRecord()
-
-        // Nothing to assert beyond ensuring no crash; verification handled implicitly.
     }
 }

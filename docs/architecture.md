@@ -21,7 +21,10 @@
 
 - **WorkspaceStore** (`Features/Workspace/Stores/WorkspaceStore.swift`)：管理 Workspace 清單，內含記憶化的 `CorrectionViewModel` 實例。Workspace 名稱與排序持久化在 UserDefaults。
 - **QuickActionsStore** (`Features/Workspace/Stores/QuickActionsStore.swift`)：管理首頁快速入口的順序與類型，支援新增/刪除/排序並以 UserDefaults 持久化，可重複建立相同入口。
-- **CorrectionViewModel** (`Features/Workspace/ViewModels/CorrectionViewModel.swift`)：每個 Workspace 的核心狀態（中文/英文輸入、批改結果、錯誤高亮、題庫練習資訊）。會以 `workspace.<id>.` 前綴將輸入與結果儲存在 UserDefaults。現已整合練習記錄功能，自動追蹤練習開始時間與儲存完成記錄。
+- **CorrectionSessionStore** (`Features/Workspace/Stores/CorrectionSessionStore.swift`)：封裝 Workspace 單一會話的輸入、批改回應、高亮與 UserDefaults 持久化，集中處理 `runCorrection`、建議套用、錯誤列表重算等邏輯。
+- **PracticeSessionCoordinator** (`Features/Workspace/Coordinators/PracticeSessionCoordinator.swift`)：管理題庫練習流程，負責挑題、追蹤來源、建立練習記錄並連動 `PracticeRecordsStore` 與進度。
+- **ErrorMergeController** (`Features/Workspace/Coordinators/ErrorMergeController.swift`)：掌管錯誤合併模式、選取狀態與 `/correct/merge` 呼叫，成功後回寫 `CorrectionSessionStore` 並發送 `errorsMerged` 通知。
+- **CorrectionViewModel** (`Features/Workspace/ViewModels/CorrectionViewModel.swift`)：作為上述元件的協調層，對外提供焦點控制、錯誤訊息與按鈕動作，並向 UI 曝露 `session`/`practice`/`merge` 狀態。
 - **PracticeRecordsStore** (`Features/Saved/Stores/PracticeRecordsStore.swift`)：練習記錄管理系統，透過 Repository 讀寫 Application Support 底下的 JSON，提供日曆與列表雙向綁定。
 - **PracticeRecordsRepository** (`Features/Saved/Repositories/PracticeRecordsRepository.swift`) 與 `PracticeRecordsFileSystem`：封裝檔案系統路徑、備份位置與 `PersistenceProvider`，同時提供內存回退防止 I/O 失敗中斷。
 - **PracticeRecordsMigrator** (`Features/Saved/Repositories/PracticeRecordsMigrator.swift`)：開機時將舊版 UserDefaults 資料搬移到檔案儲存，並備份歷史 JSON。
@@ -49,9 +52,9 @@
 
 - **ContentView** (`Features/Workspace/Views/ContentView.swift`)
   - 主批改畫面。顯示中文提示、英文輸入、批改結果卡片。
-  - 呼叫 `CorrectionViewModel.runCorrection()` 觸發網路請求，並可進入「錯誤合併模式」雙選錯誤後觸發 `mergeSelectedErrors()`。
+  - 呼叫 `CorrectionViewModel.runCorrection()` 觸發網路請求，透過 `ErrorMergeController` 控制錯誤合併模式，並委派 `PracticeSessionCoordinator` 處理載入下一題。
   - 切換卡片模式、儲存錯誤至 Saved JSON、載入下一個本機題庫項目。
-- **ResultsSectionView** (`Features/Workspace/Components/ResultsSectionView.swift`)：承載錯誤列表、合併工具列與 `MergeAnimationCoordinator`，負責管理合併動畫覆蓋層與選取狀態。
+- **ResultsSectionView** (`Features/Workspace/Components/ResultsSectionView.swift`)：承載錯誤列表、合併工具列與 `MergeAnimationCoordinator`，透過 `ErrorMergeController` 與 `CorrectionSessionStore` 取得選取與動畫狀態。
 
 - **BankBooksView / FlashcardsView 等**：分別提供題庫瀏覽、儲存錯誤 / 單字卡列表、TTS 撥放介面。
 - **CloudCourseLibraryView** (`Features/Chat/Bank/Views/CloudCourseLibraryView.swift`) 與子視圖 `CloudCourseDetailView`、`CloudCourseBookPreviewView`：導覽雲端課程、顯示封面/標籤/書本清單，可從課程層級直接複製書本至本機。

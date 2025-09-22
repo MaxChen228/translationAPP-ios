@@ -9,14 +9,27 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var vm: CorrectionViewModel
+    @ObservedObject private var session: CorrectionSessionStore
+    @ObservedObject private var mergeController: ErrorMergeController
+    @ObservedObject private var practice: PracticeSessionCoordinator
     @EnvironmentObject private var savedStore: SavedErrorsStore
     @EnvironmentObject private var bannerCenter: BannerCenter
+
     init(correctionRunner: CorrectionRunning = CorrectionServiceFactory.makeDefault()) {
-        _vm = StateObject(wrappedValue: CorrectionViewModel(correctionRunner: correctionRunner))
+        let viewModel = CorrectionViewModel(correctionRunner: correctionRunner)
+        _vm = StateObject(wrappedValue: viewModel)
+        _session = ObservedObject(initialValue: viewModel.session)
+        _mergeController = ObservedObject(initialValue: viewModel.merge)
+        _practice = ObservedObject(initialValue: viewModel.practice)
     }
+
     init(vm: CorrectionViewModel) {
         _vm = StateObject(wrappedValue: vm)
+        _session = ObservedObject(initialValue: vm.session)
+        _mergeController = ObservedObject(initialValue: vm.merge)
+        _practice = ObservedObject(initialValue: vm.practice)
     }
+
     @FocusState private var focused: Field?
     enum Field { case zh, en }
     @State private var showSavedSheet: Bool = false // legacy; replaced by NavigationLink
@@ -36,41 +49,41 @@ struct ContentView: View {
                         .buttonStyle(DSButton(style: .secondary, size: .full))
                         .frame(width: DS.ButtonSize.small)
                     }
-                    ChinesePromptView(text: vm.inputZh)
+                    ChinesePromptView(text: session.inputZh)
 
                     // Subtle separator to structure the page（以淡藍髮絲線）
                     DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.border))
 
-                    HintListSection(hints: vm.practicedHints, isExpanded: $vm.showPracticedHints)
+                    HintListSection(hints: session.practicedHints, isExpanded: vm.binding(\.showPracticedHints))
 
                     DSSectionHeader(titleKey: "content.en.title", subtitleKey: "content.en.subtitle", accentUnderline: true)
                     DSCard {
-                        DSTextArea(text: $vm.inputEn, minHeight: 140, placeholder: String(localized: "content.en.placeholder", locale: locale), isFocused: focused == .en, ruled: true, disableAutocorrection: true)
+                        DSTextArea(text: vm.binding(\.inputEn), minHeight: 140, placeholder: String(localized: "content.en.placeholder", locale: locale), isFocused: focused == .en, ruled: true, disableAutocorrection: true)
                             .focused($focused, equals: .en)
                     }
 
-                    if let res = vm.response {
+                    if let res = session.response {
                         // Separate inputs from results visually（以淡藍髮絲線）
                         DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.border))
 
                         ResultsSectionView(
                             res: res,
-                            inputZh: vm.inputZh,
-                            inputEn: vm.inputEn,
-                            highlights: vm.filteredHighlights,
-                            correctedHighlights: vm.filteredCorrectedHighlights,
-                            errors: vm.filteredErrors,
-                            selectedErrorID: $vm.selectedErrorID,
-                            filterType: $vm.filterType,
-                            popoverError: $vm.popoverError,
-                            mode: $vm.cardMode,
-                            applySuggestion: { vm.applySuggestion(for: $0) },
+                            inputZh: session.inputZh,
+                            inputEn: session.inputEn,
+                            highlights: session.filteredHighlights(),
+                            correctedHighlights: session.filteredCorrectedHighlights(),
+                            errors: session.filteredErrors(),
+                            selectedErrorID: vm.binding(\.selectedErrorID),
+                            filterType: vm.binding(\.filterType),
+                            popoverError: vm.binding(\.popoverError),
+                            mode: vm.binding(\.cardMode),
+                            applySuggestion: { session.applySuggestion(for: $0) },
                             onSave: { item in
                                 let payload = ErrorSavePayload(
                                     error: item,
-                                    inputEn: vm.inputEn,
+                                    inputEn: session.inputEn,
                                     correctedEn: res.corrected,
-                                    inputZh: vm.inputZh,
+                                    inputZh: session.inputZh,
                                     savedAt: Date()
                                 )
                                 savedStore.add(payload: payload)
@@ -78,10 +91,8 @@ struct ContentView: View {
                             onSavePracticeRecord: {
                                 vm.savePracticeRecord()
                             },
-                            isMergeMode: vm.isMergeMode,
-                            mergeSelection: vm.mergeSelection,
-                            mergeInFlight: vm.mergeInFlight,
-                            mergedHighlightID: vm.lastMergedErrorID,
+                            mergeController: mergeController,
+                            session: session,
                             onEnterMergeMode: { vm.enterMergeMode(initialErrorID: $0) },
                             onToggleSelection: { vm.toggleMergeSelection(for: $0) },
                             onMergeConfirm: { await vm.performMergeIfNeeded() },
@@ -89,7 +100,7 @@ struct ContentView: View {
                         )
                     }
 
-                    if !vm.isMergeMode {
+                    if !mergeController.isMergeMode {
                         // 內嵌於頁面底部的操作列（不再懸浮）
                         HStack(spacing: DS.Spacing.md) {
                             Button {
@@ -117,7 +128,7 @@ struct ContentView: View {
                             .disabled(vm.isLoading)
 
                             Button {
-                                Task { await vm.loadNextPractice() }
+                                vm.loadNextPractice()
                                 focused = .en
                             } label: {
                                 DSIconLabel(textKey: "content.next", systemName: "arrow.right.circle.fill")
@@ -125,7 +136,7 @@ struct ContentView: View {
                                     .minimumScaleFactor(0.9)
                             }
                             .buttonStyle(DSButton(style: .secondary, size: .full))
-                            .disabled(vm.isLoading || vm.currentBankItemId == nil)
+                            .disabled(vm.isLoading || practice.currentBankItemId == nil)
 
                             Button(role: .destructive) {
                                 vm.reset()

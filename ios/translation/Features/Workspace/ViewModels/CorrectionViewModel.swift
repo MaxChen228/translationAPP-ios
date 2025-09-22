@@ -4,81 +4,15 @@ import OSLog
 
 @MainActor
 final class CorrectionViewModel: ObservableObject {
-    private let persistence: WorkspaceStatePersisting
+    let session: CorrectionSessionStore
+    let practice: PracticeSessionCoordinator
+    let merge: ErrorMergeController
 
-    @Published var inputZh: String = "" {
-        didSet {
-            if inputZh != oldValue {
-                persistence.writeString(inputZh, key: .inputZh)
-            }
-        }
-    }
-    @Published var inputEn: String = "" {
-        didSet {
-            if inputEn != oldValue {
-                persistence.writeString(inputEn, key: .inputEn)
-            }
-        }
-    }
-
-    @Published var response: AIResponse? { didSet { persistResponse() } }
-    @Published var highlights: [Highlight] = []
-    @Published var correctedHighlights: [Highlight] = []
-    @Published var selectedErrorID: UUID?
-    @Published var filterType: ErrorType? = nil
-    @Published var popoverError: ErrorItem? = nil
-    @Published var cardMode: ResultSwitcherCard.Mode = .original
-
-    // Networking
-    private let correctionRunner: CorrectionRunning
-    private let mergeService: ErrorMerging
-    private let workspaceID: String
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
-    @Published var isMergeMode: Bool = false
-    @Published var mergeSelection: [UUID] = []
-    @Published var mergeInFlight: Bool = false
-    @Published var lastMergedErrorID: UUID? = nil
-
-    // Practice hints (from bank) to render under Chinese input
-    @Published var practicedHints: [BankHint] = [] { didSet { persistHints() } }
-    @Published var showPracticedHints: Bool = false {
-        didSet {
-            if showPracticedHints {
-                persistence.writeBool(true, key: .showPracticedHints)
-            } else {
-                persistence.remove(.showPracticedHints)
-            }
-        }
-    }
-    // Signal to request focusing EN text field in ContentView
     @Published var focusEnSignal: Int = 0
 
-    // 題庫整合：紀錄目前要練習的題目 ID（若從題庫進入）
-    @Published var currentBankItemId: String? = nil
-    @Published var currentPracticeTag: String? = nil
-    // 題庫上下文（教師建議文字；非結構化）
-    private var currentBankSuggestionText: String? = nil
-
-    // 練習來源（遠端題庫或本機題庫）
-    enum PracticeSource: Equatable { case local(bookName: String) }
-    @Published var practiceSource: PracticeSource? = nil
-    weak var localBankStore: LocalBankStore? = nil
-    weak var localProgressStore: LocalBankProgressStore? = nil
-    weak var practiceRecordsStore: PracticeRecordsStore? = nil
-
-    // 練習會話追蹤
-    private var practiceStartTime: Date? = nil
-
-    func bindLocalBankStores(localBank: LocalBankStore, progress: LocalBankProgressStore) {
-        self.localBankStore = localBank
-        self.localProgressStore = progress
-    }
-
-    func bindPracticeRecordsStore(_ store: PracticeRecordsStore) {
-        self.practiceRecordsStore = store
-    }
-
+    private let workspaceID: String
 
     init(
         correctionRunner: CorrectionRunning = CorrectionServiceFactory.makeDefault(),
@@ -86,349 +20,151 @@ final class CorrectionViewModel: ObservableObject {
         persistence: WorkspaceStatePersisting? = nil,
         workspaceID: String = "default"
     ) {
-        self.correctionRunner = correctionRunner
-        self.mergeService = mergeService
         self.workspaceID = workspaceID
         let persistence = persistence ?? DefaultsWorkspaceStatePersistence(workspaceID: workspaceID)
-        self.persistence = persistence
-        // 載入持久化狀態
-        self.inputZh = persistence.readString(.inputZh) ?? ""
-        self.inputEn = persistence.readString(.inputEn) ?? ""
-        if let data = persistence.readData(.response) {
-            self.response = try? JSONDecoder().decode(AIResponse.self, from: data)
-        }
-        if let data = persistence.readData(.practicedHints),
-           let hints = try? JSONDecoder().decode([BankHint].self, from: data) {
-            self.practicedHints = hints
-        }
-        self.showPracticedHints = persistence.readBool(.showPracticedHints)
-
-        // 重新計算highlight（從已恢復的response和inputEn）
-        if let res = self.response, !inputEn.isEmpty {
-            self.highlights = Highlighter.computeHighlights(text: inputEn, errors: res.errors)
-            self.correctedHighlights = Highlighter.computeHighlightsInCorrected(text: res.corrected, errors: res.errors)
-        }
-
+        let sessionStore = CorrectionSessionStore(
+            persistence: persistence,
+            correctionRunner: correctionRunner,
+            workspaceID: workspaceID
+        )
+        self.session = sessionStore
+        self.practice = PracticeSessionCoordinator(session: sessionStore)
+        self.merge = ErrorMergeController(session: sessionStore, mergeService: mergeService, workspaceID: workspaceID)
         AppLog.aiInfo("CorrectionViewModel initialized (ws=\(workspaceID))")
     }
 
-    func reset() {
-        inputZh = ""
-        inputEn = ""
-        response = nil
-        highlights = []
-        correctedHighlights = []
-        selectedErrorID = nil
-        filterType = nil
-        popoverError = nil
-        cardMode = .original
-        practicedHints = []
-        showPracticedHints = false
-        currentBankSuggestionText = nil
-        cancelMergeMode()
-        // 同步清掉持久化，符合「除非按右下角刪除才清空」
-        persistence.removeAll([
-            .inputZh,
-            .inputEn,
-            .response,
-            .practicedHints,
-            .showPracticedHints
-        ])
+    // MARK: - Binding helpers
+
+    func binding<Value>(_ keyPath: ReferenceWritableKeyPath<CorrectionSessionStore, Value>) -> Binding<Value> {
+        Binding(
+            get: { self.session[keyPath: keyPath] },
+            set: { self.session[keyPath: keyPath] = $0 }
+        )
     }
 
-    func fillExample() {
-        inputZh = String(localized: "content.sample.zh")
-        inputEn = String(localized: "content.sample.en")
+    // MARK: - Store binding
+
+    func bindLocalBankStores(localBank: LocalBankStore, progress: LocalBankProgressStore) {
+        practice.setLocalStores(localBank: localBank, progress: progress)
     }
+
+    func bindPracticeRecordsStore(_ store: PracticeRecordsStore) {
+        practice.setPracticeRecordsStore(store)
+    }
+
+    // MARK: - Focus helpers
 
     func requestFocusEn() {
         focusEnSignal &+= 1
     }
 
-    // 移除舊的 Sheet 題庫流程；改為列表頁直接回填中文
+    // MARK: - Session lifecycle
 
-    // 真實批改（需設定 BACKEND_URL；未設定時 UI 會提示並略過）
+    func reset() {
+        session.resetSession()
+        practice.resetPractice()
+        merge.cancel()
+    }
+
+    func fillExample() {
+        session.inputZh = String(localized: "content.sample.zh")
+        session.inputEn = String(localized: "content.sample.en")
+    }
+
+    // MARK: - Correction workflow
+
     func runCorrection() async {
-        let user = inputEn.trimmingCharacters(in: .whitespacesAndNewlines)
+        let user = session.inputEn.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !user.isEmpty else {
-            let err = ErrorItem(
-                id: UUID(),
-                span: "",
-                type: .pragmatic,
-                explainZh: String(localized: "content.error.emptyInput"),
-                suggestion: nil,
-                hints: nil
-            )
-            let res = AIResponse(corrected: "", score: 0, errors: [err])
-            self.response = res
-            self.highlights = []
-            self.correctedHighlights = []
-            self.selectedErrorID = nil
+            session.produceEmptyInputResponse()
             return
         }
 
-        if inputZh.isEmpty { inputZh = String(localized: "content.sample.zh") }
+        if session.inputZh.isEmpty {
+            session.inputZh = String(localized: "content.sample.zh")
+        }
 
         isLoading = true
         errorMessage = nil
+        merge.cancel()
         do {
-            AppLog.aiInfo("Start correction via correctionRunner")
-            let result = try await correctionRunner.runCorrection(
-                zh: inputZh,
-                en: inputEn,
-                bankItemId: currentBankItemId,
-                deviceId: DeviceID.current,
-                hints: practicedHints,
-                suggestion: currentBankSuggestionText
-            )
-            self.response = result.response
-            AppLog.aiInfo("Correction success: score=\(result.response.score), errors=\(result.response.errors.count)")
-            if let hs = result.originalHighlights { self.highlights = hs }
-            else if let res = self.response { self.highlights = Highlighter.computeHighlights(text: inputEn, errors: res.errors) }
-            if let hs2 = result.correctedHighlights { self.correctedHighlights = hs2 }
-            else if let res = self.response { self.correctedHighlights = Highlighter.computeHighlightsInCorrected(text: res.corrected, errors: res.errors) }
-            self.selectedErrorID = self.response?.errors.first?.id
-            // Notify completion for banner/notification consumers
+            let result = try await session.performCorrection(deviceId: DeviceID.current)
             NotificationCenter.default.post(name: .correctionCompleted, object: nil, userInfo: [
-                AppEventKeys.workspaceID: self.workspaceID,
-                AppEventKeys.score: self.response?.score ?? 0,
-                AppEventKeys.errors: self.response?.errors.count ?? 0,
+                AppEventKeys.workspaceID: workspaceID,
+                AppEventKeys.score: result.response.score,
+                AppEventKeys.errors: result.response.errors.count,
             ])
         } catch {
-            self.errorMessage = (error as NSError).localizedDescription
-            AppLog.aiError("Correction failed: \((error as NSError).localizedDescription)")
-            // Notify failure so App can surface a banner
+            let nsError = error as NSError
+            errorMessage = nsError.localizedDescription
+            AppLog.aiError("Correction failed: \(nsError.localizedDescription)")
             NotificationCenter.default.post(name: .correctionFailed, object: nil, userInfo: [
-                AppEventKeys.workspaceID: self.workspaceID,
-                AppEventKeys.error: (error as NSError).localizedDescription
+                AppEventKeys.workspaceID: workspaceID,
+                AppEventKeys.error: nsError.localizedDescription
             ])
         }
         isLoading = false
-        cancelMergeMode()
     }
 
-    // （移除遠端題庫練習入口）
+    // MARK: - Practice workflow
 
     func startLocalPractice(bookName: String, item: BankItem, tag: String? = nil) {
-        // 填入新題目內容
-        inputZh = item.zh
-        practicedHints = item.hints
-        showPracticedHints = false
-        currentBankItemId = item.id
-        currentPracticeTag = tag ?? (item.tags?.first)
-        practiceSource = .local(bookName: bookName)
-        // 教師 suggestion 為單段文字
-        currentBankSuggestionText = item.suggestion
-        // 清空上一題的英文輸入與批改結果
-        inputEn = ""
-        response = nil
-        highlights = []
-        correctedHighlights = []
-        selectedErrorID = nil
-        filterType = nil
-        cardMode = .original
-        // 記錄練習開始時間
-        practiceStartTime = Date()
+        practice.startLocalPractice(bookName: bookName, item: item, tag: tag)
         requestFocusEn()
     }
 
-    // 抽下一題（本機）：依目前練習的本機書本挑選未完成題
-    func loadNextPractice() async {
-        guard case .local(let bookName) = practiceSource else {
-            await MainActor.run { self.errorMessage = String(localized: "practice.error.notLocal") }
-            return
-        }
-        guard let bank = localBankStore, let progress = localProgressStore else {
-            await MainActor.run { self.errorMessage = String(localized: "practice.error.storeMissing") }
-            return
-        }
-        let items = bank.items(in: bookName)
-        if let next = items.first(where: { !progress.isCompleted(book: bookName, itemId: $0.id) && $0.id != self.currentBankItemId })
-            ?? items.first(where: { !progress.isCompleted(book: bookName, itemId: $0.id) }) {
-            await MainActor.run { self.startLocalPractice(bookName: bookName, item: next, tag: next.tags?.first) }
-        } else {
-            await MainActor.run { self.errorMessage = String(localized: "practice.error.noneRemaining") }
-        }
-    }
-
-    var filteredErrors: [ErrorItem] {
-        guard let res = response else { return [] }
-        guard let f = filterType else { return res.errors }
-        return res.errors.filter { $0.type == f }
-    }
-
-    var filteredHighlights: [Highlight] {
-        guard let f = filterType else { return highlights }
-        return highlights.filter { $0.type == f }
-    }
-    var filteredCorrectedHighlights: [Highlight] {
-        guard let f = filterType else { return correctedHighlights }
-        return correctedHighlights.filter { $0.type == f }
-    }
-
-    func applySuggestion(for error: ErrorItem) {
-        guard let suggestion = error.suggestion, !suggestion.isEmpty else { return }
-        guard let range = Highlighter.range(for: error, in: inputEn) else { return }
-        inputEn.replaceSubrange(range, with: suggestion)
-        // 重新計算高亮
-        if let res = response {
-            self.highlights = Highlighter.computeHighlights(text: inputEn, errors: res.errors)
-            self.correctedHighlights = Highlighter.computeHighlightsInCorrected(text: res.corrected, errors: res.errors)
-        }
-    }
-
-    // （提示陣列直接送後端解碼，無需組字串）
-
-    private func persistResponse() {
-        if let res = response, let data = try? JSONEncoder().encode(res) {
-            persistence.writeData(data, key: .response)
-        } else {
-            persistence.remove(.response)
-        }
-    }
-
-    private func persistHints() {
-        if practicedHints.isEmpty {
-            persistence.remove(.practicedHints)
-            return
-        }
-        if let data = try? JSONEncoder().encode(practicedHints) {
-            persistence.writeData(data, key: .practicedHints)
-        }
-    }
-
-    // 保存練習記錄
-    func savePracticeRecord() {
-        guard let response = self.response else {
-            AppLog.aiError("Cannot save practice record: no response available")
-            return
-        }
-
-        guard let store = practiceRecordsStore else {
-            AppLog.aiError("Cannot save practice record: store not bound")
-            return
-        }
-
-        let startTime = practiceStartTime ?? Date()
-        let bankBookName: String? = if case .local(let bookName) = practiceSource { bookName } else { nil }
-
-        let record = PracticeRecord(
-            createdAt: startTime,
-            completedAt: Date(),
-            bankItemId: currentBankItemId,
-            bankBookName: bankBookName,
-            practiceTag: currentPracticeTag,
-            chineseText: inputZh,
-            englishInput: inputEn,
-            hints: practicedHints,
-            teacherSuggestion: currentBankSuggestionText,
-            correctedText: response.corrected,
-            score: response.score,
-            errors: response.errors
-        )
-
-        store.add(record)
-        AppLog.aiInfo("Practice record saved successfully: score=\(response.score), errors=\(response.errors.count), total records=\(store.records.count)")
-
-        if case .local(let bookName) = practiceSource, let itemId = currentBankItemId {
-            if let progressStore = localProgressStore {
-                if !progressStore.isCompleted(book: bookName, itemId: itemId) {
-                    progressStore.markCompleted(book: bookName, itemId: itemId, score: response.score)
-                }
-            } else {
-                AppLog.aiError("Cannot mark practice completed: progress store not bound")
+    func loadNextPractice() {
+        do {
+            try practice.loadNextPractice()
+            requestFocusEn()
+            errorMessage = nil
+        } catch let err as PracticeSessionCoordinator.PracticeError {
+            if let message = err.errorDescription {
+                errorMessage = message
             }
+        } catch {
+            errorMessage = error.localizedDescription
         }
-
-        // 發送通知給用戶
-        NotificationCenter.default.post(name: .practiceRecordSaved, object: nil, userInfo: [
-            "score": response.score,
-            "errors": response.errors.count
-        ])
     }
 
-    // MARK: - Merge Mode
+    func savePracticeRecord() {
+        do {
+            let record = try practice.savePracticeRecord(currentInput: session.inputEn, response: session.response)
+            NotificationCenter.default.post(name: .practiceRecordSaved, object: nil, userInfo: [
+                "score": record.score,
+                "errors": record.errors.count,
+            ])
+        } catch PracticeSessionCoordinator.PracticeError.missingResponse {
+            AppLog.aiError("Cannot save practice record: no response available")
+        } catch PracticeSessionCoordinator.PracticeError.storeMissing {
+            AppLog.aiError("Cannot save practice record: store not bound")
+        } catch PracticeSessionCoordinator.PracticeError.notLocal {
+            AppLog.aiError("Cannot save practice record: practice source not local")
+        } catch PracticeSessionCoordinator.PracticeError.noneRemaining {
+            AppLog.aiError("Cannot save practice record: no remaining practice item")
+        } catch {
+            AppLog.aiError("Cannot save practice record: \(error.localizedDescription)")
+        }
+    }
+
+    // MARK: - Merge workflow passthrough
 
     func enterMergeMode(initialErrorID: UUID?) {
-        guard response != nil else { return }
-        if !isMergeMode {
-            isMergeMode = true
-            mergeSelection = []
-        }
-        if let id = initialErrorID {
-            mergeSelection = [id]
-            selectedErrorID = id
-        }
+        merge.begin(initial: initialErrorID)
     }
 
     func toggleMergeSelection(for id: UUID) {
-        guard isMergeMode, !mergeInFlight else { return }
-        if let index = mergeSelection.firstIndex(of: id) {
-            mergeSelection.remove(at: index)
-        } else {
-            guard mergeSelection.count < 2 else { return }
-            mergeSelection.append(id)
-            selectedErrorID = id
-        }
+        merge.toggle(id)
     }
 
     func cancelMergeMode() {
-        isMergeMode = false
-        mergeSelection = []
-        mergeInFlight = false
-    }
-
-    var canMergeSelectedErrors: Bool {
-        mergeSelection.count == 2 && !mergeInFlight
-    }
-
-    @discardableResult
-    func isErrorSelected(_ id: UUID) -> Bool {
-        mergeSelection.contains(id)
+        merge.cancel()
     }
 
     func performMergeIfNeeded() async {
-        guard canMergeSelectedErrors,
-              let response = response else { return }
-        let selected = mergeSelection
-        guard let first = response.errors.first(where: { $0.id == selected[0] }),
-              let second = response.errors.first(where: { $0.id == selected[1] }) else { return }
-
-        mergeInFlight = true
-        defer { mergeInFlight = false }
         do {
-            let rationale = "Selected two errors to combine into a single habit phrase."
-            let merged = try await mergeService.merge(
-                zh: inputZh,
-                en: inputEn,
-                corrected: response.corrected,
-                errors: [first, second],
-                rationale: rationale
-            )
-
-            var updatedErrors = response.errors.filter { !selected.contains($0.id) }
-            let insertionIndex = response.errors.firstIndex(where: { $0.id == selected[0] }) ?? updatedErrors.count
-            updatedErrors.insert(merged, at: min(insertionIndex, updatedErrors.count))
-
-            var newResponse = response
-            newResponse.errors = updatedErrors
-            self.response = newResponse
-
-            self.highlights = Highlighter.computeHighlights(text: inputEn, errors: updatedErrors)
-            self.correctedHighlights = Highlighter.computeHighlightsInCorrected(text: response.corrected, errors: updatedErrors)
-            self.selectedErrorID = merged.id
-            if let currentFilter = filterType, currentFilter != merged.type {
-                filterType = merged.type
-            }
-
-            lastMergedErrorID = merged.id
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
-                if self?.lastMergedErrorID == merged.id {
-                    self?.lastMergedErrorID = nil
-                }
-            }
-
-            cancelMergeMode()
+            try await merge.mergeIfNeeded()
+            errorMessage = nil
         } catch {
             let nsError = error as NSError
             errorMessage = nsError.localizedDescription

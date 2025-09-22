@@ -7,11 +7,12 @@
 | 任務 | 主要檔案 | 說明 |
 | ---- | -------- | ---- |
 | 顯示輸入欄位、觸發批改 | `Features/Workspace/Views/ContentView.swift` | `Button` 內呼叫 `Task { await vm.runCorrection() }`，可在此插入額外驗證或事件追蹤。 |
-| 工作區狀態管理 | `Features/Workspace/ViewModels/CorrectionViewModel.swift` | `runCorrection()` 建立 `AICorrectionResult`，同時更新高亮、通知 Banner；修改回傳結構時需同步調整這裡。 |
-| 錯誤高亮及篩選 | `Features/Workspace/Utilities/Highlighter.swift`、`CorrectionViewModel.filtered*` | 若新增錯誤類型或匹配規則，需同時更新 `ErrorType` 與此檔。 |
+| 會話狀態與持久化 | `Features/Workspace/Stores/CorrectionSessionStore.swift` | 管理輸入、批改回應、高亮與 UserDefaults 同步；若新增欄位請更新序列化邏輯。 |
+| 錯誤高亮及篩選 | `Features/Workspace/Utilities/Highlighter.swift`、`CorrectionSessionStore.filtered*` | 若新增錯誤類型或匹配規則，需同時更新 `ErrorType` 與此檔。 |
 | 與後端互動 | `Shared/Services/AIService.swift` | `AIServiceHTTP.correct(...)` 對應 `/correct`，處理 DTO→前端模型轉換。 |
+| 練習流程協調 | `Features/Workspace/Coordinators/PracticeSessionCoordinator.swift` | 統一題庫練習來源、下一題挑選與練習記錄存檔；需要本機 Store 參考時由此綁定。 |
 | 儲存錯誤資料 | `Features/Saved/Stores/SavedErrorsStore.swift` | `ContentView` 的 `onSave` 呼叫 `SavedErrorsStore.add`。 | 
-| 錯誤合併模式 | `Features/Workspace/Components/ResultsSectionView.swift`、`Shared/Services/ErrorMergeService.swift` | 進入合併模式後交由 `CorrectionViewModel.mergeSelectedErrors()` 觸發 `/correct/merge`，並透過 `MergeAnimationCoordinator` 顯示動畫。 |
+| 錯誤合併模式 | `Features/Workspace/Coordinators/ErrorMergeController.swift`、`Features/Workspace/Components/ResultsSectionView.swift`、`Shared/Services/ErrorMergeService.swift` | `ErrorMergeController.mergeIfNeeded()` 觸發 `/correct/merge`，`ResultsSectionView` 透過 `MergeAnimationCoordinator` 呈現動畫與工具列。 |
 
 調整批改輸入/回應流程時，建議由 ViewModel 開始自底向上檢查 DTO → Store → UI，並在 `docs/patterns.md` 參考新增欄位的寫法。
 
@@ -20,7 +21,7 @@
 | 任務 | 主要檔案 | 說明 |
 | ---- | -------- | ---- |
 | 題庫列表/複習入口 | `Features/Bank/Views/BankBooksView.swift`、`Features/Bank/Stores/LocalBankStore.swift` | 管理本機題庫結構與 UI。新增欄位需更新 `BankItem`、`LocalBankStore`。 |
-| 題庫練習流程 | `CorrectionViewModel.startLocalPractice` | 將題庫項目填入 Workspace 並重置狀態。 |
+| 題庫練習流程 | `Features/Workspace/Coordinators/PracticeSessionCoordinator.swift`、`CorrectionViewModel.startLocalPractice` | `startLocalPractice` 委派 coordinator 重設輸入與提示並追蹤來源；`loadNextPractice()` 內部改由 coordinator 選擇下一題。 |
 | Saved JSON 清單 | `Features/Saved/Views/SavedJSONListSheet.swift`、`Features/Saved/Stores/SavedErrorsStore.swift` | 提供儲存錯誤列表與匯出功能。 |
 | 匯出為單字卡 | `DeckService.swift` | 透過 `/make_deck` 建立新 Deck，新增欄位時同步更新 DTO。 |
 | 雲端課程列表 | `Features/Chat/Bank/Views/CloudCourseLibraryView.swift` | 從 `/cloud/courses` 取得課程摘要，支援標籤與搜尋引導。 |

@@ -233,16 +233,16 @@ private struct WorkspaceItemLink: View {
 
     var statusKey: LocalizedStringKey {
         if vm.isLoading { return "workspace.status.loading" }
-        if vm.response != nil { return "workspace.status.graded" }
-        if !(vm.inputZh.isEmpty && vm.inputEn.isEmpty) { return "workspace.status.input" }
+        if vm.session.response != nil { return "workspace.status.graded" }
+        if !(vm.session.inputZh.isEmpty && vm.session.inputEn.isEmpty) { return "workspace.status.input" }
         return "workspace.status.empty"
     }
 
     var statusColor: Color {
         // 主色以藍、白、灰為基礎；完成狀態用暖色作為強調色
         if vm.isLoading { return DS.Palette.primary }
-        if vm.response != nil { return DS.Brand.scheme.cornhusk }
-        if !(vm.inputZh.isEmpty && vm.inputEn.isEmpty) { return DS.Brand.scheme.monument }
+        if vm.session.response != nil { return DS.Brand.scheme.cornhusk }
+        if !(vm.session.inputZh.isEmpty && vm.session.inputEn.isEmpty) { return DS.Brand.scheme.monument }
         return DS.Palette.border.opacity(DS.Opacity.muted)
     }
 
