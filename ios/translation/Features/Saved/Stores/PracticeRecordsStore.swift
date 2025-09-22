@@ -13,16 +13,7 @@ final class PracticeRecordsStore: ObservableObject {
     }
 
     convenience init() {
-        let tempDirectory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("practiceRecords-temp-\(UUID().uuidString)", isDirectory: true)
-        let provider: PersistenceProvider
-        if let fileProvider = try? FilePersistenceProvider(directory: tempDirectory) {
-            provider = fileProvider
-        } else {
-            provider = MemoryPersistenceProvider()
-        }
-        let repository = PracticeRecordsRepository(provider: provider)
-        self.init(repository: repository)
+        self.init(repository: PracticeRecordsFileSystem.makeRepository())
     }
 
     func reload() {

@@ -141,28 +141,11 @@ final class AppEnvironment: ObservableObject {
 
     private static func makePracticeRecordsContext() -> (repository: PracticeRecordsRepositoryProtocol, backupDirectory: URL) {
         let fileManager = FileManager.default
-        let baseURL = practiceRecordsBaseURL(fileManager: fileManager)
-        let recordsURL = baseURL.appendingPathComponent("PracticeRecords", isDirectory: true)
-        let backupURL = baseURL.appendingPathComponent("Backups", isDirectory: true)
-
-        let provider: PersistenceProvider
-        do {
-            provider = try FilePersistenceProvider(directory: recordsURL, fileManager: fileManager)
-        } catch {
-            AppLog.aiError("Failed to initialize file persistence for practice records: \(error)")
-            provider = MemoryPersistenceProvider()
-        }
-
-        let repository = PracticeRecordsRepository(provider: provider)
+        let repository = PracticeRecordsFileSystem.makeRepository(fileManager: fileManager)
+        let backupURL = PracticeRecordsFileSystem.backupDirectory(fileManager: fileManager)
         return (repository, backupURL)
     }
 
-    private static func practiceRecordsBaseURL(fileManager: FileManager) -> URL {
-        if let base = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
-            return base.appendingPathComponent("translation", isDirectory: true)
-        }
-        return fileManager.temporaryDirectory.appendingPathComponent("translation", isDirectory: true)
-    }
 }
 
 struct AppRootView: View {

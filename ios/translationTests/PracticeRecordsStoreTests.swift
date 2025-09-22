@@ -2,10 +2,9 @@ import Testing
 import Foundation
 @testable import translation
 
+@MainActor
 @Suite("PracticeRecordsStore")
 struct PracticeRecordsStoreTests {
-    private let defaultsKey = "practice.records"
-
     private func makeRecord(
         id: UUID = UUID(),
         createdAt: Date,
@@ -43,103 +42,101 @@ struct PracticeRecordsStoreTests {
         )
     }
 
-    private func withCleanDefaults<T>(_ body: () throws -> T) rethrows -> T {
-        let defaults = UserDefaults.standard
-        let previous = defaults.object(forKey: defaultsKey)
-        defaults.removeObject(forKey: defaultsKey)
-        defer {
-            if let data = previous as? Data {
-                defaults.set(data, forKey: defaultsKey)
-            } else {
-                defaults.removeObject(forKey: defaultsKey)
-            }
+    private func makeMemoryStore(initialRecords: [PracticeRecord] = []) -> PracticeRecordsStore {
+        let repository = PracticeRecordsRepository(provider: MemoryPersistenceProvider())
+        let store = PracticeRecordsStore(repository: repository)
+        initialRecords.forEach { store.add($0) }
+        return store
+    }
+
+    private func makeFileBackedRepository() throws -> (repository: PracticeRecordsRepository, directory: URL, cleanup: () -> Void) {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("practiceRecords-test-\(UUID().uuidString)", isDirectory: true)
+        let provider = try FilePersistenceProvider(directory: directory)
+        let repository = PracticeRecordsRepository(provider: provider)
+        let cleanup: () -> Void = {
+            _ = try? FileManager.default.removeItem(at: directory)
         }
-        return try body()
+        return (repository, directory, cleanup)
     }
 
     @MainActor
     @Test("add/remove 基本操作")
     func addAndRemoveRecords() throws {
-        try withCleanDefaults {
-            let store = PracticeRecordsStore()
-            store.clearAll()
+        let store = makeMemoryStore()
 
-            let today = Date()
-            let record = makeRecord(createdAt: today, score: 80, errorCount: 2)
-            store.add(record)
+        let today = Date()
+        let record = makeRecord(createdAt: today, score: 80, errorCount: 2)
+        store.add(record)
 
-            #expect(store.records.count == 1)
-            #expect(store.getRecord(by: record.id) == record)
+        #expect(store.records.count == 1)
+        #expect(store.getRecord(by: record.id) == record)
 
-            store.remove(record.id)
-            #expect(store.records.isEmpty)
-        }
+        store.remove(record.id)
+        #expect(store.records.isEmpty)
     }
 
     @MainActor
     @Test("統計資料計算")
     func statisticsCalculation() throws {
-        try withCleanDefaults {
-            let store = PracticeRecordsStore()
-            store.clearAll()
+        let store = makeMemoryStore()
 
-            let base = Date()
-            store.add(makeRecord(createdAt: base, score: 90, errorCount: 1))
-            store.add(makeRecord(createdAt: base.addingTimeInterval(120), score: 60, errorCount: 3))
+        let base = Date()
+        store.add(makeRecord(createdAt: base, score: 90, errorCount: 1))
+        store.add(makeRecord(createdAt: base.addingTimeInterval(120), score: 60, errorCount: 3))
 
-            let stats = store.getStatistics()
-            #expect(stats.totalRecords == 2)
-            #expect(stats.averageScore == 75)
-            #expect(stats.totalErrors == 4)
-        }
+        let stats = store.getStatistics()
+        #expect(stats.totalRecords == 2)
+        #expect(stats.averageScore == 75)
+        #expect(stats.totalErrors == 4)
     }
 
     @MainActor
     @Test("依日期分組")
     func groupingByDate() throws {
-        try withCleanDefaults {
-            let store = PracticeRecordsStore()
-            store.clearAll()
+        let store = makeMemoryStore()
 
-            let calendar = Calendar(identifier: .gregorian)
-            let day1 = calendar.date(from: DateComponents(year: 2024, month: 12, day: 1, hour: 9, minute: 30))!
-            let day2 = calendar.date(from: DateComponents(year: 2024, month: 12, day: 2, hour: 9, minute: 30))!
+        let calendar = Calendar(identifier: .gregorian)
+        let day1 = calendar.date(from: DateComponents(year: 2024, month: 12, day: 1, hour: 9, minute: 30))!
+        let day2 = calendar.date(from: DateComponents(year: 2024, month: 12, day: 2, hour: 9, minute: 30))!
 
-            store.add(makeRecord(createdAt: day1, score: 85, errorCount: 1, bankBookName: "Book A"))
-            store.add(makeRecord(createdAt: day1.addingTimeInterval(3600), score: 70, errorCount: 2, bankBookName: "Book A"))
-            store.add(makeRecord(createdAt: day2, score: 95, errorCount: 0, bankBookName: "Book B"))
+        store.add(makeRecord(createdAt: day1, score: 85, errorCount: 1, bankBookName: "Book A"))
+        store.add(makeRecord(createdAt: day1.addingTimeInterval(3600), score: 70, errorCount: 2, bankBookName: "Book A"))
+        store.add(makeRecord(createdAt: day2, score: 95, errorCount: 0, bankBookName: "Book B"))
 
-            let grouped = store.getRecordsGroupedByDate()
-            let formatter = DateFormatter()
-            formatter.dateStyle = .medium
-            formatter.timeStyle = .none
+        let grouped = store.getRecordsGroupedByDate()
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
 
-            let key1 = formatter.string(from: day1)
-            let key2 = formatter.string(from: day2)
+        let key1 = formatter.string(from: day1)
+        let key2 = formatter.string(from: day2)
 
-            #expect(grouped.count == 2)
-            #expect(grouped[key1]?.count == 2)
-            #expect(grouped[key2]?.count == 1)
-            #expect(grouped.values.map(\.count).reduce(0, +) == 3)
-        }
+        #expect(grouped.count == 2)
+        #expect(grouped[key1]?.count == 2)
+        #expect(grouped[key2]?.count == 1)
+        #expect(grouped.values.map(\.count).reduce(0, +) == 3)
     }
 
     @MainActor
     @Test("持久化與重新載入")
     func persistenceRoundtrip() throws {
-        try withCleanDefaults {
-            let store = PracticeRecordsStore()
-            store.clearAll()
+        let (repository, directory, cleanup) = try makeFileBackedRepository()
+        defer { cleanup() }
 
-            let created = Date(timeIntervalSince1970: 1_700_000_000)
-            let record = makeRecord(createdAt: created, score: 88, errorCount: 2, bankBookName: "Book C", tag: "tag")
-            store.add(record)
+        let store = PracticeRecordsStore(repository: repository)
+        store.clearAll()
 
-            let reloaded = PracticeRecordsStore()
-            #expect(reloaded.records.count == 1)
-            #expect(reloaded.records.first?.score == 88)
-            #expect(reloaded.records.first?.bankBookName == "Book C")
-            #expect(reloaded.records.first?.practiceTag == "tag")
-        }
+        let created = Date(timeIntervalSince1970: 1_700_000_000)
+        let record = makeRecord(createdAt: created, score: 88, errorCount: 2, bankBookName: "Book C", tag: "tag")
+        store.add(record)
+
+        let reloadedProvider = try FilePersistenceProvider(directory: directory)
+        let reloadedRepository = PracticeRecordsRepository(provider: reloadedProvider)
+        let reloadedStore = PracticeRecordsStore(repository: reloadedRepository)
+        #expect(reloadedStore.records.count == 1)
+        #expect(reloadedStore.records.first?.score == 88)
+        #expect(reloadedStore.records.first?.bankBookName == "Book C")
+        #expect(reloadedStore.records.first?.practiceTag == "tag")
     }
 }

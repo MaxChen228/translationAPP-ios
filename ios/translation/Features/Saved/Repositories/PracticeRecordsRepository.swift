@@ -50,3 +50,38 @@ final class PracticeRecordsRepository: PracticeRecordsRepositoryProtocol {
         }
     }
 }
+
+enum PracticeRecordsFileSystem {
+    private static let recordsFolderName = "PracticeRecords"
+    private static let backupFolderName = "Backups"
+    private static let appFolderName = "translation"
+
+    static func baseDirectory(fileManager: FileManager = .default) -> URL {
+        if let base = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+            return base.appendingPathComponent(appFolderName, isDirectory: true)
+        }
+        return fileManager.temporaryDirectory.appendingPathComponent(appFolderName, isDirectory: true)
+    }
+
+    static func recordsDirectory(fileManager: FileManager = .default) -> URL {
+        baseDirectory(fileManager: fileManager).appendingPathComponent(recordsFolderName, isDirectory: true)
+    }
+
+    static func backupDirectory(fileManager: FileManager = .default) -> URL {
+        baseDirectory(fileManager: fileManager).appendingPathComponent(backupFolderName, isDirectory: true)
+    }
+
+    static func makeRepository(fileManager: FileManager = .default) -> PracticeRecordsRepository {
+        let provider = makeProvider(fileManager: fileManager)
+        return PracticeRecordsRepository(provider: provider)
+    }
+
+    static func makeProvider(fileManager: FileManager = .default) -> PersistenceProvider {
+        do {
+            return try FilePersistenceProvider(directory: recordsDirectory(fileManager: fileManager), fileManager: fileManager)
+        } catch {
+            AppLog.aiError("Failed to initialize file persistence for practice records: \(error)")
+            return MemoryPersistenceProvider()
+        }
+    }
+}
