@@ -22,14 +22,14 @@ struct DSButton: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(size == .full ? .headline : .subheadline)
+            .dsType(typography.font, lineSpacing: typography.lineSpacing)
             .foregroundStyle(foregroundColor)
             .padding(.vertical, verticalPadding)
             .conditionalModifier(size == .full) { view in
                 view.frame(maxWidth: .infinity)
             }
             .conditionalModifier(size == .compact) { view in
-                view.padding(.horizontal, 10)
+                view.padding(.horizontal, DS.Spacing.sm)
             }
             .background(backgroundView)
             .opacity(configuration.isPressed ? 0.9 : 1)
@@ -46,9 +46,18 @@ struct DSButton: ButtonStyle {
 
     private var verticalPadding: CGFloat {
         switch (style, size) {
-        case (.primary, .full): return 12
-        case (.secondary, .full): return 10
-        case (_, .compact): return 6
+        case (.primary, .full): return DS.Spacing.sm2
+        case (.secondary, .full): return DS.Spacing.sm
+        case (_, .compact): return DS.Spacing.xs
+        }
+    }
+
+    private var typography: (font: SwiftUI.Font, lineSpacing: CGFloat) {
+        switch size {
+        case .full:
+            return (DS.Font.bodyEmph, 4)
+        case .compact:
+            return (DS.Font.labelMd, 2)
         }
     }
 
@@ -71,7 +80,7 @@ struct DSPrimaryCircleButton: ButtonStyle {
     var diameter: CGFloat = 32
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.subheadline)
+            .dsType(DS.Font.labelMd, lineSpacing: 2)
             .foregroundStyle(DS.Palette.onPrimary)
             .frame(width: diameter, height: diameter)
             .background(Circle().fill(DS.Palette.primaryGradient))
