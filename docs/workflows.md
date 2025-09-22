@@ -28,7 +28,7 @@
 | 任務 | 主要檔案 | 說明 |
 | ---- | -------- | ---- |
 | 管理入口清單 | `Features/Workspace/Stores/QuickActionsStore.swift` | 以 `QuickActionItem` 儲存入口類型，提供新增/刪除/排序並寫入 UserDefaults。 |
-| 首頁呈現與編輯模式 | `Features/Workspace/Views/WorkspaceListView.swift` (`QuickActionsRow`) | 顯示橫向卡片，支援編輯、刪除與「新增入口」卡片。 |
+| 首頁呈現與編輯模式 | `Features/Workspace/Views/QuickActionsRowView.swift` | 顯示橫向卡片，支援編輯、刪除與「新增入口」卡片。 |
 | 新增入口選單 | `Features/Workspace/Components/QuickActionPickerView.swift` | Sheet 列出所有入口類型供選擇，選後即追加至列表。 |
 | 入口卡片視覺 | `Features/Workspace/Views/WorkspaceListView.swift` (`ChatEntryCard` 等) | 各功能的卡片樣式維持 `DSOutlineCard` 與 `DSCardTitle` 一致外觀。 |
 

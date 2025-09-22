@@ -41,6 +41,7 @@
 - **WorkspaceListView** (`Features/Workspace/Views/WorkspaceListView.swift`)
   - 使用 `NavigationStack` 管理 Workspace 頁面導覽，提供拖曳排序、重新命名與新增 Workspace 操作。
   - 透過 `RouterStore` 接收通知開啟指定 Workspace。
+  - 首頁快速入口列拆分為 `QuickActionsRowView.swift`，獨立處理卡片呈現與拖放排序。
 
 - **ContentView** (`Features/Workspace/Views/ContentView.swift`)
   - 主批改畫面。顯示中文提示、英文輸入、批改結果卡片。

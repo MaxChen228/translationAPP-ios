@@ -5,6 +5,31 @@ import Foundation
 @MainActor
 @Suite("PracticeRecordsStore")
 struct PracticeRecordsStoreTests {
+    private final class SpyRepository: PracticeRecordsRepositoryProtocol {
+        enum SpyError: Error { case saveFailure }
+
+        var stored: [PracticeRecord]
+        var loadCallCount = 0
+        var saveCallCount = 0
+        var shouldThrowOnSave = false
+
+        init(initial: [PracticeRecord] = []) {
+            self.stored = initial
+        }
+
+        func loadRecords() throws -> [PracticeRecord] {
+            loadCallCount &+= 1
+            return stored
+        }
+
+        func saveRecords(_ records: [PracticeRecord]) throws {
+            saveCallCount &+= 1
+            if shouldThrowOnSave {
+                throw SpyError.saveFailure
+            }
+            stored = records
+        }
+    }
     private func makeRecord(
         id: UUID = UUID(),
         createdAt: Date,
@@ -138,5 +163,54 @@ struct PracticeRecordsStoreTests {
         #expect(reloadedStore.records.first?.score == 88)
         #expect(reloadedStore.records.first?.bankBookName == "Book C")
         #expect(reloadedStore.records.first?.practiceTag == "tag")
+    }
+
+    @MainActor
+    @Test("reload 從 repository 重新載入最新資料")
+    func reloadRefreshesFromRepository() throws {
+        let record = makeRecord(createdAt: Date(), score: 92, errorCount: 1, bankBookName: "Book R")
+        let repository = SpyRepository(initial: [])
+        let store = PracticeRecordsStore(repository: repository)
+
+        #expect(store.records.isEmpty)
+
+        repository.stored = [record]
+        store.reload()
+
+        #expect(repository.loadCallCount >= 1)
+        #expect(store.records == [record])
+    }
+
+    @MainActor
+    @Test("查詢特定書籍與分數的紀錄")
+    func filteringHelpersReturnMatches() throws {
+        let recordA = makeRecord(createdAt: Date(), score: 88, errorCount: 1, bankBookName: "Book A")
+        let recordB = makeRecord(createdAt: Date().addingTimeInterval(100), score: 72, errorCount: 2, bankBookName: "Book B")
+        let store = makeMemoryStore(initialRecords: [recordA, recordB])
+
+        let bookARecords = store.getRecords(for: "Book A")
+        let score72Records = store.getRecords(with: 72)
+
+        #expect(bookARecords == [recordA])
+        #expect(score72Records == [recordB])
+    }
+
+    @MainActor
+    @Test("持久化失敗不應拋錯且保留記錄")
+    func persistFailureKeepsInMemoryState() throws {
+        let repository = SpyRepository(initial: [])
+        repository.shouldThrowOnSave = true
+        let store = PracticeRecordsStore(repository: repository)
+        let record = makeRecord(createdAt: Date(), score: 77, errorCount: 2)
+
+        store.add(record)
+
+        #expect(store.records == [record])
+        #expect(repository.stored.isEmpty)
+
+        // 再次執行 remove 應該也不崩潰
+        store.remove(record.id)
+        #expect(repository.saveCallCount == 2)
+        #expect(store.records.isEmpty)
     }
 }
