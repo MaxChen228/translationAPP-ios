@@ -42,7 +42,8 @@ App 透過 Info.plist 的 `BACKEND_URL` 讀取後端位址（由 `AppConfig` 使
 
 統一端點說明：
 - 批改：`POST {BACKEND_URL}/correct`、`POST {BACKEND_URL}/correct/merge`
-- 雲端題庫與課程：`GET {BACKEND_URL}/cloud/books`、`GET {BACKEND_URL}/cloud/books/{name}`、`GET {BACKEND_URL}/cloud/courses`、`GET {BACKEND_URL}/cloud/courses/{id}`、`GET {BACKEND_URL}/cloud/courses/{id}/books/{bookId}`
+- 雲端課程：`GET {BACKEND_URL}/cloud/courses`、`GET {BACKEND_URL}/cloud/courses/{id}`、`GET {BACKEND_URL}/cloud/courses/{id}/books/{bookId}`
+- 雲端題庫（相容舊版）：`GET {BACKEND_URL}/cloud/books`、`GET {BACKEND_URL}/cloud/books/{name}`
 - 雲端搜尋：`GET {BACKEND_URL}/cloud/search?q=`
 - 雲端卡片集：`GET {BACKEND_URL}/cloud/decks`、`GET {BACKEND_URL}/cloud/decks/{id}`
 - 產生單字卡：`POST {BACKEND_URL}/make_deck`
@@ -57,8 +58,8 @@ App 透過 Info.plist 的 `BACKEND_URL` 讀取後端位址（由 `AppConfig` 使
 - 翻譯批改（ContentView.swift）
   - 顯示中文原文/英文嘗試；提交批改後顯示修正版、分數與錯誤清單；支援錯誤合併模式（雙選 → `/correct/merge`）與最新的 Merge 動畫。現已整合練習記錄系統。
 - 題庫本（本機；components/BankBooksView.swift → LocalBankListView）
-  - 以本機為主、離線可用；可從雲端精選書本複製到本機。新增階層式標籤篩選器 `NestedTagFilterView`，重設計 `AllBankItemsView` 統一介面風格。
-- 雲端課程庫（CloudCourseLibraryView.swift）
+- 以本機為主、離線可用；可從雲端課程或題庫複製到本機。新增階層式標籤篩選器 `NestedTagFilterView`，重設計 `AllBankItemsView` 統一介面風格。
+- 雲端課程庫（CloudCourseLibraryView / CloudCourseDetailView）
   - 提供 `/cloud/courses` 分類導覽；課程詳情頁整合封面、標籤、難度與書本數。可深入 `CloudCourseBookPreviewView` 預覽書本後同步到本機題庫。
 - 已儲存 JSON（components/SavedJSONListSheet.swift）
   - 檢視/複製/刪除；可一鍵呼叫 `/make_deck` 轉成單字卡集。
@@ -121,7 +122,7 @@ App 透過 Info.plist 的 `BACKEND_URL` 讀取後端位址（由 `AppConfig` 使
 
 ## 疑難排解
 - 沒有批改結果：先確認 `BACKEND_URL` 是否設定正確（必填）。
-- 題庫清單為空：先到「題庫本」頁的「瀏覽雲端題庫」複製到本機。
+- 題庫清單為空：先到「題庫本」頁的「瀏覽雲端課程」下載後加入本機。
 - 字型未生效：確認字型檔在 bundle 並被 `FontLoader` 註冊。
 - 高亮錯位：回傳錯誤時盡量提供 `hints.before/after/occurrence` 提升片段對位準確度。
 
