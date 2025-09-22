@@ -119,16 +119,19 @@ final class CalendarViewModel: ObservableObject {
     private func buildDayStats() {
         guard let store = practiceRecordsStore else { return }
 
-        var stats: [Date: DayPracticeStats] = [:]
-
+        var recordsByDay: [Date: [PracticeRecord]] = [:]
         for record in store.records {
             let dayStart = calendar.startOfDay(for: record.createdAt)
-            if stats[dayStart] == nil {
-                stats[dayStart] = DayPracticeStats(
-                    date: dayStart,
-                    records: getRecordsForDay(dayStart)
-                )
-            }
+            recordsByDay[dayStart, default: []].append(record)
+        }
+
+        var stats: [Date: DayPracticeStats] = [:]
+        for (dayStart, records) in recordsByDay {
+            stats[dayStart] = DayPracticeStats(
+                date: dayStart,
+                records: records,
+                streakDays: calculateStreakDays(endingAt: dayStart, recordsByDay: recordsByDay)
+            )
         }
 
         dayStats = stats
@@ -141,6 +144,19 @@ final class CalendarViewModel: ObservableObject {
         return store.records.filter { record in
             record.createdAt >= dayStart && record.createdAt < dayEnd
         }
+    }
+
+    private func calculateStreakDays(endingAt dayStart: Date, recordsByDay: [Date: [PracticeRecord]]) -> Int {
+        var streak = 0
+        var currentDay = dayStart
+
+        while recordsByDay[currentDay] != nil {
+            streak += 1
+            guard let previousDay = calendar.date(byAdding: .day, value: -1, to: currentDay) else { break }
+            currentDay = previousDay
+        }
+
+        return streak
     }
 
     private static func createEmptyMonth(for date: Date) -> CalendarMonth {

@@ -4,15 +4,18 @@ struct DayDetailView: View {
     let stats: DayPracticeStats
 
     var body: some View {
-        VStack(alignment: .leading, spacing: DS.Spacing.lg) {
-            headerSection
+        DSOutlineCard(padding: DS.Spacing.lg, fill: DS.Palette.surfaceAlt.opacity(0.6)) {
+            VStack(alignment: .leading, spacing: DS.Spacing.lg) {
+                headerSection
 
-            DSSeparator(color: DS.Palette.border.opacity(DS.Opacity.hairline))
+                DSSeparator(color: DS.Palette.border.opacity(DS.Opacity.hairline))
 
-            statsGrid
+                statsGrid
 
-            if stats.count > 1 {
-                practiceTimeInfo
+                if stats.count > 1 {
+                    DSSeparator(color: DS.Palette.border.opacity(DS.Opacity.hairline))
+                    practiceTimeInfo
+                }
             }
         }
     }
@@ -27,57 +30,51 @@ struct DayDetailView: View {
 
             Spacer()
 
-            scoreIndicator
+            AnimatedStreakBadge(streakDays: stats.streakDays)
         }
-    }
-
-    private var scoreIndicator: some View {
-        HStack(spacing: DS.Spacing.xs2) {
-            Image(systemName: "chart.line.uptrend.xyaxis")
-                .font(.caption)
-                .foregroundStyle(scoreColor)
-
-            Text(averageScoreText)
-                .dsType(DS.Font.labelMd)
-                .fontWeight(.semibold)
-                .foregroundStyle(scoreColor)
-        }
-        .padding(.horizontal, DS.Spacing.sm)
-        .padding(.vertical, DS.Spacing.xs)
-        .background(
-            Capsule()
-                .fill(scoreColor.opacity(DS.Opacity.fill))
-        )
-        .overlay(
-            Capsule()
-                .stroke(scoreColor.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.hairline)
-        )
-    }
-
-    private var scoreColor: Color {
-        DS.Palette.scoreColor(for: stats.averageScore)
     }
 
     private var statsGrid: some View {
-        HStack(spacing: DS.Spacing.xl) {
-            DSStatItem(
-                icon: "doc.text",
+        HStack(alignment: .center, spacing: DS.Spacing.md) {
+            metricColumn(
                 label: "練習題數",
                 value: "\(stats.count)"
             )
 
-            DSStatItem(
-                icon: "exclamationmark.triangle",
+            metricColumn(
                 label: "錯誤總數",
                 value: "\(stats.totalErrors)"
             )
 
-            DSStatItem(
-                icon: "star.fill",
+            metricColumn(
                 label: "最高分",
                 value: "\(stats.bestScore)"
             )
         }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func metricColumn(label: LocalizedStringKey, value: String) -> some View {
+        VStack(spacing: DS.Spacing.xs) {
+            Text(value)
+                .font(.system(size: 28, weight: .semibold, design: .serif))
+                .foregroundStyle(DS.Palette.primary)
+
+            Text(label)
+                .dsType(DS.Font.caption)
+                .foregroundStyle(DS.Palette.subdued)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, DS.Spacing.md)
+        .padding(.horizontal, DS.Spacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
+                .fill(DS.Palette.background.opacity(0.3))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
+                .stroke(DS.Palette.border.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.hairline)
+        )
     }
 
     private var practiceTimeInfo: some View {
@@ -94,13 +91,8 @@ struct DayDetailView: View {
 
     private var formattedDate: String {
         let formatter = DateFormatter()
-        formatter.dateStyle = .long
-        formatter.timeStyle = .none
+        formatter.dateFormat = "M.d"
         return formatter.string(from: stats.date)
-    }
-
-    private var averageScoreText: String {
-        String(format: "%.1f", stats.averageScore)
     }
 
     private var formattedPracticeTime: String {
@@ -112,5 +104,107 @@ struct DayDetailView: View {
             let remainingMinutes = minutes % 60
             return "\(hours) 小時 \(remainingMinutes) 分鐘"
         }
+    }
+}
+
+private struct AnimatedStreakBadge: View {
+    let streakDays: Int
+
+    @State private var breathing = false
+    @State private var animateGradient = false
+
+    private let gradientColors: [Color] = [
+        DS.Brand.scheme.cornhusk,
+        DS.Brand.scheme.peachQuartz,
+        DS.Brand.scheme.provence,
+        DS.Brand.scheme.classicBlue
+    ]
+
+    private let badgeSize: CGFloat = 88
+    private let outerLineWidth: CGFloat = 4
+    private let innerLineWidth: CGFloat = 1.2
+    private let innerInset: CGFloat = 8
+    private let fillInset: CGFloat = 16
+    private let gradientDuration: Double = 8.0
+
+    private var gradient: AngularGradient {
+        AngularGradient(gradient: Gradient(colors: gradientColors), center: .center)
+    }
+
+    var body: some View {
+        ZStack {
+            gradientCircle(lineWidth: outerLineWidth)
+                .frame(width: badgeSize, height: badgeSize)
+                .rotationEffect(.degrees(animateGradient ? 360 : 0))
+                .animation(.linear(duration: gradientDuration).repeatForever(autoreverses: false), value: animateGradient)
+
+            gradientCircle(lineWidth: innerLineWidth)
+                .frame(width: badgeSize - innerInset * 2, height: badgeSize - innerInset * 2)
+                .rotationEffect(.degrees(animateGradient ? -360 : 0))
+                .animation(.linear(duration: gradientDuration * 1.2).repeatForever(autoreverses: false), value: animateGradient)
+
+            Circle()
+                .fill(Color.white.opacity(0.22))
+                .frame(width: badgeSize - fillInset, height: badgeSize - fillInset)
+                .overlay(
+                    Circle()
+                        .fill(Color.white.opacity(0.08))
+                        .blur(radius: 8)
+                        .frame(width: badgeSize - fillInset - 10, height: badgeSize - fillInset - 10)
+                )
+
+            badgeContent
+        }
+        .frame(width: badgeSize, height: badgeSize)
+        .scaleEffect(breathing ? 1.05 : 1.0)
+        .shadow(color: DS.Palette.primary.opacity(breathing ? 0.28 : 0.16), radius: breathing ? 18 : 12, y: 8)
+        .animation(.easeInOut(duration: 2.2).repeatForever(autoreverses: true), value: breathing)
+        .onAppear {
+            breathing = true
+            animateGradient = true
+        }
+        .onDisappear {
+            breathing = false
+            animateGradient = false
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("連續 \(streakDays) 天")
+    }
+
+    private func gradientCircle(lineWidth: CGFloat) -> some View {
+        Circle()
+            .strokeBorder(gradient, lineWidth: lineWidth)
+    }
+
+    private var badgeContent: some View {
+        VStack(spacing: 4) {
+            Text("連續")
+                .dsType(DS.Font.caption)
+                .fontWeight(.medium)
+                .foregroundStyle(Color.white.opacity(0.9))
+
+            VStack(spacing: 1) {
+                GradientText(text: "\(streakDays)", gradient: gradient)
+                    .font(.system(size: 28, weight: .semibold, design: .serif))
+                    .animation(.spring(response: 0.5, dampingFraction: 0.85), value: streakDays)
+
+                Text("天")
+                    .dsType(DS.Font.caption)
+                    .foregroundStyle(Color.white.opacity(0.85))
+            }
+        }
+    }
+}
+
+private struct GradientText: View {
+    let text: String
+    let gradient: AngularGradient
+
+    var body: some View {
+        gradient
+            .mask(
+                Text(text)
+                    .fontWeight(.semibold)
+            )
     }
 }

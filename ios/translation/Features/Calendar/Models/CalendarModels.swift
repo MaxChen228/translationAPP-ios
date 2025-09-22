@@ -33,6 +33,7 @@ struct CalendarMonth {
 struct DayPracticeStats {
     let date: Date
     let records: [PracticeRecord]
+    let streakDays: Int
 
     var count: Int { records.count }
     var averageScore: Double {
