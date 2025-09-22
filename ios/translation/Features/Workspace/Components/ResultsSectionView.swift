@@ -27,6 +27,8 @@ struct ResultsSectionView: View {
     let onMergeConfirm: @Sendable () async -> Void
     let onCancelMerge: () -> Void
 
+    @StateObject private var mergeAnimator = MergeAnimationCoordinator()
+
     var body: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.lg) {
             ResultSwitcherCard(
@@ -51,6 +53,7 @@ struct ResultsSectionView: View {
                     ForEach(errors) { err in
                         let isSelected = mergeSelection.contains(err.id)
                         let isDisabled = isMergeMode && !isSelected && mergeSelection.count >= 2
+                        let isHidden = mergeAnimator.isHidden(err.id)
                         ErrorItemRow(
                             err: err,
                             selected: selectedErrorID == err.id,
@@ -59,11 +62,22 @@ struct ResultsSectionView: View {
                             isMergeCandidate: isSelected,
                             isSelectedForMerge: isSelected,
                             isSelectionDisabled: isDisabled,
-                            isMerging: mergeInFlight,
+                            isMerging: isHidden ? false : mergeInFlight,
                             frameInResults: nil,
                             pinchProgress: 0,
                             pinchCentroid: .zero,
                             isNewlyMerged: mergedHighlightID == err.id
+                        )
+                        .opacity(isHidden ? 0 : 1)
+                        .allowsHitTesting(!isHidden)
+                        .background(
+                            GeometryReader { proxy in
+                                Color.clear
+                                    .preference(
+                                        key: ErrorRowFramePreferenceKey.self,
+                                        value: [err.id: proxy.frame(in: .named("resultsList"))]
+                                    )
+                            }
                         )
                         .contentShape(Rectangle())
                         .onTapGesture {
@@ -108,6 +122,34 @@ struct ResultsSectionView: View {
                 )
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
+        }
+        .overlay(alignment: .topLeading) {
+            GeometryReader { proxy in
+                if let context = mergeAnimator.overlayContext {
+                    MergeOverlayView(
+                        context: context,
+                        collapseProgress: mergeAnimator.collapseProgress,
+                        isFlipping: mergeAnimator.isFlipping,
+                        flipAngle: mergeAnimator.flipAngle
+                    )
+                    .opacity(mergeAnimator.overlayOpacity)
+                    .frame(width: proxy.size.width, height: proxy.size.height, alignment: .topLeading)
+                }
+            }
+            .allowsHitTesting(false)
+        }
+        .coordinateSpace(name: "resultsList")
+        .onPreferenceChange(ErrorRowFramePreferenceKey.self) { frames in
+            mergeAnimator.updateRowFrames(frames, errors: res.errors)
+        }
+        .onChange(of: mergeSelection) { _, newValue in
+            mergeAnimator.recordSelection(newValue)
+        }
+        .onChange(of: mergeInFlight) { _, newValue in
+            mergeAnimator.mergeStateDidChange(isInFlight: newValue, errors: res.errors)
+        }
+        .onDisappear {
+            mergeAnimator.reset()
         }
     }
 
