@@ -22,7 +22,9 @@
 - **WorkspaceStore** (`Features/Workspace/Stores/WorkspaceStore.swift`)：管理 Workspace 清單，內含記憶化的 `CorrectionViewModel` 實例。Workspace 名稱與排序持久化在 UserDefaults。
 - **QuickActionsStore** (`Features/Workspace/Stores/QuickActionsStore.swift`)：管理首頁快速入口的順序與類型，支援新增/刪除/排序並以 UserDefaults 持久化，可重複建立相同入口。
 - **CorrectionViewModel** (`Features/Workspace/ViewModels/CorrectionViewModel.swift`)：每個 Workspace 的核心狀態（中文/英文輸入、批改結果、錯誤高亮、題庫練習資訊）。會以 `workspace.<id>.` 前綴將輸入與結果儲存在 UserDefaults。現已整合練習記錄功能，自動追蹤練習開始時間與儲存完成記錄。
-- **PracticeRecordsStore** (`Features/Saved/Stores/PracticeRecordsStore.swift`)：**新增**練習記錄管理系統，儲存練習時間、分數、題目等詳細資訊，為日曆功能提供資料支援。
+- **PracticeRecordsStore** (`Features/Saved/Stores/PracticeRecordsStore.swift`)：練習記錄管理系統，透過 Repository 讀寫 Application Support 底下的 JSON，提供日曆與列表雙向綁定。
+- **PracticeRecordsRepository** (`Features/Saved/Repositories/PracticeRecordsRepository.swift`) 與 `PracticeRecordsFileSystem`：封裝檔案系統路徑、備份位置與 `PersistenceProvider`，同時提供內存回退防止 I/O 失敗中斷。
+- **PracticeRecordsMigrator** (`Features/Saved/Repositories/PracticeRecordsMigrator.swift`)：開機時將舊版 UserDefaults 資料搬移到檔案儲存，並備份歷史 JSON。
 - **CalendarViewModel** (`Features/Calendar/ViewModels/CalendarViewModel.swift`)：**新增**日曆狀態管理，處理月份導覽、練習統計計算、與 PracticeRecordsStore 的資料綁定。
 - **SavedErrorsStore**、**FlashcardDecksStore**、**LocalBankStore**、**LocalBankProgressStore** 等 store 均以 UserDefaults 持久化 JSON，提供本機資料（分佈在 `Features/Saved/Stores`、`Features/Flashcards/Stores`、`Features/Bank/Stores`）。
 - **AppSettingsStore** (`App/AppSettingsStore.swift`) 透過 `@Published` 與 UserDefaults 維持使用者設定（Banner 時間、LLM 模型、語系）。
@@ -31,7 +33,9 @@
 ## 後端服務抽象
 
 - **批改**：`Shared/Services/AIService.swift` 定義 `AIService` protocol 與 `AIServiceHTTP` 實作，負責呼叫 `/correct`，處理 `ErrorDTO` 回應並建立高亮範圍。若 `BACKEND_URL` 未設定，改用 `UnavailableAIService` 丟出提示。
+- **錯誤合併**：`Shared/Services/ErrorMergeService.swift` 封裝 `/correct/merge`，根據兩筆錯誤與 rationale 向後端請求合併結果，並在 `BACKEND_URL` 缺失時拋出本地化錯誤。
 - **題庫與卡片**：`Shared/Services/CloudLibraryService.swift` 取得 `/cloud/books`、`/cloud/decks`；`Shared/Services/DeckService.swift` 封裝 `/make_deck`。兩者均會在缺少 `BACKEND_URL` 時直接 `fatalError` 或回傳錯誤，提醒需先設定環境。
+- **雲端課程**：`Shared/Services/CloudLibraryService.swift` 亦負責 `/cloud/courses`、`/cloud/courses/{id}`、`/cloud/courses/{id}/books/{bookId}` 與 `/cloud/search`；導入 `CloudCourseSummary` / `CloudCourseDetail` DTO 供前端顯示。
 - **聊天**：`Features/Chat/Services/ChatService.swift` 實作 `/chat/respond` 與 `/chat/research`，並將 LLM 回傳轉換為 `ChatTurnResponse`（含 `state`/`checklist`）及 `ChatResearchItem`（term/explanation/context/type），並在傳送時自動將圖片附件編碼為 base64 以配合後端的 inline data。
 
 所有 HTTP service 都採用 `URLSession` + Codable DTO，並在傳送請求前自動加入使用者選擇的 LLM 模型（`settings.geminiModel`）。
@@ -45,10 +49,12 @@
 
 - **ContentView** (`Features/Workspace/Views/ContentView.swift`)
   - 主批改畫面。顯示中文提示、英文輸入、批改結果卡片。
-  - 呼叫 `CorrectionViewModel.runCorrection()` 觸發網路請求。
+  - 呼叫 `CorrectionViewModel.runCorrection()` 觸發網路請求，並可進入「錯誤合併模式」雙選錯誤後觸發 `mergeSelectedErrors()`。
   - 切換卡片模式、儲存錯誤至 Saved JSON、載入下一個本機題庫項目。
+- **ResultsSectionView** (`Features/Workspace/Components/ResultsSectionView.swift`)：承載錯誤列表、合併工具列與 `MergeAnimationCoordinator`，負責管理合併動畫覆蓋層與選取狀態。
 
 - **BankBooksView / FlashcardsView 等**：分別提供題庫瀏覽、儲存錯誤 / 單字卡列表、TTS 撥放介面。
+- **CloudCourseLibraryView** (`Features/Chat/Bank/Views/CloudCourseLibraryView.swift`) 與子視圖 `CloudCourseDetailView`、`CloudCourseBookPreviewView`：導覽雲端課程、顯示封面/標籤/書本清單，可從課程層級直接複製書本至本機。
 
 - **CalendarView** (`Features/Calendar/Views/CalendarView.swift`)：**新增**練習日曆主要介面，包含月曆網格、日期選擇、詳細統計卡片與導覽控制。
 

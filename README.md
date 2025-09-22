@@ -1,6 +1,6 @@
 # translation (iOS)
 
-SwiftUI iOS App：提供中英翻譯批改、錯誤高亮、Workspace 多工、題庫本、本機 Saved JSON、單字卡複習（含 TTS 播音與變體括號語法）。
+SwiftUI iOS App：提供中英翻譯批改、錯誤合併與高亮、Workspace 多工、題庫本、雲端課程瀏覽、本機 Saved JSON、單字卡複習（含 TTS 播音與變體括號語法）。
 
 本 repo 僅包含 iOS 前端。後端服務已獨立為另一個 Git 倉：
 - translation-backend（GitHub）：https://github.com/MaxChen228/translation
@@ -14,7 +14,7 @@ SwiftUI iOS App：提供中英翻譯批改、錯誤高亮、Workspace 多工、�
 - `ios/translation/App/`：App 生命週期、全域設定與路由（`translationApp.swift`, `AppSettingsStore.swift` 等）。
 - `ios/translation/DesignSystem/`：Design System 與共用 UI 元件（`DesignSystem.swift`, `Components/DS*`），包含月曆元件 `DSCalendarCell`、`DSCalendarGrid` 與最新的 `DSButton`、`DSCardTitle`。
 - `ios/translation/Features/`：依領域拆分的模組（Workspace、Bank、Flashcards、Saved、Chat、Settings、**Calendar**）。
-- `ios/translation/Shared/`：跨模組共享的模型、服務、工具與通用 View。新增 `PracticeRecordsStore` 練習記錄管理。
+- `ios/translation/Shared/`：跨模組共享的模型、服務、工具與通用 View。包含 `PracticeRecordsStore` + `PracticeRecordsRepository` 檔案系統持久化、`PersistenceProvider` 抽象層，以及錯誤合併的 `ErrorMergeService`。
 - `ios/translation/Resources/`：資源與在地化字串。
 
 ## 環境需求
@@ -41,8 +41,9 @@ App 透過 Info.plist 的 `BACKEND_URL` 讀取後端位址（由 `AppConfig` 使
 - 開發建議：將後端在本機啟動於 `http://127.0.0.1:8080`，或部署至雲端後填入對應 URL。
 
 統一端點說明：
-- 批改：`POST {BACKEND_URL}/correct`
-- 雲端題庫：`GET {BACKEND_URL}/cloud/books`、`GET {BACKEND_URL}/cloud/books/{name}`
+- 批改：`POST {BACKEND_URL}/correct`、`POST {BACKEND_URL}/correct/merge`
+- 雲端題庫與課程：`GET {BACKEND_URL}/cloud/books`、`GET {BACKEND_URL}/cloud/books/{name}`、`GET {BACKEND_URL}/cloud/courses`、`GET {BACKEND_URL}/cloud/courses/{id}`、`GET {BACKEND_URL}/cloud/courses/{id}/books/{bookId}`
+- 雲端搜尋：`GET {BACKEND_URL}/cloud/search?q=`
 - 雲端卡片集：`GET {BACKEND_URL}/cloud/decks`、`GET {BACKEND_URL}/cloud/decks/{id}`
 - 產生單字卡：`POST {BACKEND_URL}/make_deck`
 
@@ -54,9 +55,11 @@ App 透過 Info.plist 的 `BACKEND_URL` 讀取後端位址（由 `AppConfig` 使
 - Workspace 清單（components/WorkspaceListView.swift）
   - 多個 Workspace 平行編輯，支援拖曳、重新命名、刪除；可開啟 Saved JSON 清單。新增 `CalendarEntryCard` 快速進入日曆檢視。
 - 翻譯批改（ContentView.swift）
-  - 顯示中文原文/英文嘗試；提交批改後顯示修正版、分數與錯誤清單；兩側文字高亮可對位到同一筆錯誤。現已整合練習記錄系統。
+  - 顯示中文原文/英文嘗試；提交批改後顯示修正版、分數與錯誤清單；支援錯誤合併模式（雙選 → `/correct/merge`）與最新的 Merge 動畫。現已整合練習記錄系統。
 - 題庫本（本機；components/BankBooksView.swift → LocalBankListView）
   - 以本機為主、離線可用；可從雲端精選書本複製到本機。新增階層式標籤篩選器 `NestedTagFilterView`，重設計 `AllBankItemsView` 統一介面風格。
+- 雲端課程庫（CloudCourseLibraryView.swift）
+  - 提供 `/cloud/courses` 分類導覽；課程詳情頁整合封面、標籤、難度與書本數。可深入 `CloudCourseBookPreviewView` 預覽書本後同步到本機題庫。
 - 已儲存 JSON（components/SavedJSONListSheet.swift）
   - 檢視/複製/刪除；可一鍵呼叫 `/make_deck` 轉成單字卡集。
 - 單字卡（FlashcardDecksView → DeckDetailView → FlashcardsView）
@@ -64,7 +67,7 @@ App 透過 Info.plist 的 `BACKEND_URL` 讀取後端位址（由 `AppConfig` 使
 - **練習日曆（CalendarView）**
   - 月曆介面使用外框式卡片呈現每日練習活動；點選日期顯示詳細統計與練習摘要；支援快速跳回今天並整合練習記錄視覺化。
 - 練習記錄（PracticeRecordsListView.swift）
-  - 以 DSOutlineCard 呈現清單、統計與批改摘要，提供批次清除、錯誤數量徽章與題庫來源標示。
+  - 以 DSOutlineCard 呈現清單、統計與批改摘要，提供批次清除、錯誤數量徽章與題庫來源標示。資料改存放於 `Application Support/translation/PracticeRecords/records.json` 並自動備份舊版 UserDefaults。
 
 ## 專案結構
 - 原始碼：`ios/translation/`
@@ -89,11 +92,16 @@ App 透過 Info.plist 的 `BACKEND_URL` 讀取後端位址（由 `AppConfig` 使
     }
     ```
   - 回應：`{ corrected: string, score: number, errors: Error[] }`
+- `POST /correct/merge`
+  - 請求：`{ zh, en, corrected, errors: Error[], rationale?, deviceId?, model? }`
+  - 回應：`{ error: Error }`（伺服器合併後的單一錯誤項）
 
 - `POST /make_deck`
   - 請求新增（可選）：`model?: string`（同上，若後端支援將使用該模型產製卡片）
-- `GET /cloud/books`、`GET /cloud/books/{name}`：唯讀精選題庫
+- `GET /cloud/courses`、`GET /cloud/courses/{id}`、`GET /cloud/courses/{id}/books/{bookId}`：雲端課程、課程詳情與書本預覽
+- `GET /cloud/books`、`GET /cloud/books/{name}`：唯讀精選題庫（保留原書本端點）
 - `GET /cloud/decks`、`GET /cloud/decks/{id}`：唯讀精選卡片集
+- `GET /cloud/search?q=`：針對課程與書本的全文檢索
 - `POST /make_deck`
   - 請求：`{ name?: string, items: [{ zh?, en?, corrected?, span?, suggestion?, explainZh?, type? }] }`
   - 回應：`{ name: string, cards: [{ front, frontNote?, back, backNote? }] }`

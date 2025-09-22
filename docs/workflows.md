@@ -11,6 +11,7 @@
 | 錯誤高亮及篩選 | `Features/Workspace/Utilities/Highlighter.swift`、`CorrectionViewModel.filtered*` | 若新增錯誤類型或匹配規則，需同時更新 `ErrorType` 與此檔。 |
 | 與後端互動 | `Shared/Services/AIService.swift` | `AIServiceHTTP.correct(...)` 對應 `/correct`，處理 DTO→前端模型轉換。 |
 | 儲存錯誤資料 | `Features/Saved/Stores/SavedErrorsStore.swift` | `ContentView` 的 `onSave` 呼叫 `SavedErrorsStore.add`。 | 
+| 錯誤合併模式 | `Features/Workspace/Components/ResultsSectionView.swift`、`Shared/Services/ErrorMergeService.swift` | 進入合併模式後交由 `CorrectionViewModel.mergeSelectedErrors()` 觸發 `/correct/merge`，並透過 `MergeAnimationCoordinator` 顯示動畫。 |
 
 調整批改輸入/回應流程時，建議由 ViewModel 開始自底向上檢查 DTO → Store → UI，並在 `docs/patterns.md` 參考新增欄位的寫法。
 
@@ -22,6 +23,8 @@
 | 題庫練習流程 | `CorrectionViewModel.startLocalPractice` | 將題庫項目填入 Workspace 並重置狀態。 |
 | Saved JSON 清單 | `Features/Saved/Views/SavedJSONListSheet.swift`、`Features/Saved/Stores/SavedErrorsStore.swift` | 提供儲存錯誤列表與匯出功能。 |
 | 匯出為單字卡 | `DeckService.swift` | 透過 `/make_deck` 建立新 Deck，新增欄位時同步更新 DTO。 |
+| 雲端課程列表 | `Features/Chat/Bank/Views/CloudCourseLibraryView.swift` | 從 `/cloud/courses` 取得課程摘要，支援標籤與搜尋引導。 |
+| 課程詳情與書本預覽 | `Features/Chat/Bank/Views/CloudCourseDetailView.swift`、`Features/Chat/Bank/Views/CloudCourseBookPreviewView.swift` | 顯示課程封面、介紹、子書本（`/cloud/courses/{id}`、`/cloud/courses/{id}/books/{bookId}`），可一鍵複製到本機。 |
 
 ## 3. 快速功能列自訂
 
