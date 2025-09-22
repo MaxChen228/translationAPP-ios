@@ -24,7 +24,9 @@ struct CalendarMonth {
 
     var monthYear: String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy年M月"
+        formatter.locale = .autoupdatingCurrent
+        formatter.calendar = .autoupdatingCurrent
+        formatter.setLocalizedDateFormatFromTemplate("yyyyMMMM")
         let date = Calendar.current.date(from: DateComponents(year: year, month: month)) ?? Date()
         return formatter.string(from: date)
     }

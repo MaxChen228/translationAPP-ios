@@ -54,17 +54,17 @@ struct DayDetailView: View {
     private var statsGrid: some View {
         HStack(alignment: .center, spacing: DS.Spacing.md) {
             metricColumn(
-                label: "練習題數",
+                label: "calendar.metric.practiceCount",
                 value: "\(stats.count)"
             )
 
             metricColumn(
-                label: "錯誤總數",
+                label: "calendar.metric.totalErrors",
                 value: "\(stats.totalErrors)"
             )
 
             metricColumn(
-                label: "最高分",
+                label: "calendar.metric.bestScore",
                 value: "\(stats.bestScore)"
             )
         }
@@ -100,7 +100,7 @@ struct DayDetailView: View {
                 .dsType(DS.Font.caption)
                 .foregroundStyle(DS.Palette.subdued)
 
-            Text("總練習時間：\(formattedPracticeTime)")
+            Text(verbatim: totalPracticeTimeText)
                 .dsType(DS.Font.caption)
                 .foregroundStyle(DS.Palette.subdued)
         }
@@ -108,25 +108,39 @@ struct DayDetailView: View {
 
     private var formattedMonth: String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "M"
+        formatter.locale = .autoupdatingCurrent
+        formatter.calendar = .autoupdatingCurrent
+        formatter.setLocalizedDateFormatFromTemplate("M")
         return formatter.string(from: stats.date)
     }
 
     private var formattedDay: String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "d"
+        formatter.locale = .autoupdatingCurrent
+        formatter.calendar = .autoupdatingCurrent
+        formatter.setLocalizedDateFormatFromTemplate("d")
         return formatter.string(from: stats.date)
     }
 
     private var formattedPracticeTime: String {
-        let minutes = Int(stats.practiceTime / 60)
-        if minutes < 60 {
-            return "\(minutes) 分鐘"
-        } else {
-            let hours = minutes / 60
-            let remainingMinutes = minutes % 60
-            return "\(hours) 小時 \(remainingMinutes) 分鐘"
+        if stats.practiceTime < 60 {
+            return NSLocalizedString("calendar.practiceTime.lessThanOneMinute", comment: "Practice duration shorter than one minute")
         }
+
+        let formatter = DateComponentsFormatter()
+        formatter.unitsStyle = .short
+        formatter.allowedUnits = stats.practiceTime < 3600 ? [.minute] : [.hour, .minute]
+        formatter.zeroFormattingBehavior = [.dropTrailing]
+        formatter.calendar = .autoupdatingCurrent
+        formatter.locale = .autoupdatingCurrent
+
+        return formatter.string(from: stats.practiceTime)
+            ?? NSLocalizedString("calendar.practiceTime.lessThanOneMinute", comment: "Fallback when practice duration cannot be formatted")
+    }
+
+    private var totalPracticeTimeText: String {
+        let format = NSLocalizedString("calendar.practiceTime.totalFormat", comment: "Label prefix for total practice time with placeholder for formatted duration")
+        return String.localizedStringWithFormat(format, formattedPracticeTime)
     }
 }
 
@@ -213,7 +227,7 @@ private struct AnimatedStreakBadge: View {
             animateGradient = false
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("連續 \(streakDays) 天")
+        .accessibilityLabel(Text("calendar.streak.accessibility \(streakDays)"))
     }
 
     private func gradientCircle(lineWidth: CGFloat) -> some View {

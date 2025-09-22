@@ -17,6 +17,18 @@
 "quick.addWorkspace" = "新增工作區";
 "quick.addEntry" = "新增入口";
 
+/* 日曆 */
+"calendar.navigation.title" = "練習日曆";
+"calendar.action.today" = "回到今天";
+"calendar.action.previousMonth" = "上個月";
+"calendar.action.nextMonth" = "下個月";
+"calendar.metric.practiceCount" = "練習題數";
+"calendar.metric.totalErrors" = "錯誤總數";
+"calendar.metric.bestScore" = "最高分";
+"calendar.practiceTime.lessThanOneMinute" = "不到 1 分鐘";
+"calendar.practiceTime.totalFormat" = "總練習時間：%@";
+"calendar.streak.accessibility" = "連續 %d 天";
+
 /* 設定 */
 "settings.banner.title" = "Banner";
 "settings.banner.subtitle" = "設定橫幅顯示秒數";
