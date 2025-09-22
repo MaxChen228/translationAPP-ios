@@ -30,9 +30,9 @@ final class ShelfEditController<ID: Hashable>: ObservableObject {
 struct ShelfWiggle<Content: View>: View {
     var isActive: Bool
     var content: Content
-    private let amplitude: CGFloat = 1.4
-    private let rotation: Double = 2.2
-    private let speed: Double = 7.0
+    private let amplitude: CGFloat = 0.8
+    private let rotation: Double = 1.5
+    private let speed: Double = 12.0
 
     init(isActive: Bool, @ViewBuilder content: () -> Content) {
         self.isActive = isActive

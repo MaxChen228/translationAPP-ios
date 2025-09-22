@@ -168,6 +168,12 @@ struct LocalBankListView: View {
                     }
                 }
 
+                DSSeparator(color: DS.Palette.border.opacity(DS.Opacity.hairline))
+                    .frame(width: 160)
+                    .padding(.top, DS.Spacing.lg)
+                    .padding(.bottom, DS.Spacing.md)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
                 if items.isEmpty && !allItems.isEmpty {
                     EmptyStateCard(
                         title: String(localized: "filter.noResults", locale: locale),

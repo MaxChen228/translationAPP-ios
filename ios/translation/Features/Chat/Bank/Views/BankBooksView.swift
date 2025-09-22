@@ -131,13 +131,6 @@ struct BankBooksView: View {
                                 editController.enterEditMode()
                                 Haptics.medium()
                             }
-                            if bankFolders.folders.isEmpty {
-                                Text(String(localized: "bank.folders.empty", locale: locale)).foregroundStyle(.secondary)
-                            } else {
-                                ForEach(bankFolders.folders) { folder in
-                                    Button(String(format: String(localized: "bank.action.addToFolder", locale: locale), folder.name)) { bankFolders.add(bookName: b.name, to: folder.id) }
-                                }
-                            }
                             Button(String(localized: "action.rename", locale: locale)) {
                                 editController.exitEditMode()
                                 renamingBook = b
@@ -147,12 +140,6 @@ struct BankBooksView: View {
                                 deletingBookName = b.name
                                 showDeleteConfirm = true
                             }
-                            #if canImport(UIKit)
-                            Button(String(localized: "action.copyName", locale: locale)) {
-                                editController.exitEditMode()
-                                UIPasteboard.general.string = b.name
-                            }
-                            #endif
                         }
                         .onDrag {
                             guard editController.isEditing else { return NSItemProvider() }
