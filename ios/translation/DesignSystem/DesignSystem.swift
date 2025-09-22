@@ -205,6 +205,10 @@ enum DS {
             "Avenir-Roman",
             "Avenir" // family fallback
         ]
+        static let tangerineCandidates = [
+            "Tangerine-Regular",
+            "Tangerine-Bold"
+        ]
     }
 
     enum Font {
@@ -230,6 +234,9 @@ enum DS {
         // Serif = Songti
         static let serifTitle = customOrSystemCandidates(FontFamily.songtiCandidates, size: 22, relativeTo: .title2)
         static let serifBody = customOrSystemCandidates(FontFamily.songtiCandidates, size: 17, relativeTo: .body)
+
+        static let scriptDisplay = customOrSystemCandidates(FontFamily.tangerineCandidates, size: 34, relativeTo: .largeTitle)
+        static let scriptTitle = customOrSystemCandidates(FontFamily.tangerineCandidates, size: 24, relativeTo: .title2)
 
         // Monospace-like usage still use Avenir per requirement
         static let mono = customOrSystemCandidates(FontFamily.avenirCandidates, size: 15, relativeTo: .callout)

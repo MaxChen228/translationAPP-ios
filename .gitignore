@@ -24,3 +24,7 @@ ios/*.ipa
 *.ttf
 *.otf
 ios/translation/Resources/Fonts/
+!ios/translation/Resources/Fonts/
+!ios/translation/Resources/Fonts/*.ttc
+!ios/translation/Resources/Fonts/*.ttf
+!ios/translation/Resources/Fonts/*.otf

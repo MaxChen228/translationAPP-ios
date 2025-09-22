@@ -162,6 +162,9 @@
 "practice.records.list.subtitle" = "按時間順序排列";
 "practice.records.card.chinese" = "中文原文";
 "practice.records.card.english" = "英文翻譯";
+"practice.records.card.corrected" = "修正版";
+"practice.records.card.suggestion" = "教師建議";
+"practice.records.card.errors" = "錯誤類型";
 "practice.records.clear.all" = "清除全部";
 "practice.records.clear.confirm.title" = "確認清除";
 "practice.records.clear.confirm.message" = "此操作將永久刪除所有練習記錄，無法復原。";

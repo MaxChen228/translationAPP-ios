@@ -4,7 +4,7 @@ struct DayDetailView: View {
     let stats: DayPracticeStats
 
     var body: some View {
-        DSOutlineCard(padding: DS.Spacing.lg, fill: DS.Palette.surfaceAlt.opacity(0.6)) {
+        DSOutlineCard(padding: DS.Spacing.lg, fill: DS.Palette.surfaceAlt.opacity(0.4)) {
             VStack(alignment: .leading, spacing: DS.Spacing.lg) {
                 headerSection
 
@@ -121,14 +121,22 @@ private struct AnimatedStreakBadge: View {
     ]
 
     private let badgeSize: CGFloat = 88
-    private let outerLineWidth: CGFloat = 4
-    private let innerLineWidth: CGFloat = 1.2
+    private let outerLineWidth: CGFloat = DS.BorderWidth.emphatic
+    private let innerLineWidth: CGFloat = DS.BorderWidth.hairline
     private let innerInset: CGFloat = 8
     private let fillInset: CGFloat = 16
     private let gradientDuration: Double = 8.0
 
     private var gradient: AngularGradient {
-        AngularGradient(gradient: Gradient(colors: gradientColors), center: .center)
+        AngularGradient(
+            gradient: Gradient(stops: [
+                .init(color: gradientColors[0], location: 0.0),
+                .init(color: gradientColors[1], location: 0.33),
+                .init(color: gradientColors[2], location: 0.66),
+                .init(color: gradientColors[3], location: 1.0)
+            ]),
+            center: .center
+        )
     }
 
     var body: some View {
@@ -144,11 +152,11 @@ private struct AnimatedStreakBadge: View {
                 .animation(.linear(duration: gradientDuration * 1.2).repeatForever(autoreverses: false), value: animateGradient)
 
             Circle()
-                .fill(Color.white.opacity(0.22))
+                .fill(Color.white.opacity(0.5))
                 .frame(width: badgeSize - fillInset, height: badgeSize - fillInset)
                 .overlay(
                     Circle()
-                        .fill(Color.white.opacity(0.08))
+                        .fill(Color.white.opacity(0.12))
                         .blur(radius: 8)
                         .frame(width: badgeSize - fillInset - 10, height: badgeSize - fillInset - 10)
                 )
@@ -177,20 +185,21 @@ private struct AnimatedStreakBadge: View {
     }
 
     private var badgeContent: some View {
-        VStack(spacing: 4) {
-            Text("連續")
-                .dsType(DS.Font.caption)
-                .fontWeight(.medium)
-                .foregroundStyle(Color.white.opacity(0.9))
+        VStack(spacing: 6) {
+            GradientText(text: "連續", gradient: gradient)
+                .font(DS.Font.body)
+                .fontWeight(.semibold)
 
             VStack(spacing: 1) {
-                GradientText(text: "\(streakDays)", gradient: gradient)
-                    .font(.system(size: 28, weight: .semibold, design: .serif))
+                Text("\(streakDays)")
+                    .font(DS.Font.scriptTitle)
+                    .fontWeight(.bold)
+                    .foregroundStyle(Color.white)
                     .animation(.spring(response: 0.5, dampingFraction: 0.85), value: streakDays)
 
-                Text("天")
-                    .dsType(DS.Font.caption)
-                    .foregroundStyle(Color.white.opacity(0.85))
+                GradientText(text: "天", gradient: gradient)
+                    .font(DS.Font.body)
+                    .fontWeight(.medium)
             }
         }
     }
@@ -201,10 +210,7 @@ private struct GradientText: View {
     let gradient: AngularGradient
 
     var body: some View {
-        gradient
-            .mask(
-                Text(text)
-                    .fontWeight(.semibold)
-            )
+        Text(text)
+            .foregroundStyle(gradient)
     }
 }

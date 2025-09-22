@@ -134,6 +134,9 @@
 "practice.records.list.subtitle" = "Sorted by time";
 "practice.records.card.chinese" = "Chinese Text";
 "practice.records.card.english" = "English Translation";
+"practice.records.card.corrected" = "Corrected";
+"practice.records.card.suggestion" = "Teacher Suggestion";
+"practice.records.card.errors" = "Error Types";
 "practice.records.clear.all" = "Clear All";
 "practice.records.clear.confirm.title" = "Confirm Clear";
 "practice.records.clear.confirm.message" = "This will permanently delete all practice records and cannot be undone.";
