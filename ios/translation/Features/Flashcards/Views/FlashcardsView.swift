@@ -149,44 +149,50 @@ struct FlashcardsView: View {
                                     }
                                     .padding(.top, extraTopPadding)
                                 } back: {
-                                    VStack(alignment: .leading, spacing: 10) {
-                                        Spacer(minLength: DS.Spacing.md)
+                                    VStack(alignment: .leading, spacing: 14) {
+                                        Spacer(minLength: DS.Spacing.lg)
                                         VariantBracketComposerView(card.back, onComposedChange: { s in
                                             viewModel.recordBackComposition(for: card.id, text: s)
                                         })
                                         .frame(maxWidth: .infinity, alignment: .center)
-                                        Spacer(minLength: DS.Spacing.lg)
+                                        Spacer(minLength: DS.Spacing.xl)
                                         if let note = card.backNote, !note.isEmpty {
                                             Text(note)
                                                 .dsType(DS.Font.bodyEmph)
                                                 .foregroundStyle(.primary.opacity(0.85))
                                                 .frame(maxWidth: .infinity, alignment: .center)
                                         }
+                                        Spacer(minLength: DS.Spacing.xl)
                                     }
                                     .padding(.top, extraTopPadding)
                                 } overlay: {
-                                    FlashcardsPlaySideButton(style: .outline, diameter: 28) {
-                                        let manager = speechManager
-                                        if store.showBack {
-                                            let text = viewModel.backTextToSpeak(for: card)
-                                            viewModel.speak(text: text, lang: manager.settings.backLang)
-                                        } else {
-                                            viewModel.speak(text: card.front, lang: manager.settings.frontLang)
+                                    ZStack {
+                                        if showEditButton {
+                                            DSQuickActionIconButton(
+                                                systemName: "square.and.pencil",
+                                                labelKey: "action.edit",
+                                                action: { viewModel.beginEdit(progressStore: progressStore) },
+                                                shape: .circle,
+                                                style: .outline,
+                                                size: 32
+                                            )
+                                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                                            .padding(.top, DS.Spacing.md)
+                                            .padding(.trailing, DS.Spacing.md)
                                         }
-                                    }
-                                }
-                                .overlay(alignment: .topTrailing) {
-                                    if showEditButton {
-                                        DSQuickActionIconButton(
-                                            systemName: "square.and.pencil",
-                                            labelKey: "action.edit",
-                                            action: { viewModel.beginEdit(progressStore: progressStore) },
-                                            shape: .circle,
-                                            style: .outline,
-                                            size: 32
-                                        )
+
+                                        FlashcardsPlaySideButton(style: .outline, diameter: 28) {
+                                            let manager = speechManager
+                                            if store.showBack {
+                                                let text = viewModel.backTextToSpeak(for: card)
+                                                viewModel.speak(text: text, lang: manager.settings.backLang)
+                                            } else {
+                                                viewModel.speak(text: card.front, lang: manager.settings.frontLang)
+                                            }
+                                        }
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                                        .padding(.bottom, DS.Spacing.md)
                                         .padding(.trailing, DS.Spacing.md)
-                                        .padding(.top, DS.Spacing.md)
                                     }
                                 }
                             }

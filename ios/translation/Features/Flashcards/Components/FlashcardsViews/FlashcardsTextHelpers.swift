@@ -37,7 +37,7 @@ struct FlashcardsMarkdownText: View {
                 Text(processed)
             }
         }
-        .font(.custom("Songti SC", size: 20, relativeTo: .body))
+        .font(.custom("Songti SC", size: 26, relativeTo: .title))
         .lineSpacing(6)
         .foregroundStyle(.primary)
         .textSelection(.enabled)
@@ -49,7 +49,7 @@ struct FlashcardsNoteText: View {
 
     var body: some View {
         Text(text)
-            .dsType(DS.Font.caption)
-            .foregroundStyle(.secondary)
+            .font(.custom("Songti SC", size: 18, relativeTo: .body))
+            .foregroundStyle(.primary.opacity(0.7))
     }
 }
