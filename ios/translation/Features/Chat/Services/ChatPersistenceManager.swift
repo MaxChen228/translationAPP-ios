@@ -1,107 +1,26 @@
 import Foundation
 
-/// 聊天狀態持久化管理器
-final class ChatPersistenceManager {
-    private let fileManager = FileManager.default
-    private let encoder = JSONEncoder()
-    private let decoder = JSONDecoder()
-
-    private var documentsDirectory: URL {
-        fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-    }
-
-    private var chatSessionsDirectory: URL {
-        documentsDirectory.appendingPathComponent("ChatSessions", isDirectory: true)
-    }
-
-    init() {
-        createDirectoriesIfNeeded()
-    }
-
-    // MARK: - Session Management
-
-    func saveSession(_ sessionData: ChatSessionData) {
-        do {
-            let data = try encoder.encode(sessionData)
-            let fileURL = sessionFileURL(for: sessionData.id)
-            try data.write(to: fileURL)
-        } catch {
-            AppLog.chatError("Failed to save chat session: \(error)")
-        }
-    }
-
-    func loadSession(id: UUID) -> ChatSessionData? {
-        do {
-            let fileURL = sessionFileURL(for: id)
-            let data = try Data(contentsOf: fileURL)
-            return try decoder.decode(ChatSessionData.self, from: data)
-        } catch {
-            AppLog.chatError("Failed to load chat session \(id): \(error)")
-            return nil
-        }
-    }
-
-    func loadActiveSessions() -> [ChatSessionData] {
-        do {
-            let sessionFiles = try fileManager.contentsOfDirectory(at: chatSessionsDirectory, includingPropertiesForKeys: nil)
-            return sessionFiles.compactMap { fileURL in
-                do {
-                    let data = try Data(contentsOf: fileURL)
-                    return try decoder.decode(ChatSessionData.self, from: data)
-                } catch {
-                    return nil
-                }
-            }
-        } catch {
-            AppLog.chatError("Failed to load active sessions: \(error)")
-            return []
-        }
-    }
-
-    func deleteSession(id: UUID) {
-        do {
-            let fileURL = sessionFileURL(for: id)
-            try fileManager.removeItem(at: fileURL)
-        } catch {
-            AppLog.chatError("Failed to delete session \(id): \(error)")
-        }
-    }
-
-    func clearAllSessions() {
-        do {
-            let sessionFiles = try fileManager.contentsOfDirectory(at: chatSessionsDirectory, includingPropertiesForKeys: nil)
-            for fileURL in sessionFiles {
-                try fileManager.removeItem(at: fileURL)
-            }
-        } catch {
-            AppLog.chatError("Failed to clear sessions: \(error)")
-        }
-    }
-
-    // MARK: - Helper Methods
-
-    private func createDirectoriesIfNeeded() {
-        do {
-            try fileManager.createDirectory(at: chatSessionsDirectory, withIntermediateDirectories: true)
-        } catch {
-            AppLog.chatError("Failed to create chat sessions directory: \(error)")
-        }
-    }
-
-    private func sessionFileURL(for sessionID: UUID) -> URL {
-        chatSessionsDirectory.appendingPathComponent("\(sessionID.uuidString).json")
-    }
+protocol ChatSessionRepository {
+    func save(_ session: ChatSessionData)
+    func loadSession(id: UUID) -> ChatSessionData?
+    func loadAll() -> [ChatSessionData]
+    func delete(id: UUID)
+    func clearAll()
 }
 
-/// 聊天會話數據結構
-struct ChatSessionData: Codable {
+enum ChatPendingRequestType: Codable, Equatable {
+    case message(content: String, attachments: [ChatAttachment])
+    case research
+}
+
+struct ChatSessionData: Codable, Equatable {
     let id: UUID
     let messages: [ChatMessage]
     let state: ChatTurnResponse.State
     let checklist: [String]?
     let researchResult: ChatResearchResponse?
     let hasPendingRequest: Bool
-    let pendingRequestType: ChatSession.PendingRequestType?
+    let pendingRequestType: ChatPendingRequestType?
     let savedAt: Date
 
     init(
@@ -111,7 +30,8 @@ struct ChatSessionData: Codable {
         checklist: [String]?,
         researchResult: ChatResearchResponse?,
         hasPendingRequest: Bool,
-        pendingRequestType: ChatSession.PendingRequestType?
+        pendingRequestType: ChatPendingRequestType?,
+        savedAt: Date = Date()
     ) {
         self.id = id
         self.messages = messages
@@ -120,6 +40,95 @@ struct ChatSessionData: Codable {
         self.researchResult = researchResult
         self.hasPendingRequest = hasPendingRequest
         self.pendingRequestType = pendingRequestType
-        self.savedAt = Date()
+        self.savedAt = savedAt
     }
 }
+
+final class FileChatSessionRepository: ChatSessionRepository {
+    private let fileManager: FileManager
+    private let encoder: JSONEncoder
+    private let decoder: JSONDecoder
+    private let directory: URL
+
+    init(baseDirectory: URL? = nil, fileManager: FileManager = .default) {
+        self.fileManager = fileManager
+        self.encoder = JSONEncoder()
+        self.decoder = JSONDecoder()
+        if let baseDirectory {
+            self.directory = baseDirectory.appendingPathComponent("ChatSessions", isDirectory: true)
+        } else {
+            let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            self.directory = documents.appendingPathComponent("ChatSessions", isDirectory: true)
+        }
+        createDirectoriesIfNeeded()
+    }
+
+    func save(_ session: ChatSessionData) {
+        do {
+            let data = try encoder.encode(session)
+            try data.write(to: fileURL(for: session.id), options: .atomic)
+        } catch {
+            AppLog.chatError("Failed to save chat session: \(error)")
+        }
+    }
+
+    func loadSession(id: UUID) -> ChatSessionData? {
+        do {
+            let data = try Data(contentsOf: fileURL(for: id))
+            return try decoder.decode(ChatSessionData.self, from: data)
+        } catch {
+            AppLog.chatError("Failed to load chat session \(id): \(error)")
+            return nil
+        }
+    }
+
+    func loadAll() -> [ChatSessionData] {
+        do {
+            let files = try fileManager.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
+            return files.compactMap { url in
+                do {
+                    let data = try Data(contentsOf: url)
+                    return try decoder.decode(ChatSessionData.self, from: data)
+                } catch {
+                    return nil
+                }
+            }
+        } catch {
+            AppLog.chatError("Failed to load chat sessions: \(error)")
+            return []
+        }
+    }
+
+    func delete(id: UUID) {
+        do {
+            try fileManager.removeItem(at: fileURL(for: id))
+        } catch {
+            AppLog.chatError("Failed to delete chat session \(id): \(error)")
+        }
+    }
+
+    func clearAll() {
+        do {
+            let files = try fileManager.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
+            for file in files {
+                try fileManager.removeItem(at: file)
+            }
+        } catch {
+            AppLog.chatError("Failed to clear chat sessions: \(error)")
+        }
+    }
+
+    private func createDirectoriesIfNeeded() {
+        do {
+            try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
+        } catch {
+            AppLog.chatError("Failed to create chat session directory: \(error)")
+        }
+    }
+
+    private func fileURL(for id: UUID) -> URL {
+        directory.appendingPathComponent("\(id.uuidString).json")
+    }
+}
+
+typealias ChatPersistenceManager = FileChatSessionRepository

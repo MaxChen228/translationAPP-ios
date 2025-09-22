@@ -39,15 +39,14 @@ final class TestAudioController: FlashcardsAudioController {
 @MainActor
 final class FlashcardsViewModelTests {
     private func makeViewModel(cards: [Flashcard] = TestCardData.cards) -> FlashcardsViewModel {
-        let store = FlashcardsStore(cards: cards, startIndex: 0)
-        let viewModel = FlashcardsViewModel(
-            store: store,
+        let session = FlashcardSessionStore(cards: cards, startIndex: 0)
+        return FlashcardsViewModel(
+            session: session,
             title: "Test",
             cards: cards,
             deckID: UUID(),
             startEditingOnAppear: false
         )
-        return viewModel
     }
 
     @Test func flipStopsPlaybackWhenActive() async throws {
@@ -55,10 +54,10 @@ final class FlashcardsViewModelTests {
         let testAudio = TestAudioController(viewModel: viewModel, active: true)
         viewModel.audio = testAudio
 
-        let initialFace = viewModel.store.showBack
+        let initialFace = viewModel.session.showBack
         viewModel.flipCurrentCard()
 
-        #expect(viewModel.store.showBack == !initialFace)
+        #expect(viewModel.session.showBack == !initialFace)
         #expect(testAudio.stopPlaybackCalled)
         #expect(testAudio.simulatedActive == false)
         #expect(testAudio.speakCalls.isEmpty)
@@ -84,6 +83,10 @@ final class FlashcardsViewModelTests {
         viewModel.adjustProficiency(.familiar, mode: .annotate, progressStore: progressStore)
 
         #expect(viewModel.sessionRightCount == 1)
-        #expect(progressStore.isFamiliar(deckID: viewModel.deckID!, cardID: viewModel.store.current!.id))
+        if let deckID = viewModel.deckID, let current = viewModel.session.current {
+            #expect(progressStore.isFamiliar(deckID: deckID, cardID: current.id))
+        } else {
+            Issue.record("Deck ID or current card missing")
+        }
     }
 }

@@ -2,37 +2,27 @@ import SwiftUI
 
 struct WorkspaceListView: View {
     @EnvironmentObject private var store: WorkspaceStore
-    @StateObject private var workspaceEditController = ShelfEditController<UUID>()
     @EnvironmentObject private var savedStore: SavedErrorsStore
     @EnvironmentObject private var localBank: LocalBankStore
     @EnvironmentObject private var localProgress: LocalBankProgressStore
     @EnvironmentObject private var practiceRecords: PracticeRecordsStore
     @EnvironmentObject private var quickActions: QuickActionsStore
     @EnvironmentObject private var router: RouterStore
-    @EnvironmentObject private var bannerCenter: BannerCenter
     @Environment(\.locale) private var locale
-    @State private var showSavedSheet = false // legacy: replaced by NavigationLink
-
-    // Rename state
-    @State private var renaming: Workspace? = nil
-    @State private var newName: String = ""
+    @StateObject private var coordinator = WorkspaceHomeCoordinator()
 
     private var cols: [GridItem] { [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.lg)] }
-    // Navigation via typed routes to avoid off-stage pushes
-    private enum Route: Hashable { case workspace(UUID) }
-    @State private var path: [Route] = []
-    @StateObject private var quickActionsEditController = ShelfEditController<UUID>()
 
     var body: some View {
-        NavigationStack(path: $path) {
+        NavigationStack(path: $coordinator.navigationPath) {
             ScrollView {
                 VStack(alignment: .leading, spacing: DS.Spacing.lg) {
                     // 快速功能保留 Row 形式，但使用一致的區塊標題
                     QuickActionsRowView(
                         workspaceStore: store,
-                        editController: quickActionsEditController,
-                        onToggleEditing: toggleQuickActionsEditing,
-                        onRequestAdd: handleAddQuickAction
+                        editController: coordinator.quickActionsEditController,
+                        onToggleEditing: { coordinator.toggleQuickActionsEditing() },
+                        onRequestAdd: { coordinator.handleAddQuickActionTapped() }
                     )
 
                     // 快速功能與 Workspaces 間加上 hairline 分隔
@@ -41,31 +31,28 @@ struct WorkspaceListView: View {
 
                     ShelfGrid(titleKey: "home.workspaces", columns: cols) {
 
-                    ForEach(store.workspaces) { ws in
+                    ForEach(store.workspaces) { workspace in
                         WorkspaceItemLink(
-                            ws: ws,
-                            vm: store.vm(for: ws.id),
-                            store: store,
-                            editController: workspaceEditController
-                        ) {
-                            startRename(ws)
-                        } onDelete: {
-                            store.remove(ws.id)
-                        }
+                            workspace: workspace,
+                            viewModel: store.vm(for: workspace.id),
+                            coordinator: coordinator,
+                            editController: coordinator.workspaceEditController,
+                            onRename: { coordinator.startRename(workspace) },
+                            onDelete: { coordinator.deleteWorkspace(workspace.id) }
+                        )
                         .environmentObject(savedStore)
                     }
                     // 將重排的動畫收斂到容器層，避免在 delegate 內多次觸發動畫
                     .dsAnimation(DS.AnimationToken.reorder, value: store.workspaces)
 
                     Button {
-                        workspaceEditController.exitEditMode()
-                        _ = store.addWorkspace()
+                        coordinator.addWorkspace()
                     } label: {
                         AddWorkspaceCard()
                     }
                     .buttonStyle(.plain)
                     // 允許拖到新增卡以移到清單尾端
-                    .onDrop(of: [.text], delegate: AddToEndDropDelegate(store: store, editController: workspaceEditController))
+                    .onDrop(of: [.text], delegate: WorkspaceAddToEndDropDelegate(coordinator: coordinator))
                     }
                 }
                 .padding(.horizontal, DS.Spacing.lg)
@@ -73,19 +60,19 @@ struct WorkspaceListView: View {
             }
             .id(locale.identifier)
             // 後備 drop：若使用者把項目拖到空白處或邊緣放下，確保 draggingID 能被清除
-            .onDrop(of: [.text], delegate: ClearDragStateDropDelegate(editController: workspaceEditController))
+            .onDrop(of: [.text], delegate: WorkspaceClearDragDropDelegate(coordinator: coordinator))
             .contentShape(Rectangle())
             .simultaneousGesture(
                 TapGesture().onEnded {
-                    if workspaceEditController.isEditing {
-                        workspaceEditController.exitEditMode()
+                    if coordinator.workspaceEditController.isEditing {
+                        coordinator.workspaceEditController.exitEditMode()
                     }
                 },
                 including: .gesture
             )
             .background(DS.Palette.background)
             .navigationTitle(Text("nav.workspace"))
-            .navigationDestination(for: Route.self) { route in
+            .navigationDestination(for: WorkspaceRoute.self) { route in
                 switch route {
                 case .workspace(let id):
                     ContentView(vm: store.vm(for: id)).environmentObject(savedStore)
@@ -100,131 +87,51 @@ struct WorkspaceListView: View {
                     }
                 }
             }
-            .sheet(item: $renaming) { ws in
-                RenameWorkspaceSheet(name: ws.name) { new in
-                    store.rename(ws.id, to: new)
-                }
+            .sheet(item: $coordinator.renamingWorkspace) { workspace in
+                RenameWorkspaceSheet(name: coordinator.renameDraft, onAction: { action in
+                    switch action {
+                    case .cancel:
+                        coordinator.cancelRename()
+                    case .save(let name):
+                        coordinator.commitRename(newName: name, store: store)
+                    }
+                })
                 .presentationDetents([.height(180)])
             }
-            .sheet(isPresented: $showQuickActionPicker) {
-                QuickActionPickerView(isPresented: $showQuickActionPicker) { type in
-                    quickActions.append(type)
+            .sheet(isPresented: $coordinator.showQuickActionPicker) {
+                QuickActionPickerView(isPresented: $coordinator.showQuickActionPicker) { type in
+                    coordinator.appendQuickAction(type)
                 }
             }
             .onAppear {
+                coordinator.configureIfNeeded(
+                    workspaceStore: store,
+                    quickActions: quickActions,
+                    router: router
+                )
                 // Bind stores to WorkspaceStore
                 store.localBankStore = localBank
                 store.localProgressStore = localProgress
                 store.practiceRecordsStore = practiceRecords
                 // Rebind all existing ViewModels to ensure they have the latest store references
                 store.rebindAllStores()
-                workspaceEditController.exitEditMode()
+                coordinator.workspaceEditController.exitEditMode()
             }
         }
         // 只在 ScrollView 範圍處理後備 drop；避免多層干擾
-        // banner 監聽已移到 App root，這裡只處理 Router 指令
-        .onReceive(router.$openWorkspaceID) { id in
-            guard let id else { return }
-            path.append(.workspace(id))
-            router.openWorkspaceID = nil
+        .onChange(of: coordinator.quickActionsEditController.isEditing) { _, isEditing in
+            coordinator.quickActionsEditingChanged(isEditing: isEditing)
         }
-        .onChange(of: quickActionsEditController.isEditing) { _, isEditing in
-            if isEditing {
-                workspaceEditController.exitEditMode()
-            }
+        .onChange(of: coordinator.workspaceEditController.isEditing) { _, isEditing in
+            coordinator.workspaceEditingChanged(isEditing: isEditing)
         }
-        .onChange(of: workspaceEditController.isEditing) { _, isEditing in
-            if isEditing {
-                quickActionsEditController.exitEditMode()
-            }
-        }
-    }
-
-    private func startRename(_ ws: Workspace) {
-        newName = ws.name
-        renaming = ws
-    }
-
-    private func toggleQuickActionsEditing() {
-        if quickActionsEditController.isEditing {
-            showQuickActionPicker = false
-            quickActionsEditController.exitEditMode()
-        } else {
-            workspaceEditController.exitEditMode()
-            quickActionsEditController.enterEditMode()
-        }
-    }
-
-    @State private var showQuickActionPicker = false
-
-    private func handleAddQuickAction() {
-        if !quickActionsEditController.isEditing {
-            quickActionsEditController.enterEditMode()
-        }
-        showQuickActionPicker = true
     }
 }
-
-// MARK: - 拖曳重排 Delegate / 尾端 Drop Delegate
-
-private struct ReorderDropDelegate: DropDelegate {
-    let item: Workspace
-    let store: WorkspaceStore
-    let editController: ShelfEditController<UUID>
-
-    func validateDrop(info: DropInfo) -> Bool { true }
-    func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
-
-    func dropEntered(info: DropInfo) {
-        guard let draggingID = editController.draggingID, draggingID != item.id else { return }
-        guard let from = store.index(of: draggingID), let to = store.index(of: item.id) else { return }
-        if from != to {
-            store.moveWorkspace(id: draggingID, to: to > from ? to + 1 : to)
-            Haptics.lightTick()
-        }
-    }
-
-    func performDrop(info: DropInfo) -> Bool {
-        editController.endDragging()
-        Haptics.success()
-        return true
-    }
-}
-
-private struct AddToEndDropDelegate: DropDelegate {
-    let store: WorkspaceStore
-    let editController: ShelfEditController<UUID>
-    func validateDrop(info: DropInfo) -> Bool { true }
-    func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
-    func dropEntered(info: DropInfo) { }
-    func performDrop(info: DropInfo) -> Bool {
-        guard let draggingID = editController.draggingID else { return false }
-        store.moveWorkspace(id: draggingID, to: store.workspaces.count)
-        editController.endDragging()
-        Haptics.success()
-        return true
-    }
-}
-
-private struct ClearDragStateDropDelegate: DropDelegate {
-    let editController: ShelfEditController<UUID>
-    func validateDrop(info: DropInfo) -> Bool { true }
-    // 使用 .move 以確保 performDrop 會被呼叫（部分情境下 .cancel 可能不觸發 performDrop）
-    func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
-    func performDrop(info: DropInfo) -> Bool {
-        AppLog.uiDebug("[drag] clear-drop performDrop (fallback)")
-        editController.endDragging()
-        return true
-    }
-}
-
-// 以 isTargeted 監控拖放生命週期，會話結束時確保清理狀態
-// removed watcher overlay; simplified drag lifecycle
 
 private struct WorkspaceItemLink: View {
-    let ws: Workspace
-    @ObservedObject var vm: CorrectionViewModel
-    let store: WorkspaceStore
+    let workspace: Workspace
+    @ObservedObject var viewModel: CorrectionViewModel
+    unowned let coordinator: WorkspaceHomeCoordinator
     @ObservedObject var editController: ShelfEditController<UUID>
     var onRename: () -> Void
     var onDelete: () -> Void
@@ -232,25 +139,25 @@ private struct WorkspaceItemLink: View {
     @Environment(\.locale) private var locale
 
     var statusKey: LocalizedStringKey {
-        if vm.isLoading { return "workspace.status.loading" }
-        if vm.session.response != nil { return "workspace.status.graded" }
-        if !(vm.session.inputZh.isEmpty && vm.session.inputEn.isEmpty) { return "workspace.status.input" }
+        if viewModel.isLoading { return "workspace.status.loading" }
+        if viewModel.session.response != nil { return "workspace.status.graded" }
+        if !(viewModel.session.inputZh.isEmpty && viewModel.session.inputEn.isEmpty) { return "workspace.status.input" }
         return "workspace.status.empty"
     }
 
     var statusColor: Color {
         // 主色以藍、白、灰為基礎；完成狀態用暖色作為強調色
-        if vm.isLoading { return DS.Palette.primary }
-        if vm.session.response != nil { return DS.Brand.scheme.cornhusk }
-        if !(vm.session.inputZh.isEmpty && vm.session.inputEn.isEmpty) { return DS.Brand.scheme.monument }
+        if viewModel.isLoading { return DS.Palette.primary }
+        if viewModel.session.response != nil { return DS.Brand.scheme.cornhusk }
+        if !(viewModel.session.inputZh.isEmpty && viewModel.session.inputEn.isEmpty) { return DS.Brand.scheme.monument }
         return DS.Palette.border.opacity(DS.Opacity.muted)
     }
 
     var body: some View {
         NavigationLink {
-            ContentView(vm: vm).environmentObject(savedStore)
+            ContentView(vm: viewModel).environmentObject(savedStore)
         } label: {
-            WorkspaceCard(name: ws.name, statusKey: statusKey, statusColor: statusColor)
+            WorkspaceCard(name: workspace.name, statusKey: statusKey, statusColor: statusColor)
                 .contextMenu {
                     Button(String(localized: "action.edit", locale: locale)) {
                         editController.enterEditMode()
@@ -269,10 +176,10 @@ private struct WorkspaceItemLink: View {
         .buttonStyle(DSCardLinkStyle())
         .shelfWiggle(isActive: editController.isEditing)
         .shelfConditionalDrag(editController.isEditing) {
-            editController.beginDragging(ws.id)
-            return NSItemProvider(object: ws.id.uuidString as NSString)
+            editController.beginDragging(workspace.id)
+            return NSItemProvider(object: workspace.id.uuidString as NSString)
         }
-        .onDrop(of: [.text], delegate: ReorderDropDelegate(item: ws, store: store, editController: editController))
+        .onDrop(of: [.text], delegate: WorkspaceReorderDropDelegate(workspaceID: workspace.id, coordinator: coordinator))
         .simultaneousGesture(
             editController.isEditing ?
             TapGesture().onEnded {
@@ -342,13 +249,15 @@ private struct StatusBadge: View {
 }
 
 private struct RenameWorkspaceSheet: View {
+    enum Action { case cancel, save(String) }
+
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
     @State private var text: String
-    let onDone: (String) -> Void
-    init(name: String, onDone: @escaping (String) -> Void) {
+    let onAction: (Action) -> Void
+    init(name: String, onAction: @escaping (Action) -> Void) {
         self._text = State(initialValue: name)
-        self.onDone = onDone
+        self.onAction = onAction
     }
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -357,10 +266,15 @@ private struct RenameWorkspaceSheet: View {
                 .textFieldStyle(.roundedBorder)
             HStack {
                 Spacer()
-                Button(String(localized: "action.cancel", locale: locale)) { dismiss() }
+                Button(String(localized: "action.cancel", locale: locale)) {
+                    onAction(.cancel)
+                    dismiss()
+                }
                 Button(String(localized: "action.done", locale: locale)) {
                     let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-                    if !trimmed.isEmpty { onDone(trimmed) }
+                    if !trimmed.isEmpty {
+                        onAction(.save(trimmed))
+                    }
                     dismiss()
                 }
                 .buttonStyle(DSButton(style: .primary, size: .full))

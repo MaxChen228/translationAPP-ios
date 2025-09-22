@@ -8,6 +8,8 @@ class FlashcardsReviewCoordinator {
         self.viewModel = viewModel
     }
 
+    private var session: FlashcardSessionStore { viewModel.session }
+
     func updateSwipePreview(mode: FlashcardsReviewMode, offset: CGFloat, threshold: CGFloat) {
         guard mode == .annotate else {
             viewModel.swipePreview = nil
@@ -24,9 +26,8 @@ class FlashcardsReviewCoordinator {
 
     func adjustProficiency(_ outcome: AnnotateFeedback, mode: FlashcardsReviewMode, progressStore: FlashcardProgressStore) {
         guard mode == .annotate else { return }
-        guard let deckID = viewModel.deckID, let current = viewModel.store.current else { return }
+        guard let deckID = viewModel.deckID, let current = session.current else { return }
 
-        // 記錄當前狀態以便回滾
         let previousState = progressStore.isFamiliar(deckID: deckID, cardID: current.id)
         viewModel.annotationHistory.append((cardID: current.id, previousState: previousState, action: outcome))
 
@@ -46,16 +47,16 @@ class FlashcardsReviewCoordinator {
 
     @discardableResult
     func advance(mode: FlashcardsReviewMode) -> Bool {
-        guard !viewModel.store.cards.isEmpty else { return false }
+        guard !session.isEmpty else { return false }
         if mode == .annotate {
-            if viewModel.store.index < viewModel.store.cards.count - 1 {
-                viewModel.store.index += 1
-                viewModel.store.showBack = false
+            if session.index < session.count - 1 {
+                session.setIndex(session.index + 1)
+                session.resetShowBack()
                 return false
             }
             return true
         } else {
-            viewModel.store.next()
+            session.next()
             return false
         }
     }
@@ -72,19 +73,13 @@ class FlashcardsReviewCoordinator {
     func applyUnfamiliarFilterIfNeeded(progressStore: FlashcardProgressStore) {
         guard let deckID = viewModel.deckID else { return }
         viewModel.swipePreview = nil
-        let preferredID: UUID? = (viewModel.store.index < viewModel.originalCards.count) ? viewModel.originalCards[viewModel.store.index].id : nil
+        let preferredID: UUID? = (session.index < viewModel.originalCards.count) ? viewModel.originalCards[session.index].id : nil
         let filtered: [Flashcard] = viewModel.originalCards.filter { !progressStore.isFamiliar(deckID: deckID, cardID: $0.id) }
         if filtered.isEmpty {
             viewModel.showEmptyResetConfirm = true
             return
         }
-        viewModel.store.cards = filtered
-        if let pid = preferredID, let idx = filtered.firstIndex(where: { $0.id == pid }) {
-            viewModel.store.index = idx
-        } else {
-            viewModel.store.index = 0
-        }
-        viewModel.store.showBack = false
+        session.updateCards(filtered, prefer: preferredID)
     }
 
     func clearForDeckReset(progressStore: FlashcardProgressStore) {

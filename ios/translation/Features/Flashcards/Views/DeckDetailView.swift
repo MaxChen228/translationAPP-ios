@@ -204,7 +204,7 @@ private extension DeckDetailView {
 
 #Preview {
     let store = FlashcardDecksStore()
-    let sampleCards = FlashcardsStore.defaultCards
+    let sampleCards = FlashcardSessionStore.defaultCards
     let deck = store.add(name: String(localized: "flashcards.sampleDeck.name"), cards: sampleCards)
     return NavigationStack { DeckDetailView(deckID: deck.id) }
         .environmentObject(store)

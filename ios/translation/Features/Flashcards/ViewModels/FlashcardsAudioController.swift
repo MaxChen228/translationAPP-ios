@@ -3,6 +3,7 @@ import SwiftUI
 @MainActor
 class FlashcardsAudioController {
     private unowned let viewModel: FlashcardsViewModel
+    private var session: FlashcardSessionStore { viewModel.session }
     private var globalAudio: GlobalAudioSessionManager { GlobalAudioSessionManager.shared }
     private var speechManager: FlashcardSpeechManager { viewModel.speechManager }
 
@@ -13,11 +14,9 @@ class FlashcardsAudioController {
     var isActive: Bool { speechManager.isPlaying || speechManager.isPaused }
 
     func startTTS(with settings: TTSSettings) {
-        let queue = PlaybackBuilder.buildQueue(cards: viewModel.store.cards, startIndex: viewModel.store.index, settings: settings)
+        let queue = PlaybackBuilder.buildQueue(cards: session.cards, startIndex: session.index, settings: settings)
         speechManager.play(queue: queue)
         viewModel.lastTTSSettings = settings
-
-        // 不在這裡創建全局會話，只在退出頁面時創建
     }
 
     func speak(text: String, lang: String) {
@@ -39,26 +38,20 @@ class FlashcardsAudioController {
     }
 
     func jumpForward() {
-        guard !viewModel.store.cards.isEmpty else { return }
-
-        // 清除待處理的播放完成事件，防止衝突
+        guard !session.isEmpty else { return }
         speechManager.completedCardIndex = nil
         speechManager.didCompleteAllCards = false
-
-        viewModel.store.next()
-        viewModel.store.showBack = false
+        session.next()
+        session.resetShowBack()
         restartMaintainingSettings()
     }
 
     func jumpBackward() {
-        guard !viewModel.store.cards.isEmpty else { return }
-
-        // 清除待處理的播放完成事件，防止衝突
+        guard !session.isEmpty else { return }
         speechManager.completedCardIndex = nil
         speechManager.didCompleteAllCards = false
-
-        viewModel.store.prev()
-        viewModel.store.showBack = false
+        session.previous()
+        session.resetShowBack()
         restartMaintainingSettings()
     }
 
@@ -72,7 +65,6 @@ class FlashcardsAudioController {
     func stopPlayback() {
         guard isActive else { return }
         speechManager.stop()
-        // 結束全局會話
         globalAudio.endSession()
     }
 }

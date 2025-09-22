@@ -1,55 +1,7 @@
 import SwiftUI
 
-final class FlashcardsStore: ObservableObject {
-    @Published var cards: [Flashcard]
-    @Published var index: Int = 0
-    @Published var showBack: Bool = false
-
-    init(cards: [Flashcard] = FlashcardsStore.defaultCards, startIndex: Int = 0) {
-        self.cards = cards
-        let clamped = max(0, min(startIndex, max(0, cards.count - 1)))
-        self.index = clamped
-    }
-
-    var current: Flashcard? { cards.isEmpty ? nil : cards[index] }
-
-    func next() { guard !cards.isEmpty else { return }; index = (index + 1) % cards.count; showBack = false }
-    func prev() { guard !cards.isEmpty else { return }; index = (index - 1 + cards.count) % cards.count; showBack = false }
-    func flip() { showBack.toggle() }
-
-    static var defaultCards: [Flashcard] {
-        [
-            Flashcard(
-                front: String(localized: "flashcards.sample1.front"),
-                back: String(localized: "flashcards.sample1.back"),
-                frontNote: nil,
-                backNote: localizedOptional("flashcards.sample1.backNote")
-            ),
-            Flashcard(
-                front: String(localized: "flashcards.sample2.front"),
-                back: String(localized: "flashcards.sample2.back"),
-                frontNote: nil,
-                backNote: localizedOptional("flashcards.sample2.backNote")
-            ),
-            Flashcard(
-                front: String(localized: "flashcards.sample3.front"),
-                back: String(localized: "flashcards.sample3.back"),
-                frontNote: nil,
-                backNote: localizedOptional("flashcards.sample3.backNote")
-            )
-        ]
-    }
-
-    private static func localizedOptional(_ key: String) -> String? {
-        let value = Bundle.main.localizedString(forKey: key, value: "", table: nil)
-        return value.isEmpty ? nil : value
-    }
-
-    // End of store helpers
-}
-
 struct FlashcardsView: View {
-    @StateObject private var store: FlashcardsStore
+    @StateObject private var session: FlashcardSessionStore
     @StateObject private var viewModel: FlashcardsViewModel
     @ObservedObject private var speechManager: FlashcardSpeechManager
     @ObservedObject private var globalAudio = GlobalAudioSessionManager.shared
@@ -64,20 +16,19 @@ struct FlashcardsView: View {
     @Environment(\.locale) private var locale
     @Environment(\.dismiss) private var dismiss
 
-    init(title: String = String(localized: "flashcards.title"), cards: [Flashcard] = FlashcardsStore.defaultCards, deckID: UUID? = nil, startIndex: Int = 0, startEditing: Bool = false) {
-        let store = FlashcardsStore(cards: cards, startIndex: startIndex)
+    init(title: String = String(localized: "flashcards.title"), cards: [Flashcard] = FlashcardSessionStore.defaultCards, deckID: UUID? = nil, startIndex: Int = 0, startEditing: Bool = false) {
+        let sessionStore = FlashcardSessionStore(cards: cards, startIndex: startIndex)
         let viewModel = FlashcardsViewModel(
-            store: store,
+            session: sessionStore,
             title: title,
             cards: cards,
             deckID: deckID,
             startEditingOnAppear: startEditing
         )
-        _store = StateObject(wrappedValue: store)
+        _session = StateObject(wrappedValue: sessionStore)
         _viewModel = StateObject(wrappedValue: viewModel)
         _speechManager = ObservedObject(wrappedValue: viewModel.speechManager)
 
-        // 立即標記為活躍練習頁面，防止迷你播放器顯示
         GlobalAudioSessionManager.shared.enterActiveSession()
     }
 
@@ -86,21 +37,18 @@ struct FlashcardsView: View {
             VStack(alignment: .leading, spacing: DS.Spacing.lg) {
                 FlashcardsTopBar(
                     width: geo.size.width,
-                    index: store.index,
-                    total: store.cards.count,
+                    index: session.index,
+                    total: session.count,
                     sessionRightCount: viewModel.sessionRightCount,
                     sessionWrongCount: viewModel.sessionWrongCount,
                     onClose: {
-                        // 退出時不停止播放，讓音頻繼續在背景播放
-                        // 設定全局會話信息，以便回到原始頁面
                         if speechManager.isPlaying {
                             globalAudio.startSession(
                                 deckName: viewModel.title,
                                 deckID: viewModel.deckID,
-                                totalCards: store.cards.count
+                                totalCards: session.count
                             ) {
-                                // 回到此 FlashcardsView - 這裡需要導航邏輯
-                                // 暫時保留空實現，稍後會通過 RouterStore 實現
+                                // TODO: integrate RouterStore navigation once available
                             }
                         }
                         dismiss()
@@ -108,7 +56,7 @@ struct FlashcardsView: View {
                     onOpenSettings: { viewModel.showSettings = true }
                 )
 
-                if let card = store.current {
+                if let card = session.current {
                     if viewModel.isEditing {
                         ScrollView {
                             CardEditor(
@@ -129,157 +77,30 @@ struct FlashcardsView: View {
                             }
                         }
                     } else {
-
-                        ZStack {
-                            let preview = (mode == .annotate) ? viewModel.swipePreview : nil
-                            if mode == .annotate, let preview {
-                                FlashcardsClassificationCard(label: preview.label, color: preview.color)
-                                    .dsAnimation(DS.AnimationToken.subtle, value: preview)
-                            } else {
-                                let showEditButton = viewModel.deckID != nil && !viewModel.isEditing
-                                let extraTopPadding: CGFloat = showEditButton ? DS.Spacing.xl : .zero
-
-                                FlashcardsFlipCard(isFlipped: store.showBack) {
-                                    VStack(alignment: .leading, spacing: 10) {
-                                        FlashcardsMarkdownText(card.front)
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                        if let note = card.frontNote, !note.isEmpty {
-                                            FlashcardsNoteText(text: note)
-                                        }
-                                    }
-                                    .padding(.top, extraTopPadding)
-                                } back: {
-                                    VStack(alignment: .leading, spacing: 14) {
-                                        Spacer(minLength: DS.Spacing.lg)
-                                        VariantBracketComposerView(card.back, onComposedChange: { s in
-                                            viewModel.recordBackComposition(for: card.id, text: s)
-                                        })
-                                        .frame(maxWidth: .infinity, alignment: .center)
-                                        Spacer(minLength: DS.Spacing.xl)
-                                        if let note = card.backNote, !note.isEmpty {
-                                            Text(note)
-                                                .dsType(DS.Font.bodyEmph)
-                                                .foregroundStyle(.primary.opacity(0.85))
-                                                .frame(maxWidth: .infinity, alignment: .center)
-                                        }
-                                        Spacer(minLength: DS.Spacing.xl)
-                                    }
-                                    .padding(.top, extraTopPadding)
-                                } overlay: {
-                                    ZStack {
-                                        if showEditButton {
-                                            DSQuickActionIconButton(
-                                                systemName: "square.and.pencil",
-                                                labelKey: "action.edit",
-                                                action: { viewModel.beginEdit(progressStore: progressStore) },
-                                                shape: .circle,
-                                                style: .outline,
-                                                size: 32
-                                            )
-                                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                                            .padding(.top, DS.Spacing.md)
-                                            .padding(.trailing, DS.Spacing.md)
-                                        }
-
-                                        FlashcardsPlaySideButton(style: .outline, diameter: 28) {
-                                            let manager = speechManager
-                                            if store.showBack {
-                                                let text = viewModel.backTextToSpeak(for: card)
-                                                viewModel.speak(text: text, lang: manager.settings.backLang)
-                                            } else {
-                                                viewModel.speak(text: card.front, lang: manager.settings.frontLang)
-                                            }
-                                        }
-                                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-                                        .padding(.bottom, DS.Spacing.md)
-                                        .padding(.trailing, DS.Spacing.md)
-                                    }
-                                }
-                            }
-                        }
-                        .onTapGesture { viewModel.flipCurrentCard() }
-                        .offset(x: viewModel.dragX)
-                        .rotationEffect(.degrees(Double(max(-10, min(10, viewModel.dragX * 0.06)))))
-                        .frame(maxWidth: .infinity)
-                        .frame(height: max(300, geo.size.height * 0.62))
-                        .gesture(DragGesture(minimumDistance: 20)
-                            .onChanged { value in
-                                viewModel.dragX = value.translation.width
-                                let threshold: CGFloat = 80
-                                viewModel.updateSwipePreview(mode: mode, offset: viewModel.dragX, threshold: threshold)
-                            }
-                            .onEnded { value in
-                                let translation = value.translation.width
-                                let threshold: CGFloat = 80
-                                if abs(translation) > threshold {
-                                    let dir: CGFloat = translation > 0 ? 1 : -1
-                                    let outcome: AnnotateFeedback = dir > 0 ? .familiar : .unfamiliar
-
-                                    // 用戶手動操作優先，停止自動播放邏輯
-                                    let wasAutoPlaying = speechManager.isPlaying
-                                    if wasAutoPlaying {
-                                        speechManager.completedCardIndex = nil  // 清除待處理的自動完成事件
-                                    }
-
-                                    DSMotion.run(DS.AnimationToken.tossOut) { viewModel.dragX = dir * 800 }
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
-                                        if mode == .annotate {
-                                            viewModel.adjustProficiency(outcome, mode: mode, progressStore: progressStore)
-                                        }
-                                        viewModel.swipePreview = nil
-                                        let reachedEnd = viewModel.advance(mode: mode)
-                                        store.showBack = false
-                                        viewModel.dragX = -dir * 450
-                                        DSMotion.run(DS.AnimationToken.bouncy) { viewModel.dragX = 0 }
-
-                                        // 如果之前在播放，重新同步播放位置
-                                        if wasAutoPlaying {
-                                            viewModel.audio.restartMaintainingSettings()
-                                        }
-
-                                        if reachedEnd {
-                                            viewModel.completeSession(
-                                                bannerCenter: bannerCenter,
-                                                locale: locale,
-                                                dismiss: { dismiss() }
-                                            )
-                                        }
-                                    }
-                                } else {
-                                    DSMotion.run(DS.AnimationToken.bouncy) { viewModel.dragX = 0 }
-                                    viewModel.swipePreview = nil
-                                }
-                            })
-
-                        Spacer(minLength: DS.Spacing.md)
-
-                        // 簡潔的底部控制區域
-                        HStack {
-                            DSQuickActionIconButton(
-                                systemName: "arrow.uturn.left",
-                                labelKey: "flashcards.prev",
-                                action: { viewModel.handlePrevTapped(mode: mode, progressStore: progressStore) },
-                                shape: .circle,
-                                style: .outline,
-                                size: 44
-                            )
-
-                            Spacer()
-
-                            DSQuickActionIconButton(
-                                systemName: (speechManager.isPlaying && !speechManager.isPaused) ? "pause.fill" : "play.fill",
-                                labelKey: (speechManager.isPlaying && !speechManager.isPaused) ? "tts.pause" : "tts.play",
-                                action: { viewModel.ttsToggle() },
-                                shape: .circle,
-                                style: .outline,
-                                size: 48
-                            )
-                        }
-                        .padding(.horizontal, DS.Spacing.lg)
-                        .padding(.bottom, DS.Spacing.lg)
+                        FlashcardsCardStackView(
+                            card: card,
+                            mode: mode,
+                            session: session,
+                            viewModel: viewModel,
+                            speechManager: speechManager,
+                            bannerCenter: bannerCenter,
+                            progressStore: progressStore,
+                            availableSize: geo.size,
+                            locale: locale,
+                            dismiss: dismiss
+                        )
                     }
                 } else {
                     EmptyState()
+                }
+
+                if !viewModel.isEditing {
+                    FlashcardsBottomControls(
+                        mode: mode,
+                        viewModel: viewModel,
+                        speechManager: speechManager,
+                        progressStore: progressStore
+                    )
                 }
             }
             .padding(.horizontal, DS.Spacing.lg)
@@ -289,17 +110,14 @@ struct FlashcardsView: View {
             .background(DS.Palette.background)
             .dsAnimation(DS.AnimationToken.subtle, value: viewModel.isAudioActive)
         }
-        // Use custom top bar; hide system navigation chrome
         .navigationTitle("")
         .navigationBarBackButtonHidden(true)
         .toolbar { }
         .onAppear {
             viewModel.handleOnAppear(progressStore: progressStore)
-            // 標記進入活躍練習頁面
             globalAudio.enterActiveSession()
         }
         .onDisappear {
-            // 標記離開活躍練習頁面
             globalAudio.exitActiveSession()
         }
         .alert(Text("flashcards.alert.delete"), isPresented: binding(\.showDeleteConfirm)) {
@@ -328,56 +146,44 @@ struct FlashcardsView: View {
         } message: {
             Text("flashcards.emptyDeckReset.message")
         }
-        // 移除底部迷你播放器，改用右下角播放按鈕
         .onChange(of: speechManager.currentCardIndex, initial: false) { _, newValue in
-            if let v = newValue, v >= 0, v < store.cards.count {
+            if let v = newValue, v >= 0, v < session.count {
                 DSMotion.run(DS.AnimationToken.subtle) {
-                    store.index = v
-                    store.showBack = false
+                    session.setIndex(v)
+                    session.resetShowBack()
                 }
-                // 更新全局會話進度
                 globalAudio.updateSessionProgress(currentIndex: v)
             }
         }
         .onChange(of: speechManager.currentFace, initial: false) { _, face in
             switch face {
             case .front?:
-                DSMotion.run(DS.AnimationToken.subtle) { store.showBack = false }
+                DSMotion.run(DS.AnimationToken.subtle) { session.resetShowBack() }
             case .back?:
-                DSMotion.run(DS.AnimationToken.subtle) { store.showBack = true }
+                DSMotion.run(DS.AnimationToken.subtle) { session.showBack = true }
             default:
                 break
             }
         }
-        .onChange(of: store.index, initial: false) { _, _ in
-            // New card selected: clear previous composed cache to avoid stale playback
+        .onChange(of: session.index, initial: false) { _, _ in
             viewModel.resetComposedBackCache()
         }
         .onChange(of: speechManager.completedCardIndex, initial: false) { _, completedIndex in
             guard let completedIndex else { return }
-
-            // 檢查是否與當前卡片索引匹配（避免舊事件影響）
-            guard completedIndex == store.index else {
+            guard completedIndex == session.index else {
                 speechManager.completedCardIndex = nil
                 return
             }
-
-            // 確保仍在播放狀態（避免已停止播放後的延遲事件）
             guard speechManager.isPlaying else {
                 speechManager.completedCardIndex = nil
                 return
             }
-
-            // 自動歸類為不熟悉
             if mode == .annotate {
                 viewModel.adjustProficiency(.unfamiliar, mode: mode, progressStore: progressStore)
             }
-
-            // 自動前進到下一張卡片
             DSMotion.run(DS.AnimationToken.subtle) {
                 let reachedEnd = viewModel.advance(mode: mode)
-                store.showBack = false
-
+                session.resetShowBack()
                 if reachedEnd {
                     viewModel.completeSession(
                         bannerCenter: bannerCenter,
@@ -386,16 +192,11 @@ struct FlashcardsView: View {
                     )
                 }
             }
-
-            // 重置完成狀態
             speechManager.completedCardIndex = nil
         }
         .onChange(of: speechManager.didCompleteAllCards, initial: false) { _, didComplete in
             guard didComplete else { return }
-
-            // 播放完成，停止播放並顯示完成狀態
             speechManager.didCompleteAllCards = false
-
             viewModel.completeSession(
                 bannerCenter: bannerCenter,
                 locale: locale,
@@ -413,7 +214,6 @@ private extension FlashcardsView {
         )
     }
 }
-
 
 private struct EmptyState: View {
     @Environment(\.locale) private var locale

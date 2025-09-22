@@ -45,7 +45,7 @@ struct ChatPersistenceManagerTests {
         let sessionData = createTestSessionData()
 
         // 保存會話
-        manager.saveSession(sessionData)
+        manager.save(sessionData)
 
         // 嘗試加載會話來驗證保存成功
         let loadedSession = manager.loadSession(id: sessionData.id)
@@ -73,7 +73,7 @@ struct ChatPersistenceManagerTests {
                 pendingRequestType: nil
             )
 
-            manager.saveSession(sessionData)
+            manager.save(sessionData)
             let loadedSession = manager.loadSession(id: sessionData.id)
 
             #expect(loadedSession?.state == state)
@@ -88,7 +88,7 @@ struct ChatPersistenceManagerTests {
         let sessionData = createTestSessionData()
 
         // 先保存會話
-        manager.saveSession(sessionData)
+        manager.save(sessionData)
 
         // 然後加載會話
         let loadedSession = manager.loadSession(id: sessionData.id)
@@ -119,7 +119,7 @@ struct ChatPersistenceManagerTests {
         let manager = createTestManager()
 
         // 清理現有會話
-        manager.clearAllSessions()
+        manager.clearAll()
 
         // 創建多個會話
         let session1 = createTestSessionData()
@@ -127,12 +127,12 @@ struct ChatPersistenceManagerTests {
         let session3 = createTestSessionData()
 
         // 保存會話
-        manager.saveSession(session1)
-        manager.saveSession(session2)
-        manager.saveSession(session3)
+        manager.save(session1)
+        manager.save(session2)
+        manager.save(session3)
 
         // 加載活躍會話
-        let activeSessions = manager.loadActiveSessions()
+        let activeSessions = manager.loadAll()
 
         #expect(activeSessions.count == 3)
 
@@ -147,9 +147,9 @@ struct ChatPersistenceManagerTests {
         let manager = createTestManager()
 
         // 清理所有會話
-        manager.clearAllSessions()
+        manager.clearAll()
 
-        let activeSessions = manager.loadActiveSessions()
+        let activeSessions = manager.loadAll()
 
         #expect(activeSessions.isEmpty)
     }
@@ -162,14 +162,14 @@ struct ChatPersistenceManagerTests {
         let sessionData = createTestSessionData()
 
         // 先保存會話
-        manager.saveSession(sessionData)
+        manager.save(sessionData)
 
         // 驗證會話存在
         let loadedSession = manager.loadSession(id: sessionData.id)
         #expect(loadedSession != nil)
 
         // 刪除會話
-        manager.deleteSession(id: sessionData.id)
+        manager.delete(id: sessionData.id)
 
         // 驗證會話已被刪除
         let deletedSession = manager.loadSession(id: sessionData.id)
@@ -182,7 +182,7 @@ struct ChatPersistenceManagerTests {
         let nonExistentID = UUID()
 
         // 刪除不存在的會話應該安全執行
-        manager.deleteSession(id: nonExistentID)
+        manager.delete(id: nonExistentID)
 
         // 應該沒有崩潰或錯誤
         #expect(true)
@@ -198,17 +198,17 @@ struct ChatPersistenceManagerTests {
         let session1 = createTestSessionData()
         let session2 = createTestSessionData()
 
-        manager.saveSession(session1)
-        manager.saveSession(session2)
+        manager.save(session1)
+        manager.save(session2)
 
         // 驗證會話存在
-        #expect(manager.loadActiveSessions().count >= 2)
+        #expect(manager.loadAll().count >= 2)
 
         // 清理所有會話
-        manager.clearAllSessions()
+        manager.clearAll()
 
         // 驗證所有會話已被清理
-        let activeSessions = manager.loadActiveSessions()
+        let activeSessions = manager.loadAll()
         #expect(activeSessions.isEmpty)
     }
 
@@ -235,7 +235,7 @@ struct ChatPersistenceManagerTests {
             pendingRequestType: nil
         )
 
-        manager.saveSession(sessionData)
+        manager.save(sessionData)
         let loadedSession = manager.loadSession(id: sessionData.id)
 
         #expect(loadedSession?.messages.count == 4)
@@ -265,7 +265,7 @@ struct ChatPersistenceManagerTests {
             pendingRequestType: nil
         )
 
-        manager.saveSession(sessionData)
+        manager.save(sessionData)
         let loadedSession = manager.loadSession(id: sessionData.id)
 
         #expect(loadedSession?.checklist != nil)
@@ -289,7 +289,7 @@ struct ChatPersistenceManagerTests {
             pendingRequestType: nil
         )
 
-        manager.saveSession(sessionData)
+        manager.save(sessionData)
         let loadedSession = manager.loadSession(id: sessionData.id)
 
         #expect(loadedSession?.checklist == nil)
@@ -311,7 +311,7 @@ struct ChatPersistenceManagerTests {
             pendingRequestType: nil
         )
 
-        manager.saveSession(sessionData)
+        manager.save(sessionData)
         let loadedSession = manager.loadSession(id: sessionData.id)
 
         #expect(loadedSession?.messages.isEmpty == true)
@@ -336,7 +336,7 @@ struct ChatPersistenceManagerTests {
             pendingRequestType: nil
         )
 
-        manager.saveSession(sessionData)
+        manager.save(sessionData)
         let loadedSession = manager.loadSession(id: sessionData.id)
 
         #expect(loadedSession?.messages.first?.content == longContent)
@@ -361,7 +361,7 @@ struct ChatPersistenceManagerTests {
             pendingRequestType: nil
         )
 
-        manager.saveSession(sessionData)
+        manager.save(sessionData)
         let loadedSession = manager.loadSession(id: sessionData.id)
 
         #expect(loadedSession?.messages.first?.content == specialContent)
@@ -386,13 +386,13 @@ struct ChatPersistenceManagerTests {
                         hasPendingRequest: false,
                         pendingRequestType: nil
                     )
-                    manager.saveSession(sessionData)
+                    manager.save(sessionData)
                 }
             }
         }
 
         // 驗證所有會話都被保存
-        let activeSessions = manager.loadActiveSessions()
+        let activeSessions = manager.loadAll()
         #expect(activeSessions.count >= 10)
     }
 }
