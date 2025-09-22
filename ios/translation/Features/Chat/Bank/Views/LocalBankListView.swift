@@ -1,16 +1,5 @@
 import SwiftUI
 
-private func difficultyToRoman(_ difficulty: Int) -> String {
-    switch difficulty {
-    case 1: return "Ⅰ"
-    case 2: return "Ⅱ"
-    case 3: return "Ⅲ"
-    case 4: return "Ⅳ"
-    case 5: return "Ⅴ"
-    default: return "Ⅰ"
-    }
-}
-
 struct LocalBankListView: View {
     @ObservedObject var vm: CorrectionViewModel
     let bookName: String
@@ -185,67 +174,50 @@ struct LocalBankListView: View {
                 }
                 ForEach(items.indices, id: \.self) { i in
                     if i > 0 {
-                        DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.border)).padding(.vertical, DS.Spacing.sm)
+                        DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.border))
+                            .padding(.vertical, DS.Spacing.sm)
                     }
                     let item = items[i]
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text(item.zh)
-                            .dsType(DS.Font.serifTitle, lineSpacing: 6, tracking: 0.1)
-                            .padding(.vertical, 12)
-                            .padding(.horizontal, 12)
-                            .background(
-                                RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
-                                    .stroke(DS.Palette.border.opacity(DS.Opacity.muted), lineWidth: DS.BorderWidth.regular)
-                                    .background(DS.Palette.surface.opacity(0.0001))
-                            )
-                        HStack(alignment: .center, spacing: 8) {
-                            HStack(spacing: 8) {
-                                Text(difficultyToRoman(item.difficulty))
-                                    .dsType(DS.Font.labelSm)
-                                    .foregroundStyle(DS.Palette.primary.opacity(0.8))
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 2)
-                                    .background(
-                                        Capsule().fill(DS.Palette.primary.opacity(0.1))
-                                    )
-                                if let tags = item.tags, !tags.isEmpty {
-                                    Text(tags.joined(separator: ", "))
-                                        .dsType(DS.Font.caption)
-                                        .foregroundStyle(.secondary)
+                    let isCompleted = localProgress.isCompleted(book: bookName, itemId: item.id)
+
+                    BankItemCard(
+                        item: item,
+                        bookName: nil,
+                        isExpanded: Binding(
+                            get: { expanded.contains(item.id) },
+                            set: { newValue in
+                                if newValue {
+                                    expanded.insert(item.id)
+                                } else {
+                                    expanded.remove(item.id)
                                 }
                             }
-                            Spacer(minLength: 0)
-                            if localProgress.isCompleted(book: bookName, itemId: item.id) {
-                                NavigationLink {
-                                    BankPracticeRecordsView(bookName: bookName, item: item)
-                                } label: {
-                                    CompletionBadge(showsChevron: true)
-                                }
-                                .buttonStyle(.plain)
-                            } else {
-                                Button {
-                                    if let onPractice {
-                                        onPractice(item, item.tags?.first)
-                                        // 關閉本清單頁，與遠端列表行為一致（外層 handler 還會再關閉上一層頁面）
-                                        dismiss()
-                                    } else {
-                                        vm.bindLocalBankStores(localBank: localBank, progress: localProgress)
-                                        vm.startLocalPractice(bookName: bookName, item: item, tag: item.tags?.first)
-                                        dismiss()
-                                    }
-                                } label: { DSIconLabel(textKey: "action.practice", systemName: "play.fill") }
-                                    .buttonStyle(DSButton(style: .secondary, size: .compact))
-                            }
-                        }
-                        HintListSection(
-                            hints: item.hints,
-                            isExpanded: Binding(
-                                get: { expanded.contains(item.id) },
-                                set: { v in if v { expanded.insert(item.id) } else { expanded.remove(item.id) } }
-                            )
                         )
+                    ) {
+                        if isCompleted {
+                            NavigationLink {
+                                BankPracticeRecordsView(bookName: bookName, item: item)
+                            } label: {
+                                CompletionBadge(style: .outline(showsChevron: true, accent: DS.Palette.primary))
+                            }
+                            .buttonStyle(.plain)
+                        } else {
+                            Button {
+                                if let onPractice {
+                                    onPractice(item, item.tags?.first)
+                                    // 與遠端列表一致：觸發後關閉此清單
+                                    dismiss()
+                                } else {
+                                    vm.bindLocalBankStores(localBank: localBank, progress: localProgress)
+                                    vm.startLocalPractice(bookName: bookName, item: item, tag: item.tags?.first)
+                                    dismiss()
+                                }
+                            } label: {
+                                DSIconLabel(textKey: "action.practice", systemName: "play.fill")
+                            }
+                            .buttonStyle(DSButton(style: .secondary, size: .compact))
+                        }
                     }
-                    .padding(.vertical, 6)
                 }
             }
         }
@@ -276,28 +248,5 @@ struct LocalBankListView: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
         }
-    }
-}
-
-// 重用遠端清單的完成徽章樣式
-private struct CompletionBadge: View {
-    var showsChevron: Bool = false
-    @Environment(\.locale) private var locale
-    var body: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "checkmark.seal.fill")
-            Text(String(localized: "label.completed", locale: locale))
-            if showsChevron {
-                Image(systemName: "chevron.right")
-                    .font(.system(size: DS.IconSize.chevronSm, weight: .semibold))
-            }
-        }
-        .font(.subheadline)
-        .foregroundStyle(DS.Palette.primary)
-        .padding(.vertical, 6)
-        .padding(.horizontal, 10)
-        .background(Capsule().fill(Color.clear))
-        .overlay(Capsule().stroke(DS.Palette.primary.opacity(DS.Opacity.strong), lineWidth: DS.BorderWidth.regular))
-        .accessibilityLabel(Text("label.completed"))
     }
 }

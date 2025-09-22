@@ -1,27 +1,5 @@
 import SwiftUI
 
-private func difficultyToRoman(_ difficulty: Int) -> String {
-    switch difficulty {
-    case 1: return "Ⅰ"
-    case 2: return "Ⅱ"
-    case 3: return "Ⅲ"
-    case 4: return "Ⅳ"
-    case 5: return "Ⅴ"
-    default: return "Ⅰ"
-    }
-}
-
-private func difficultyColor(_ difficulty: Int) -> Color {
-    switch difficulty {
-    case 1: return DS.Palette.success
-    case 2: return DS.Brand.scheme.cornhusk
-    case 3: return DS.Brand.scheme.peachQuartz
-    case 4: return DS.Palette.warning
-    case 5: return DS.Palette.danger
-    default: return DS.Palette.neutral
-    }
-}
-
 struct AllBankItemsView: View {
     @ObservedObject var vm: CorrectionViewModel
     // Optional override: when provided, caller controls where the practice item goes
@@ -251,73 +229,37 @@ struct AllBankItemsView: View {
                 // Items list using exact LocalBankListView structure
                 ForEach(items.indices, id: \.self) { i in
                     if i > 0 {
-                        DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.border)).padding(.vertical, DS.Spacing.sm)
+                        DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.border))
+                            .padding(.vertical, DS.Spacing.sm)
                     }
                     let (item, bookName) = items[i]
-                    VStack(alignment: .leading, spacing: 10) {
-                        // Main content card - Chinese text
-                        Text(item.zh)
-                            .dsType(DS.Font.serifTitle, lineSpacing: 6, tracking: 0.1)
-                            .padding(.vertical, 12)
-                            .padding(.horizontal, 12)
-                            .background(
-                                RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
-                                    .stroke(DS.Palette.border.opacity(DS.Opacity.muted), lineWidth: DS.BorderWidth.regular)
-                                    .background(DS.Palette.surface.opacity(0.0001))
-                            )
+                    let isCompleted = localProgress.isCompleted(book: bookName, itemId: item.id)
 
-                        // Bottom row with difficulty, tags, and practice button
-                        HStack(alignment: .center, spacing: 8) {
-                            HStack(spacing: 8) {
-                                // Difficulty badge
-                                Text(difficultyToRoman(item.difficulty))
-                                    .dsType(DS.Font.labelSm)
-                                    .foregroundStyle(DS.Palette.primary.opacity(0.8))
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 2)
-                                    .background(
-                                        Capsule().fill(DS.Palette.primary.opacity(0.1))
-                                    )
-
-                                // Book name
-                                Text(bookName)
-                                    .dsType(DS.Font.caption)
-                                    .foregroundStyle(.secondary)
-
-                                // Tags
-                                if let tags = item.tags, !tags.isEmpty {
-                                    Text(tags.joined(separator: ", "))
-                                        .dsType(DS.Font.caption)
-                                        .foregroundStyle(.secondary)
+                    BankItemCard(
+                        item: item,
+                        bookName: bookName,
+                        isExpanded: Binding(
+                            get: { expanded.contains(item.id) },
+                            set: { newValue in
+                                if newValue {
+                                    expanded.insert(item.id)
+                                } else {
+                                    expanded.remove(item.id)
                                 }
                             }
-                            Spacer(minLength: 0)
-                            if localProgress.isCompleted(book: bookName, itemId: item.id) {
-                                CompletionBadge()
-                            } else {
-                                Button {
-                                    handlePractice(bookName: bookName, item: item, tag: item.tags?.first)
-                                } label: {
-                                    Label {
-                                        Text(String(localized: "action.practice", locale: locale))
-                                    } icon: {
-                                        Image(systemName: "play.fill")
-                                    }
-                                }
-                                .buttonStyle(DSButton(style: .secondary, size: .compact))
-                            }
-                        }
-
-                        // Hints section
-                        HintListSection(
-                            hints: item.hints,
-                            isExpanded: Binding(
-                                get: { expanded.contains(item.id) },
-                                set: { v in if v { expanded.insert(item.id) } else { expanded.remove(item.id) } }
-                            )
                         )
+                    ) {
+                        if isCompleted {
+                            CompletionBadge()
+                        } else {
+                            Button {
+                                handlePractice(bookName: bookName, item: item, tag: item.tags?.first)
+                            } label: {
+                                DSIconLabel(textKey: "action.practice", systemName: "play.fill")
+                            }
+                            .buttonStyle(DSButton(style: .secondary, size: .compact))
+                        }
                     }
-                    .padding(.vertical, 6)
                 }
             }
             .padding(.horizontal, DS.Spacing.lg)
@@ -362,23 +304,5 @@ struct AllBankItemsView: View {
             vm.startLocalPractice(bookName: bookName, item: item, tag: tag)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { dismiss() }
         }
-    }
-}
-
-// Completion badge for completed items (matching LocalBankListView style)
-private struct CompletionBadge: View {
-    @Environment(\.locale) private var locale
-    var body: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "checkmark.seal.fill")
-            Text(String(localized: "label.completed", locale: locale))
-        }
-        .font(.subheadline)
-        .foregroundStyle(DS.Palette.primary)
-        .padding(.vertical, 6)
-        .padding(.horizontal, 10)
-        .background(Capsule().fill(Color.clear))
-        .overlay(Capsule().stroke(DS.Palette.primary.opacity(DS.Opacity.strong), lineWidth: DS.BorderWidth.regular))
-        .accessibilityLabel(Text("label.completed"))
     }
 }

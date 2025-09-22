@@ -36,13 +36,13 @@ struct BankItemDetailView: View {
                                 .dsType(DS.Font.caption)
                                 .foregroundStyle(.secondary)
                             Spacer()
-                            Text(difficultyToRoman(item.difficulty))
+                            Text(BankItemDifficulty.romanNumeral(for: item.difficulty))
                                 .dsType(DS.Font.labelSm)
-                                .foregroundStyle(difficultyColor(item.difficulty))
+                                .foregroundStyle(BankItemDifficulty.tint(for: item.difficulty))
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 2)
                                 .background(
-                                    Capsule().fill(difficultyColor(item.difficulty).opacity(0.1))
+                                    Capsule().fill(BankItemDifficulty.tint(for: item.difficulty).opacity(0.1))
                                 )
                         }
 
@@ -52,7 +52,7 @@ struct BankItemDetailView: View {
                                     .dsType(DS.Font.caption)
                                     .foregroundStyle(.secondary)
                                 Spacer()
-                                CompletionBadge()
+                                CompletionBadge(style: .filled(accent: DS.Palette.success))
                             }
                         }
                     }
@@ -150,45 +150,5 @@ struct BankItemDetailView: View {
             vm.startLocalPractice(bookName: bookName, item: item, tag: item.tags?.first)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { dismiss() }
         }
-    }
-}
-
-private func difficultyToRoman(_ difficulty: Int) -> String {
-    switch difficulty {
-    case 1: return "Ⅰ"
-    case 2: return "Ⅱ"
-    case 3: return "Ⅲ"
-    case 4: return "Ⅳ"
-    case 5: return "Ⅴ"
-    default: return "Ⅰ"
-    }
-}
-
-private func difficultyColor(_ difficulty: Int) -> Color {
-    switch difficulty {
-    case 1: return DS.Palette.success
-    case 2: return DS.Brand.scheme.cornhusk
-    case 3: return DS.Brand.scheme.peachQuartz
-    case 4: return DS.Palette.warning
-    case 5: return DS.Palette.danger
-    default: return DS.Palette.neutral
-    }
-}
-
-// Completion badge for completed items
-private struct CompletionBadge: View {
-    @Environment(\.locale) private var locale
-    var body: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "checkmark.seal.fill")
-                .font(.caption)
-                .foregroundStyle(DS.Palette.success)
-            Text(String(localized: "label.completed", locale: locale))
-                .dsType(DS.Font.caption)
-                .foregroundStyle(DS.Palette.success)
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(DS.Palette.success.opacity(0.1), in: Capsule())
     }
 }
