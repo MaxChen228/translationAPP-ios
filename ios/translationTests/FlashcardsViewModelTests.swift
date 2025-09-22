@@ -64,7 +64,7 @@ final class FlashcardsViewModelTests {
         #expect(testAudio.speakCalls.isEmpty)
     }
 
-    @Test func flipSpeaksWhenAudioInactive() async throws {
+    @Test func flipDoesNotTriggerAudioWhenInactive() async throws {
         let viewModel = makeViewModel()
         let testAudio = TestAudioController(viewModel: viewModel, active: false)
         viewModel.audio = testAudio
@@ -72,7 +72,7 @@ final class FlashcardsViewModelTests {
         viewModel.flipCurrentCard()
 
         #expect(testAudio.stopPlaybackCalled == false)
-        #expect(testAudio.speakCalls.count == 1)
+        #expect(testAudio.speakCalls.isEmpty)
     }
 
     @Test func annotateFlowMarksFamiliar() async throws {

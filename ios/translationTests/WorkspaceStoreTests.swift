@@ -22,6 +22,7 @@ struct WorkspaceStoreTests {
 
     @Test("WorkspaceStore initializes with default workspace")
     func testInitialization() {
+        UserDefaults.standard.removeObject(forKey: "workspaces.list")
         let store = WorkspaceStore()
 
         // 應該至少有一個預設工作區

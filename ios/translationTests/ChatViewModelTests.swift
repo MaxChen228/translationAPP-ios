@@ -22,7 +22,8 @@ struct ChatViewModelTests {
         #expect(viewModel.inputText.isEmpty)
         #expect(!viewModel.isBackgroundActive)
         #expect(!viewModel.showContinuationBanner)
-        #expect(viewModel.messages.isEmpty)
+        #expect(viewModel.messages.count == 1)
+        #expect(viewModel.messages.first?.role == .assistant)
         #expect(!viewModel.isLoading)
     }
 
@@ -33,6 +34,8 @@ struct ChatViewModelTests {
 
         #expect(viewModel.inputText.isEmpty)
         #expect(!viewModel.isBackgroundActive)
+        #expect(!viewModel.messages.isEmpty)
+        #expect(viewModel.messages.first?.role == .assistant)
     }
 
     // MARK: - Input Text Tests
@@ -156,8 +159,9 @@ struct ChatViewModelTests {
 
         viewModel.reset()
 
-        // 對話應該被清空
-        #expect(viewModel.messages.isEmpty)
+        // 對話應該只剩系統問候
+        #expect(viewModel.messages.count == 1)
+        #expect(viewModel.messages.first?.role == .assistant)
         #expect(!viewModel.showContinuationBanner)
     }
 
@@ -180,14 +184,20 @@ struct ChatViewModelTests {
     // MARK: - Background State Tests
 
     @Test("ChatViewModel tracks background state")
-    func testBackgroundState() {
-        let viewModel = ChatViewModel()
+    func testBackgroundState() async {
+        let manager = ChatManager.shared
+        manager.isBackgroundTaskActive = false
 
-        // 初始狀態應該是非背景
+        let viewModel = ChatViewModel()
         #expect(!viewModel.isBackgroundActive)
 
-        // 這個測試檢查背景狀態追蹤
-        // 實際的背景狀態變化由 ChatManager 控制
+        manager.isBackgroundTaskActive = true
+        await Task.yield()
+        #expect(viewModel.isBackgroundActive)
+
+        manager.isBackgroundTaskActive = false
+        await Task.yield()
+        #expect(!viewModel.isBackgroundActive)
     }
 }
 
