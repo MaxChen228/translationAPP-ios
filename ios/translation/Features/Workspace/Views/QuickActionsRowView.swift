@@ -14,7 +14,16 @@ struct QuickActionsRowView: View {
     @StateObject private var sharedChatViewModel = ChatViewModel()
 
     var body: some View {
-        let isEmpty = quickActions.items.isEmpty
+        let coordinator = QuickActionsCoordinator(
+            workspaceStore: workspaceStore,
+            quickActions: quickActions,
+            router: router,
+            localBank: localBank,
+            localProgress: localProgress,
+            editController: editController
+        )
+        let items = coordinator.items()
+        let isEmpty = items.isEmpty
 
         VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
             QuickActionsHeaderView(
@@ -26,42 +35,41 @@ struct QuickActionsRowView: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    ForEach(quickActions.items) { item in
-                        quickActionTile(for: item)
+                    ForEach(items) { item in
+                        quickActionTile(for: item, coordinator: coordinator)
                     }
 
                     if editController.isEditing || isEmpty {
                         AddQuickActionCard()
                             .frame(width: DS.IconSize.entryCardWidth)
                             .onTapGesture { onRequestAdd() }
-                            .onDrop(of: [.text], delegate: QuickActionsAppendDropDelegate(store: quickActions, editController: editController))
+                            .onDrop(of: [.text], delegate: QuickActionsAppendDropDelegate(coordinator: coordinator))
                     }
                 }
                 .padding(.horizontal, 2)
-                .onDrop(of: [.text], delegate: QuickActionsClearDragDropDelegate(editController: editController))
+                .onDrop(of: [.text], delegate: QuickActionsClearDragDropDelegate(coordinator: coordinator))
             }
         }
     }
 
     @ViewBuilder
-    private func quickActionTile(for item: QuickActionItem) -> some View {
+    private func quickActionTile(for item: QuickActionItem, coordinator: QuickActionsCoordinator) -> some View {
         let baseCard = quickActionCard(for: item)
             .frame(width: DS.IconSize.entryCardWidth)
 
         Group {
             if editController.isEditing {
-                editingTile(baseCard: baseCard, item: item)
+                editingTile(baseCard: baseCard, item: item, coordinator: coordinator)
             } else {
-                navigationTile(baseCard: baseCard, item: item)
+                navigationTile(baseCard: baseCard, item: item, coordinator: coordinator)
             }
         }
         .shelfWiggle(isActive: editController.isEditing)
         .shelfConditionalDrag(editController.isEditing) {
-            editController.beginDragging(item.id)
-            return NSItemProvider(object: item.id.uuidString as NSString)
+            coordinator.beginDragging(item.id)
         }
         .simultaneousGesture(editController.isEditing ? TapGesture().onEnded { editController.exitEditMode() } : nil)
-        .onDrop(of: [.text], delegate: QuickActionsReorderDropDelegate(item: item, store: quickActions, editController: editController))
+        .onDrop(of: [.text], delegate: QuickActionsReorderDropDelegate(item: item, coordinator: coordinator))
     }
 
     @ViewBuilder
@@ -81,8 +89,10 @@ struct QuickActionsRowView: View {
     }
 
     @ViewBuilder
-    private func navigationTile<Content: View>(baseCard: Content, item: QuickActionItem) -> some View {
-        navigationWrapper(for: item) {
+    private func navigationTile<Content: View>(baseCard: Content,
+                                              item: QuickActionItem,
+                                              coordinator: QuickActionsCoordinator) -> some View {
+        coordinator.navigationLink(for: item, chatViewModel: sharedChatViewModel) {
             baseCard
         }
         .buttonStyle(DSCardLinkStyle())
@@ -92,16 +102,18 @@ struct QuickActionsRowView: View {
                 Haptics.medium()
             }
             Button(String(localized: "action.delete", locale: locale), role: .destructive) {
-                quickActions.remove(id: item.id)
+                coordinator.remove(item)
             }
         }
     }
 
-    private func editingTile<Content: View>(baseCard: Content, item: QuickActionItem) -> some View {
+    private func editingTile<Content: View>(baseCard: Content,
+                                            item: QuickActionItem,
+                                            coordinator: QuickActionsCoordinator) -> some View {
         baseCard
             .overlay(alignment: .topTrailing) {
                 Button(role: .destructive) {
-                    quickActions.remove(id: item.id)
+                    coordinator.remove(item)
                 } label: {
                     Image(systemName: "minus.circle.fill")
                         .font(.system(size: 20))
@@ -115,43 +127,9 @@ struct QuickActionsRowView: View {
                     editController.exitEditMode()
                 }
                 Button(String(localized: "action.delete", locale: locale), role: .destructive) {
-                    quickActions.remove(id: item.id)
+                    coordinator.remove(item)
                 }
             }
-    }
-
-    @ViewBuilder
-    private func navigationWrapper<Content: View>(for item: QuickActionItem, @ViewBuilder content: () -> Content) -> some View {
-        switch item.type {
-        case .chat:
-            NavigationLink { ChatWorkspaceView(viewModel: sharedChatViewModel) } label: { content() }
-        case .flashcards:
-            NavigationLink { FlashcardDecksView() } label: { content() }
-        case .bank:
-            if let workspace = workspaceStore.workspaces.first {
-                NavigationLink {
-                    BankBooksView(
-                        vm: workspaceStore.vm(for: workspace.id),
-                        onPracticeLocal: handleLocalPractice
-                    )
-                } label: { content() }
-            } else {
-                content()
-                    .opacity(0.5)
-            }
-        case .calendar:
-            NavigationLink { CalendarView() } label: { content() }
-        case .settings:
-            NavigationLink { SettingsView() } label: { content() }
-        }
-    }
-
-    private func handleLocalPractice(bookName: String, item: BankItem, tag: String?) {
-        let newWorkspace = workspaceStore.addWorkspace()
-        let newViewModel = workspaceStore.vm(for: newWorkspace.id)
-        newViewModel.bindLocalBankStores(localBank: localBank, progress: localProgress)
-        newViewModel.startLocalPractice(bookName: bookName, item: item, tag: tag)
-        router.open(workspaceID: newWorkspace.id)
     }
 }
 
@@ -255,65 +233,5 @@ private struct SettingsEntryCard: View {
                 .dsType(DS.Font.caption)
                 .foregroundStyle(.secondary)
         }
-    }
-}
-
-// MARK: - Drag & Drop Delegates
-
-private struct QuickActionsReorderDropDelegate: DropDelegate {
-    let item: QuickActionItem
-    let store: QuickActionsStore
-    let editController: ShelfEditController<UUID>
-
-    func validateDrop(info: DropInfo) -> Bool { editController.isEditing }
-    func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
-
-    func dropEntered(info: DropInfo) {
-        guard editController.isEditing,
-              let draggingID = editController.draggingID,
-              draggingID != item.id,
-              let from = store.index(of: draggingID),
-              let to = store.index(of: item.id) else { return }
-
-        if from != to {
-            store.move(from: from, to: to > from ? to + 1 : to)
-            Haptics.lightTick()
-        }
-    }
-
-    func performDrop(info: DropInfo) -> Bool {
-        guard editController.isEditing else { return false }
-        editController.endDragging()
-        Haptics.success()
-        return true
-    }
-}
-
-private struct QuickActionsAppendDropDelegate: DropDelegate {
-    let store: QuickActionsStore
-    let editController: ShelfEditController<UUID>
-
-    func validateDrop(info: DropInfo) -> Bool { editController.isEditing }
-    func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
-
-    func performDrop(info: DropInfo) -> Bool {
-        guard editController.isEditing,
-              let draggingID = editController.draggingID,
-              let from = store.index(of: draggingID) else { return false }
-
-        store.move(from: from, to: store.items.count)
-        editController.endDragging()
-        Haptics.success()
-        return true
-    }
-}
-
-private struct QuickActionsClearDragDropDelegate: DropDelegate {
-    let editController: ShelfEditController<UUID>
-    func validateDrop(info: DropInfo) -> Bool { editController.isEditing }
-    func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
-    func performDrop(info: DropInfo) -> Bool {
-        editController.endDragging()
-        return true
     }
 }
