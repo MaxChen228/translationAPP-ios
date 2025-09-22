@@ -77,63 +77,72 @@ struct ContentView: View {
                             },
                             onSavePracticeRecord: {
                                 vm.savePracticeRecord()
-                            }
+                            },
+                            isMergeMode: vm.isMergeMode,
+                            mergeSelection: vm.mergeSelection,
+                            mergeInFlight: vm.mergeInFlight,
+                            mergedHighlightID: vm.lastMergedErrorID,
+                            onEnterMergeMode: { vm.enterMergeMode(initialErrorID: $0) },
+                            onToggleSelection: { vm.toggleMergeSelection(for: $0) },
+                            onMergeConfirm: { await vm.performMergeIfNeeded() },
+                            onCancelMerge: { vm.cancelMergeMode() }
                         )
                     }
 
-                    // 內嵌於頁面底部的操作列（不再懸浮）
-                    HStack(spacing: DS.Spacing.md) {
-                        Button {
-                            if AppConfig.correctAPIURL == nil {
-                                bannerCenter.show(title: String(localized: "banner.backend.missing.title", locale: locale), subtitle: String(localized: "banner.backend.missing.subtitle", locale: locale))
-                            } else {
-                                Task { await vm.runCorrection() }
-                                focused = nil
-                            }
-                        } label: {
-                            Group {
-                                if vm.isLoading {
-                                    HStack(spacing: 8) {
-                                        ProgressView()
-                                            .tint(.white)
-                                        Text("content.correcting")
-                                    }
+                    if !vm.isMergeMode {
+                        // 內嵌於頁面底部的操作列（不再懸浮）
+                        HStack(spacing: DS.Spacing.md) {
+                            Button {
+                                if AppConfig.correctAPIURL == nil {
+                                    bannerCenter.show(title: String(localized: "banner.backend.missing.title", locale: locale), subtitle: String(localized: "banner.backend.missing.subtitle", locale: locale))
                                 } else {
-                                    DSIconLabel(textKey: "content.correct", systemName: "checkmark.seal.fill")
+                                    Task { await vm.runCorrection() }
+                                    focused = nil
                                 }
+                            } label: {
+                                Group {
+                                    if vm.isLoading {
+                                        HStack(spacing: 8) {
+                                            ProgressView()
+                                                .tint(.white)
+                                            Text("content.correcting")
+                                        }
+                                    } else {
+                                        DSIconLabel(textKey: "content.correct", systemName: "checkmark.seal.fill")
+                                    }
+                                }
+                                .frame(maxWidth: .infinity)
                             }
-                            .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(DSButton(style: .primary, size: .full))
-                        .disabled(vm.isLoading)
+                            .buttonStyle(DSButton(style: .primary, size: .full))
+                            .disabled(vm.isLoading)
 
-                        // 下一題（略過已完成）：需有題庫關聯與 BACKEND_URL
-                        Button {
-                            Task { await vm.loadNextPractice() }
-                            focused = .en
-                        } label: {
-                            DSIconLabel(textKey: "content.next", systemName: "arrow.right.circle.fill")
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.9)
-                        }
-                        .buttonStyle(DSButton(style: .secondary, size: .full))
-                        .disabled(vm.isLoading || vm.currentBankItemId == nil)
+                            Button {
+                                Task { await vm.loadNextPractice() }
+                                focused = .en
+                            } label: {
+                                DSIconLabel(textKey: "content.next", systemName: "arrow.right.circle.fill")
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.9)
+                            }
+                            .buttonStyle(DSButton(style: .secondary, size: .full))
+                            .disabled(vm.isLoading || vm.currentBankItemId == nil)
 
-                        Button(role: .destructive) {
-                            vm.reset()
-                        } label: {
-                            Image(systemName: "trash")
-                                .frame(width: DS.IconSize.toolbarIcon, height: DS.IconSize.toolbarIcon)
+                            Button(role: .destructive) {
+                                vm.reset()
+                            } label: {
+                                Image(systemName: "trash")
+                                    .frame(width: DS.IconSize.toolbarIcon, height: DS.IconSize.toolbarIcon)
+                            }
+                            .buttonStyle(DSButton(style: .secondary, size: .full))
+                            .frame(width: DS.ButtonSize.compact)
+                            .disabled(vm.isLoading)
                         }
-                        .buttonStyle(DSButton(style: .secondary, size: .full))
-                        .frame(width: DS.ButtonSize.compact)
-                        .disabled(vm.isLoading)
+                        .padding(.top, DS.Spacing.md)
                     }
-                    .padding(.top, DS.Spacing.md)
                 }
-            }
-            .disabled(vm.isLoading)
-            .navigationTitle(Text("nav.translate"))
+        }
+        .disabled(vm.isLoading)
+        .navigationTitle(Text("nav.translate"))
             .toolbar {
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()

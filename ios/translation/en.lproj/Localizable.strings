@@ -148,6 +148,10 @@
 
 /* Backend errors */
 "error.backend.missing" = "Network unavailable. Please check connection.";
+"error.merge.backendMissing" = "Cannot merge because backend is unavailable.";
+"merge.button.merge" = "Merge";
+"merge.button.cancel" = "Cancel";
+"merge.selection.hint" = "Selected %d / 2";
 "error.chat.backendMissing" = "Network unavailable. Chat is currently unavailable.";
 
 /* Flashcard samples */

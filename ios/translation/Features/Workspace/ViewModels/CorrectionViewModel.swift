@@ -31,9 +31,14 @@ final class CorrectionViewModel: ObservableObject {
 
     // Networking
     private let correctionRunner: CorrectionRunning
+    private let mergeService: ErrorMerging
     private let workspaceID: String
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
+    @Published var isMergeMode: Bool = false
+    @Published var mergeSelection: [UUID] = []
+    @Published var mergeInFlight: Bool = false
+    @Published var lastMergedErrorID: UUID? = nil
 
     // Practice hints (from bank) to render under Chinese input
     @Published var practicedHints: [BankHint] = [] { didSet { persistHints() } }
@@ -77,10 +82,12 @@ final class CorrectionViewModel: ObservableObject {
 
     init(
         correctionRunner: CorrectionRunning = CorrectionServiceFactory.makeDefault(),
+        mergeService: ErrorMerging = ErrorMergeServiceFactory.makeDefault(),
         persistence: WorkspaceStatePersisting? = nil,
         workspaceID: String = "default"
     ) {
         self.correctionRunner = correctionRunner
+        self.mergeService = mergeService
         self.workspaceID = workspaceID
         let persistence = persistence ?? DefaultsWorkspaceStatePersistence(workspaceID: workspaceID)
         self.persistence = persistence
@@ -118,6 +125,7 @@ final class CorrectionViewModel: ObservableObject {
         practicedHints = []
         showPracticedHints = false
         currentBankSuggestionText = nil
+        cancelMergeMode()
         // 同步清掉持久化，符合「除非按右下角刪除才清空」
         persistence.removeAll([
             .inputZh,
@@ -196,6 +204,7 @@ final class CorrectionViewModel: ObservableObject {
             ])
         }
         isLoading = false
+        cancelMergeMode()
     }
 
     // （移除遠端題庫練習入口）
@@ -336,5 +345,94 @@ final class CorrectionViewModel: ObservableObject {
             "score": response.score,
             "errors": response.errors.count
         ])
+    }
+
+    // MARK: - Merge Mode
+
+    func enterMergeMode(initialErrorID: UUID?) {
+        guard response != nil else { return }
+        if !isMergeMode {
+            isMergeMode = true
+            mergeSelection = []
+        }
+        if let id = initialErrorID {
+            mergeSelection = [id]
+            selectedErrorID = id
+        }
+    }
+
+    func toggleMergeSelection(for id: UUID) {
+        guard isMergeMode, !mergeInFlight else { return }
+        if let index = mergeSelection.firstIndex(of: id) {
+            mergeSelection.remove(at: index)
+        } else {
+            guard mergeSelection.count < 2 else { return }
+            mergeSelection.append(id)
+            selectedErrorID = id
+        }
+    }
+
+    func cancelMergeMode() {
+        isMergeMode = false
+        mergeSelection = []
+        mergeInFlight = false
+    }
+
+    var canMergeSelectedErrors: Bool {
+        mergeSelection.count == 2 && !mergeInFlight
+    }
+
+    @discardableResult
+    func isErrorSelected(_ id: UUID) -> Bool {
+        mergeSelection.contains(id)
+    }
+
+    func performMergeIfNeeded() async {
+        guard canMergeSelectedErrors,
+              let response = response else { return }
+        let selected = mergeSelection
+        guard let first = response.errors.first(where: { $0.id == selected[0] }),
+              let second = response.errors.first(where: { $0.id == selected[1] }) else { return }
+
+        mergeInFlight = true
+        defer { mergeInFlight = false }
+        do {
+            let rationale = "Selected two errors to combine into a single habit phrase."
+            let merged = try await mergeService.merge(
+                zh: inputZh,
+                en: inputEn,
+                corrected: response.corrected,
+                errors: [first, second],
+                rationale: rationale
+            )
+
+            var updatedErrors = response.errors.filter { !selected.contains($0.id) }
+            let insertionIndex = response.errors.firstIndex(where: { $0.id == selected[0] }) ?? updatedErrors.count
+            updatedErrors.insert(merged, at: min(insertionIndex, updatedErrors.count))
+
+            var newResponse = response
+            newResponse.errors = updatedErrors
+            self.response = newResponse
+
+            self.highlights = Highlighter.computeHighlights(text: inputEn, errors: updatedErrors)
+            self.correctedHighlights = Highlighter.computeHighlightsInCorrected(text: response.corrected, errors: updatedErrors)
+            self.selectedErrorID = merged.id
+            if let currentFilter = filterType, currentFilter != merged.type {
+                filterType = merged.type
+            }
+
+            lastMergedErrorID = merged.id
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
+                if self?.lastMergedErrorID == merged.id {
+                    self?.lastMergedErrorID = nil
+                }
+            }
+
+            cancelMergeMode()
+        } catch {
+            let nsError = error as NSError
+            errorMessage = nsError.localizedDescription
+            AppLog.aiError("Merge errors failed: \(nsError.localizedDescription)")
+        }
     }
 }

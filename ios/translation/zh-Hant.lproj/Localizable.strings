@@ -176,6 +176,10 @@
 
 /* 後端錯誤 */
 "error.backend.missing" = "網路無法連線，請檢查設定。";
+"error.merge.backendMissing" = "後端無法連線，目前無法合併錯誤卡片。";
+"merge.button.merge" = "合併";
+"merge.button.cancel" = "取消";
+"merge.selection.hint" = "已選 %d / 2";
 "error.chat.backendMissing" = "網路無法連線，聊天功能暫時無法使用。";
 
 /* 單字卡示例 */
