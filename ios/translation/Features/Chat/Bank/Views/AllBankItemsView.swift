@@ -227,6 +227,12 @@ struct AllBankItemsView: View {
                     }
                 }
 
+                DSSeparator(color: DS.Palette.border.opacity(DS.Opacity.hairline))
+                    .frame(width: 160)
+                    .padding(.top, DS.Spacing.lg)
+                    .padding(.bottom, DS.Spacing.md)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
                 // Empty states
                 if items.isEmpty && !allItems.isEmpty {
                     EmptyStateCard(
