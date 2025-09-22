@@ -93,7 +93,10 @@ struct CloudBankLibraryView: View {
             return
         }
         do {
-            books = try await service.fetchBooks()
+            let fetched = try await service.fetchBooks()
+            books = fetched.sorted { lhs, rhs in
+                lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
+            }
         } catch {
             self.error = (error as NSError).localizedDescription
             books = []
