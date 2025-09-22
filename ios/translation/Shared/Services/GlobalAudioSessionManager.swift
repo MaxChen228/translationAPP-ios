@@ -36,6 +36,15 @@ final class GlobalAudioSessionManager: ObservableObject {
             .assign(to: \.isActive, on: self)
             .store(in: &cancellables)
 
+        speechManager.$currentCardIndex
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] idx in
+                guard let self, var session = self.currentSession, let idx else { return }
+                session.currentCardIndex = idx
+                self.currentSession = session
+            }
+            .store(in: &cancellables)
+
         // 監控迷你播放器顯示狀態 - 只在非活躍練習頁面時顯示
         $isActive
             .combineLatest($currentSession, $isInActiveSession)
@@ -62,6 +71,7 @@ final class GlobalAudioSessionManager: ObservableObject {
             totalCards: totalCards,
             startedAt: Date()
         )
+        self.currentSession?.currentCardIndex = speechManager.currentCardIndex ?? 0
         self.onReturnToSession = onReturnToSession
     }
 
@@ -108,7 +118,15 @@ final class GlobalAudioSessionManager: ObservableObject {
     }
 
     func skipToNext() {
+        speechManager.markUserOperationStart()
         speechManager.speechEngine.skip()
+        speechManager.markUserOperationEnd()
+    }
+
+    func skipToPrevious() {
+        speechManager.markUserOperationStart()
+        speechManager.speechEngine.skipToPreviousCard()
+        speechManager.markUserOperationEnd()
     }
 
     func stopPlayback() {

@@ -44,12 +44,27 @@ struct DeckDetailView: View {
                     VStack(spacing: 10) {
                         ForEach(d.cards) { card in
                             let idx = d.cards.firstIndex(where: { $0.id == card.id }) ?? 0
-                            NavigationLink {
-                                FlashcardsView(title: d.name, cards: d.cards, deckID: d.id, startIndex: idx)
-                            } label: {
-                                CardPreviewRow(card: card)
+                            ZStack(alignment: .topTrailing) {
+                                NavigationLink {
+                                    FlashcardsView(title: d.name, cards: d.cards, deckID: d.id, startIndex: idx)
+                                } label: {
+                                    CardPreviewRow(card: card)
+                                }
+                                .buttonStyle(DSCardLinkStyle())
+
+                                DSQuickActionIconButton(
+                                    systemName: "square.and.pencil",
+                                    labelKey: "action.edit",
+                                    action: {
+                                        newEditorRoute = NewEditorRoute(deckID: d.id, startIndex: idx)
+                                    },
+                                    shape: .circle,
+                                    style: .outline,
+                                    size: 28
+                                )
+                                .padding(.trailing, DS.Spacing.sm)
+                                .padding(.top, DS.Spacing.sm)
                             }
-                            .buttonStyle(DSCardLinkStyle())
                         }
                     }
                 } else {

@@ -163,6 +163,20 @@ struct FlashcardsView: View {
                                         }
                                     }
                                 }
+                                .overlay(alignment: .topTrailing) {
+                                    if viewModel.deckID != nil, !viewModel.isEditing {
+                                        DSQuickActionIconButton(
+                                            systemName: "square.and.pencil",
+                                            labelKey: "action.edit",
+                                            action: { viewModel.beginEdit() },
+                                            shape: .circle,
+                                            style: .outline,
+                                            size: 32
+                                        )
+                                        .padding(.trailing, DS.Spacing.md)
+                                        .padding(.top, DS.Spacing.md)
+                                    }
+                                }
                             }
                         }
                         .onTapGesture { viewModel.flipCurrentCard() }

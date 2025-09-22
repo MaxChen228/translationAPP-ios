@@ -86,6 +86,31 @@ final class SpeechEngine: NSObject, ObservableObject, AVSpeechSynthesizerDelegat
         advance()
     }
 
+    func skipToPreviousCard() {
+        guard !queue.isEmpty else { return }
+        pendingWork?.cancel()
+        synth.stopSpeaking(at: .immediate)
+
+        let inferredCurrent = currentCardIndex
+            ?? (currentIndex < queue.count ? queue[currentIndex].cardIndex : queue.last?.cardIndex)
+            ?? 0
+        let targetCard = max(0, inferredCurrent - 1)
+
+        if let newIndex = queue.firstIndex(where: { $0.cardIndex == targetCard }) {
+            currentIndex = newIndex
+            currentCardIndex = targetCard
+            currentFace = queue[newIndex].face
+        } else {
+            currentIndex = 0
+            currentCardIndex = queue.first?.cardIndex ?? 0
+            currentFace = queue.first?.face
+        }
+
+        isPlaying = true
+        isPaused = false
+        playCurrent()
+    }
+
     // MARK: - AVSpeechSynthesizerDelegate
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
         guard isPlaying else { return }
