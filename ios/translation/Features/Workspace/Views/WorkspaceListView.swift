@@ -432,12 +432,6 @@ private struct QuickActionsRow: View {
                     }
                     .buttonStyle(DSButton(style: .secondary, size: .compact))
                     .padding(.top, 4)
-                } else {
-                    Button(editController.isEditing ? String(localized: "action.done", locale: locale) : String(localized: "action.edit", locale: locale)) {
-                        onToggleEditing()
-                    }
-                    .buttonStyle(DSButton(style: .secondary, size: .compact))
-                    .padding(.top, 4)
                 }
             }
     }
