@@ -4,7 +4,7 @@ struct DayDetailView: View {
     let stats: DayPracticeStats
 
     var body: some View {
-        DSOutlineCard(padding: DS.Spacing.lg, fill: DS.Palette.surfaceAlt.opacity(0.4)) {
+        DSOutlineCard(padding: DS.Spacing.lg, fill: DS.Palette.surfaceAlt.opacity(0.25)) {
             VStack(alignment: .leading, spacing: DS.Spacing.lg) {
                 headerSection
 
@@ -21,14 +21,31 @@ struct DayDetailView: View {
     }
 
     private var headerSection: some View {
-        HStack(alignment: .center, spacing: DS.Spacing.md) {
-            DSCardTitle(
-                icon: "calendar",
-                titleText: formattedDate,
-                showChevron: false
-            )
+        HStack(alignment: .center, spacing: DS.Spacing.lg) {
+            HStack(alignment: .bottom, spacing: DS.Spacing.xs2) {
+                Text(formattedMonth)
+                    .font(.custom(
+                        DS.FontFamily.tangerineCandidates.first ?? "Tangerine-Bold",
+                        size: 60
+                    ))
+                    .kerning(1.4)
 
-            Spacer()
+                Text("/")
+                    .font(.custom(
+                        DS.FontFamily.tangerineCandidates.first ?? "Tangerine-Regular",
+                        size: 42
+                    ))
+                    .baselineOffset(8)
+
+                Text(formattedDay)
+                    .font(.custom(
+                        DS.FontFamily.tangerineCandidates.first ?? "Tangerine-Regular",
+                        size: 40
+                    ))
+                    .kerning(1.0)
+            }
+
+            Spacer(minLength: DS.Spacing.md)
 
             AnimatedStreakBadge(streakDays: stats.streakDays)
         }
@@ -89,9 +106,15 @@ struct DayDetailView: View {
         }
     }
 
-    private var formattedDate: String {
+    private var formattedMonth: String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "M.d"
+        formatter.dateFormat = "M"
+        return formatter.string(from: stats.date)
+    }
+
+    private var formattedDay: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "d"
         return formatter.string(from: stats.date)
     }
 
@@ -133,9 +156,23 @@ private struct AnimatedStreakBadge: View {
                 .init(color: gradientColors[0], location: 0.0),
                 .init(color: gradientColors[1], location: 0.33),
                 .init(color: gradientColors[2], location: 0.66),
-                .init(color: gradientColors[3], location: 1.0)
+                .init(color: gradientColors[3], location: 0.99),
+                .init(color: gradientColors[0], location: 1.0)
             ]),
             center: .center
+        )
+    }
+
+    private var textGradient: LinearGradient {
+        LinearGradient(
+            gradient: Gradient(stops: [
+                .init(color: gradientColors[0], location: 0.0),
+                .init(color: gradientColors[1], location: 0.3),
+                .init(color: gradientColors[2], location: 0.65),
+                .init(color: gradientColors[3], location: 1.0)
+            ]),
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
         )
     }
 
@@ -152,11 +189,11 @@ private struct AnimatedStreakBadge: View {
                 .animation(.linear(duration: gradientDuration * 1.2).repeatForever(autoreverses: false), value: animateGradient)
 
             Circle()
-                .fill(Color.white.opacity(0.5))
+                .fill(Color.white.opacity(0.65))
                 .frame(width: badgeSize - fillInset, height: badgeSize - fillInset)
                 .overlay(
                     Circle()
-                        .fill(Color.white.opacity(0.12))
+                        .fill(Color.white.opacity(0.18))
                         .blur(radius: 8)
                         .frame(width: badgeSize - fillInset - 10, height: badgeSize - fillInset - 10)
                 )
@@ -185,32 +222,14 @@ private struct AnimatedStreakBadge: View {
     }
 
     private var badgeContent: some View {
-        VStack(spacing: 6) {
-            GradientText(text: "連續", gradient: gradient)
-                .font(DS.Font.body)
-                .fontWeight(.semibold)
-
-            VStack(spacing: 1) {
-                Text("\(streakDays)")
-                    .font(DS.Font.scriptTitle)
-                    .fontWeight(.bold)
-                    .foregroundStyle(Color.white)
-                    .animation(.spring(response: 0.5, dampingFraction: 0.85), value: streakDays)
-
-                GradientText(text: "天", gradient: gradient)
-                    .font(DS.Font.body)
-                    .fontWeight(.medium)
-            }
+        GeometryReader { geo in
+            Text("\(streakDays)")
+                .font(.system(size: geo.size.width * 0.62, weight: .semibold, design: .serif))
+                .foregroundStyle(textGradient)
+                .shadow(color: Color.white.opacity(0.18), radius: 4, y: 1)
+                .frame(width: geo.size.width, height: geo.size.height)
+                .minimumScaleFactor(0.65)
+                .animation(.spring(response: 0.5, dampingFraction: 0.85), value: streakDays)
         }
-    }
-}
-
-private struct GradientText: View {
-    let text: String
-    let gradient: AngularGradient
-
-    var body: some View {
-        Text(text)
-            .foregroundStyle(gradient)
     }
 }

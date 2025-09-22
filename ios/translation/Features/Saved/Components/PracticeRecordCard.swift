@@ -52,47 +52,27 @@ struct PracticeRecordCard: View {
     }
 
     private var header: some View {
-        HStack(alignment: .top, spacing: DS.Spacing.sm) {
-            VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
-                HStack(spacing: DS.Spacing.xs2) {
-                    Text(record.createdAt, style: .date)
+        VStack(alignment: .leading, spacing: DS.Spacing.xs) {
+            HStack(alignment: .firstTextBaseline, spacing: DS.Spacing.sm) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(compactDate)
                         .dsType(DS.Font.caption)
                         .foregroundStyle(.secondary)
-                    Text(record.createdAt, style: .time)
+                    Text(compactTime)
                         .dsType(DS.Font.caption)
                         .foregroundStyle(.tertiary)
                 }
 
-                metadataRow
+                Spacer(minLength: 0)
+
+                scoreSummary
+
+                Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                    .font(.system(size: DS.IconSize.chevronSm, weight: .semibold))
+                    .foregroundStyle(.secondary)
             }
 
-            Spacer()
-
-            VStack(alignment: .trailing, spacing: DS.Spacing.xs2) {
-                DSScoreBadge(score: record.score, style: .compact)
-
-                if record.errors.count > 0 {
-                    HStack(spacing: DS.Spacing.xs2) {
-                        Image(systemName: "exclamationmark.triangle")
-                            .font(.caption2)
-                            .foregroundStyle(DS.Palette.warning)
-                        Text("\(record.errors.count)")
-                            .dsType(DS.Font.caption)
-                            .foregroundStyle(DS.Palette.warning)
-                    }
-                }
-
-                if record.attemptCount > 1 {
-                    Text("×\(record.attemptCount)")
-                        .dsType(DS.Font.caption)
-                        .foregroundStyle(.tertiary)
-                }
-            }
-
-            Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .padding(.top, DS.Spacing.xs)
+            metadataRow
         }
     }
 
@@ -105,6 +85,30 @@ struct PracticeRecordCard: View {
             if let tag = record.practiceTag {
                 tagView(icon: "tag", text: tag)
             }
+
+            if record.errors.count > 0 {
+                tagView(icon: "exclamationmark.triangle", text: "\(record.errors.count)")
+            }
+
+            if record.attemptCount > 1 {
+                tagView(icon: "repeat", text: "×\(record.attemptCount)")
+            }
+        }
+    }
+
+    private var scoreSummary: some View {
+        HStack(spacing: DS.Spacing.xs) {
+            ZStack(alignment: .leading) {
+                Capsule()
+                    .fill(DS.Palette.trackHairline)
+                Capsule()
+                    .fill(DS.Palette.scoreGradient)
+                    .frame(width: Self.miniScoreWidth * scoreProgress)
+            }
+            .frame(width: Self.miniScoreWidth, height: 6)
+
+            Text("\(record.score)")
+                .dsType(DS.Font.serifTitle)
         }
     }
 
@@ -174,11 +178,20 @@ struct PracticeRecordCard: View {
     }
 
     private func tagView(icon: String, text: String) -> some View {
-        Label(text, systemImage: icon)
-            .labelStyle(.titleAndIcon)
-            .dsType(DS.Font.caption)
-            .foregroundStyle(.tertiary)
-            .lineLimit(1)
+        HStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.system(size: 11, weight: .medium))
+            Text(text)
+                .lineLimit(1)
+        }
+        .dsType(DS.Font.caption)
+        .foregroundStyle(.secondary)
+        .padding(.horizontal, DS.Spacing.xs2)
+        .padding(.vertical, 4)
+        .background(
+            Capsule()
+                .fill(DS.Palette.surfaceAlt)
+        )
     }
 
     private enum DetailTextStyle {
@@ -224,4 +237,30 @@ struct PracticeRecordCard: View {
         }
         return result
     }
+
+    private var scoreProgress: CGFloat {
+        CGFloat(min(max(record.score, 0), 100)) / 100
+    }
+
+    private static let miniScoreWidth: CGFloat = 80
+
+    private var compactDate: String {
+        PracticeRecordCard.dateFormatter.string(from: record.createdAt)
+    }
+
+    private var compactTime: String {
+        PracticeRecordCard.timeFormatter.string(from: record.createdAt)
+    }
+
+    private static let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.setLocalizedDateFormatFromTemplate("M.d")
+        return formatter
+    }()
+
+    private static let timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter
+    }()
 }
