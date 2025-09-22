@@ -109,6 +109,29 @@ struct CloudCourseDetailView: View {
     @ViewBuilder
     private func courseHeader(detail: CloudCourseDetail) -> some View {
         VStack(alignment: .leading, spacing: DS.Spacing.md) {
+            if let imageURL = detail.coverImage, let url = URL(string: imageURL) {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFill()
+                    case .failure:
+                        Color.gray.opacity(0.12)
+                    case .empty:
+                        Color.gray.opacity(0.05)
+                    @unknown default:
+                        Color.gray.opacity(0.05)
+                    }
+                }
+                .frame(height: 180)
+                .clipShape(RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
+                        .stroke(DS.Palette.border.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.hairline)
+                )
+            }
+
             if let summary = detail.summary, !summary.isEmpty {
                 Text(summary)
                     .dsType(DS.Font.body)
