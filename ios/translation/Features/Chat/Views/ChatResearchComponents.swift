@@ -206,9 +206,9 @@ struct ResearchItemCard: View {
                 .overlay(
                     Rectangle()
                         .fill(item.type.color)
-                        .frame(width: 3)
-                        .clipShape(RoundedRectangle(cornerRadius: 2, style: .continuous))
-                        .padding(.vertical, 6), alignment: .leading
+                        .frame(width: DS.IconSize.dividerThin)
+                        .clipShape(RoundedRectangle(cornerRadius: DS.Component.Stripe.cornerRadius, style: .continuous))
+                        .padding(.vertical, DS.Component.Stripe.paddingVertical), alignment: .leading
                 )
         )
     }

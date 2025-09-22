@@ -554,10 +554,10 @@ private struct StatusBadge: View {
             Circle().fill(color).frame(width: 8, height: 8)
             Text(textKey).dsType(DS.Font.caption).foregroundStyle(.secondary)
         }
-        .padding(.vertical, 6)
-        .padding(.horizontal, 10)
+        .padding(.vertical, DS.Component.Badge.paddingVertical)
+        .padding(.horizontal, DS.Component.Badge.paddingHorizontal)
         .overlay(
-            Capsule().stroke(color.opacity(DS.Opacity.strong), lineWidth: 1.6)
+            Capsule().stroke(color.opacity(DS.Opacity.strong), lineWidth: DS.BorderWidth.emphatic)
         )
     }
 }

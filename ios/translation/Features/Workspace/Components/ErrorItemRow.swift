@@ -7,8 +7,8 @@ struct ErrorItemRow: View {
 
     var body: some View {
         let theme = ErrorTheme.theme(for: err.type)
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
+        VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
+            HStack(alignment: .firstTextBaseline, spacing: DS.Spacing.xs2) {
                 TagLabel(text: err.type.displayName, color: err.type.color)
                 Text(err.span)
                     .dsType(DS.Font.body)
@@ -19,7 +19,7 @@ struct ErrorItemRow: View {
                 .dsType(DS.Font.body, lineSpacing: 4)
                 .foregroundStyle(.secondary)
             if let s = err.suggestion, !s.isEmpty {
-                HStack(spacing: 8) {
+                HStack(spacing: DS.Spacing.xs2) {
                     Text("error.suggestion")
                         .dsType(DS.Font.caption)
                         .foregroundStyle(.secondary)
@@ -34,13 +34,13 @@ struct ErrorItemRow: View {
         )
         .overlay(alignment: .leading) {
             RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
-                .stroke(selected ? theme.base.opacity(0.6) : theme.border, lineWidth: selected ? 1.2 : 0.8)
+                .stroke(selected ? theme.base.opacity(0.6) : theme.border, lineWidth: selected ? DS.BorderWidth.regular : DS.BorderWidth.thin)
                 .overlay(
                     Rectangle()
                         .fill(theme.base)
                         .frame(width: DS.IconSize.dividerThin)
-                        .clipShape(RoundedRectangle(cornerRadius: 2, style: .continuous))
-                        .padding(.vertical, 6), alignment: .leading
+                        .clipShape(RoundedRectangle(cornerRadius: DS.Component.Stripe.cornerRadius, style: .continuous))
+                        .padding(.vertical, DS.Component.Stripe.paddingVertical), alignment: .leading
                 )
         }
         .overlay(alignment: .bottomLeading) { EmptyView() } // keep overlay chain simple

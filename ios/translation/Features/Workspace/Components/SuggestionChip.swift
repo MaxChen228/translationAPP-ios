@@ -6,15 +6,15 @@ struct SuggestionChip: View {
     var body: some View {
         Text(text)
             .dsType(DS.Font.mono)
-            .padding(.vertical, 4)
-            .padding(.horizontal, 10)
+            .padding(.vertical, DS.Component.Chip.paddingVertical)
+            .padding(.horizontal, DS.Component.Chip.paddingHorizontal)
             .background(
                 Capsule(style: .continuous)
-                    .fill(color.opacity(0.12))
+                    .fill(color.opacity(DS.Component.Chip.fillOpacity))
             )
             .overlay(
                 Capsule(style: .continuous)
-                    .stroke(color.opacity(0.35), lineWidth: DS.BorderWidth.thin)
+                    .stroke(color.opacity(DS.Component.Chip.strokeOpacity), lineWidth: DS.BorderWidth.thin)
             )
     }
 }

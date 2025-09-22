@@ -275,8 +275,8 @@ struct ChatMarkdownText: View {
                 .overlay(alignment: .leading) {
                     Rectangle()
                         .fill((isUser ? DS.Palette.onPrimary : DS.Palette.primary).opacity(0.2))
-                        .frame(width: 3)
-                        .cornerRadius(1.5)
+                        .frame(width: DS.IconSize.dividerThin)
+                        .cornerRadius(DS.Component.Stripe.cornerRadius)
                 }
         }
     }

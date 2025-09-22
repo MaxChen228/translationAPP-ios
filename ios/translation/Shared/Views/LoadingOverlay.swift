@@ -6,15 +6,18 @@ struct LoadingOverlay: View {
         ZStack {
             DS.Palette.scrim
                 .ignoresSafeArea()
-            VStack(spacing: 12) {
+            VStack(spacing: DS.Spacing.sm2) {
                 ProgressView()
                     .progressViewStyle(.circular)
                 Text(textKey)
-                    .font(.headline)
+                    .dsType(DS.Font.section)
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .padding(.horizontal, DS.Component.OverlayCard.paddingHorizontal)
+            .padding(.vertical, DS.Component.OverlayCard.paddingVertical)
+            .background(
+                .ultraThinMaterial,
+                in: RoundedRectangle(cornerRadius: DS.Component.OverlayCard.cornerRadius, style: .continuous)
+            )
             .shadow(color: DS.Shadow.overlay.color, radius: DS.Shadow.overlay.radius, x: DS.Shadow.overlay.x, y: DS.Shadow.overlay.y)
         }
         .transition(.opacity)

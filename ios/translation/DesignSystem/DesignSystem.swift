@@ -27,6 +27,8 @@ enum DS {
         static let thin: CGFloat = 0.8
         // Regular 1pt borders (inputs, buttons, outlines)
         static let regular: CGFloat = 1.0
+        // Emphasized outline for badges/pills
+        static let emphatic: CGFloat = 1.6
     }
 
     enum Radius {
@@ -86,6 +88,32 @@ enum DS {
         static let strong: Double = 0.45    // emphasized outlines/highlight
         static let muted: Double = 0.60     // subdued foregrounds/status
         static let accentLight: Double = 0.28 // accent separators/light tints
+    }
+
+    enum Component {
+        enum Chip {
+            static let paddingVertical: CGFloat = 4
+            static let paddingHorizontal: CGFloat = 10
+            static let fillOpacity: Double = 0.12
+            static let strokeOpacity: Double = 0.35
+        }
+
+        enum Badge {
+            static let paddingVertical: CGFloat = 6
+            static let paddingHorizontal: CGFloat = 10
+            static let fillOpacity: Double = 0.12
+        }
+
+        enum Stripe {
+            static let cornerRadius: CGFloat = 1.5
+            static let paddingVertical: CGFloat = DS.Spacing.xs
+        }
+
+        enum OverlayCard {
+            static let paddingHorizontal: CGFloat = 20
+            static let paddingVertical: CGFloat = DS.Spacing.md
+            static let cornerRadius: CGFloat = DS.Radius.lg
+        }
     }
 
 

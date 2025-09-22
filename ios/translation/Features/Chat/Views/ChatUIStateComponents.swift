@@ -40,11 +40,11 @@ struct ChatStateBadge: View {
                 .dsType(DS.Font.caption)
                 .foregroundStyle(color)
         }
-        .padding(.vertical, 4)
-        .padding(.horizontal, 10)
+        .padding(.vertical, DS.Component.Chip.paddingVertical)
+        .padding(.horizontal, DS.Component.Chip.paddingHorizontal)
         .background(
             Capsule(style: .continuous)
-                .fill(color.opacity(0.12))
+                .fill(color.opacity(DS.Component.Chip.fillOpacity))
         )
     }
 
@@ -147,11 +147,11 @@ struct BackgroundTaskIndicator: View {
                 .dsType(DS.Font.caption)
                 .foregroundStyle(DS.Brand.scheme.classicBlue)
         }
-        .padding(.vertical, 6)
-        .padding(.horizontal, DS.Spacing.sm)
+        .padding(.vertical, DS.Component.Badge.paddingVertical)
+        .padding(.horizontal, DS.Component.Badge.paddingHorizontal)
         .background(
             Capsule(style: .continuous)
-                .fill(DS.Brand.scheme.babyBlue.opacity(0.12))
+                .fill(DS.Brand.scheme.babyBlue.opacity(DS.Component.Badge.fillOpacity))
         )
         .padding(.horizontal, DS.Spacing.md)
         .padding(.bottom, DS.Spacing.sm2)

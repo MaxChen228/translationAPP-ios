@@ -9,8 +9,8 @@ struct ChinesePromptView: View {
                 Text("prompt.empty")
                     .dsType(DS.Font.caption)
                     .foregroundStyle(.secondary)
-                    .padding(.vertical, 12)
-                    .padding(.horizontal, 12)
+                    .padding(.vertical, DS.Spacing.sm2)
+                    .padding(.horizontal, DS.Spacing.sm2)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .overlay(
                         RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
@@ -19,8 +19,8 @@ struct ChinesePromptView: View {
             } else {
                 Text(text)
                     .dsType(DS.Font.serifTitle, lineSpacing: 6, tracking: 0.1)
-                    .padding(.vertical, 12)
-                    .padding(.horizontal, 12)
+                    .padding(.vertical, DS.Spacing.sm2)
+                    .padding(.horizontal, DS.Spacing.sm2)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .overlay(
                         RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
@@ -29,8 +29,8 @@ struct ChinesePromptView: View {
                     .overlay(alignment: .leading) {
                         LinearGradient(colors: [DS.Brand.scheme.cornhusk, DS.Brand.scheme.peachQuartz], startPoint: .top, endPoint: .bottom)
                             .frame(width: DS.IconSize.dividerThin)
-                            .clipShape(RoundedRectangle(cornerRadius: 1.5, style: .continuous))
-                            .padding(.vertical, 6)
+                            .clipShape(RoundedRectangle(cornerRadius: DS.Component.Stripe.cornerRadius, style: .continuous))
+                            .padding(.vertical, DS.Component.Stripe.paddingVertical)
                     }
             }
         }
