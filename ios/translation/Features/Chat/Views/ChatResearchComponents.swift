@@ -180,19 +180,19 @@ struct ResearchItemCard: View {
                 }
             }
 
-            DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(0.35))
-
-            HStack {
-                Spacer()
-                Button(action: onSave) {
-                    if isSaved {
-                        Label(String(localized: "chat.research.saved"), systemImage: "checkmark.seal.fill")
-                    } else {
-                        Label(String(localized: "chat.research.save"), systemImage: "tray.and.arrow.down")
+            DSFooterActionBar {
+                HStack {
+                    Spacer()
+                    Button(action: onSave) {
+                        if isSaved {
+                            Label(String(localized: "chat.research.saved"), systemImage: "checkmark.seal.fill")
+                        } else {
+                            Label(String(localized: "chat.research.save"), systemImage: "tray.and.arrow.down")
+                        }
                     }
+                    .buttonStyle(DSButton(style: .secondary, size: .compact))
+                    .disabled(isSaved)
                 }
-                .buttonStyle(DSButton(style: .secondary, size: .compact))
-                .disabled(isSaved)
             }
         }
         .padding(DS.Spacing.md2)

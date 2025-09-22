@@ -57,8 +57,7 @@ private struct SaveActionBar: ViewModifier {
         VStack(spacing: 0) {
             content
             if let onSave {
-                VStack(spacing: 6) {
-                    DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(0.35))
+                DSFooterActionBar {
                     HStack {
                         Spacer()
                         Button {
@@ -75,7 +74,6 @@ private struct SaveActionBar: ViewModifier {
                         .disabled(didSave)
                     }
                 }
-                .padding(.top, 8)
             }
         }
     }

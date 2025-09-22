@@ -251,31 +251,31 @@ struct ActiveFilterChip: View {
 
     var body: some View {
         Button(action: onRemove) {
-            HStack(spacing: 4) {
+            DSBadge(
+                style: .tinted(color: DS.Palette.primary),
+                paddingVertical: DS.Component.Chip.paddingVertical,
+                paddingHorizontal: DS.Component.Chip.paddingHorizontal
+            ) {
                 Text(TagRegistry.localizedName(for: tag))
                     .dsType(DS.Font.labelSm)
-
-                if count > 0 {
-                    Text("(\(count))")
-                        .dsType(DS.Font.caption)
-                        .padding(.vertical, 1)
-                        .padding(.horizontal, 4)
-                        .background(Capsule().fill(DS.Palette.primary.opacity(0.15)))
+            } trailing: {
+                HStack(spacing: 4) {
+                    if count > 0 {
+                        DSBadge(
+                            style: .fill(color: DS.Palette.primary, opacity: 0.15),
+                            paddingVertical: 1,
+                            paddingHorizontal: 4
+                        ) {
+                            Text("(\(count))")
+                                .dsType(DS.Font.caption)
+                        }
+                    }
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 14))
+                        .foregroundStyle(.secondary)
                 }
-
-                Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 14))
-                    .foregroundStyle(.secondary)
             }
             .foregroundStyle(DS.Palette.primary)
-            .padding(.vertical, 4)
-            .padding(.horizontal, 8)
-            .background(
-                Capsule().fill(DS.Palette.primary.opacity(DS.Opacity.fill))
-            )
-            .overlay(
-                Capsule().stroke(DS.Palette.primary.opacity(0.3), lineWidth: DS.BorderWidth.thin)
-            )
         }
         .buttonStyle(.plain)
         .dsAnimation(DS.AnimationToken.subtle, value: tag)

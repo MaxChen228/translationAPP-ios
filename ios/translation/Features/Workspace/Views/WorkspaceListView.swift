@@ -538,15 +538,12 @@ private struct StatusBadge: View {
     var textKey: LocalizedStringKey
     var color: Color
     var body: some View {
-        HStack(spacing: 8) {
-            Circle().fill(color).frame(width: 8, height: 8)
-            Text(textKey).dsType(DS.Font.caption).foregroundStyle(.secondary)
+        DSBadge(style: .outline(color: color.opacity(DS.Opacity.strong), lineWidth: DS.BorderWidth.emphatic)) {
+            HStack(spacing: 8) {
+                Circle().fill(color).frame(width: 8, height: 8)
+                Text(textKey).dsType(DS.Font.caption).foregroundStyle(.secondary)
+            }
         }
-        .padding(.vertical, DS.Component.Badge.paddingVertical)
-        .padding(.horizontal, DS.Component.Badge.paddingHorizontal)
-        .overlay(
-            Capsule().stroke(color.opacity(DS.Opacity.strong), lineWidth: DS.BorderWidth.emphatic)
-        )
     }
 }
 
