@@ -9,6 +9,7 @@ struct Workspace: Identifiable, Codable, Equatable {
 @MainActor
 final class WorkspaceStore: ObservableObject {
     private let listKey = "workspaces.list"
+    private let correctionRunner: CorrectionRunning
 
     @Published private(set) var workspaces: [Workspace] = [] {
         didSet { persistList() }
@@ -22,7 +23,8 @@ final class WorkspaceStore: ObservableObject {
     weak var localProgressStore: LocalBankProgressStore?
     weak var practiceRecordsStore: PracticeRecordsStore?
 
-    init() {
+    init(correctionRunner: CorrectionRunning = CorrectionServiceFactory.makeDefault()) {
+        self.correctionRunner = correctionRunner
         load()
         if workspaces.isEmpty {
             // 初次啟動預設 1 個
@@ -30,9 +32,9 @@ final class WorkspaceStore: ObservableObject {
         }
     }
 
-    func vm(for id: UUID, service: AIService = AIServiceFactory.makeDefault()) -> CorrectionViewModel {
+    func vm(for id: UUID) -> CorrectionViewModel {
         if let vm = viewModels[id] { return vm }
-        let vm = CorrectionViewModel(service: service, workspaceID: id.uuidString)
+        let vm = CorrectionViewModel(correctionRunner: correctionRunner, workspaceID: id.uuidString)
 
         bindStores(to: vm)
         viewModels[id] = vm
@@ -45,7 +47,7 @@ final class WorkspaceStore: ObservableObject {
         let ws = Workspace(id: UUID(), name: name ?? "Workspace \(index)")
         workspaces.append(ws)
         // 準備 VM（將自動載入其持久化狀態）
-        let vm = CorrectionViewModel(service: AIServiceFactory.makeDefault(), workspaceID: ws.id.uuidString)
+        let vm = CorrectionViewModel(correctionRunner: correctionRunner, workspaceID: ws.id.uuidString)
 
         bindStores(to: vm)
         viewModels[ws.id] = vm
@@ -125,9 +127,13 @@ final class WorkspaceStore: ObservableObject {
     }
 
     private func purgeWorkspaceData(id: UUID) {
-        let prefix = "workspace.\(id.uuidString)."
-        let keys = ["inputZh", "inputEn", "response", "practicedHints", "showPracticedHints"]
-        let ud = UserDefaults.standard
-        for key in keys { ud.removeObject(forKey: prefix + key) }
+        let persistence = DefaultsWorkspaceStatePersistence(workspaceID: id.uuidString)
+        persistence.removeAll([
+            .inputZh,
+            .inputEn,
+            .response,
+            .practicedHints,
+            .showPracticedHints
+        ])
     }
 }

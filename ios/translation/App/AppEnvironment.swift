@@ -20,14 +20,24 @@ final class AppEnvironment: ObservableObject {
     let settings = AppSettingsStore()
     let randomSettings = RandomPracticeStore()
     let globalAudio = GlobalAudioSessionManager.shared
+    let correctionService: CorrectionRunning
+    let workspaceStore: WorkspaceStore
 
     private var cancellables = Set<AnyCancellable>()
 
-    init() {
+    init(
+        correctionService: CorrectionRunning = CorrectionServiceFactory.makeDefault()
+    ) {
+        self.correctionService = correctionService
+        self.workspaceStore = WorkspaceStore(correctionRunner: correctionService)
         FontLoader.registerBundledFonts()
         AppLog.aiInfo("App launched")
         configureNavigationAppearance()
         logBackendStatus()
+        workspaceStore.localBankStore = localBank
+        workspaceStore.localProgressStore = localProgress
+        workspaceStore.practiceRecordsStore = practiceRecords
+        workspaceStore.rebindAllStores()
         settings.objectWillChange
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
@@ -174,5 +184,6 @@ private extension View {
             .environmentObject(env.settings)
             .environmentObject(env.randomSettings)
             .environmentObject(env.globalAudio)
+            .environmentObject(env.workspaceStore)
     }
 }

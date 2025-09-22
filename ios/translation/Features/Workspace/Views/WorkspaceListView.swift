@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct WorkspaceListView: View {
-    @StateObject private var store = WorkspaceStore()
+    @EnvironmentObject private var store: WorkspaceStore
     @StateObject private var workspaceEditController = ShelfEditController<UUID>()
     @EnvironmentObject private var savedStore: SavedErrorsStore
     @EnvironmentObject private var localBank: LocalBankStore

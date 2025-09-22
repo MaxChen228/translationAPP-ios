@@ -4,16 +4,22 @@ import OSLog
 
 @MainActor
 final class CorrectionViewModel: ObservableObject {
-    // Per-workspace keys; prefix 由 workspaceID 組成
-    private let workspacePrefix: String
-    private var keyInputZh: String { workspacePrefix + "inputZh" }
-    private var keyInputEn: String { workspacePrefix + "inputEn" }
-    private var keyResponse: String { workspacePrefix + "response" }
-    private var keyHints: String { workspacePrefix + "practicedHints" }
-    private var keyShowHints: String { workspacePrefix + "showPracticedHints" }
+    private let persistence: WorkspaceStatePersisting
 
-    @Published var inputZh: String = "" { didSet { if inputZh != oldValue { UserDefaults.standard.set(inputZh, forKey: keyInputZh) } } }
-    @Published var inputEn: String = "" { didSet { if inputEn != oldValue { UserDefaults.standard.set(inputEn, forKey: keyInputEn) } } }
+    @Published var inputZh: String = "" {
+        didSet {
+            if inputZh != oldValue {
+                persistence.writeString(inputZh, key: .inputZh)
+            }
+        }
+    }
+    @Published var inputEn: String = "" {
+        didSet {
+            if inputEn != oldValue {
+                persistence.writeString(inputEn, key: .inputEn)
+            }
+        }
+    }
 
     @Published var response: AIResponse? { didSet { persistResponse() } }
     @Published var highlights: [Highlight] = []
@@ -24,14 +30,22 @@ final class CorrectionViewModel: ObservableObject {
     @Published var cardMode: ResultSwitcherCard.Mode = .original
 
     // Networking
-    private let service: AIService
+    private let correctionRunner: CorrectionRunning
     private let workspaceID: String
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
 
     // Practice hints (from bank) to render under Chinese input
     @Published var practicedHints: [BankHint] = [] { didSet { persistHints() } }
-    @Published var showPracticedHints: Bool = false { didSet { UserDefaults.standard.set(showPracticedHints, forKey: keyShowHints) } }
+    @Published var showPracticedHints: Bool = false {
+        didSet {
+            if showPracticedHints {
+                persistence.writeBool(true, key: .showPracticedHints)
+            } else {
+                persistence.remove(.showPracticedHints)
+            }
+        }
+    }
     // Signal to request focusing EN text field in ContentView
     @Published var focusEnSignal: Int = 0
 
@@ -61,21 +75,26 @@ final class CorrectionViewModel: ObservableObject {
     }
 
 
-    init(service: AIService = AIServiceFactory.makeDefault(), workspaceID: String = "default") {
-        self.service = service
+    init(
+        correctionRunner: CorrectionRunning = CorrectionServiceFactory.makeDefault(),
+        persistence: WorkspaceStatePersisting? = nil,
+        workspaceID: String = "default"
+    ) {
+        self.correctionRunner = correctionRunner
         self.workspaceID = workspaceID
-        self.workspacePrefix = "workspace.\(workspaceID)."
+        let persistence = persistence ?? DefaultsWorkspaceStatePersistence(workspaceID: workspaceID)
+        self.persistence = persistence
         // 載入持久化狀態
-        self.inputZh = UserDefaults.standard.string(forKey: keyInputZh) ?? ""
-        self.inputEn = UserDefaults.standard.string(forKey: keyInputEn) ?? ""
-        if let data = UserDefaults.standard.data(forKey: keyResponse) {
+        self.inputZh = persistence.readString(.inputZh) ?? ""
+        self.inputEn = persistence.readString(.inputEn) ?? ""
+        if let data = persistence.readData(.response) {
             self.response = try? JSONDecoder().decode(AIResponse.self, from: data)
         }
-        if let data = UserDefaults.standard.data(forKey: keyHints),
+        if let data = persistence.readData(.practicedHints),
            let hints = try? JSONDecoder().decode([BankHint].self, from: data) {
             self.practicedHints = hints
         }
-        self.showPracticedHints = UserDefaults.standard.bool(forKey: keyShowHints)
+        self.showPracticedHints = persistence.readBool(.showPracticedHints)
 
         // 重新計算highlight（從已恢復的response和inputEn）
         if let res = self.response, !inputEn.isEmpty {
@@ -83,7 +102,7 @@ final class CorrectionViewModel: ObservableObject {
             self.correctedHighlights = Highlighter.computeHighlightsInCorrected(text: res.corrected, errors: res.errors)
         }
 
-        AppLog.aiInfo("CorrectionViewModel initialized (ws=\(workspaceID)) with service: \(String(describing: type(of: service)))")
+        AppLog.aiInfo("CorrectionViewModel initialized (ws=\(workspaceID))")
     }
 
     func reset() {
@@ -100,12 +119,13 @@ final class CorrectionViewModel: ObservableObject {
         showPracticedHints = false
         currentBankSuggestionText = nil
         // 同步清掉持久化，符合「除非按右下角刪除才清空」
-        let ud = UserDefaults.standard
-        ud.removeObject(forKey: keyInputZh)
-        ud.removeObject(forKey: keyInputEn)
-        ud.removeObject(forKey: keyResponse)
-        ud.removeObject(forKey: keyHints)
-        ud.removeObject(forKey: keyShowHints)
+        persistence.removeAll([
+            .inputZh,
+            .inputEn,
+            .response,
+            .practicedHints,
+            .showPracticedHints
+        ])
     }
 
     func fillExample() {
@@ -144,20 +164,15 @@ final class CorrectionViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         do {
-            AppLog.aiInfo("Start correction via \(String(describing: type(of: self.service)))")
-            let result: AICorrectionResult
-            if let http = self.service as? AIServiceHTTP {
-                result = try await http.correct(
-                    zh: inputZh,
-                    en: inputEn,
-                    bankItemId: currentBankItemId,
-                    deviceId: DeviceID.current,
-                    hints: practicedHints,
-                    suggestion: currentBankSuggestionText
-                )
-            } else {
-                result = try await self.service.correct(zh: inputZh, en: inputEn)
-            }
+            AppLog.aiInfo("Start correction via correctionRunner")
+            let result = try await correctionRunner.runCorrection(
+                zh: inputZh,
+                en: inputEn,
+                bankItemId: currentBankItemId,
+                deviceId: DeviceID.current,
+                hints: practicedHints,
+                suggestion: currentBankSuggestionText
+            )
             self.response = result.response
             AppLog.aiInfo("Correction success: score=\(result.response.score), errors=\(result.response.errors.count)")
             if let hs = result.originalHighlights { self.highlights = hs }
@@ -256,22 +271,20 @@ final class CorrectionViewModel: ObservableObject {
     // （提示陣列直接送後端解碼，無需組字串）
 
     private func persistResponse() {
-        let ud = UserDefaults.standard
         if let res = response, let data = try? JSONEncoder().encode(res) {
-            ud.set(data, forKey: keyResponse)
+            persistence.writeData(data, key: .response)
         } else {
-            ud.removeObject(forKey: keyResponse)
+            persistence.remove(.response)
         }
     }
 
     private func persistHints() {
-        let ud = UserDefaults.standard
         if practicedHints.isEmpty {
-            ud.removeObject(forKey: keyHints)
+            persistence.remove(.practicedHints)
             return
         }
         if let data = try? JSONEncoder().encode(practicedHints) {
-            ud.set(data, forKey: keyHints)
+            persistence.writeData(data, key: .practicedHints)
         }
     }
 

@@ -11,8 +11,8 @@ struct ContentView: View {
     @StateObject private var vm: CorrectionViewModel
     @EnvironmentObject private var savedStore: SavedErrorsStore
     @EnvironmentObject private var bannerCenter: BannerCenter
-    init(service: AIService = AIServiceFactory.makeDefault()) {
-        _vm = StateObject(wrappedValue: CorrectionViewModel(service: service))
+    init(correctionRunner: CorrectionRunning = CorrectionServiceFactory.makeDefault()) {
+        _vm = StateObject(wrappedValue: CorrectionViewModel(correctionRunner: correctionRunner))
     }
     init(vm: CorrectionViewModel) {
         _vm = StateObject(wrappedValue: vm)
