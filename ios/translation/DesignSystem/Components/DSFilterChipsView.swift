@@ -47,8 +47,8 @@ struct DSFilterChip: View {
             )
             .overlay(
                 Capsule().stroke(
-                    selected ? color.opacity(DS.Opacity.muted) : DS.Palette.border.opacity(DS.Opacity.border),
-                    lineWidth: selected ? 1.1 : 0.8
+                    selected ? color.opacity(DS.Opacity.strong) : DS.Palette.border.opacity(DS.Opacity.border),
+                    lineWidth: selected ? DS.BorderWidth.thin : DS.BorderWidth.hairline
                 )
             )
         }
@@ -95,8 +95,8 @@ struct DSDifficultyFilterChip: View {
             )
             .overlay(
                 Capsule().stroke(
-                    selected ? difficultyColor.opacity(DS.Opacity.muted) : DS.Palette.border.opacity(DS.Opacity.border),
-                    lineWidth: selected ? 1.1 : 0.8
+                    selected ? difficultyColor.opacity(DS.Opacity.strong) : DS.Palette.border.opacity(DS.Opacity.border),
+                    lineWidth: selected ? DS.BorderWidth.thin : DS.BorderWidth.hairline
                 )
             )
         }

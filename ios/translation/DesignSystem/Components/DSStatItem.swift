@@ -6,7 +6,7 @@ struct DSStatItem: View {
     let value: String
 
     var body: some View {
-        VStack(spacing: DS.Spacing.xs2) {
+        VStack(spacing: DS.Spacing.sm) {
             Image(systemName: icon)
                 .font(.caption)
                 .foregroundStyle(DS.Palette.primary)

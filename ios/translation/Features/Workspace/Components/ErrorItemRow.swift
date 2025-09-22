@@ -7,8 +7,8 @@ struct ErrorItemRow: View {
 
     var body: some View {
         let theme = ErrorTheme.theme(for: err.type)
-        VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
-            HStack(alignment: .firstTextBaseline, spacing: DS.Spacing.xs2) {
+        VStack(alignment: .leading, spacing: DS.Spacing.sm) {
+            HStack(alignment: .firstTextBaseline, spacing: DS.Spacing.sm) {
                 TagLabel(text: err.type.displayName, color: err.type.color)
                 Text(err.span)
                     .dsType(DS.Font.body)
@@ -19,7 +19,7 @@ struct ErrorItemRow: View {
                 .dsType(DS.Font.body, lineSpacing: 4)
                 .foregroundStyle(.secondary)
             if let s = err.suggestion, !s.isEmpty {
-                HStack(spacing: DS.Spacing.xs2) {
+                HStack(spacing: DS.Spacing.sm) {
                     Text("error.suggestion")
                         .dsType(DS.Font.caption)
                         .foregroundStyle(.secondary)

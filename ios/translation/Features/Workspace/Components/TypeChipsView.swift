@@ -53,7 +53,10 @@ struct TypeChipsView: View {
                     Capsule().fill(selected ? color.opacity(0.15) : DS.Palette.surface)
                 )
                 .overlay(
-                    Capsule().stroke(selected ? color.opacity(DS.Opacity.muted) : DS.Palette.border.opacity(DS.Opacity.border), lineWidth: selected ? 1.1 : 0.8)
+                    Capsule().stroke(
+                        selected ? color.opacity(DS.Opacity.strong) : DS.Palette.border.opacity(DS.Opacity.border),
+                        lineWidth: selected ? DS.BorderWidth.thin : DS.BorderWidth.hairline
+                    )
                 )
             }
             .buttonStyle(.plain)

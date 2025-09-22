@@ -42,7 +42,7 @@ struct BannerHost: View {
                 }
                 .padding(.horizontal, DS.Spacing.md2)
                 .padding(.vertical, DS.Spacing.sm)
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: DS.Radius.md2, style: .continuous))
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous))
                 .shadow(color: .black.opacity(0.15), radius: 12, x: 0, y: 6)
                 // keep it off the edges (bottom-right corner)
                 .padding(.trailing, DS.Spacing.lg)

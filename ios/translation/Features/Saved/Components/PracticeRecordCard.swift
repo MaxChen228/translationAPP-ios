@@ -113,7 +113,7 @@ struct PracticeRecordCard: View {
     }
 
     private var collapsedPreview: some View {
-        VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
+        VStack(alignment: .leading, spacing: DS.Spacing.sm) {
             Text(record.chineseText)
                 .dsType(DS.Font.serifBody)
                 .lineLimit(2)
@@ -157,13 +157,13 @@ struct PracticeRecordCard: View {
             }
 
             if !record.errors.isEmpty {
-                VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
+                VStack(alignment: .leading, spacing: DS.Spacing.sm) {
                     Text("practice.records.card.errors")
                         .dsType(DS.Font.caption)
                         .foregroundStyle(.tertiary)
 
                     ForEach(uniqueErrorTypes, id: \.id) { type in
-                        HStack(spacing: DS.Spacing.xs2) {
+                        HStack(spacing: DS.Spacing.sm) {
                             Circle()
                                 .fill(type.color.opacity(0.7))
                                 .frame(width: 6, height: 6)
@@ -186,7 +186,7 @@ struct PracticeRecordCard: View {
         }
         .dsType(DS.Font.caption)
         .foregroundStyle(.secondary)
-        .padding(.horizontal, DS.Spacing.xs2)
+        .padding(.horizontal, DS.Spacing.sm)
         .padding(.vertical, 4)
         .background(
             Capsule()
@@ -214,7 +214,7 @@ struct PracticeRecordCard: View {
     }
 
     private func detailSection(titleKey: LocalizedStringKey, text: String, style: DetailTextStyle) -> some View {
-        VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
+        VStack(alignment: .leading, spacing: DS.Spacing.sm) {
             Text(titleKey)
                 .dsType(DS.Font.caption)
                 .foregroundStyle(.tertiary)

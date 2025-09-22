@@ -9,14 +9,14 @@ enum DS {
         static var hairline: CGFloat { max(1 / UIScreen.main.scale, 0.5) }
     }
     enum Spacing {
-        static let xs: CGFloat = 6
-        static let xs2: CGFloat = 8
-        static let sm: CGFloat = 10
-        static let sm2: CGFloat = 12
-        static let md2: CGFloat = 14
-        static let md: CGFloat = 16
-        static let lg: CGFloat = 24
-        static let xl: CGFloat = 32
+        static let xs: CGFloat = 4
+        static let sm2: CGFloat = 6
+        static let sm: CGFloat = 8
+        static let md2: CGFloat = 10
+        static let md: CGFloat = 12
+        static let lg: CGFloat = 16
+        static let xl: CGFloat = 20
+        static let xxl: CGFloat = 24
     }
 
     // Standardized border widths so we avoid magic numbers
@@ -24,19 +24,16 @@ enum DS {
         // Hairline should reflect device pixel ratio; reuse Metrics.hairline
         static var hairline: CGFloat { DS.Metrics.hairline }
         // Thin cosmetic borders (chips, badges)
-        static let thin: CGFloat = 0.8
-        // Regular 1pt borders (inputs, buttons, outlines)
-        static let regular: CGFloat = 1.0
-        // Emphasized outline for badges/pills
-        static let emphatic: CGFloat = 1.6
+        static let thin: CGFloat = 1.0
+        // Regular emphasis borders (inputs, buttons, outlines)
+        static let regular: CGFloat = 2.0
     }
 
     enum Radius {
-        static let xs: CGFloat = 6
-        static let sm: CGFloat = 8
-        static let md: CGFloat = 12
-        static let md2: CGFloat = 14
-        static let lg: CGFloat = 16
+        static let sm: CGFloat = 6
+        static let md: CGFloat = 10
+        static let lg: CGFloat = 14
+        static let xl: CGFloat = 20
     }
 
     enum Shadow {
@@ -82,12 +79,10 @@ enum DS {
 
     // Opacity tokens (avoid magic numbers sprinkled around)
     enum Opacity {
-        static let fill: Double = 0.12      // chip/card subtle fills
-        static let hairline: Double = 0.18  // hairline borders
-        static let border: Double = 0.35    // default outlines/separators
-        static let strong: Double = 0.45    // emphasized outlines/highlight
-        static let muted: Double = 0.60     // subdued foregrounds/status
-        static let accentLight: Double = 0.28 // accent separators/light tints
+        static let hairline: Double = 0.15  // hairline borders
+        static let border: Double = 0.20    // default outlines/separators
+        static let fill: Double = 0.08      // chip/card subtle fills
+        static let strong: Double = 0.40    // emphasized outlines/highlight
     }
 
     enum Component {
@@ -110,7 +105,7 @@ enum DS {
         }
 
         enum OverlayCard {
-            static let paddingHorizontal: CGFloat = 20
+            static let paddingHorizontal: CGFloat = DS.Spacing.xl
             static let paddingVertical: CGFloat = DS.Spacing.md
             static let cornerRadius: CGFloat = DS.Radius.lg
         }
@@ -421,7 +416,7 @@ struct DSQuickActionIconGlyph: View {
                 Group {
                     if let borderColor {
                         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                            .stroke(borderColor, lineWidth: DS.BorderWidth.regular)
+                            .stroke(borderColor, lineWidth: DS.BorderWidth.thin)
                     }
                 }
             )
