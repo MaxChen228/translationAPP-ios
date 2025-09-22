@@ -14,19 +14,14 @@ struct CalendarEntryCard: View {
     }
 
     var body: some View {
-        DSOutlineCard {
-            VStack(alignment: .leading, spacing: DS.Spacing.md) {
-                DSCardTitle(
-                    icon: "calendar",
-                    title: "quick.calendar.title",
-                    accentColor: DS.Brand.scheme.provence
-                )
-                DSSeparator(color: DS.Palette.border.opacity(0.12))
-                Text(subtitleText)
-                    .dsType(DS.Font.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .frame(minHeight: DS.CardSize.minHeightStandard)
+        QuickEntryCard(
+            icon: "calendar",
+            title: "quick.calendar.title",
+            accentColor: DS.Brand.scheme.provence
+        ) {
+            Text(subtitleText)
+                .dsType(DS.Font.caption)
+                .foregroundStyle(.secondary)
         }
     }
 

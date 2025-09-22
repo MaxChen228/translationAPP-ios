@@ -505,41 +505,29 @@ private struct QuickActionsRow: View {
 }
 
 private struct BankBooksEntryCard: View {
-    @Environment(\.locale) private var locale
     var body: some View {
-        DSOutlineCard {
-            VStack(alignment: .leading, spacing: DS.Spacing.md) {
-                DSCardTitle(
-                    icon: "books.vertical",
-                    title: "quick.bank.title",
-                    accentColor: DS.Brand.scheme.stucco
-                )
-                DSSeparator(color: DS.Palette.border.opacity(0.12))
-                Text("quick.bank.subtitle")
-                    .dsType(DS.Font.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .frame(minHeight: DS.CardSize.minHeightStandard)
+        QuickEntryCard(
+            icon: "books.vertical",
+            title: "quick.bank.title",
+            accentColor: DS.Brand.scheme.stucco
+        ) {
+            Text("quick.bank.subtitle")
+                .dsType(DS.Font.caption)
+                .foregroundStyle(.secondary)
         }
     }
 }
 
 private struct SettingsEntryCard: View {
-    @Environment(\.locale) private var locale
     var body: some View {
-        DSOutlineCard {
-            VStack(alignment: .leading, spacing: DS.Spacing.md) {
-                DSCardTitle(
-                    icon: "gearshape",
-                    title: "quick.settings.title",
-                    accentColor: DS.Palette.primary
-                )
-                DSSeparator(color: DS.Palette.border.opacity(0.12))
-                Text("quick.settings.subtitle")
-                    .dsType(DS.Font.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .frame(minHeight: DS.CardSize.minHeightStandard)
+        QuickEntryCard(
+            icon: "gearshape",
+            title: "quick.settings.title",
+            accentColor: DS.Palette.primary
+        ) {
+            Text("quick.settings.subtitle")
+                .dsType(DS.Font.caption)
+                .foregroundStyle(.secondary)
         }
     }
 }
