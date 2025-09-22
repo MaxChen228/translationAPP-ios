@@ -8,7 +8,11 @@ struct CloudDeckSummary: Codable, Identifiable, Equatable { let id: String; let 
 struct CloudDeckDetail: Codable, Equatable { let id: String; let name: String; let cards: [Flashcard] }
 
 struct CloudBookSummary: Codable, Identifiable, Equatable { var id: String { name }; let name: String; let count: Int }
-struct CloudBookDetail: Codable, Equatable { let name: String; let items: [BankItem] }
+struct CloudBookDetail: Codable, Equatable, Identifiable {
+    var id: String { name }
+    let name: String
+    let items: [BankItem]
+}
 
 protocol CloudLibraryService {
     func fetchDecks() async throws -> [CloudDeckSummary]

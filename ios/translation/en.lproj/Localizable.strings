@@ -62,6 +62,7 @@
 "cloud.books.empty" = "No cloud banks";
 "cloud.common.retry" = "Please try again or check connection.";
 "cloud.copyToLocal" = "Copy to Local";
+"cloud.preview" = "Preview";
 "nav.cloudDecks" = "Browse Decks";
 "nav.cloudBooks" = "Browse Banks";
 "banner.copiedToLocal.title" = "Copied to Local";

@@ -13,7 +13,8 @@ final class AppEnvironment: ObservableObject {
     let deckRootOrder = DeckRootOrderStore()
     let localBank = LocalBankStore()
     let localProgress = LocalBankProgressStore()
-    let practiceRecords = PracticeRecordsStore()
+    let practiceRecordsRepository: PracticeRecordsRepositoryProtocol
+    let practiceRecords: PracticeRecordsStore
     let quickActions = QuickActionsStore()
     let bannerCenter = BannerCenter()
     let router = RouterStore()
@@ -28,6 +29,13 @@ final class AppEnvironment: ObservableObject {
     init(
         correctionService: CorrectionRunning = CorrectionServiceFactory.makeDefault()
     ) {
+        let practiceContext = AppEnvironment.makePracticeRecordsContext()
+        let migrator = PracticeRecordsMigrator(backupDirectory: practiceContext.backupDirectory)
+        migrator.migrateIfNeeded(repository: practiceContext.repository)
+
+        self.practiceRecordsRepository = practiceContext.repository
+        self.practiceRecords = PracticeRecordsStore(repository: practiceContext.repository)
+
         self.correctionService = correctionService
         self.workspaceStore = WorkspaceStore(correctionRunner: correctionService)
         FontLoader.registerBundledFonts()
@@ -129,6 +137,31 @@ final class AppEnvironment: ObservableObject {
         } else {
             AppLog.uiError("BACKEND_URL missing")
         }
+    }
+
+    private static func makePracticeRecordsContext() -> (repository: PracticeRecordsRepositoryProtocol, backupDirectory: URL) {
+        let fileManager = FileManager.default
+        let baseURL = practiceRecordsBaseURL(fileManager: fileManager)
+        let recordsURL = baseURL.appendingPathComponent("PracticeRecords", isDirectory: true)
+        let backupURL = baseURL.appendingPathComponent("Backups", isDirectory: true)
+
+        let provider: PersistenceProvider
+        do {
+            provider = try FilePersistenceProvider(directory: recordsURL, fileManager: fileManager)
+        } catch {
+            AppLog.aiError("Failed to initialize file persistence for practice records: \(error)")
+            provider = MemoryPersistenceProvider()
+        }
+
+        let repository = PracticeRecordsRepository(provider: provider)
+        return (repository, backupURL)
+    }
+
+    private static func practiceRecordsBaseURL(fileManager: FileManager) -> URL {
+        if let base = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+            return base.appendingPathComponent("translation", isDirectory: true)
+        }
+        return fileManager.temporaryDirectory.appendingPathComponent("translation", isDirectory: true)
     }
 }
 

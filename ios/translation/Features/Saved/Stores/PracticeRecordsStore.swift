@@ -3,30 +3,50 @@ import SwiftUI
 
 @MainActor
 final class PracticeRecordsStore: ObservableObject {
-    private let defaultsKey = "practice.records"
+    @Published private(set) var records: [PracticeRecord] = []
 
-    @Published private(set) var records: [PracticeRecord] = [] {
-        didSet { persist() }
+    private let repository: PracticeRecordsRepositoryProtocol
+
+    init(repository: PracticeRecordsRepositoryProtocol) {
+        self.repository = repository
+        self.records = (try? repository.loadRecords()) ?? []
     }
 
-    init() { load() }
+    convenience init() {
+        let tempDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("practiceRecords-temp-\(UUID().uuidString)", isDirectory: true)
+        let provider: PersistenceProvider
+        if let fileProvider = try? FilePersistenceProvider(directory: tempDirectory) {
+            provider = fileProvider
+        } else {
+            provider = MemoryPersistenceProvider()
+        }
+        let repository = PracticeRecordsRepository(provider: provider)
+        self.init(repository: repository)
+    }
+
+    func reload() {
+        records = (try? repository.loadRecords()) ?? []
+    }
 
     func add(_ record: PracticeRecord) {
         records.append(record)
+        persist()
     }
 
     func remove(_ id: UUID) {
         records.removeAll { $0.id == id }
+        persist()
     }
 
     func clearAll() {
         records = []
+        persist()
     }
 
     func getRecord(by id: UUID) -> PracticeRecord? {
         records.first { $0.id == id }
     }
-
 
     func getRecords(for bankBookName: String) -> [PracticeRecord] {
         records.filter { $0.bankBookName == bankBookName }
@@ -53,26 +73,11 @@ final class PracticeRecordsStore: ObservableObject {
         return (total, avgScore, totalErrors)
     }
 
-    private func load() {
-        guard let data = UserDefaults.standard.data(forKey: defaultsKey) else { return }
-        do {
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            records = try decoder.decode([PracticeRecord].self, from: data)
-        } catch {
-            records = []
-        }
-    }
-
     private func persist() {
         do {
-            let encoder = JSONEncoder()
-            encoder.dateEncodingStrategy = .iso8601
-            encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-            let data = try encoder.encode(records)
-            UserDefaults.standard.set(data, forKey: defaultsKey)
+            try repository.saveRecords(records)
         } catch {
-            // ignore persist errors
+            AppLog.aiError("Failed to persist practice records: \(error)")
         }
     }
 }

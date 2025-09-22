@@ -90,6 +90,7 @@
 "cloud.books.empty" = "目前沒有雲端題庫本";
 "cloud.common.retry" = "請稍後再試或檢查連線。";
 "cloud.copyToLocal" = "複製到本機";
+"cloud.preview" = "預覽";
 "nav.cloudDecks" = "瀏覽單字卡集";
 "nav.cloudBooks" = "瀏覽題庫本";
 "banner.copiedToLocal.title" = "已複製到本機";

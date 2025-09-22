@@ -8,6 +8,9 @@ struct CloudBankLibraryView: View {
     @State private var books: [CloudBookSummary] = []
     @State private var isLoading: Bool = false
     @State private var error: String? = nil
+    @State private var previewLoadingID: String? = nil
+    @State private var previewDetail: CloudBookDetail? = nil
+    @State private var previewCache: [String: CloudBookDetail] = [:]
     @Environment(\.locale) private var locale
 
     var body: some View {
@@ -27,12 +30,20 @@ struct CloudBankLibraryView: View {
                         DSOutlineCard {
                             HStack(alignment: .center, spacing: 12) {
                                 VStack(alignment: .leading, spacing: 6) {
-                    Text(b.name).dsType(DS.Font.section)
-                    Text(String(format: String(localized: "bank.book.count", locale: locale), b.count)).dsType(DS.Font.caption).foregroundStyle(.secondary)
+                                    Text(b.name)
+                                        .dsType(DS.Font.section)
+                                    Text(String(format: String(localized: "bank.book.count", locale: locale), b.count))
+                                        .dsType(DS.Font.caption)
+                                        .foregroundStyle(.secondary)
                                 }
                                 Spacer(minLength: 0)
-                                Button { Task { await copyBook(b) } } label: { DSIconLabel(textKey: "cloud.copyToLocal", systemName: "arrow.down.doc.fill") }
+                                HStack(spacing: DS.Spacing.sm) {
+                                    previewButton(for: b)
+                                    Button { Task { await copyBook(b) } } label: {
+                                        DSIconLabel(textKey: "cloud.copyToLocal", systemName: "arrow.down.doc.fill")
+                                    }
                                     .buttonStyle(DSButton(style: .secondary, size: .compact))
+                                }
                             }
                             .padding(.vertical, 6)
                         }
@@ -43,6 +54,31 @@ struct CloudBankLibraryView: View {
         .navigationTitle(Text("nav.cloudBooks"))
         .task { await load() }
         .refreshable { await load() }
+        .sheet(item: $previewDetail) { detail in
+            NavigationStack {
+                CloudBankPreviewView(detail: detail)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func previewButton(for summary: CloudBookSummary) -> some View {
+        let isLoadingPreview = previewLoadingID == summary.name
+
+        Button {
+            guard !isLoadingPreview else { return }
+            Task { await openPreview(for: summary) }
+        } label: {
+            if isLoadingPreview {
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .frame(width: 24, height: 24)
+            } else {
+                DSIconLabel(textKey: "cloud.preview", systemName: "eye")
+            }
+        }
+        .buttonStyle(DSButton(style: .secondary, size: .compact))
+        .disabled(isLoadingPreview)
     }
 
     private func load() async {
@@ -66,6 +102,35 @@ struct CloudBankLibraryView: View {
         isLoading = false
     }
 
+    private func openPreview(for summary: CloudBookSummary) async {
+        guard AppConfig.backendURL != nil else {
+            bannerCenter.show(
+                title: String(localized: "banner.backend.missing.title", locale: locale),
+                subtitle: String(localized: "banner.backend.missing.subtitle", locale: locale)
+            )
+            return
+        }
+
+        if let cached = previewCache[summary.name] {
+            previewDetail = cached
+            return
+        }
+
+        previewLoadingID = summary.name
+        defer { previewLoadingID = nil }
+
+        do {
+            let detail = try await service.fetchBook(name: summary.name)
+            previewDetail = detail
+            previewCache[detail.name] = detail
+        } catch {
+            bannerCenter.show(
+                title: String(localized: "banner.cloud.loadFailed.title", locale: locale),
+                subtitle: (error as NSError).localizedDescription
+            )
+        }
+    }
+
     private func copyBook(_ s: CloudBookSummary) async {
         guard AppConfig.backendURL != nil else {
             bannerCenter.show(title: String(localized: "banner.backend.missing.title", locale: locale), subtitle: String(localized: "banner.backend.missing.subtitle", locale: locale))
@@ -73,11 +138,15 @@ struct CloudBankLibraryView: View {
         }
         do {
             let detail = try await service.fetchBook(name: s.name)
-            localBank.addOrReplaceBook(name: detail.name, items: detail.items)
-            let subtitle = "\(detail.name) • " + String(format: String(localized: "bank.book.count", locale: locale), detail.items.count)
-            bannerCenter.show(title: String(localized: "banner.copiedToLocal.title", locale: locale), subtitle: subtitle)
+            copyBookDetail(detail)
         } catch {
             bannerCenter.show(title: String(localized: "banner.copyFailed.title", locale: locale), subtitle: (error as NSError).localizedDescription)
         }
+    }
+
+    private func copyBookDetail(_ detail: CloudBookDetail) {
+        localBank.addOrReplaceBook(name: detail.name, items: detail.items)
+        let subtitle = "\(detail.name) • " + String(format: String(localized: "bank.book.count", locale: locale), detail.items.count)
+        bannerCenter.show(title: String(localized: "banner.copiedToLocal.title", locale: locale), subtitle: subtitle)
     }
 }
