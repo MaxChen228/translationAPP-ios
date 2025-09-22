@@ -64,15 +64,61 @@ struct Highlight: Identifiable, Equatable {
 //（保留擴充點：若未來需要細分，可在此擴充）
 
 struct BankHint: Codable, Identifiable, Equatable {
-    var id: UUID { UUID() }
+    let id: UUID
     var category: ErrorType
     var text: String
+
+    init(id: UUID = UUID(), category: ErrorType, text: String) {
+        self.id = id
+        self.category = category
+        self.text = text
+    }
+
+    private enum CodingKeys: String, CodingKey { case id, category, text }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        let category = try container.decode(ErrorType.self, forKey: .category)
+        let text = try container.decode(String.self, forKey: .text)
+        self.init(id: id, category: category, text: text)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(category, forKey: .category)
+        try container.encode(text, forKey: .text)
+    }
 }
 
 struct BankSuggestion: Codable, Identifiable, Equatable {
-    var id: UUID { UUID() }
+    let id: UUID
     var text: String
     var category: String? = nil
+
+    init(id: UUID = UUID(), text: String, category: String? = nil) {
+        self.id = id
+        self.text = text
+        self.category = category
+    }
+
+    private enum CodingKeys: String, CodingKey { case id, text, category }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        let text = try container.decode(String.self, forKey: .text)
+        let category = try container.decodeIfPresent(String.self, forKey: .category)
+        self.init(id: id, text: text, category: category)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(text, forKey: .text)
+        try container.encodeIfPresent(category, forKey: .category)
+    }
 }
 
 struct BankItem: Codable, Identifiable, Equatable {
