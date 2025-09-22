@@ -4,8 +4,11 @@ struct FlashcardsSettingsSheet: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage("flashcards.reviewMode") private var modeRaw: String = FlashcardsReviewMode.browse.storageValue
     @Environment(\.locale) private var locale
+    @EnvironmentObject private var progressStore: FlashcardProgressStore
+    @EnvironmentObject private var bannerCenter: BannerCenter
     @ObservedObject var ttsStore: TTSSettingsStore
     var onOpenAudio: (() -> Void)? = nil
+    @State private var showResetConfirm: Bool = false
 
     var body: some View {
         ScrollView {
@@ -71,6 +74,21 @@ struct FlashcardsSettingsSheet: View {
                     }
                 }
             }
+
+            DSOutlineCard {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("settings.flashcards.reset.hint").dsType(DS.Font.caption).foregroundStyle(.secondary)
+                    HStack {
+                        Spacer()
+                        Button(role: .destructive) { showResetConfirm = true } label: {
+                            Text("settings.flashcards.resetAll")
+                        }
+                        .buttonStyle(DSButton(style: .secondary, size: .full))
+                        .frame(maxWidth: 220)
+                    }
+                }
+            }
+
             HStack { Spacer()
                 Button(String(localized: "action.done", locale: locale)) { dismiss() }
                     .buttonStyle(DSButton(style: .secondary, size: .full))
@@ -80,6 +98,16 @@ struct FlashcardsSettingsSheet: View {
         .padding(16)
         }
         .background(DS.Palette.background)
+        .alert(Text("settings.flashcards.reset.confirm.title"), isPresented: $showResetConfirm) {
+            Button(String(localized: "action.cancel", locale: locale), role: .cancel) {}
+            Button(String(localized: "action.delete", locale: locale), role: .destructive) {
+                progressStore.clearAll()
+                Haptics.success()
+                bannerCenter.show(title: String(localized: "settings.flashcards.reset.done", locale: locale))
+            }
+        } message: {
+            Text("settings.flashcards.reset.confirm.subtitle")
+        }
     }
 
     private var helpText: String {

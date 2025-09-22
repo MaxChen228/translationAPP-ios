@@ -5,10 +5,7 @@ import SwiftUI
 struct VariantBracketComposerView: View {
     let phrase: String
     @State private var selected: [Int: Int] = [:]
-    @State private var normalized: String = ""
     var onComposedChange: ((String) -> Void)? = nil
-    @EnvironmentObject private var bannerCenter: BannerCenter
-    @Environment(\.locale) private var locale
 
     init(_ phrase: String, onComposedChange: ((String) -> Void)? = nil) {
         self.phrase = phrase
@@ -22,7 +19,7 @@ struct VariantBracketComposerView: View {
             if case .group(let g) = el { return (i, g) } else { return nil }
         }
 
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .center, spacing: 16) {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(alignment: .top, spacing: 10) {
                     ForEach(parsed.elements.indices, id: \.self) { i in
@@ -45,35 +42,13 @@ struct VariantBracketComposerView: View {
                     }
                 }
                 .padding(.horizontal, 2)
-            }
-
-            // Current composed line + copy (左側排版，避免與播放鍵重疊)
-            HStack(spacing: 10) {
-                Button { copyCurrent(parsed.elements) } label: {
-                    Image(systemName: "doc.on.doc")
-                }
-                .buttonStyle(DSButton(style: .secondary, size: .compact))
-                .accessibilityLabel(Text("a11y.copyCurrentComposition"))
-
-                Text(currentCombinedText(elements: parsed.elements))
-                    .dsType(DS.Font.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .center)
             }
         }
         .onAppear { ensureSelection(groups: groups); onComposedChange?(currentCombinedText(elements: parsed.elements)) }
         .onChange(of: phrase) { _, _ in ensureSelection(groups: groups); onComposedChange?(currentCombinedText(elements: parsed.elements)) }
         .padding(.bottom, 52) // 預留右下角播放鍵空間，避免重疊
-    }
-
-    private func copyCurrent(_ elements: [VariantElement]) {
-        #if canImport(UIKit)
-        let str = currentCombinedText(elements: elements)
-        UIPasteboard.general.string = str
-        Haptics.success()
-        bannerCenter.show(title: String(localized: "action.copied", locale: locale), subtitle: str)
-        #endif
+        .frame(maxWidth: .infinity, alignment: .center)
     }
 
     private func currentCombinedText(elements: [VariantElement]) -> String {

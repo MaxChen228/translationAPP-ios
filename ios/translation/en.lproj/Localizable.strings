@@ -93,6 +93,9 @@
 "flashcards.editor.back" = "Back (single line with (A | B))";
 "flashcards.editor.backNote" = "Back note (optional)";
 "flashcards.editor.delete" = "Delete Card";
+"flashcards.editor.familiarity" = "Familiarity";
+"flashcards.editor.familiar" = "Familiar";
+"flashcards.editor.unfamiliar" = "Unfamiliar";
 "flashcards.status.familiar" = "Familiar";
 "flashcards.status.unfamiliar" = "Unfamiliar";
 "flashcards.annotate.familiar" = "Familiar";

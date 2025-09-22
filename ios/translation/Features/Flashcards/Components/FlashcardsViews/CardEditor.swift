@@ -3,6 +3,8 @@ import SwiftUI
 struct CardEditor: View {
     @Binding var draft: Flashcard?
     @Binding var errorText: String?
+    @Binding var familiaritySelection: Bool?
+    let showsFamiliaritySelector: Bool
     let onDelete: () -> Void
 
     var body: some View {
@@ -66,6 +68,19 @@ struct CardEditor: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
+                if showsFamiliaritySelector {
+                    DSSeparator()
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("flashcards.editor.familiarity").dsType(DS.Font.body).foregroundStyle(.primary)
+                        Picker("flashcards.editor.familiarity", selection: familiarityBinding) {
+                            Text("flashcards.editor.unfamiliar").tag(false)
+                            Text("flashcards.editor.familiar").tag(true)
+                        }
+                        .pickerStyle(.segmented)
+                        .tint(DS.Palette.primary)
+                    }
+                }
+
                 if let errorText {
                     Text(errorText)
                         .foregroundStyle(DS.Palette.danger)
@@ -73,5 +88,14 @@ struct CardEditor: View {
                 }
             }
         }
+    }
+}
+
+private extension CardEditor {
+    var familiarityBinding: Binding<Bool> {
+        Binding(
+            get: { familiaritySelection ?? false },
+            set: { familiaritySelection = $0 }
+        )
     }
 }

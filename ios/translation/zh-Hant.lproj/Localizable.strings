@@ -121,6 +121,9 @@
 "flashcards.editor.back" = "背面（用 (A | B) 單行）";
 "flashcards.editor.backNote" = "背面備註（可留空）";
 "flashcards.editor.delete" = "刪除卡片";
+"flashcards.editor.familiarity" = "熟悉度";
+"flashcards.editor.familiar" = "熟悉";
+"flashcards.editor.unfamiliar" = "不熟悉";
 "flashcards.status.familiar" = "熟悉";
 "flashcards.status.unfamiliar" = "不熟悉";
 "flashcards.annotate.familiar" = "熟悉";

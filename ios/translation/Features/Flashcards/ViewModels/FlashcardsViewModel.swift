@@ -19,6 +19,7 @@ final class FlashcardsViewModel: ObservableObject {
     @Published var showEmptyResetConfirm: Bool = false
     @Published var sessionRightCount: Int = 0
     @Published var sessionWrongCount: Int = 0
+    @Published var editingFamiliar: Bool? = nil
 
     // 操作歷史，用於支援 Back 按鈕回滾標注操作
     var annotationHistory: [(cardID: UUID, previousState: Bool?, action: AnnotateFeedback)] = []
@@ -77,26 +78,32 @@ final class FlashcardsViewModel: ObservableObject {
     func handleOnAppear(progressStore: FlashcardProgressStore) {
         if startEditingOnAppear, !didAutoStartEditing, store.current != nil {
             didAutoStartEditing = true
-            beginEdit()
+            beginEdit(progressStore: progressStore)
         }
         beginReviewCycle(progressStore: progressStore)
     }
 
-    func beginEdit() {
+    func beginEdit(progressStore: FlashcardProgressStore? = nil) {
         guard let card = store.current else { return }
         draft = card
         errorText = nil
         DSMotion.run(DS.AnimationToken.subtle) { isEditing = true }
         store.showBack = false
+        if let deckID, let progressStore {
+            editingFamiliar = progressStore.isFamiliar(deckID: deckID, cardID: card.id)
+        } else {
+            editingFamiliar = nil
+        }
     }
 
     func cancelEdit() {
         draft = nil
         errorText = nil
+        editingFamiliar = nil
         DSMotion.run(DS.AnimationToken.subtle) { isEditing = false }
     }
 
-    func saveEdit(decksStore: FlashcardDecksStore, locale: Locale) {
+    func saveEdit(decksStore: FlashcardDecksStore, progressStore: FlashcardProgressStore, locale: Locale) {
         guard let draftCard = draft else {
             cancelEdit()
             return
@@ -108,7 +115,16 @@ final class FlashcardsViewModel: ObservableObject {
         if let idx = store.cards.firstIndex(where: { $0.id == draftCard.id }) {
             store.cards[idx] = draftCard
         }
-        if let deckID { decksStore.updateCard(in: deckID, card: draftCard) }
+        if let deckID {
+            decksStore.updateCard(in: deckID, card: draftCard)
+            if let familiar = editingFamiliar {
+                if familiar {
+                    progressStore.markFamiliar(deckID: deckID, cardID: draftCard.id)
+                } else {
+                    progressStore.markUnfamiliar(deckID: deckID, cardID: draftCard.id)
+                }
+            }
+        }
         cancelEdit()
     }
 

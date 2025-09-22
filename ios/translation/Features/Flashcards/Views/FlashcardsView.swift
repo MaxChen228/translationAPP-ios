@@ -114,13 +114,15 @@ struct FlashcardsView: View {
                             CardEditor(
                                 draft: binding(\.draft),
                                 errorText: binding(\.errorText),
+                                familiaritySelection: binding(\.editingFamiliar),
+                                showsFamiliaritySelector: viewModel.deckID != nil,
                                 onDelete: { viewModel.showDeleteConfirm = true }
                             )
                             HStack(spacing: DS.Spacing.md) {
                                 Button(String(localized: "action.cancel", locale: locale)) { viewModel.cancelEdit() }
                                     .buttonStyle(DSButton(style: .secondary, size: .full))
                                 Button(String(localized: "action.save", locale: locale)) {
-                                    viewModel.saveEdit(decksStore: decksStore, locale: locale)
+                                    viewModel.saveEdit(decksStore: decksStore, progressStore: progressStore, locale: locale)
                                 }
                                 .buttonStyle(DSButton(style: .primary, size: .full))
                                 .disabled(viewModel.validationError(locale: locale) != nil)
@@ -137,44 +139,48 @@ struct FlashcardsView: View {
                                 let showEditButton = viewModel.deckID != nil && !viewModel.isEditing
                                 let extraTopPadding: CGFloat = showEditButton ? DS.Spacing.xl : .zero
 
-                                ZStack(alignment: .topTrailing) {
-                                    FlashcardsFlipCard(isFlipped: store.showBack) {
-                                        VStack(alignment: .leading, spacing: 10) {
-                                            FlashcardsMarkdownText(card.front)
-                                                .frame(maxWidth: .infinity, alignment: .leading)
-                                            if let note = card.frontNote, !note.isEmpty {
-                                                FlashcardsNoteText(text: note)
-                                            }
-                                        }
-                                        .padding(.top, extraTopPadding)
-                                    } back: {
-                                        VStack(alignment: .leading, spacing: 10) {
-                                            VariantBracketComposerView(card.back, onComposedChange: { s in
-                                                viewModel.recordBackComposition(for: card.id, text: s)
-                                            })
+                                FlashcardsFlipCard(isFlipped: store.showBack) {
+                                    VStack(alignment: .leading, spacing: 10) {
+                                        FlashcardsMarkdownText(card.front)
                                             .frame(maxWidth: .infinity, alignment: .leading)
-                                            if let note = card.backNote, !note.isEmpty {
-                                                FlashcardsNoteText(text: note)
-                                            }
-                                        }
-                                        .padding(.top, extraTopPadding)
-                                    } overlay: {
-                                        FlashcardsPlaySideButton(style: .outline, diameter: 28) {
-                                            let manager = speechManager
-                                            if store.showBack {
-                                                let text = viewModel.backTextToSpeak(for: card)
-                                                viewModel.speak(text: text, lang: manager.settings.backLang)
-                                            } else {
-                                                viewModel.speak(text: card.front, lang: manager.settings.frontLang)
-                                            }
+                                        if let note = card.frontNote, !note.isEmpty {
+                                            FlashcardsNoteText(text: note)
                                         }
                                     }
-
+                                    .padding(.top, extraTopPadding)
+                                } back: {
+                                    VStack(alignment: .leading, spacing: 10) {
+                                        Spacer(minLength: DS.Spacing.md)
+                                        VariantBracketComposerView(card.back, onComposedChange: { s in
+                                            viewModel.recordBackComposition(for: card.id, text: s)
+                                        })
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                        Spacer(minLength: DS.Spacing.lg)
+                                        if let note = card.backNote, !note.isEmpty {
+                                            Text(note)
+                                                .dsType(DS.Font.bodyEmph)
+                                                .foregroundStyle(.primary.opacity(0.85))
+                                                .frame(maxWidth: .infinity, alignment: .center)
+                                        }
+                                    }
+                                    .padding(.top, extraTopPadding)
+                                } overlay: {
+                                    FlashcardsPlaySideButton(style: .outline, diameter: 28) {
+                                        let manager = speechManager
+                                        if store.showBack {
+                                            let text = viewModel.backTextToSpeak(for: card)
+                                            viewModel.speak(text: text, lang: manager.settings.backLang)
+                                        } else {
+                                            viewModel.speak(text: card.front, lang: manager.settings.frontLang)
+                                        }
+                                    }
+                                }
+                                .overlay(alignment: .topTrailing) {
                                     if showEditButton {
                                         DSQuickActionIconButton(
                                             systemName: "square.and.pencil",
                                             labelKey: "action.edit",
-                                            action: { viewModel.beginEdit() },
+                                            action: { viewModel.beginEdit(progressStore: progressStore) },
                                             shape: .circle,
                                             style: .outline,
                                             size: 32
