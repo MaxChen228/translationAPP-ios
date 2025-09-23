@@ -2,6 +2,7 @@ import Foundation
 import SwiftUI
 import Combine
 
+@MainActor
 protocol ChatManaging: AnyObject {
     var backgroundActivityPublisher: AnyPublisher<Bool, Never> { get }
     func startChatSession(sessionID: UUID) -> ChatSession
@@ -43,7 +44,7 @@ final class ChatManager: ObservableObject, ChatManaging {
         }
         let session = ChatSession(id: sessionID, service: service, persister: persister)
         activeSessions[sessionID] = session
-        Task { [weak session] in
+        Task { @MainActor [weak session] in
             guard let data = await persister.loadSession(id: sessionID) else { return }
             guard let session else { return }
             await session.applyPersistedData(data)

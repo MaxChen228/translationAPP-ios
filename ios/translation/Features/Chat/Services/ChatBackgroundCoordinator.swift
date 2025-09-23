@@ -2,9 +2,10 @@ import Foundation
 import BackgroundTasks
 import UIKit
 
+@MainActor
 protocol ChatBackgroundCoordinating: AnyObject {
     var isBackgroundTaskActive: Bool { get }
-    func configure(resumeHandler: @escaping () async -> Void)
+    func configure(resumeHandler: @escaping @Sendable () async -> Void)
     func startBackgroundTaskIfNeeded()
     func endBackgroundTaskIfNeeded()
 }
@@ -16,7 +17,7 @@ final class ChatBackgroundCoordinator: ChatBackgroundCoordinating {
     private var resumeHandler: (() async -> Void)?
     private let taskIdentifier = "com.translation.chat.background"
 
-    func configure(resumeHandler: @escaping () async -> Void) {
+    func configure(resumeHandler: @escaping @Sendable () async -> Void) {
         self.resumeHandler = resumeHandler
         BGTaskScheduler.shared.register(forTaskWithIdentifier: taskIdentifier, using: nil) { task in
             guard let appRefreshTask = task as? BGAppRefreshTask else {

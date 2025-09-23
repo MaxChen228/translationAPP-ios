@@ -60,7 +60,7 @@ actor FileChatSessionStore: ChatSessionPersisting {
             let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
             self.directory = documents.appendingPathComponent("ChatSessions", isDirectory: true)
         }
-        createDirectoriesIfNeeded()
+        Self.ensureDirectoryExists(directory, fileManager: fileManager)
     }
 
     func save(_ session: ChatSessionData) async {
@@ -119,7 +119,7 @@ actor FileChatSessionStore: ChatSessionPersisting {
         }
     }
 
-    private func createDirectoriesIfNeeded() {
+    nonisolated private static func ensureDirectoryExists(_ directory: URL, fileManager: FileManager) {
         do {
             try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
         } catch {

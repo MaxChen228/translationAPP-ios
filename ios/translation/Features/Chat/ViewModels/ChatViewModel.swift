@@ -22,13 +22,14 @@ final class ChatViewModel: ObservableObject {
     private let sessionID: UUID
     private var cancellables: Set<AnyCancellable> = []
 
-    init(sessionID: UUID? = nil, chatManager: ChatManaging = ChatManager.shared) {
+    init(sessionID: UUID? = nil, chatManager: ChatManaging? = nil) {
+        let resolvedManager = chatManager ?? ChatManager.shared
         self.sessionID = sessionID ?? UUID()
-        self.chatManager = chatManager
-        self.session = chatManager.startChatSession(sessionID: self.sessionID)
+        self.chatManager = resolvedManager
+        self.session = resolvedManager.startChatSession(sessionID: self.sessionID)
 
         // 監聽後台狀態
-        chatManager.backgroundActivityPublisher
+        resolvedManager.backgroundActivityPublisher
             .receive(on: RunLoop.main)
             .assign(to: \.isBackgroundActive, on: self)
             .store(in: &cancellables)
