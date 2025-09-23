@@ -13,7 +13,7 @@ final class ChatViewModel: ObservableObject {
     var isLoading: Bool { session.isLoading }
     var state: ChatTurnResponse.State { session.state }
     var checklist: [String]? { session.checklist }
-    var researchResult: ChatResearchResponse? { session.researchResult }
+    var researchDeck: ChatResearchDeck? { session.researchDeck }
     var errorMessage: String? { session.errorMessage }
     var hasPendingRequest: Bool { session.hasPendingRequest }
 

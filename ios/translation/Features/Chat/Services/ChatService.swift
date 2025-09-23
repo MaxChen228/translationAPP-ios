@@ -2,7 +2,7 @@ import Foundation
 
 protocol ChatService {
     func send(messages: [ChatMessage]) async throws -> ChatTurnResponse
-    func research(messages: [ChatMessage]) async throws -> ChatResearchResponse
+    func research(messages: [ChatMessage]) async throws -> ChatResearchDeck
 }
 
 enum ChatServiceFactory {
@@ -21,7 +21,7 @@ final class UnavailableChatService: ChatService {
         var errorDescription: String? { String(localized: "error.chat.backendMissing") }
     }
     func send(messages: [ChatMessage]) async throws -> ChatTurnResponse { throw MissingBackendError() }
-    func research(messages: [ChatMessage]) async throws -> ChatResearchResponse { throw MissingBackendError() }
+    func research(messages: [ChatMessage]) async throws -> ChatResearchDeck { throw MissingBackendError() }
 }
 
 final class ChatServiceHTTP: ChatService {
@@ -51,15 +51,10 @@ final class ChatServiceHTTP: ChatService {
         let state: String
         let checklist: [String]?
     }
-    struct ResearchItemDTO: Codable {
-        let term: String
-        let explanation: String
-        let context: String
-        let type: String
-    }
-
-    struct ResearchResponseDTO: Codable {
-        let items: [ResearchItemDTO]
+    struct ResearchDeckResponseDTO: Codable {
+        let deckName: String?
+        let generatedAt: Date?
+        let cards: [DeckCardDTO]
     }
 
     func send(messages: [ChatMessage]) async throws -> ChatTurnResponse {
@@ -69,21 +64,26 @@ final class ChatServiceHTTP: ChatService {
         return ChatTurnResponse(reply: dto.reply, state: state, checklist: dto.checklist)
     }
 
-    func research(messages: [ChatMessage]) async throws -> ChatResearchResponse {
+    func research(messages: [ChatMessage]) async throws -> ChatResearchDeck {
         let model = UserDefaults.standard.string(forKey: "settings.researchModel")
         let dto = try await postResearch(messages: MessageList(messages: messages, model: model))
-        let items = dto.items.map { item in
-            ChatResearchItem(
-                term: item.term,
-                explanation: item.explanation,
-                context: item.context,
-                type: ErrorType(rawValue: item.type) ?? .lexical
+        let cards = dto.cards.map { card in
+            Flashcard(
+                front: card.front,
+                back: card.back,
+                frontNote: card.frontNote,
+                backNote: card.backNote
             )
         }
-        guard !items.isEmpty else {
+        guard !cards.isEmpty else {
             throw URLError(.cannotDecodeContentData)
         }
-        return ChatResearchResponse(items: items)
+        let deckName = dto.deckName ?? String(localized: "chat.research.deckDefaultName")
+        return ChatResearchDeck(
+            name: deckName,
+            cards: cards,
+            generatedAt: dto.generatedAt ?? Date()
+        )
     }
 
     private struct MessageList: Codable {
@@ -105,7 +105,7 @@ final class ChatServiceHTTP: ChatService {
         try await post(url: respondEndpoint, body: messages)
     }
 
-    private func postResearch(messages: MessageList) async throws -> ResearchResponseDTO {
+    private func postResearch(messages: MessageList) async throws -> ResearchDeckResponseDTO {
         try await post(url: researchEndpoint, body: messages)
     }
 
@@ -119,6 +119,8 @@ final class ChatServiceHTTP: ChatService {
             let code = (resp as? HTTPURLResponse)?.statusCode ?? -1
             throw URLError(.badServerResponse, userInfo: ["status": code])
         }
-        return try JSONDecoder().decode(R.self, from: data)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode(R.self, from: data)
     }
 }

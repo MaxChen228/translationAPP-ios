@@ -87,7 +87,7 @@ struct ChatManagerTests {
             messages: [ChatMessage(role: .user, content: "Resume me")],
             state: .gathering,
             checklist: nil,
-            researchResult: nil,
+            researchDeck: nil,
             hasPendingRequest: true,
             pendingRequestType: .message(content: "Resume me", attachments: [])
         )

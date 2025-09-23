@@ -65,7 +65,7 @@
 | ---- | -------- | ---- |
 | 聊天 UI 與狀態 | `Features/Chat/ViewModels/ChatViewModel.swift`、`Features/Chat/Views/ChatWorkspaceView.swift` | 管理訊息列表、`state`/`checklist`、研究結果展示，並依 `AppSettingsStore` 的模型設定觸發研究。 |
 | HTTP 交握 | `Features/Chat/Services/ChatService.swift` | `ChatServiceHTTP` 會將圖片附件轉換為 base64、附上每個流程的模型設定，並對 500/422 錯誤做本地化轉換。 |
-| 研究輸出模型 | `Features/Chat/Models/ChatModels.swift` | `ChatResearchResponse.items` 轉成 `ChatResearchItem(term/explanation/context/type)`；若後端回傳空陣列會拋錯提醒使用者補充資訊。 |
+| 研究輸出模型 | `Features/Chat/Models/ChatModels.swift` | `ChatResearchDeck` 直接封裝後端生成的牌組名稱與 `Flashcard` 列表；若後端回傳空陣列會拋錯提醒使用者補充資訊。 |
 
 ## 7. 通知與 Banner
 

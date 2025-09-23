@@ -54,57 +54,46 @@ struct ChatChecklistCard: View {
 }
 
 struct ChatResearchCard: View {
-    var response: ChatResearchResponse
-    @EnvironmentObject private var savedStore: SavedErrorsStore
+    var deck: ChatResearchDeck
+    @EnvironmentObject private var decksStore: FlashcardDecksStore
     @EnvironmentObject private var bannerCenter: BannerCenter
-    @State private var savedItemIDs: Set<UUID> = []
-    @State private var isExpanded: Bool = false
     @Environment(\.locale) private var locale
+
+    @State private var isExpanded: Bool = true
+    @State private var deckName: String
+    @State private var isSaving: Bool = false
+    @State private var hasSaved: Bool = false
+
+    init(deck: ChatResearchDeck) {
+        self.deck = deck
+        _deckName = State(initialValue: deck.name)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.md) {
-            Button {
-                guard !response.items.isEmpty else { return }
-                withAnimation(DS.AnimationToken.subtle) { isExpanded.toggle() }
-            } label: {
-                HStack(alignment: .center, spacing: DS.Spacing.sm) {
-                    Label {
-                        Text("chat.researchResult").dsType(DS.Font.section)
-                    } icon: {
-                        Image(systemName: "lightbulb.fill")
-                            .foregroundStyle(DS.Brand.scheme.peachQuartz)
-                    }
+            header
 
-                    Spacer(minLength: 0)
+            nameField
 
-                    if !response.items.isEmpty {
-                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-
-            if response.items.isEmpty {
-                Text(String(localized: "chat.research.ready"))
+            if deck.cards.isEmpty {
+                Text(String(localized: "chat.research.empty"))
                     .dsType(DS.Font.body)
                     .foregroundStyle(.secondary)
-            } else if isExpanded {
-                VStack(alignment: .leading, spacing: DS.Spacing.md) {
-                    ForEach(response.items) { item in
-                        ResearchItemCard(
-                            item: item,
-                            isSaved: savedItemIDs.contains(item.id),
-                            onSave: { saveItem(item) }
-                        )
-                    }
-                }
             } else {
-                Text(collapsedHint(for: response.items.count))
-                    .dsType(DS.Font.caption)
-                    .foregroundStyle(.secondary)
+                saveButton
+
+                if isExpanded {
+                    VStack(alignment: .leading, spacing: DS.Spacing.sm) {
+                        ForEach(deck.cards) { card in
+                            FlashcardPreviewCard(card: card)
+                        }
+                    }
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                } else {
+                    Text(summaryText)
+                        .dsType(DS.Font.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
         .padding(DS.Spacing.md)
@@ -117,98 +106,142 @@ struct ChatResearchCard: View {
                 .stroke(DS.Palette.border.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.thin)
         )
         .shadow(color: DS.Shadow.card.color, radius: DS.Shadow.card.radius, x: DS.Shadow.card.x, y: DS.Shadow.card.y)
-        .onChange(of: response.id) { _, _ in
-            savedItemIDs.removeAll()
-            isExpanded = false
+        .onChange(of: deck.id) { _, _ in resetState() }
+    }
+
+    private var header: some View {
+        Button {
+            guard !deck.cards.isEmpty else { return }
+            withAnimation(DS.AnimationToken.subtle) { isExpanded.toggle() }
+        } label: {
+            HStack(alignment: .center, spacing: DS.Spacing.sm) {
+                Label {
+                    Text("chat.researchResult").dsType(DS.Font.section)
+                } icon: {
+                    Image(systemName: "lightbulb.fill")
+                        .foregroundStyle(DS.Brand.scheme.peachQuartz)
+                }
+
+                Spacer(minLength: 0)
+
+                if !deck.cards.isEmpty {
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .padding(.leading, DS.Spacing.sm)
+                }
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var nameField: some View {
+        VStack(alignment: .leading, spacing: DS.Spacing.xs) {
+            Text(String(localized: "chat.research.deckName"))
+                .dsType(DS.Font.caption)
+                .foregroundStyle(.secondary)
+            TextField(String(localized: "chat.research.deckName.placeholder"), text: $deckName)
+                .textFieldStyle(.plain)
+                .padding(.vertical, 10)
+                .padding(.horizontal, DS.Spacing.sm)
+                .background(
+                    RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
+                        .stroke(DS.Palette.border.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.thin)
+                        .background(
+                            RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
+                                .fill(DS.Palette.surfaceAlt.opacity(DS.Opacity.fill))
+                        )
+                )
         }
     }
 
-    private func saveItem(_ item: ChatResearchItem) {
-        guard !savedItemIDs.contains(item.id) else { return }
-        savedStore.addKnowledge(
-            title: item.term,
-            explanation: item.explanation,
-            correctExample: item.context,
-            note: nil,
-            savedAt: Date()
-        )
-        savedItemIDs.insert(item.id)
-        Haptics.success()
-        bannerCenter.show(
-            title: String(localized: "banner.researchSaved.title"),
-            subtitle: item.term
-        )
+    private var saveButton: some View {
+        Button {
+            Task { await saveDeck() }
+        } label: {
+            Label(String(localized: hasSaved ? "chat.research.deckSaved" : "chat.research.saveDeck"), systemImage: hasSaved ? "checkmark.seal.fill" : "tray.and.arrow.down")
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(DSButton(style: hasSaved ? .secondary : .primary, size: .full))
+        .disabled(isSaving || deck.cards.isEmpty || hasSaved)
     }
 
-    private func collapsedHint(for count: Int) -> String {
-        let template = String(localized: "chat.research.collapsedHint", locale: locale)
-        return String(format: template, locale: locale, count)
+    private var summaryText: String {
+        let countString = String(format: String(localized: "deck.cards.count", locale: locale), deck.cards.count)
+        let dateText = deck.generatedAt.formatted(date: .abbreviated, time: .shortened)
+        let template = String(localized: "chat.research.deckSummary", locale: locale)
+        return String(format: template, locale: locale, countString, dateText)
+    }
+
+    private func resetState() {
+        deckName = deck.name
+        hasSaved = false
+        isSaving = false
+        isExpanded = true
+    }
+
+    @MainActor
+    private func saveDeck() async {
+        guard !deck.cards.isEmpty else { return }
+        guard !isSaving else { return }
+        isSaving = true
+        defer { isSaving = false }
+
+        let trimmed = deckName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let resolvedName = trimmed.isEmpty ? String(localized: "chat.research.deckDefaultName", locale: locale) : trimmed
+        let deck = decksStore.add(name: resolvedName, cards: deck.cards)
+        hasSaved = true
+        Haptics.success()
+        let subtitleCount = String(format: String(localized: "deck.cards.count", locale: locale), deck.cards.count)
+        let subtitle = "\(resolvedName) • \(subtitleCount)"
+        bannerCenter.show(title: String(localized: "banner.deckSaved.title", locale: locale), subtitle: subtitle)
     }
 }
 
-struct ResearchItemCard: View {
-    var item: ChatResearchItem
-    var isSaved: Bool
-    var onSave: () -> Void
+private struct FlashcardPreviewCard: View {
+    var card: Flashcard
 
     var body: some View {
-        VStack(alignment: .leading, spacing: DS.Spacing.md) {
-            VStack(alignment: .leading, spacing: DS.Spacing.sm2) {
-                HStack(alignment: .firstTextBaseline, spacing: DS.Spacing.sm2) {
-                    TagLabel(text: item.type.displayName, color: item.type.color)
-                    Text(item.term)
-                        .dsType(DS.Font.section)
-                        .foregroundStyle(.primary)
-                        .lineLimit(2)
-                    Spacer(minLength: 0)
-                }
-
-                Text(item.explanation)
-                    .dsType(DS.Font.body, lineSpacing: 4)
+        VStack(alignment: .leading, spacing: DS.Spacing.sm) {
+            VStack(alignment: .leading, spacing: DS.Spacing.xs) {
+                Text("chat.research.front")
+                    .dsType(DS.Font.caption)
                     .foregroundStyle(.secondary)
-
-                if !item.context.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("chat.research.context")
-                            .dsType(DS.Font.caption)
-                            .foregroundStyle(.secondary)
-                        Text(item.context)
-                            .dsType(DS.Font.body, lineSpacing: 4)
-                            .foregroundStyle(.primary)
-                    }
+                Text(card.front)
+                    .dsType(DS.Font.bodyEmph, lineSpacing: 6)
+                    .foregroundStyle(.primary)
+                if let note = card.frontNote, !note.isEmpty {
+                    Text(note)
+                        .dsType(DS.Font.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
 
-            DSFooterActionBar {
-                HStack {
-                    Spacer()
-                    Button(action: onSave) {
-                        if isSaved {
-                            Label(String(localized: "chat.research.saved"), systemImage: "checkmark.seal.fill")
-                        } else {
-                            Label(String(localized: "chat.research.save"), systemImage: "tray.and.arrow.down")
-                        }
-                    }
-                    .buttonStyle(DSButton(style: .secondary, size: .compact))
-                    .disabled(isSaved)
+            Divider()
+
+            VStack(alignment: .leading, spacing: DS.Spacing.xs) {
+                Text("chat.research.back")
+                    .dsType(DS.Font.caption)
+                    .foregroundStyle(.secondary)
+                Text(card.back)
+                    .dsType(DS.Font.body, lineSpacing: 6)
+                    .foregroundStyle(.primary)
+                if let note = card.backNote, !note.isEmpty {
+                    Text(note)
+                        .dsType(DS.Font.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
         }
-        .padding(DS.Spacing.md2)
+        .padding(DS.Spacing.md)
         .background(
             RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
-                .fill(DS.Palette.surface)
+                .fill(DS.Palette.surfaceAlt.opacity(DS.Opacity.fill))
         )
         .overlay(
             RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
-                .stroke(item.type.color.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.hairline)
-                .overlay(
-                    Rectangle()
-                        .fill(item.type.color)
-                        .frame(width: DS.IconSize.dividerThin)
-                        .clipShape(RoundedRectangle(cornerRadius: DS.Component.Stripe.cornerRadius, style: .continuous))
-                        .padding(.vertical, DS.Component.Stripe.paddingVertical), alignment: .leading
-                )
+                .stroke(DS.Palette.border.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.hairline)
         )
     }
 }

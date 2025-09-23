@@ -39,7 +39,7 @@
 - **錯誤合併**：`Shared/Services/ErrorMergeService.swift` 封裝 `/correct/merge`，根據兩筆錯誤與 rationale 向後端請求合併結果，並在 `BACKEND_URL` 缺失時拋出本地化錯誤。
 - **題庫與卡片**：`Shared/Services/CloudLibraryService.swift` 取得 `/cloud/books`、`/cloud/decks`；`Shared/Services/DeckService.swift` 封裝 `/make_deck`。兩者均會在缺少 `BACKEND_URL` 時直接 `fatalError` 或回傳錯誤，提醒需先設定環境。
 - **雲端課程**：`Shared/Services/CloudLibraryService.swift` 亦負責 `/cloud/courses`、`/cloud/courses/{id}`、`/cloud/courses/{id}/books/{bookId}` 與 `/cloud/search`；導入 `CloudCourseSummary` / `CloudCourseDetail` DTO 供前端顯示。
-- **聊天**：`Features/Chat/Services/ChatService.swift` 實作 `/chat/respond` 與 `/chat/research`，並將 LLM 回傳轉換為 `ChatTurnResponse`（含 `state`/`checklist`）及 `ChatResearchItem`（term/explanation/context/type），並在傳送時自動將圖片附件編碼為 base64 以配合後端的 inline data。
+- **聊天**：`Features/Chat/Services/ChatService.swift` 實作 `/chat/respond` 與 `/chat/research`，並將 LLM 回傳轉換為 `ChatTurnResponse`（含 `state`/`checklist`）與 `ChatResearchDeck`（含建議牌組名稱與 `Flashcard` 列表），同時在傳送時自動將圖片附件編碼為 base64 以配合後端的 inline data。
 
 所有 HTTP service 都採用 `URLSession` + Codable DTO，並在傳送請求前自動加入使用者選擇的 LLM 模型（`settings.geminiModel`）。
 
@@ -81,7 +81,7 @@
 
 ## 變更依賴與注意事項
 
-- 背景批改／聊天流程高度倚賴後端 DTO 結構。任何 API 變更請同步調整 `AIServiceHTTP.ErrorDTO` 與聊天相關 DTO（`ChatTurnResponse`、`ChatResearchItem` 等），並更新此文件。
+- 背景批改／聊天流程高度倚賴後端 DTO 結構。任何 API 變更請同步調整 `AIServiceHTTP.ErrorDTO` 與聊天相關 DTO（`ChatTurnResponse`、`ChatResearchDeck` 等），並更新此文件。
 - 如需新增長期持久化資料，優先考慮建立獨立 Store class 以保持 `CorrectionViewModel` 簡潔。
 - 新增視圖時建議放入對應的 `Features/<Module>/Views` / `Components` 子資料夾，並於 `docs/workflows.md` 補充對應關聯。
 - **練習記錄系統**：新增的 `PracticeRecordsStore` 與 `CalendarViewModel` 緊密整合，修改練習記錄結構時需同步更新日曆統計邏輯。

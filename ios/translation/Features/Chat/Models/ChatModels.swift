@@ -70,49 +70,21 @@ struct ChatTurnResponse: Codable, Equatable {
     enum State: String, Codable { case gathering, ready, completed }
 }
 
-struct ChatResearchItem: Codable, Identifiable, Equatable {
-    var id: UUID = UUID()
-    var term: String
-    var explanation: String
-    var context: String
-    var type: ErrorType
+struct ChatResearchDeck: Codable, Equatable, Identifiable {
+    var id: UUID
+    var name: String
+    var cards: [Flashcard]
+    var generatedAt: Date
 
-    private enum CodingKeys: String, CodingKey {
-        case term
-        case explanation
-        case context
-        case type
-    }
-
-    init(id: UUID = UUID(), term: String, explanation: String, context: String, type: ErrorType) {
+    init(
+        id: UUID = UUID(),
+        name: String,
+        cards: [Flashcard],
+        generatedAt: Date = Date()
+    ) {
         self.id = id
-        self.term = term
-        self.explanation = explanation
-        self.context = context
-        self.type = type
+        self.name = name
+        self.cards = cards
+        self.generatedAt = generatedAt
     }
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        term = try container.decode(String.self, forKey: .term)
-        explanation = try container.decode(String.self, forKey: .explanation)
-        context = try container.decode(String.self, forKey: .context)
-        let rawType = try container.decode(String.self, forKey: .type)
-        type = ErrorType(rawValue: rawType) ?? .lexical
-    }
-
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(term, forKey: .term)
-        try container.encode(explanation, forKey: .explanation)
-        try container.encode(context, forKey: .context)
-        try container.encode(type.rawValue, forKey: .type)
-    }
-}
-
-struct ChatResearchResponse: Codable, Equatable, Identifiable {
-    var id: UUID = UUID()
-    var items: [ChatResearchItem]
-
-    private enum CodingKeys: String, CodingKey { case items }
 }

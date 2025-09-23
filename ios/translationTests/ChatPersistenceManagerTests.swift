@@ -21,7 +21,7 @@ struct ChatPersistenceManagerTests {
             messages: messages,
             state: .ready,
             checklist: ["Task 1", "Task 2"],
-            researchResult: nil,
+            researchDeck: nil,
             hasPendingRequest: false,
             pendingRequestType: nil
         )
@@ -68,7 +68,7 @@ struct ChatPersistenceManagerTests {
                 messages: [],
                 state: state,
                 checklist: nil,
-                researchResult: nil,
+                researchDeck: nil,
                 hasPendingRequest: false,
                 pendingRequestType: nil
             )
@@ -230,7 +230,7 @@ struct ChatPersistenceManagerTests {
             messages: messages,
             state: .ready,
             checklist: nil,
-            researchResult: nil,
+            researchDeck: nil,
             hasPendingRequest: false,
             pendingRequestType: nil
         )
@@ -260,7 +260,7 @@ struct ChatPersistenceManagerTests {
             messages: [],
             state: .ready,
             checklist: checklist,
-            researchResult: nil,
+            researchDeck: nil,
             hasPendingRequest: false,
             pendingRequestType: nil
         )
@@ -284,7 +284,7 @@ struct ChatPersistenceManagerTests {
             messages: [],
             state: .ready,
             checklist: nil,
-            researchResult: nil,
+            researchDeck: nil,
             hasPendingRequest: false,
             pendingRequestType: nil
         )
@@ -306,7 +306,7 @@ struct ChatPersistenceManagerTests {
             messages: [],
             state: .ready,
             checklist: nil,
-            researchResult: nil,
+            researchDeck: nil,
             hasPendingRequest: false,
             pendingRequestType: nil
         )
@@ -331,7 +331,7 @@ struct ChatPersistenceManagerTests {
             messages: messages,
             state: .ready,
             checklist: nil,
-            researchResult: nil,
+            researchDeck: nil,
             hasPendingRequest: false,
             pendingRequestType: nil
         )
@@ -356,7 +356,7 @@ struct ChatPersistenceManagerTests {
             messages: messages,
             state: .ready,
             checklist: nil,
-            researchResult: nil,
+            researchDeck: nil,
             hasPendingRequest: false,
             pendingRequestType: nil
         )
@@ -382,7 +382,7 @@ struct ChatPersistenceManagerTests {
                         messages: [TestHelpers.createTestMessage(role: .user, content: "Message \(i)")],
                         state: .ready,
                         checklist: nil,
-                        researchResult: nil,
+                        researchDeck: nil,
                         hasPendingRequest: false,
                         pendingRequestType: nil
                     )

@@ -9,7 +9,7 @@ final class ChatSession: ObservableObject, Identifiable {
     @Published var isLoading: Bool
     @Published var state: ChatTurnResponse.State
     @Published var checklist: [String]?
-    @Published var researchResult: ChatResearchResponse?
+    @Published var researchDeck: ChatResearchDeck?
     @Published var errorMessage: String?
     @Published var hasPendingRequest: Bool
 
@@ -29,7 +29,7 @@ final class ChatSession: ObservableObject, Identifiable {
         self.isLoading = false
         self.state = .gathering
         self.checklist = nil
-        self.researchResult = nil
+        self.researchDeck = nil
         self.errorMessage = nil
         self.hasPendingRequest = false
         persistStateDetached()
@@ -47,7 +47,7 @@ final class ChatSession: ObservableObject, Identifiable {
         self.isLoading = false
         self.state = data.state
         self.checklist = data.checklist
-        self.researchResult = data.researchResult
+        self.researchDeck = data.researchDeck
         self.errorMessage = nil
         self.hasPendingRequest = data.hasPendingRequest
         self.pendingRequestType = data.pendingRequestType
@@ -93,10 +93,11 @@ final class ChatSession: ObservableObject, Identifiable {
         defer { isLoading = false }
 
         do {
-            let result = try await service.research(messages: messages)
-            researchResult = result
-            let bulletList = result.items.map { "• \($0.term)" }.joined(separator: "\n")
-            let messageText = bulletList.isEmpty ? String(localized: "chat.research.ready") : bulletList
+            let deck = try await service.research(messages: messages)
+            researchDeck = deck
+            let cardCount = deck.cards.count
+            let template = String(localized: "chat.research.deckGenerated")
+            let messageText = String(format: template, deck.name, cardCount)
             messages.append(ChatMessage(role: .assistant, content: messageText))
             errorMessage = nil
             pendingRequestType = nil
@@ -120,7 +121,7 @@ final class ChatSession: ObservableObject, Identifiable {
     func reset() {
         messages = [ChatMessage(role: .assistant, content: String(localized: "chat.greeting"))]
         checklist = nil
-        researchResult = nil
+        researchDeck = nil
         state = .gathering
         errorMessage = nil
         pendingRequestType = nil
@@ -132,7 +133,7 @@ final class ChatSession: ObservableObject, Identifiable {
         messages = data.messages
         state = data.state
         checklist = data.checklist
-        researchResult = data.researchResult
+        researchDeck = data.researchDeck
         hasPendingRequest = data.hasPendingRequest
         pendingRequestType = data.pendingRequestType
         errorMessage = nil
@@ -151,7 +152,7 @@ final class ChatSession: ObservableObject, Identifiable {
             messages: messages,
             state: state,
             checklist: checklist,
-            researchResult: researchResult,
+            researchDeck: researchDeck,
             hasPendingRequest: hasPendingRequest,
             pendingRequestType: pendingRequestType
         )

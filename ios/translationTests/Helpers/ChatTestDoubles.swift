@@ -9,14 +9,14 @@ enum MockChatError: Error {
 @MainActor
 final class MockChatService: ChatService {
     private var sendResult: Result<ChatTurnResponse, Error>
-    private var researchResult: Result<ChatResearchResponse, Error>
+    private var researchResult: Result<ChatResearchDeck, Error>
 
     private(set) var sendRequests: [[ChatMessage]] = []
     private(set) var researchRequests: [[ChatMessage]] = []
 
     init(
         sendResult: Result<ChatTurnResponse, Error> = .success(ChatTurnResponse(reply: "Mock reply", state: .ready, checklist: ["item"])),
-        researchResult: Result<ChatResearchResponse, Error> = .success(ChatResearchResponse(items: [ChatResearchItem(term: "term", explanation: "explanation", context: "context", type: .lexical)]))
+        researchResult: Result<ChatResearchDeck, Error> = .success(ChatResearchDeck(name: "Deck", cards: [Flashcard(front: "Front", back: "Back")]))
     ) {
         self.sendResult = sendResult
         self.researchResult = researchResult
@@ -26,7 +26,7 @@ final class MockChatService: ChatService {
         sendResult = result
     }
 
-    func setResearchResult(_ result: Result<ChatResearchResponse, Error>) {
+    func setResearchResult(_ result: Result<ChatResearchDeck, Error>) {
         researchResult = result
     }
 
@@ -40,7 +40,7 @@ final class MockChatService: ChatService {
         }
     }
 
-    func research(messages: [ChatMessage]) async throws -> ChatResearchResponse {
+    func research(messages: [ChatMessage]) async throws -> ChatResearchDeck {
         researchRequests.append(messages)
         switch researchResult {
         case .success(let response):

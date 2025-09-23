@@ -57,7 +57,8 @@ struct ChatSessionTests {
         await session.sendMessage(content: "Prompt")
         await session.runResearch()
 
-        #expect(session.researchResult != nil)
+        #expect(session.researchDeck != nil)
+        #expect(session.researchDeck?.cards.count == 1)
         #expect(session.messages.last?.role == .assistant)
         #expect(session.hasPendingRequest == false)
         let snapshot = await repository.storedSessions()

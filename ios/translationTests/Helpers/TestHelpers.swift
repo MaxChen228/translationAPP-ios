@@ -40,7 +40,7 @@ enum TestHelpers {
             messages: messages,
             state: state,
             checklist: nil,
-            researchResult: nil,
+            researchDeck: nil,
             hasPendingRequest: false,
             pendingRequestType: nil
         )

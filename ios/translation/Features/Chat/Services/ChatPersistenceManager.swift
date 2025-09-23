@@ -18,7 +18,7 @@ struct ChatSessionData: Codable, Equatable {
     let messages: [ChatMessage]
     let state: ChatTurnResponse.State
     let checklist: [String]?
-    let researchResult: ChatResearchResponse?
+    let researchDeck: ChatResearchDeck?
     let hasPendingRequest: Bool
     let pendingRequestType: ChatPendingRequestType?
     let savedAt: Date
@@ -28,7 +28,7 @@ struct ChatSessionData: Codable, Equatable {
         messages: [ChatMessage],
         state: ChatTurnResponse.State,
         checklist: [String]?,
-        researchResult: ChatResearchResponse?,
+        researchDeck: ChatResearchDeck?,
         hasPendingRequest: Bool,
         pendingRequestType: ChatPendingRequestType?,
         savedAt: Date = Date()
@@ -37,7 +37,7 @@ struct ChatSessionData: Codable, Equatable {
         self.messages = messages
         self.state = state
         self.checklist = checklist
-        self.researchResult = researchResult
+        self.researchDeck = researchDeck
         self.hasPendingRequest = hasPendingRequest
         self.pendingRequestType = pendingRequestType
         self.savedAt = savedAt

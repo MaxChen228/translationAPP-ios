@@ -85,8 +85,8 @@ struct ChatWorkspaceView: View {
                                 .id(ScrollAnchor.checklist)
                         }
 
-                        if let research = viewModel.researchResult {
-                            ChatResearchCard(response: research)
+                        if let research = viewModel.researchDeck {
+                            ChatResearchCard(deck: research)
                                 .id(ScrollAnchor.research(research.id))
                         }
 
@@ -109,7 +109,7 @@ struct ChatWorkspaceView: View {
             .task(id: viewModel.checklist?.count ?? 0) {
                 await MainActor.run { scrollToLatest(proxy) }
             }
-            .task(id: viewModel.researchResult?.id) {
+            .task(id: viewModel.researchDeck?.id) {
                 await MainActor.run { scrollToLatest(proxy) }
             }
             .task(id: viewModel.isLoading) {
@@ -191,11 +191,11 @@ struct ChatWorkspaceView: View {
     }
 
     private var shouldShowResearchButton: Bool {
-        canRunResearch && (viewModel.researchResult?.items.isEmpty ?? true)
+        canRunResearch && viewModel.researchDeck == nil
     }
 
     private var canReset: Bool {
-        viewModel.messages.contains { $0.role == .user } || !viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.researchResult != nil || (viewModel.checklist?.isEmpty == false) || !pendingAttachments.isEmpty
+        viewModel.messages.contains { $0.role == .user } || !viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.researchDeck != nil || (viewModel.checklist?.isEmpty == false) || !pendingAttachments.isEmpty
     }
 
 
@@ -213,7 +213,7 @@ struct ChatWorkspaceView: View {
 
     private var latestAnchor: ScrollAnchor? {
         if viewModel.isLoading { return .typing }
-        if let research = viewModel.researchResult { return .research(research.id) }
+        if let research = viewModel.researchDeck { return .research(research.id) }
         if let checklist = viewModel.checklist, !checklist.isEmpty { return .checklist }
         if let last = viewModel.messages.last { return .message(last.id) }
         return nil
@@ -266,7 +266,6 @@ struct ChatWorkspaceView: View {
         #endif
     }
 }
-
 
 
 

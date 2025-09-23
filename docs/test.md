@@ -7,6 +7,21 @@
 | Saved / Knowledge Stash | `ios/translationTests/SavedErrorsStoreTests.swift` | `xcodebuild -project ios/translation.xcodeproj -scheme translation -destination 'platform=iOS Simulator,name=iPhone 16' test -only-testing:translationTests/SavedErrorsStoreTests` | 穩定 | 驗證知識點儲存、便利建構子、stash 移動、清除與持久化同步 | 與 `SavedJSONListSheet` 的整體流程尚未自動化；缺乏 Deck 匯出整合測試 |
 | Chat / Flashcards | `ios/translationTests/ChatManagerTests.swift`<br>`ios/translationTests/ChatSessionTests.swift`<br>`ios/translationTests/ChatViewModelTests.swift`<br>`ios/translationTests/FlashcardsViewModelTests.swift` | `xcodebuild -project ios/translation.xcodeproj -scheme translation -destination 'platform=iOS Simulator,name=iPhone 16' test -only-testing:translationTests/ChatSessionTests -only-testing:translationTests/ChatManagerTests -only-testing:translationTests/ChatViewModelTests -only-testing:translationTests/FlashcardsViewModelTests` | 穩定（全以本地 mock 執行） | 驗證聊天狀態轉換、背景任務協調、卡片增刪與排序 | 待補語音/即時播放服務、Flashcards 進階情境 |
 
+### 常用測試指令
+
+- **iOS 前端建置檢查**（SwiftUI 專案）：
+  ```bash
+  xcodebuild -project ios/translation.xcodeproj -scheme translation -destination 'platform=iOS Simulator,name=iPhone 16' build
+  ```
+
+- **後端 FastAPI / Gemini 代理**：請先啟動虛擬環境，再設定 `PYTHONPATH` 執行 pytest。
+  ```bash
+  cd translation-backend
+  source .venv/bin/activate
+  PYTHONPATH=. pytest tests/test_chat_services.py
+  ```
+
+
 ## 覆蓋率摘要
 
 - 最近一次量測（2025-09-22，含 `-enableCodeCoverage YES`)：
