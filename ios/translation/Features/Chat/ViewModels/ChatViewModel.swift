@@ -17,17 +17,21 @@ final class ChatViewModel: ObservableObject {
     var errorMessage: String? { session.errorMessage }
     var hasPendingRequest: Bool { session.hasPendingRequest }
 
-    private let chatManager = ChatManager.shared
+    let chatManager: ChatManaging
     private let session: ChatSession
     private let sessionID: UUID
     private var cancellables: Set<AnyCancellable> = []
 
-    init(sessionID: UUID? = nil) {
+    init(sessionID: UUID? = nil, chatManager: ChatManaging = ChatManager.shared) {
         self.sessionID = sessionID ?? UUID()
+        self.chatManager = chatManager
         self.session = chatManager.startChatSession(sessionID: self.sessionID)
 
         // 監聽後台狀態
-        chatManager.$isBackgroundTaskActive.assign(to: &$isBackgroundActive)
+        chatManager.backgroundActivityPublisher
+            .receive(on: RunLoop.main)
+            .assign(to: \.isBackgroundActive, on: self)
+            .store(in: &cancellables)
 
         session.objectWillChange
             .sink { [weak self] _ in

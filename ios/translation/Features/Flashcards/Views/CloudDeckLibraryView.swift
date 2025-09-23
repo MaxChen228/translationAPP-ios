@@ -45,24 +45,29 @@ struct CloudDeckLibraryView: View {
     }
 
     private func load() async {
+        if isLoading { return }
         isLoading = true
         error = nil
+        defer { isLoading = false }
+
         guard AppConfig.backendURL != nil else {
-            isLoading = false
             let msg = String(localized: "banner.backend.missing.subtitle", locale: locale)
             error = msg
             bannerCenter.show(title: String(localized: "banner.backend.missing.title", locale: locale), subtitle: msg)
             decks = []
             return
         }
+
         do {
-            decks = try await service.fetchDecks()
+            let fetched = try await service.fetchDecks()
+            if Task.isCancelled { return }
+            decks = fetched
         } catch {
+            if isCancellationError(error) { return }
             self.error = (error as NSError).localizedDescription
             decks = []
             bannerCenter.show(title: String(localized: "banner.cloud.loadFailed.title", locale: locale), subtitle: self.error)
         }
-        isLoading = false
     }
 
     private func copyDeck(_ d: CloudDeckSummary) async {

@@ -138,3 +138,9 @@ final class CloudLibraryHTTP: CloudLibraryService {
 }
 
 // Mock implementation removed: BACKEND_URL is required for cloud operations.
+
+func isCancellationError(_ error: Error) -> Bool {
+    if error is CancellationError { return true }
+    if let urlError = error as? URLError, urlError.code == .cancelled { return true }
+    return false
+}

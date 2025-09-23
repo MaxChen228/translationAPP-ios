@@ -15,6 +15,12 @@ struct translationTests {
         // Write your test here and use APIs like `#expect(...)` to check expected conditions.
     }
 
+    @Test func cancellationErrorsAreRecognized() throws {
+        #expect(isCancellationError(CancellationError()))
+        #expect(isCancellationError(URLError(.cancelled)))
+        #expect(!isCancellationError(URLError(.timedOut)))
+    }
+
     @Test func decodeDeckResponse() throws {
         let json = """
         {"name":"測試卡集","cards":[

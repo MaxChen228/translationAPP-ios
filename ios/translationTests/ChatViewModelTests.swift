@@ -1,6 +1,5 @@
 import Foundation
 import Testing
-import Combine
 @testable import translation
 
 @MainActor
@@ -8,16 +7,17 @@ struct ChatViewModelTests {
 
     // MARK: - Test Helpers
 
-    private func createMockChatManager() -> ChatManager {
-        // 使用真實的 ChatManager 但可以 mock 其依賴
-        return ChatManager.shared
+    private func makeViewModel(sessionID: UUID? = nil) -> (ChatViewModel, TestChatManager) {
+        let manager = TestChatManager()
+        let viewModel = ChatViewModel(sessionID: sessionID, chatManager: manager)
+        return (viewModel, manager)
     }
 
     // MARK: - Initialization Tests
 
     @Test("ChatViewModel initializes with default state")
     func testInitialization() {
-        let viewModel = ChatViewModel()
+        let (viewModel, _) = makeViewModel()
 
         #expect(viewModel.inputText.isEmpty)
         #expect(!viewModel.isBackgroundActive)
@@ -30,7 +30,7 @@ struct ChatViewModelTests {
     @Test("ChatViewModel initializes with existing sessionID")
     func testInitializationWithSessionID() {
         let sessionID = UUID()
-        let viewModel = ChatViewModel(sessionID: sessionID)
+        let (viewModel, _) = makeViewModel(sessionID: sessionID)
 
         #expect(viewModel.inputText.isEmpty)
         #expect(!viewModel.isBackgroundActive)
@@ -42,7 +42,7 @@ struct ChatViewModelTests {
 
     @Test("ChatViewModel updates input text")
     func testInputTextUpdate() {
-        let viewModel = ChatViewModel()
+        let (viewModel, _) = makeViewModel()
         let testText = "Hello, world!"
 
         viewModel.inputText = testText
@@ -52,7 +52,7 @@ struct ChatViewModelTests {
 
     @Test("ChatViewModel clears input text")
     func testInputTextClear() {
-        let viewModel = ChatViewModel()
+        let (viewModel, _) = makeViewModel()
         viewModel.inputText = "Some text"
 
         viewModel.inputText = ""
@@ -64,26 +64,22 @@ struct ChatViewModelTests {
 
     @Test("ChatViewModel sends message")
     func testSendMessage() async {
-        let viewModel = ChatViewModel()
+        let (viewModel, _) = makeViewModel()
         let testMessage = "Test message"
 
         viewModel.inputText = testMessage
 
-        // 測試發送訊息
         await viewModel.sendMessage()
 
-        // 驗證輸入已清空
         #expect(viewModel.inputText.isEmpty)
-
-        // 驗證訊息已添加到 messages
         #expect(!viewModel.messages.isEmpty)
-        #expect(viewModel.messages.last?.content == testMessage)
-        #expect(viewModel.messages.last?.role == .user)
+        let userMessages = viewModel.messages.filter { $0.role == .user }
+        #expect(userMessages.last?.content == testMessage)
     }
 
     @Test("ChatViewModel does not send empty message")
     func testSendEmptyMessage() async {
-        let viewModel = ChatViewModel()
+        let (viewModel, _) = makeViewModel()
         let initialMessageCount = viewModel.messages.count
 
         viewModel.inputText = ""
@@ -94,7 +90,7 @@ struct ChatViewModelTests {
 
     @Test("ChatViewModel does not send whitespace-only message")
     func testSendWhitespaceMessage() async {
-        let viewModel = ChatViewModel()
+        let (viewModel, _) = makeViewModel()
         let initialMessageCount = viewModel.messages.count
 
         viewModel.inputText = "   \n\t  "
@@ -107,15 +103,11 @@ struct ChatViewModelTests {
 
     @Test("ChatViewModel handles loading state")
     func testLoadingState() async {
-        let viewModel = ChatViewModel()
-
-        // 發送訊息會觸發 loading 狀態
+        let (viewModel, _) = makeViewModel()
         viewModel.inputText = "Test message"
 
-        // 發送訊息並等待完成
         await viewModel.sendMessage()
 
-        // 完成後應該不再 loading
         #expect(!viewModel.isLoading)
     }
 
@@ -123,9 +115,8 @@ struct ChatViewModelTests {
 
     @Test("ChatViewModel shows continuation banner when appropriate")
     func testContinuationBanner() {
-        let viewModel = ChatViewModel()
+        let (viewModel, _) = makeViewModel()
 
-        // 測試 banner 顯示邏輯
         viewModel.showContinuationBanner = true
         #expect(viewModel.showContinuationBanner)
 
@@ -135,12 +126,11 @@ struct ChatViewModelTests {
 
     @Test("ChatViewModel resumes pending request")
     func testResumePendingRequest() async {
-        let viewModel = ChatViewModel()
+        let (viewModel, _) = makeViewModel()
         viewModel.showContinuationBanner = true
 
         await viewModel.resumePendingRequest()
 
-        // Banner 應該被隱藏
         #expect(!viewModel.showContinuationBanner)
     }
 
@@ -148,18 +138,15 @@ struct ChatViewModelTests {
 
     @Test("ChatViewModel resets conversation")
     func testResetConversation() async {
-        let viewModel = ChatViewModel()
+        let (viewModel, _) = makeViewModel()
 
-        // 添加一些測試訊息
         viewModel.inputText = "Test message"
         await viewModel.sendMessage()
 
-        // 驗證有訊息
         #expect(!viewModel.messages.isEmpty)
 
         viewModel.reset()
 
-        // 對話應該只剩系統問候
         #expect(viewModel.messages.count == 1)
         #expect(viewModel.messages.first?.role == .assistant)
         #expect(!viewModel.showContinuationBanner)
@@ -169,38 +156,27 @@ struct ChatViewModelTests {
 
     @Test("ChatViewModel runs research")
     func testRunResearch() async {
-        let viewModel = ChatViewModel()
+        let (viewModel, _) = makeViewModel()
 
-        // 需要先有訊息才能執行研究
         viewModel.inputText = "Test message"
         await viewModel.sendMessage()
 
         await viewModel.runResearch()
-
-        // 這個測試檢查研究功能是否被調用
-        // 實際的研究結果取決於 API 回應
     }
 
     // MARK: - Background State Tests
 
     @Test("ChatViewModel tracks background state")
     func testBackgroundState() async {
-        let manager = ChatManager.shared
-        manager.isBackgroundTaskActive = false
-
-        let viewModel = ChatViewModel()
+        let (viewModel, manager) = makeViewModel()
         #expect(!viewModel.isBackgroundActive)
 
-        manager.isBackgroundTaskActive = true
+        manager.simulateBackgroundActivity(true)
         await Task.yield()
         #expect(viewModel.isBackgroundActive)
 
-        manager.isBackgroundTaskActive = false
+        manager.simulateBackgroundActivity(false)
         await Task.yield()
         #expect(!viewModel.isBackgroundActive)
     }
 }
-
-// MARK: - Test Notes
-// 這些測試依賴於實際的 ChatSession 實現
-// 在真實的應用中，可能需要 dependency injection 來進行更好的測試隔離

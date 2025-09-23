@@ -48,11 +48,12 @@ struct CloudCourseLibraryView: View {
     }
 
     private func loadCourses() async {
+        if isLoading { return }
         isLoading = true
         error = nil
+        defer { isLoading = false }
 
         guard AppConfig.backendURL != nil else {
-            isLoading = false
             let msg = String(localized: "banner.backend.missing.subtitle", locale: locale)
             error = msg
             bannerCenter.show(title: String(localized: "banner.backend.missing.title", locale: locale), subtitle: msg)
@@ -62,16 +63,16 @@ struct CloudCourseLibraryView: View {
 
         do {
             let fetched = try await service.fetchCourses()
+            if Task.isCancelled { return }
             courses = fetched.sorted { lhs, rhs in
                 lhs.title.localizedCaseInsensitiveCompare(rhs.title) == .orderedAscending
             }
         } catch {
+            if isCancellationError(error) { return }
             self.error = (error as NSError).localizedDescription
             courses = []
             bannerCenter.show(title: String(localized: "banner.cloud.loadFailed.title", locale: locale), subtitle: self.error)
         }
-
-        isLoading = false
     }
 }
 

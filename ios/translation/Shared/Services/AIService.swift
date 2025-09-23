@@ -38,9 +38,9 @@ enum AppConfig {
         // Prefer runtime environment for easy override when running on device via Xcode.
         if let s = ProcessInfo.processInfo.environment["BACKEND_URL"],
            let u = URL(string: s), !s.isEmpty { return u }
-        if let s = Bundle.main.object(forInfoDictionaryKey: "BACKEND_URL") as? String,
-           let u = URL(string: s), !s.isEmpty { return u }
-        return nil
+
+        // Hardcoded fallback for production (Xcode 16 doesn't support custom INFOPLIST_KEY_*)
+        return URL(string: "https://translation-l9qi.onrender.com")
     }
 
     // All service endpoints derive from BACKEND_URL
