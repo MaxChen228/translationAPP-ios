@@ -30,14 +30,13 @@ struct SavedJSONListSheet: View {
             }
         }
         .navigationTitle(Text("nav.savedJSON"))
-        .navigationBarBackButtonHidden(isSaving)
         .sheet(isPresented: $showSaveDeckSheet) {
             SaveDeckNameSheet(name: proposedName, count: filteredDecoded.count, isSaving: isSaving) { action in
                 switch action {
                 case .cancel:
                     showSaveDeckSheet = false
                 case .save(let name):
-                    Task { await saveDeck(named: name) }
+                    saveDeck(named: name)
                 }
             }
             .presentationDetents([.height(220)])
@@ -165,18 +164,31 @@ struct SavedJSONListSheet: View {
         }
     }
 
-    private func saveDeck(named name: String) async {
+    private func saveDeck(named name: String) {
         guard !isSaving else { return }
-        isSaving = true
-        defer { isSaving = false }
         guard AppConfig.correctAPIURL != nil else {
             bannerCenter.show(title: String(localized: "banner.backend.missing.title", locale: locale), subtitle: String(localized: "banner.backend.missing.subtitle", locale: locale))
             return
         }
-        do {
+
+        let stash = activeStash
+        let records = store.items(in: stash)
+        if records.isEmpty {
+            bannerCenter.show(title: String(localized: "saved.empty", locale: locale), subtitle: nil)
+            return
+        }
+
+        let effectiveName = name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? String(localized: "deck.untitled", locale: locale) : name
+        let deckService = self.deckService
+        let decksStore = self.decksStore
+        let bannerCenter = self.bannerCenter
+        let locale = self.locale
+
+        isSaving = true
+
+        Task.detached(priority: .userInitiated) {
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
-            let records = store.items(in: activeStash)
             var requestItems: [DeckMakeRequest.Item] = []
             requestItems.reserveCapacity(records.count)
             for rec in records {
@@ -184,14 +196,22 @@ struct SavedJSONListSheet: View {
                       let payload = try? decoder.decode(KnowledgeSavePayload.self, from: data) else { continue }
                 requestItems.append(.knowledge(payload))
             }
-            let effectiveName = name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? String(localized: "deck.untitled", locale: locale) : name
-            let (resolvedName, cards) = try await deckService.makeDeck(name: effectiveName, items: requestItems)
-            _ = decksStore.add(name: resolvedName, cards: cards)
-            showSaveDeckSheet = false
-            let subtitle = "\(resolvedName) • " + String(format: String(localized: "deck.cards.count", locale: locale), cards.count)
-            bannerCenter.show(title: String(localized: "banner.deckSaved.title", locale: locale), subtitle: subtitle)
-        } catch {
-            saveError = (error as NSError).localizedDescription
+
+            do {
+                let (resolvedName, cards) = try await deckService.makeDeck(name: effectiveName, items: requestItems)
+                await MainActor.run {
+                    _ = decksStore.add(name: resolvedName, cards: cards)
+                    showSaveDeckSheet = false
+                    isSaving = false
+                    let subtitle = "\(resolvedName) • " + String(format: String(localized: "deck.cards.count", locale: locale), cards.count)
+                    bannerCenter.show(title: String(localized: "banner.deckSaved.title", locale: locale), subtitle: subtitle)
+                }
+            } catch {
+                await MainActor.run {
+                    saveError = (error as NSError).localizedDescription
+                    isSaving = false
+                }
+            }
         }
     }
 }
