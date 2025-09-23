@@ -44,6 +44,10 @@ final class BankBooksOrderStore: ObservableObject {
         order = r + others
     }
 
+    func removeFromRoot(_ name: String) {
+        order.removeAll { $0 == name }
+    }
+
     // MARK: - Persistence
     private func load() {
         guard let data = UserDefaults.standard.data(forKey: key) else { return }
@@ -53,4 +57,3 @@ final class BankBooksOrderStore: ObservableObject {
         if let data = try? JSONEncoder().encode(order) { UserDefaults.standard.set(data, forKey: key) }
     }
 }
-

@@ -25,7 +25,7 @@
 | Saved JSON 清單 | `Features/Saved/Views/SavedJSONListSheet.swift`、`Features/Saved/Stores/SavedErrorsStore.swift` | 儲存已萃取的知識點（title/explanation/correctExample/note），並提供匯出與 Deck 生成入口。 |
 | 匯出為單字卡 | `DeckService.swift` | 透過 `/make_deck` 建立新 Deck，新增欄位時同步更新 DTO。 |
 | 雲端課程列表 | `Features/Chat/Bank/Views/CloudCourseLibraryView.swift` | 從 `/cloud/courses` 取得課程摘要，支援標籤與搜尋引導。 |
-| 課程詳情與書本預覽 | `Features/Chat/Bank/Views/CloudCourseDetailView.swift`、`Features/Chat/Bank/Views/CloudCourseBookPreviewView.swift` | 顯示課程封面、介紹、子書本（`/cloud/courses/{id}`、`/cloud/courses/{id}/books/{bookId}`），可一鍵複製到本機。 |
+| 課程詳情與書本預覽 | `Features/Chat/Bank/Views/CloudCourseDetailView.swift`、`Features/Chat/Bank/Views/CloudCourseBookPreviewView.swift` | 顯示課程封面、介紹、子書本（`/cloud/courses/{id}`、`/cloud/courses/{id}/books/{bookId}`），下載時會自動建立課程資料夾並以書本原名儲存。 |
 
 ## 3. 快速功能列自訂
 

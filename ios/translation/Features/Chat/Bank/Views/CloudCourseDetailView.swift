@@ -7,6 +7,8 @@ struct CloudCourseDetailView: View {
     @EnvironmentObject private var localBank: LocalBankStore
     @EnvironmentObject private var bannerCenter: BannerCenter
     @EnvironmentObject private var localProgress: LocalBankProgressStore
+    @EnvironmentObject private var bankFolders: BankFoldersStore
+    @EnvironmentObject private var bankOrder: BankBooksOrderStore
     private let service: CloudLibraryService = CloudLibraryServiceFactory.makeDefault()
 
     @State private var detail: CloudCourseDetail?
@@ -43,7 +45,7 @@ struct CloudCourseDetailView: View {
                             CourseBookCard(
                                 book: book,
                                 onPreview: { previewBook = book },
-                                onDownload: { Task { await copyBook(book, courseTitle: detail.title) } }
+                                onDownload: { Task { await copyBook(book, courseId: detail.id, courseTitle: detail.title) } }
                             )
                         }
                     }
@@ -81,29 +83,39 @@ struct CloudCourseDetailView: View {
         isLoading = false
     }
 
-    private func localName(for book: CloudCourseBook, courseTitle: String) -> String {
-        "\(courseTitle) · \(book.title)"
-    }
-
-    private func copyBook(_ book: CloudCourseBook, courseTitle: String) async {
+    private func copyBook(_ book: CloudCourseBook, courseId: String, courseTitle: String) async -> String? {
         guard AppConfig.backendURL != nil else {
             bannerCenter.show(title: String(localized: "banner.backend.missing.title", locale: locale), subtitle: String(localized: "banner.backend.missing.subtitle", locale: locale))
-            return
+            return nil
         }
-        let name = localName(for: book, courseTitle: courseTitle)
-        localBank.addOrReplaceBook(name: name, items: book.items)
-        localProgress.removeBook(name) // reset any stale progress for overwritten book
-        let subtitle = "\(name) • " + String(format: String(localized: "bank.book.count", locale: locale), book.items.count)
+        let existingName = bankFolders.existingCourseBookName(courseId: courseId, courseBookId: book.id)
+        let finalName = localBank.upsertBook(preferredName: book.title, existingName: existingName, items: book.items)
+        if let existingName, existingName != finalName {
+            bankFolders.replaceBookName(old: existingName, with: finalName)
+            bankOrder.removeFromRoot(existingName)
+            localProgress.renameBook(from: existingName, to: finalName)
+        }
+        localProgress.removeBook(finalName)
+        let folder = bankFolders.ensureCourseFolder(courseId: courseId, title: courseTitle)
+        bankFolders.recordCourseBook(courseId: courseId, courseBookId: book.id, bookName: finalName)
+        bankOrder.removeFromRoot(finalName)
+
+        let countText = String(format: String(localized: "bank.book.count", locale: locale), book.items.count)
+        let subtitle = "\(folder.name) • \(finalName) • \(countText)"
         bannerCenter.show(title: String(localized: "banner.copiedToLocal.title", locale: locale), subtitle: subtitle)
+        return finalName
     }
 
     private func copyEntireCourse(_ detail: CloudCourseDetail) async {
+        var savedNames: [String] = []
         for book in detail.books {
-            await copyBook(book, courseTitle: detail.title)
+            if let name = await copyBook(book, courseId: detail.id, courseTitle: detail.title) {
+                savedNames.append(name)
+            }
         }
         bannerCenter.show(
             title: String(localized: "cloud.course.downloadAll.success", locale: locale),
-            subtitle: detail.books.map { $0.title }.joined(separator: " • ")
+            subtitle: savedNames.isEmpty ? detail.title : savedNames.joined(separator: " • ")
         )
     }
     @ViewBuilder

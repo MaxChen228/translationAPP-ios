@@ -82,6 +82,37 @@ struct LocalBankStoreTests {
         }
     }
 
+    @Test("upsertBook 會沿用既有名稱並更新內容")
+    func upsertBookReusesExistingName() throws {
+        try withIsolatedDefaults {
+            let store = LocalBankStore()
+            let initial = makeItem(id: "item-6", text: "原始題")
+            store.addOrReplaceBook(name: "Grammar", items: [initial])
+
+            let updated = makeItem(id: "item-7", text: "更新題")
+            let result = store.upsertBook(preferredName: "Grammar", existingName: "Grammar", items: [updated])
+
+            #expect(result == "Grammar")
+            #expect(store.items(in: "Grammar") == [updated])
+            #expect(store.books.count == 1)
+        }
+    }
+
+    @Test("upsertBook 會在名稱衝突時產生編號")
+    func upsertBookGeneratesUniqueName() throws {
+        try withIsolatedDefaults {
+            let store = LocalBankStore()
+            store.addOrReplaceBook(name: "Vocabulary", items: [makeItem(id: "item-8")])
+
+            let newItem = makeItem(id: "item-9", text: "新題")
+            let result = store.upsertBook(preferredName: "Vocabulary", items: [newItem])
+
+            #expect(result == "Vocabulary (2)")
+            #expect(store.items(in: "Vocabulary (2)") == [newItem])
+            #expect(store.books.count == 2)
+        }
+    }
+
     @Test("重新初始化會載入保存的題庫")
     func persistenceRoundtripRestoresBooks() throws {
         try withIsolatedDefaults {
@@ -96,4 +127,3 @@ struct LocalBankStoreTests {
         }
     }
 }
-
