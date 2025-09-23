@@ -334,6 +334,13 @@ enum DSTransition {
             removal: .move(edge: .top).combined(with: .opacity)
         )
     }
+
+    static var cardReveal: AnyTransition {
+        .asymmetric(
+            insertion: .scale(scale: 0.97, anchor: .top).combined(with: .opacity),
+            removal: .scale(scale: 0.97, anchor: .top).combined(with: .opacity)
+        )
+    }
 }
 
 // MARK: - Components

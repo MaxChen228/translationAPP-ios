@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 
 struct SavedJSONListSheet: View {
     @Environment(\.dismiss) private var dismiss
@@ -16,6 +17,8 @@ struct SavedJSONListSheet: View {
     @State private var expanded: Set<UUID> = []
     // Two temporary stashes: left/right
     @State private var activeStash: SavedStash = .left
+    @State private var editingRecord: DecodedRecord? = nil
+    @State private var editDraft: String = ""
     @Environment(\.locale) private var locale
 
     var body: some View {
@@ -38,6 +41,18 @@ struct SavedJSONListSheet: View {
                 }
             }
             .presentationDetents([.height(220)])
+        }
+        .sheet(item: $editingRecord, onDismiss: { editDraft = "" }) { record in
+            SavedRecordEditSheet(record: record, text: $editDraft) {
+                guard validateEditedJSON() else { return }
+                store.update(record.id, json: editDraft)
+                bannerCenter.show(title: String(localized: "saved.edit.success", locale: locale), subtitle: nil)
+                editDraft = ""
+                editingRecord = nil
+            } onCancel: {
+                editDraft = ""
+                editingRecord = nil
+            }
         }
         .alert(saveError ?? "", isPresented: Binding(get: { saveError != nil }, set: { _ in saveError = nil })) {}
         .overlay(alignment: .center) {
@@ -229,6 +244,20 @@ private extension SavedJSONListSheet {
         decoded.removeAll { $0.id == id }
     }
 
+    func beginEdit(_ row: DecodedRecord) {
+        editDraft = row.rawJSON
+        editingRecord = row
+    }
+
+    func validateEditedJSON() -> Bool {
+        guard let data = editDraft.data(using: .utf8),
+              (try? JSONSerialization.jsonObject(with: data)) != nil else {
+            bannerCenter.show(title: String(localized: "saved.edit.invalid", locale: locale), subtitle: nil)
+            return false
+        }
+        return true
+    }
+
     var filteredDecoded: [DecodedRecord] { decoded.filter { $0.stash == activeStash } }
     var currentCount: Int { store.count(in: activeStash) }
     var otherCount: Int { store.count(in: activeStash == .left ? .right : .left) }
@@ -255,6 +284,7 @@ private extension SavedJSONListSheet {
                             }
                         },
                         onCopy: { copyJSON(row.rawJSON) },
+                        onEdit: { beginEdit(row) },
                         onDelete: { deleteRow(row.id) }
                     )
                     .swipeActions(edge: .leading, allowsFullSwipe: stash == .left) {

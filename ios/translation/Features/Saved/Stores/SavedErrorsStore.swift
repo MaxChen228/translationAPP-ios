@@ -31,7 +31,7 @@ enum SavedSource: String, Codable {
 struct SavedErrorRecord: Codable, Identifiable, Equatable {
     let id: UUID
     let createdAt: Date
-    let json: String
+    var json: String
     var stash: SavedStash = .left
     var source: SavedSource = .correction
 
@@ -109,6 +109,11 @@ final class SavedErrorsStore: ObservableObject {
     func move(_ id: UUID, to stash: SavedStash) {
         guard let idx = items.firstIndex(where: { $0.id == id }) else { return }
         items[idx].stash = stash
+    }
+
+    func update(_ id: UUID, json: String) {
+        guard let idx = items.firstIndex(where: { $0.id == id }) else { return }
+        items[idx].json = json
     }
 
     func items(in stash: SavedStash) -> [SavedErrorRecord] {

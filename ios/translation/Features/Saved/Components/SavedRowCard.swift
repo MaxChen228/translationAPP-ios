@@ -19,6 +19,7 @@ struct SavedErrorRowCard: View {
     let expanded: Bool
     let onToggle: () -> Void
     let onCopy: () -> Void
+    let onEdit: () -> Void
     let onDelete: () -> Void
     @State private var didCopy = false
     @State private var showDeleteConfirm = false
@@ -40,9 +41,10 @@ struct SavedErrorRowCard: View {
 
                 if expanded {
                     expandedContent
-                        .transition(DSTransition.fade)
+                        .transition(DSTransition.cardReveal)
                 }
             }
+            .dsAnimation(DS.AnimationToken.snappy, value: expanded)
         }
     }
 
@@ -151,6 +153,13 @@ struct SavedErrorRowCard: View {
                     } else {
                         Label(String(localized: "action.copy", locale: locale), systemImage: "doc.on.doc")
                     }
+                }
+                .buttonStyle(DSButton(style: .secondary, size: .compact))
+
+                Button {
+                    onEdit()
+                } label: {
+                    Label(String(localized: "action.edit", locale: locale), systemImage: "square.and.pencil")
                 }
                 .buttonStyle(DSButton(style: .secondary, size: .compact))
 

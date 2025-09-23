@@ -282,6 +282,10 @@
 "saved.source.correction" = "批改";
 "saved.source.research" = "研究";
 "saved.deckName.placeholder" = "卡片集名稱";
+"saved.edit.title" = "編輯紀錄";
+"saved.edit.description" = "更新已儲存的 JSON 內容。";
+"saved.edit.invalid" = "JSON 格式不正確";
+"saved.edit.success" = "已更新儲存項目";
 
 /* Workspace 狀態 */
 "workspace.status.loading" = "批改中…";

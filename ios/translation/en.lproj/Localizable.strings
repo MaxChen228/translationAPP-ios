@@ -254,6 +254,10 @@
 "saved.source.correction" = "Correction";
 "saved.source.research" = "Research";
 "saved.deckName.placeholder" = "Deck name";
+"saved.edit.title" = "Edit Record";
+"saved.edit.description" = "Update the saved JSON content.";
+"saved.edit.invalid" = "Invalid JSON format";
+"saved.edit.success" = "Saved item updated";
 "error.applySuggestion" = "Apply suggestion";
 "field.name" = "Name";
 "deck.mock.usageLabel" = "Usage";
