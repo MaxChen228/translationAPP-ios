@@ -58,13 +58,16 @@ struct QuickActionsRowView: View {
                 .onDrop(of: [.text], delegate: QuickActionsClearDragDropDelegate(coordinator: coordinator))
             }
             .contentShape(Rectangle())
-            .gesture(
-                TapGesture().onEnded {
-                    if editController.isEditing {
-                        editController.exitEditMode()
-                    }
-                },
-                including: .gesture
+            .background(
+                Color.clear
+                    .contentShape(Rectangle())
+                    .highPriorityGesture(
+                        TapGesture().onEnded {
+                            if editController.isEditing {
+                                editController.exitEditMode()
+                            }
+                        }
+                    )
             )
         }
         .confirmationDialog(

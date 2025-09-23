@@ -143,11 +143,12 @@ struct FlashcardDecksView: View {
                             deckFolders: deckFolders,
                             deckOrder: deckOrder
                         ))
-                        .simultaneousGesture(
-                            isEditing ?
+                        .highPriorityGesture(
                             TapGesture().onEnded {
-                                editController.exitEditMode()
-                            } : nil
+                                if isEditing {
+                                    editController.toggleSelection(deck.id)
+                                }
+                            }
                         )
                     }
                 }
@@ -170,7 +171,7 @@ struct FlashcardDecksView: View {
         .toolbar { }
         .onDrop(of: [.text], delegate: ClearDeckDragStateDropDelegate(editController: editController))
         .contentShape(Rectangle())
-        .simultaneousGesture(
+        .gesture(
             TapGesture().onEnded {
                 if editController.isEditing {
                     editController.exitEditMode()

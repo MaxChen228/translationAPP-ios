@@ -172,12 +172,13 @@ struct BankBooksView: View {
                                 orderedNames: orderedRootBooks.map { $0.name },
                                 bankOrder: bankOrder
                             ))
-                            .simultaneousGesture(
-                                isEditing ?
-                                TapGesture().onEnded {
-                                    editController.exitEditMode()
-                                } : nil
-                            )
+                        .highPriorityGesture(
+                            TapGesture().onEnded {
+                                if isEditing {
+                                    editController.toggleSelection(b.name)
+                                }
+                            }
+                        )
                         }
                     }
                     .overlay(alignment: .topTrailing) {
