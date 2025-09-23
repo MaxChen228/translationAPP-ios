@@ -13,7 +13,6 @@ struct QuickActionsRowView: View {
     @Environment(\.locale) private var locale
     @StateObject private var sharedChatViewModel = ChatViewModel()
     @State private var showBulkDeleteConfirm = false
-    @State private var suppressExitTap = false
 
     var body: some View {
         let coordinator = QuickActionsCoordinator(
@@ -60,14 +59,10 @@ struct QuickActionsRowView: View {
                 .onDrop(of: [.text], delegate: QuickActionsClearDragDropDelegate(coordinator: coordinator))
             }
             .contentShape(Rectangle())
-            .simultaneousGesture(
+            .gesture(
                 TapGesture().onEnded {
                     if editController.isEditing {
-                        if suppressExitTap {
-                            suppressExitTap = false
-                        } else {
-                            editController.exitEditMode()
-                        }
+                        editController.exitEditMode()
                     }
                 } ,
                 including: .gesture
@@ -110,11 +105,7 @@ struct QuickActionsRowView: View {
                         }
                         .highPriorityGesture(
                             TapGesture().onEnded {
-                                suppressExitTap = true
                                 editController.toggleSelection(item.id)
-                                DispatchQueue.main.async {
-                                    suppressExitTap = false
-                                }
                             }
                         )
                 )

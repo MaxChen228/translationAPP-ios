@@ -26,7 +26,6 @@ struct BankBooksView: View {
     @State private var folderDeleteMessageText: String = ""
     @State private var showFolderDeleteConfirm: Bool = false
     @State private var showBulkDeleteConfirm: Bool = false
-    @State private var suppressExitTap = false
     @Environment(\.locale) private var locale
 
     private var selectedCount: Int { editController.selectedIDs.count }
@@ -184,11 +183,7 @@ struct BankBooksView: View {
                         .highPriorityGesture(
                             TapGesture().onEnded {
                                 if isEditing {
-                                    suppressExitTap = true
                                     editController.toggleSelection(b.name)
-                                    DispatchQueue.main.async {
-                                        suppressExitTap = false
-                                    }
                                 }
                             }
                         )
@@ -212,14 +207,10 @@ struct BankBooksView: View {
         .navigationTitle(Text("nav.bank"))
         .onDrop(of: [.text], delegate: ClearBookDragStateDropDelegate(editController: editController))
         .contentShape(Rectangle())
-        .simultaneousGesture(
+        .gesture(
             TapGesture().onEnded {
                 if editController.isEditing {
-                    if suppressExitTap {
-                        suppressExitTap = false
-                    } else {
-                        editController.exitEditMode()
-                    }
+                    editController.exitEditMode()
                 }
             },
             including: .gesture

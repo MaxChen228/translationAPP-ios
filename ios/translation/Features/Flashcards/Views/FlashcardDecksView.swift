@@ -10,7 +10,6 @@ struct FlashcardDecksView: View {
     @State private var renamingFolder: DeckFolder? = nil
     @StateObject private var editController = ShelfEditController<UUID>()
     @State private var showBulkDeleteConfirm = false
-    @State private var suppressExitTap = false
     @Environment(\.locale) private var locale
 
     private var selectedCount: Int { editController.selectedIDs.count }
@@ -147,11 +146,7 @@ struct FlashcardDecksView: View {
                         .highPriorityGesture(
                             TapGesture().onEnded {
                                 if isEditing {
-                                    suppressExitTap = true
                                     editController.toggleSelection(deck.id)
-                                    DispatchQueue.main.async {
-                                        suppressExitTap = false
-                                    }
                                 }
                             }
                         )
@@ -179,11 +174,7 @@ struct FlashcardDecksView: View {
         .gesture(
             TapGesture().onEnded {
                 if editController.isEditing {
-                    if suppressExitTap {
-                        suppressExitTap = false
-                    } else {
-                        editController.exitEditMode()
-                    }
+                    editController.exitEditMode()
                 }
             },
             including: .gesture
