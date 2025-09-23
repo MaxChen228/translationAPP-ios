@@ -219,6 +219,7 @@ private extension SavedJSONListSheet {
                 research = data.flatMap { try? decoder.decode(ResearchSavePayload.self, from: $0) }
                 correction = nil
             }
+            let display = Self.makeDisplay(for: rec, correction: correction, research: research, locale: locale)
             return DecodedRecord(
                 id: rec.id,
                 createdAt: rec.createdAt,
@@ -226,10 +227,58 @@ private extension SavedJSONListSheet {
                 stash: rec.stash,
                 source: rec.source,
                 correction: correction,
-                research: research
+                research: research,
+                display: display
             )
         }
         decoded.sort { $0.createdAt > $1.createdAt }
+    }
+
+    static func makeDisplay(for record: SavedErrorRecord, correction: ErrorSavePayload?, research: ResearchSavePayload?, locale: Locale) -> DecodedRecordDisplay {
+        let unparsable = String(localized: "saved.unparsable", locale: locale)
+        switch record.source {
+        case .correction:
+            guard let payload = correction else {
+                return DecodedRecordDisplay(summary: unparsable, explanation: nil, zhLine: nil, originalLine: nil, correctedLine: nil, contextTitle: nil, context: nil, hintBefore: nil, hintAfter: nil)
+            }
+            let summary: String
+            if let suggestion = payload.error.suggestion, !suggestion.isEmpty {
+                summary = "'\(payload.error.span)' → '\(suggestion)'"
+            } else {
+                summary = "'\(payload.error.span)' · \(payload.correctedEn)"
+            }
+            let zhPrefix = String(localized: "label.zhPrefix", locale: locale)
+            let originalPrefix = String(localized: "label.enOriginalPrefix", locale: locale)
+            let correctedPrefix = String(localized: "label.enCorrectedPrefix", locale: locale)
+            let explanation = payload.error.explainZh.isEmpty ? nil : payload.error.explainZh
+            return DecodedRecordDisplay(
+                summary: summary,
+                explanation: explanation,
+                zhLine: zhPrefix + payload.inputZh,
+                originalLine: originalPrefix + payload.inputEn,
+                correctedLine: correctedPrefix + payload.correctedEn,
+                contextTitle: nil,
+                context: nil,
+                hintBefore: payload.error.hints?.before,
+                hintAfter: payload.error.hints?.after
+            )
+        case .research:
+            guard let payload = research else {
+                return DecodedRecordDisplay(summary: unparsable, explanation: nil, zhLine: nil, originalLine: nil, correctedLine: nil, contextTitle: nil, context: nil, hintBefore: nil, hintAfter: nil)
+            }
+            let contextTitle = String(localized: "chat.research.context", locale: locale)
+            return DecodedRecordDisplay(
+                summary: payload.term,
+                explanation: payload.explanation,
+                zhLine: nil,
+                originalLine: nil,
+                correctedLine: nil,
+                contextTitle: contextTitle,
+                context: payload.context,
+                hintBefore: nil,
+                hintAfter: nil
+            )
+        }
     }
 
     func copyJSON(_ s: String) {

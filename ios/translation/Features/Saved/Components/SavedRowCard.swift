@@ -10,6 +10,19 @@ struct DecodedRecord: Identifiable, Equatable {
     let source: SavedSource
     let correction: ErrorSavePayload?
     let research: ResearchSavePayload?
+    let display: DecodedRecordDisplay
+}
+
+struct DecodedRecordDisplay: Equatable {
+    let summary: String
+    let explanation: String?
+    let zhLine: String?
+    let originalLine: String?
+    let correctedLine: String?
+    let contextTitle: String?
+    let context: String?
+    let hintBefore: String?
+    let hintAfter: String?
 }
 
 // MARK: - Row Card Component
@@ -41,10 +54,8 @@ struct SavedErrorRowCard: View {
 
                 if expanded {
                     expandedContent
-                        .transition(DSTransition.cardReveal)
                 }
             }
-            .dsAnimation(DS.AnimationToken.snappy, value: expanded)
         }
     }
 
@@ -55,7 +66,7 @@ struct SavedErrorRowCard: View {
                 if let payload = row.correction {
                     TagLabel(text: payload.error.type.displayName, color: payload.error.type.color)
                     sourceBadge(text: "saved.source.correction", color: DS.Brand.scheme.monument)
-                    Text(summaryText(for: row))
+                    Text(row.display.summary)
                         .dsType(DS.Font.body)
                         .lineLimit(1)
                         .foregroundStyle(.primary)
@@ -66,7 +77,7 @@ struct SavedErrorRowCard: View {
                 if let payload = row.research {
                     TagLabel(text: payload.type.displayName, color: payload.type.color)
                     sourceBadge(text: "saved.source.research", color: DS.Brand.scheme.provence)
-                    Text(summaryText(for: row))
+                    Text(row.display.summary)
                         .dsType(DS.Font.body)
                         .lineLimit(1)
                         .foregroundStyle(.primary)
@@ -97,8 +108,8 @@ struct SavedErrorRowCard: View {
 
     private func correctionDetail(_ payload: ErrorSavePayload) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            if !payload.error.explainZh.isEmpty {
-                Text(payload.error.explainZh)
+            if let explanation = row.display.explanation, !explanation.isEmpty {
+                Text(explanation)
                     .dsType(DS.Font.body)
                     .foregroundStyle(.secondary)
             }
@@ -106,13 +117,19 @@ struct SavedErrorRowCard: View {
                 SuggestionChip(text: suggestion, color: payload.error.type.color)
             }
             Group {
-                Text(String(localized: "label.zhPrefix", locale: locale) + payload.inputZh)
-                    .dsType(DS.Font.caption)
-                    .foregroundStyle(.secondary)
-                Text(String(localized: "label.enOriginalPrefix", locale: locale) + payload.inputEn)
-                    .dsType(DS.Font.body)
-                Text(String(localized: "label.enCorrectedPrefix", locale: locale) + payload.correctedEn)
-                    .dsType(DS.Font.body)
+                if let zhLine = row.display.zhLine {
+                    Text(zhLine)
+                        .dsType(DS.Font.caption)
+                        .foregroundStyle(.secondary)
+                }
+                if let originalLine = row.display.originalLine {
+                    Text(originalLine)
+                        .dsType(DS.Font.body)
+                }
+                if let correctedLine = row.display.correctedLine {
+                    Text(correctedLine)
+                        .dsType(DS.Font.body)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -122,16 +139,22 @@ struct SavedErrorRowCard: View {
 
     private func researchDetail(_ payload: ResearchSavePayload) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(payload.explanation)
-                .dsType(DS.Font.body, lineSpacing: 6)
-                .foregroundStyle(.secondary)
-
-            VStack(alignment: .leading, spacing: 6) {
-                Text(String(localized: "chat.research.context", locale: locale))
-                    .dsType(DS.Font.caption)
+            if let explanation = row.display.explanation {
+                Text(explanation)
+                    .dsType(DS.Font.body, lineSpacing: 6)
                     .foregroundStyle(.secondary)
-                Text(payload.context)
-                    .dsType(DS.Font.body)
+            }
+
+            if let context = row.display.context {
+                VStack(alignment: .leading, spacing: 6) {
+                    if let contextTitle = row.display.contextTitle {
+                        Text(contextTitle)
+                            .dsType(DS.Font.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Text(context)
+                        .dsType(DS.Font.body)
+                }
             }
 
             footerActions
@@ -208,18 +231,4 @@ struct SavedErrorRowCard: View {
         }
     }
 
-    private func summaryText(for row: DecodedRecord) -> String {
-        switch row.source {
-        case .correction:
-            guard let payload = row.correction else { return String(localized: "saved.unparsable", locale: locale) }
-            let span = payload.error.span
-            if let suggestion = payload.error.suggestion, !suggestion.isEmpty {
-                return "'\(span)' → '\(suggestion)'"
-            }
-            return "'\(span)' · \(payload.correctedEn)"
-        case .research:
-            guard let payload = row.research else { return String(localized: "saved.unparsable", locale: locale) }
-            return payload.term
-        }
-    }
 }
