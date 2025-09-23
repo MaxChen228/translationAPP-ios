@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 @testable import translation
 
 enum MockChatError: Error {
@@ -50,10 +51,10 @@ final class MockChatService: ChatService {
     }
 }
 
-final class InMemoryChatSessionRepository: ChatSessionRepository {
-    private(set) var storage: [UUID: ChatSessionData]
-    private(set) var saveCallCount: Int = 0
-    private(set) var deleteCallCount: Int = 0
+actor InMemoryChatSessionStore: ChatSessionPersisting {
+    private var storage: [UUID: ChatSessionData]
+    private var saveCallCount: Int = 0
+    private var deleteCallCount: Int = 0
 
     init(initial: [UUID: ChatSessionData] = [:]) {
         self.storage = initial
@@ -79,6 +80,18 @@ final class InMemoryChatSessionRepository: ChatSessionRepository {
 
     func clearAll() {
         storage.removeAll()
+    }
+
+    func storedSessions() -> [UUID: ChatSessionData] {
+        storage
+    }
+
+    func savedCount() -> Int {
+        saveCallCount
+    }
+
+    func deletedCount() -> Int {
+        deleteCallCount
     }
 }
 
@@ -106,5 +119,71 @@ final class MockBackgroundCoordinator: ChatBackgroundCoordinating {
 
     func triggerResume() async {
         await resumeHandler?()
+    }
+}
+
+@MainActor
+final class TestChatManager: ChatManaging, ObservableObject {
+    @Published private var isBackgroundActiveInternal: Bool = false
+    private let repository: InMemoryChatSessionStore
+    private let service: MockChatService
+    private let backgroundCoordinator: MockBackgroundCoordinator
+    private var sessions: [UUID: ChatSession] = [:]
+
+    init(
+        service: MockChatService? = nil,
+        repository: InMemoryChatSessionStore? = nil,
+        backgroundCoordinator: MockBackgroundCoordinator? = nil
+    ) {
+        self.service = service ?? MockChatService()
+        self.repository = repository ?? InMemoryChatSessionStore()
+        self.backgroundCoordinator = backgroundCoordinator ?? MockBackgroundCoordinator()
+    }
+
+    var backgroundActivityPublisher: AnyPublisher<Bool, Never> {
+        $isBackgroundActiveInternal.eraseToAnyPublisher()
+    }
+
+    func startChatSession(sessionID: UUID) -> ChatSession {
+        if let existing = sessions[sessionID] {
+            return existing
+        }
+        let session = ChatSession(id: sessionID, service: service, persister: repository)
+        sessions[sessionID] = session
+        Task { [weak session] in
+            guard let data = await repository.loadSession(id: sessionID) else { return }
+            guard let session else { return }
+            await session.applyPersistedData(data)
+        }
+        return session
+    }
+
+    func sendMessage(sessionID: UUID, content: String, attachments: [ChatAttachment] = []) async {
+        guard let session = sessions[sessionID] else { return }
+        backgroundCoordinator.startBackgroundTaskIfNeeded()
+        isBackgroundActiveInternal = true
+        await session.sendMessage(content: content, attachments: attachments)
+        isBackgroundActiveInternal = false
+        backgroundCoordinator.endBackgroundTaskIfNeeded()
+    }
+
+    func runResearch(sessionID: UUID) async {
+        guard let session = sessions[sessionID] else { return }
+        backgroundCoordinator.startBackgroundTaskIfNeeded()
+        isBackgroundActiveInternal = true
+        await session.runResearch()
+        isBackgroundActiveInternal = false
+        backgroundCoordinator.endBackgroundTaskIfNeeded()
+    }
+
+    func removeSession(id: UUID) {
+        sessions[id] = nil
+        Task {
+            await repository.delete(id: id)
+        }
+    }
+
+    func simulateBackgroundActivity(_ active: Bool) {
+        isBackgroundActiveInternal = active
     }
 }

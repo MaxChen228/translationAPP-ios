@@ -14,17 +14,17 @@ final class ChatSession: ObservableObject, Identifiable {
     @Published var hasPendingRequest: Bool
 
     private let service: ChatService
-    private let repository: ChatSessionRepository
+    private let persister: ChatSessionPersisting
     private var pendingRequestType: ChatPendingRequestType?
 
     init(
         id: UUID = UUID(),
         service: ChatService,
-        repository: ChatSessionRepository
+        persister: ChatSessionPersisting
     ) {
         self.id = id
         self.service = service
-        self.repository = repository
+        self.persister = persister
         self.messages = [ChatMessage(role: .assistant, content: String(localized: "chat.greeting"))]
         self.isLoading = false
         self.state = .gathering
@@ -32,17 +32,17 @@ final class ChatSession: ObservableObject, Identifiable {
         self.researchResult = nil
         self.errorMessage = nil
         self.hasPendingRequest = false
-        persistState()
+        persistStateDetached()
     }
 
     init(
         from data: ChatSessionData,
         service: ChatService,
-        repository: ChatSessionRepository
+        persister: ChatSessionPersisting
     ) {
         self.id = data.id
         self.service = service
-        self.repository = repository
+        self.persister = persister
         self.messages = data.messages
         self.isLoading = false
         self.state = data.state
@@ -63,7 +63,7 @@ final class ChatSession: ObservableObject, Identifiable {
 
         pendingRequestType = .message(content: trimmed, attachments: attachments)
         hasPendingRequest = true
-        persistState()
+        await persistStateAsync()
 
         isLoading = true
         defer { isLoading = false }
@@ -79,7 +79,7 @@ final class ChatSession: ObservableObject, Identifiable {
         } catch {
             errorMessage = (error as NSError).localizedDescription
         }
-        persistState()
+        await persistStateAsync()
     }
 
     func runResearch() async {
@@ -87,7 +87,7 @@ final class ChatSession: ObservableObject, Identifiable {
 
         pendingRequestType = .research
         hasPendingRequest = true
-        persistState()
+        await persistStateAsync()
 
         isLoading = true
         defer { isLoading = false }
@@ -104,7 +104,7 @@ final class ChatSession: ObservableObject, Identifiable {
         } catch {
             errorMessage = (error as NSError).localizedDescription
         }
-        persistState()
+        await persistStateAsync()
     }
 
     func resumePendingRequest() async {
@@ -125,10 +125,27 @@ final class ChatSession: ObservableObject, Identifiable {
         errorMessage = nil
         pendingRequestType = nil
         hasPendingRequest = false
-        persistState()
+        persistStateDetached()
     }
 
-    private func persistState() {
+    func applyPersistedData(_ data: ChatSessionData) {
+        messages = data.messages
+        state = data.state
+        checklist = data.checklist
+        researchResult = data.researchResult
+        hasPendingRequest = data.hasPendingRequest
+        pendingRequestType = data.pendingRequestType
+        errorMessage = nil
+        isLoading = false
+    }
+
+    private func persistStateDetached() {
+        Task {
+            await persistStateAsync()
+        }
+    }
+
+    private func persistStateAsync() async {
         let data = ChatSessionData(
             id: id,
             messages: messages,
@@ -138,6 +155,6 @@ final class ChatSession: ObservableObject, Identifiable {
             hasPendingRequest: hasPendingRequest,
             pendingRequestType: pendingRequestType
         )
-        repository.save(data)
+        await persister.save(data)
     }
 }

@@ -1,24 +1,33 @@
 import Foundation
 import SwiftUI
+import Combine
+
+protocol ChatManaging: AnyObject {
+    var backgroundActivityPublisher: AnyPublisher<Bool, Never> { get }
+    func startChatSession(sessionID: UUID) -> ChatSession
+    func sendMessage(sessionID: UUID, content: String, attachments: [ChatAttachment]) async
+    func runResearch(sessionID: UUID) async
+    func removeSession(id: UUID)
+}
 
 @MainActor
-final class ChatManager: ObservableObject {
+final class ChatManager: ObservableObject, ChatManaging {
     static let shared = ChatManager()
 
     @Published private(set) var activeSessions: [UUID: ChatSession] = [:]
     @Published var isBackgroundTaskActive: Bool = false
 
     private let service: ChatService
-    private let repository: ChatSessionRepository
+    private let persister: ChatSessionPersisting
     private let backgroundCoordinator: ChatBackgroundCoordinating
 
     init(
         service: ChatService = ChatServiceFactory.makeDefault(),
-        repository: ChatSessionRepository = FileChatSessionRepository(),
+        persister: ChatSessionPersisting = FileChatSessionStore(),
         backgroundCoordinator: ChatBackgroundCoordinating? = nil
     ) {
         self.service = service
-        self.repository = repository
+        self.persister = persister
         self.backgroundCoordinator = backgroundCoordinator ?? ChatBackgroundCoordinator()
 
         self.backgroundCoordinator.configure { [weak self] in
@@ -32,13 +41,13 @@ final class ChatManager: ObservableObject {
         if let existing = activeSessions[sessionID] {
             return existing
         }
-        if let restored = repository.loadSession(id: sessionID) {
-            let session = ChatSession(from: restored, service: service, repository: repository)
-            activeSessions[sessionID] = session
-            return session
-        }
-        let session = ChatSession(id: sessionID, service: service, repository: repository)
+        let session = ChatSession(id: sessionID, service: service, persister: persister)
         activeSessions[sessionID] = session
+        Task { [weak session] in
+            guard let data = await persister.loadSession(id: sessionID) else { return }
+            guard let session else { return }
+            await session.applyPersistedData(data)
+        }
         return session
     }
 
@@ -58,16 +67,25 @@ final class ChatManager: ObservableObject {
 
     func removeSession(id: UUID) {
         activeSessions[id] = nil
-        repository.delete(id: id)
+        Task {
+            await persister.delete(id: id)
+        }
     }
 
     // MARK: - Private Helpers
 
     private func restoreSessions() {
-        let stored = repository.loadAll()
-        for sessionData in stored {
-            let session = ChatSession(from: sessionData, service: service, repository: repository)
-            activeSessions[session.id] = session
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            let stored = await persister.loadAll()
+            for sessionData in stored {
+                if let existing = activeSessions[sessionData.id] {
+                    existing.applyPersistedData(sessionData)
+                } else {
+                    let session = ChatSession(from: sessionData, service: service, persister: persister)
+                    activeSessions[session.id] = session
+                }
+            }
         }
     }
 
@@ -75,6 +93,10 @@ final class ChatManager: ObservableObject {
         for session in activeSessions.values where session.hasPendingRequest {
             await session.resumePendingRequest()
         }
+    }
+
+    var backgroundActivityPublisher: AnyPublisher<Bool, Never> {
+        $isBackgroundTaskActive.eraseToAnyPublisher()
     }
 
     private func startBackgroundTaskIfNeeded() {

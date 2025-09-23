@@ -7,17 +7,19 @@ struct ChatSessionTests {
 
     @Test("ChatSession sendMessage persists and appends assistant reply")
     func testSendMessagePersists() async {
-        let repository = InMemoryChatSessionRepository()
+        let repository = InMemoryChatSessionStore()
         let service = MockChatService()
-        let session = ChatSession(service: service, repository: repository)
+        let session = ChatSession(service: service, persister: repository)
 
         await session.sendMessage(content: "Hello")
 
         #expect(session.messages.count == 3) // greeting + user + assistant
         #expect(session.messages.last?.role == .assistant)
         #expect(session.hasPendingRequest == false)
-        #expect(repository.storage[session.id]?.messages.count == session.messages.count)
-        #expect(repository.saveCallCount >= 2)
+        let snapshot = await repository.storedSessions()
+        #expect(snapshot[session.id]?.messages.count == session.messages.count)
+        let saveCount = await repository.savedCount()
+        #expect(saveCount >= 2)
 
         let requests = service.sendRequests
         #expect(requests.count == 1)
@@ -26,16 +28,17 @@ struct ChatSessionTests {
 
     @Test("ChatSession keeps pending state when send fails")
     func testSendMessageFailureKeepsPending() async {
-        let repository = InMemoryChatSessionRepository()
+        let repository = InMemoryChatSessionStore()
         let service = MockChatService()
         service.setSendResult(.failure(MockChatError.failure))
-        let session = ChatSession(service: service, repository: repository)
+        let session = ChatSession(service: service, persister: repository)
 
         await session.sendMessage(content: "Needs retry")
 
         #expect(session.hasPendingRequest)
         #expect(session.errorMessage != nil)
-        let saved = repository.storage[session.id]
+        let snapshot = await repository.storedSessions()
+        let saved = snapshot[session.id]
         #expect(saved?.hasPendingRequest == true)
         switch saved?.pendingRequestType {
         case .message(let content, _)?:
@@ -47,9 +50,9 @@ struct ChatSessionTests {
 
     @Test("ChatSession runResearch appends summary and clears pending")
     func testRunResearch() async {
-        let repository = InMemoryChatSessionRepository()
+        let repository = InMemoryChatSessionStore()
         let service = MockChatService()
-        let session = ChatSession(service: service, repository: repository)
+        let session = ChatSession(service: service, persister: repository)
 
         await session.sendMessage(content: "Prompt")
         await session.runResearch()
@@ -57,7 +60,8 @@ struct ChatSessionTests {
         #expect(session.researchResult != nil)
         #expect(session.messages.last?.role == .assistant)
         #expect(session.hasPendingRequest == false)
-        #expect(repository.storage[session.id]?.hasPendingRequest == false)
+        let snapshot = await repository.storedSessions()
+        #expect(snapshot[session.id]?.hasPendingRequest == false)
 
         let researchCalls = service.researchRequests
         #expect(researchCalls.count == 1)
@@ -65,10 +69,10 @@ struct ChatSessionTests {
 
     @Test("ChatSession resumePendingRequest retries failed message")
     func testResumePendingMessage() async {
-        let repository = InMemoryChatSessionRepository()
+        let repository = InMemoryChatSessionStore()
         let service = MockChatService()
         service.setSendResult(.failure(MockChatError.failure))
-        let session = ChatSession(service: service, repository: repository)
+        let session = ChatSession(service: service, persister: repository)
 
         await session.sendMessage(content: "Retry me")
         #expect(session.hasPendingRequest)
@@ -78,7 +82,8 @@ struct ChatSessionTests {
 
         #expect(session.hasPendingRequest == false)
         #expect(session.messages.last?.content == "ok")
-        #expect(repository.storage[session.id]?.hasPendingRequest == false)
+        let snapshot = await repository.storedSessions()
+        #expect(snapshot[session.id]?.hasPendingRequest == false)
 
         let requests = service.sendRequests
         #expect(requests.count == 2)
@@ -86,15 +91,16 @@ struct ChatSessionTests {
 
     @Test("ChatSession reset clears conversation state")
     func testReset() {
-        let repository = InMemoryChatSessionRepository()
+        let repository = InMemoryChatSessionStore()
         let service = MockChatService()
-        let session = ChatSession(service: service, repository: repository)
+        let session = ChatSession(service: service, persister: repository)
 
         session.reset()
 
         #expect(session.messages.count == 1)
         #expect(session.messages.first?.role == .assistant)
         #expect(session.hasPendingRequest == false)
-        #expect(repository.storage[session.id]?.hasPendingRequest == false)
+        let snapshot = await repository.storedSessions()
+        #expect(snapshot[session.id]?.hasPendingRequest == false)
     }
 }

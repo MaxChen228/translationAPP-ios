@@ -1,11 +1,11 @@
 import Foundation
 
-protocol ChatSessionRepository {
-    func save(_ session: ChatSessionData)
-    func loadSession(id: UUID) -> ChatSessionData?
-    func loadAll() -> [ChatSessionData]
-    func delete(id: UUID)
-    func clearAll()
+protocol ChatSessionPersisting: AnyObject {
+    func save(_ session: ChatSessionData) async
+    func loadSession(id: UUID) async -> ChatSessionData?
+    func loadAll() async -> [ChatSessionData]
+    func delete(id: UUID) async
+    func clearAll() async
 }
 
 enum ChatPendingRequestType: Codable, Equatable {
@@ -44,7 +44,7 @@ struct ChatSessionData: Codable, Equatable {
     }
 }
 
-final class FileChatSessionRepository: ChatSessionRepository {
+actor FileChatSessionStore: ChatSessionPersisting {
     private let fileManager: FileManager
     private let encoder: JSONEncoder
     private let decoder: JSONDecoder
@@ -63,7 +63,7 @@ final class FileChatSessionRepository: ChatSessionRepository {
         createDirectoriesIfNeeded()
     }
 
-    func save(_ session: ChatSessionData) {
+    func save(_ session: ChatSessionData) async {
         do {
             let data = try encoder.encode(session)
             try data.write(to: fileURL(for: session.id), options: .atomic)
@@ -72,7 +72,7 @@ final class FileChatSessionRepository: ChatSessionRepository {
         }
     }
 
-    func loadSession(id: UUID) -> ChatSessionData? {
+    func loadSession(id: UUID) async -> ChatSessionData? {
         do {
             let data = try Data(contentsOf: fileURL(for: id))
             return try decoder.decode(ChatSessionData.self, from: data)
@@ -82,14 +82,15 @@ final class FileChatSessionRepository: ChatSessionRepository {
         }
     }
 
-    func loadAll() -> [ChatSessionData] {
+    func loadAll() async -> [ChatSessionData] {
         do {
             let files = try fileManager.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
-            return files.compactMap { url in
+            return try files.compactMap { url in
                 do {
                     let data = try Data(contentsOf: url)
                     return try decoder.decode(ChatSessionData.self, from: data)
                 } catch {
+                    AppLog.chatError("Failed to decode chat session file \(url.lastPathComponent): \(error)")
                     return nil
                 }
             }
@@ -99,7 +100,7 @@ final class FileChatSessionRepository: ChatSessionRepository {
         }
     }
 
-    func delete(id: UUID) {
+    func delete(id: UUID) async {
         do {
             try fileManager.removeItem(at: fileURL(for: id))
         } catch {
@@ -107,7 +108,7 @@ final class FileChatSessionRepository: ChatSessionRepository {
         }
     }
 
-    func clearAll() {
+    func clearAll() async {
         do {
             let files = try fileManager.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
             for file in files {
@@ -131,4 +132,4 @@ final class FileChatSessionRepository: ChatSessionRepository {
     }
 }
 
-typealias ChatPersistenceManager = FileChatSessionRepository
+typealias ChatPersistenceManager = FileChatSessionStore

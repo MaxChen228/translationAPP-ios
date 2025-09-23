@@ -30,7 +30,7 @@ struct ChatPersistenceManagerTests {
     // MARK: - Initialization Tests
 
     @Test("ChatPersistenceManager initializes successfully")
-    func testInitialization() {
+    func testInitialization() async {
         let manager = createTestManager()
 
         // 管理器應該成功初始化
@@ -40,15 +40,15 @@ struct ChatPersistenceManagerTests {
     // MARK: - Save Session Tests
 
     @Test("ChatPersistenceManager saves session successfully")
-    func testSaveSession() {
+    func testSaveSession() async {
         let manager = createTestManager()
         let sessionData = createTestSessionData()
 
         // 保存會話
-        manager.save(sessionData)
+        await manager.save(sessionData)
 
         // 嘗試加載會話來驗證保存成功
-        let loadedSession = manager.loadSession(id: sessionData.id)
+        let loadedSession = await manager.loadSession(id: sessionData.id)
 
         #expect(loadedSession != nil)
         #expect(loadedSession?.id == sessionData.id)
@@ -57,7 +57,7 @@ struct ChatPersistenceManagerTests {
     }
 
     @Test("ChatPersistenceManager saves session with different states")
-    func testSaveSessionDifferentStates() {
+    func testSaveSessionDifferentStates() async {
         let manager = createTestManager()
 
         let states: [ChatTurnResponse.State] = [.gathering, .ready, .completed]
@@ -73,8 +73,8 @@ struct ChatPersistenceManagerTests {
                 pendingRequestType: nil
             )
 
-            manager.save(sessionData)
-            let loadedSession = manager.loadSession(id: sessionData.id)
+            await manager.save(sessionData)
+            let loadedSession = await manager.loadSession(id: sessionData.id)
 
             #expect(loadedSession?.state == state)
         }
@@ -83,15 +83,15 @@ struct ChatPersistenceManagerTests {
     // MARK: - Load Session Tests
 
     @Test("ChatPersistenceManager loads existing session")
-    func testLoadExistingSession() {
+    func testLoadExistingSession() async {
         let manager = createTestManager()
         let sessionData = createTestSessionData()
 
         // 先保存會話
-        manager.save(sessionData)
+        await manager.save(sessionData)
 
         // 然後加載會話
-        let loadedSession = manager.loadSession(id: sessionData.id)
+        let loadedSession = await manager.loadSession(id: sessionData.id)
 
         #expect(loadedSession != nil)
         #expect(loadedSession?.id == sessionData.id)
@@ -103,11 +103,11 @@ struct ChatPersistenceManagerTests {
     }
 
     @Test("ChatPersistenceManager returns nil for non-existent session")
-    func testLoadNonExistentSession() {
+    func testLoadNonExistentSession() async {
         let manager = createTestManager()
         let nonExistentID = UUID()
 
-        let loadedSession = manager.loadSession(id: nonExistentID)
+        let loadedSession = await manager.loadSession(id: nonExistentID)
 
         #expect(loadedSession == nil)
     }
@@ -115,11 +115,11 @@ struct ChatPersistenceManagerTests {
     // MARK: - Load Active Sessions Tests
 
     @Test("ChatPersistenceManager loads multiple active sessions")
-    func testLoadActiveSessions() {
+    func testLoadActiveSessions() async {
         let manager = createTestManager()
 
         // 清理現有會話
-        manager.clearAll()
+        await manager.clearAll()
 
         // 創建多個會話
         let session1 = createTestSessionData()
@@ -127,12 +127,12 @@ struct ChatPersistenceManagerTests {
         let session3 = createTestSessionData()
 
         // 保存會話
-        manager.save(session1)
-        manager.save(session2)
-        manager.save(session3)
+        await manager.save(session1)
+        await manager.save(session2)
+        await manager.save(session3)
 
         // 加載活躍會話
-        let activeSessions = manager.loadAll()
+        let activeSessions = await manager.loadAll()
 
         #expect(activeSessions.count == 3)
 
@@ -143,13 +143,13 @@ struct ChatPersistenceManagerTests {
     }
 
     @Test("ChatPersistenceManager returns empty array when no active sessions")
-    func testLoadActiveSessionsEmpty() {
+    func testLoadActiveSessionsEmpty() async {
         let manager = createTestManager()
 
         // 清理所有會話
-        manager.clearAll()
+        await manager.clearAll()
 
-        let activeSessions = manager.loadAll()
+        let activeSessions = await manager.loadAll()
 
         #expect(activeSessions.isEmpty)
     }
@@ -157,32 +157,32 @@ struct ChatPersistenceManagerTests {
     // MARK: - Delete Session Tests
 
     @Test("ChatPersistenceManager deletes session successfully")
-    func testDeleteSession() {
+    func testDeleteSession() async {
         let manager = createTestManager()
         let sessionData = createTestSessionData()
 
         // 先保存會話
-        manager.save(sessionData)
+        await manager.save(sessionData)
 
         // 驗證會話存在
-        let loadedSession = manager.loadSession(id: sessionData.id)
+        let loadedSession = await manager.loadSession(id: sessionData.id)
         #expect(loadedSession != nil)
 
         // 刪除會話
-        manager.delete(id: sessionData.id)
+        await manager.delete(id: sessionData.id)
 
         // 驗證會話已被刪除
-        let deletedSession = manager.loadSession(id: sessionData.id)
+        let deletedSession = await manager.loadSession(id: sessionData.id)
         #expect(deletedSession == nil)
     }
 
     @Test("ChatPersistenceManager deletes non-existent session safely")
-    func testDeleteNonExistentSession() {
+    func testDeleteNonExistentSession() async {
         let manager = createTestManager()
         let nonExistentID = UUID()
 
         // 刪除不存在的會話應該安全執行
-        manager.delete(id: nonExistentID)
+        await manager.delete(id: nonExistentID)
 
         // 應該沒有崩潰或錯誤
         #expect(true)
@@ -191,31 +191,31 @@ struct ChatPersistenceManagerTests {
     // MARK: - Clear All Sessions Tests
 
     @Test("ChatPersistenceManager clears all sessions")
-    func testClearAllSessions() {
+    func testClearAllSessions() async {
         let manager = createTestManager()
 
         // 創建多個會話
         let session1 = createTestSessionData()
         let session2 = createTestSessionData()
 
-        manager.save(session1)
-        manager.save(session2)
+        await manager.save(session1)
+        await manager.save(session2)
 
         // 驗證會話存在
-        #expect(manager.loadAll().count >= 2)
+        #expect(await manager.loadAll().count >= 2)
 
         // 清理所有會話
-        manager.clearAll()
+        await manager.clearAll()
 
         // 驗證所有會話已被清理
-        let activeSessions = manager.loadAll()
+        let activeSessions = await manager.loadAll()
         #expect(activeSessions.isEmpty)
     }
 
     // MARK: - Data Integrity Tests
 
     @Test("ChatPersistenceManager preserves message order")
-    func testMessageOrder() {
+    func testMessageOrder() async {
         let manager = createTestManager()
 
         let messages = [
@@ -235,8 +235,8 @@ struct ChatPersistenceManagerTests {
             pendingRequestType: nil
         )
 
-        manager.save(sessionData)
-        let loadedSession = manager.loadSession(id: sessionData.id)
+        await manager.save(sessionData)
+        let loadedSession = await manager.loadSession(id: sessionData.id)
 
         #expect(loadedSession?.messages.count == 4)
         #expect(loadedSession?.messages[0].content == "First message")
@@ -246,7 +246,7 @@ struct ChatPersistenceManagerTests {
     }
 
     @Test("ChatPersistenceManager preserves checklist data")
-    func testChecklistPreservation() {
+    func testChecklistPreservation() async {
         let manager = createTestManager()
 
         let checklist = [
@@ -265,8 +265,8 @@ struct ChatPersistenceManagerTests {
             pendingRequestType: nil
         )
 
-        manager.save(sessionData)
-        let loadedSession = manager.loadSession(id: sessionData.id)
+        await manager.save(sessionData)
+        let loadedSession = await manager.loadSession(id: sessionData.id)
 
         #expect(loadedSession?.checklist != nil)
         #expect(loadedSession?.checklist?.count == 3)
@@ -276,7 +276,7 @@ struct ChatPersistenceManagerTests {
     }
 
     @Test("ChatPersistenceManager handles nil checklist")
-    func testNilChecklist() {
+    func testNilChecklist() async {
         let manager = createTestManager()
 
         let sessionData = ChatSessionData(
@@ -289,8 +289,8 @@ struct ChatPersistenceManagerTests {
             pendingRequestType: nil
         )
 
-        manager.save(sessionData)
-        let loadedSession = manager.loadSession(id: sessionData.id)
+        await manager.save(sessionData)
+        let loadedSession = await manager.loadSession(id: sessionData.id)
 
         #expect(loadedSession?.checklist == nil)
     }
@@ -298,7 +298,7 @@ struct ChatPersistenceManagerTests {
     // MARK: - Edge Cases Tests
 
     @Test("ChatPersistenceManager handles empty messages")
-    func testEmptyMessages() {
+    func testEmptyMessages() async {
         let manager = createTestManager()
 
         let sessionData = ChatSessionData(
@@ -311,14 +311,14 @@ struct ChatPersistenceManagerTests {
             pendingRequestType: nil
         )
 
-        manager.save(sessionData)
-        let loadedSession = manager.loadSession(id: sessionData.id)
+        await manager.save(sessionData)
+        let loadedSession = await manager.loadSession(id: sessionData.id)
 
         #expect(loadedSession?.messages.isEmpty == true)
     }
 
     @Test("ChatPersistenceManager handles very long messages")
-    func testLongMessages() {
+    func testLongMessages() async {
         let manager = createTestManager()
 
         let longContent = String(repeating: "A", count: 10000)
@@ -336,14 +336,14 @@ struct ChatPersistenceManagerTests {
             pendingRequestType: nil
         )
 
-        manager.save(sessionData)
-        let loadedSession = manager.loadSession(id: sessionData.id)
+        await manager.save(sessionData)
+        let loadedSession = await manager.loadSession(id: sessionData.id)
 
         #expect(loadedSession?.messages.first?.content == longContent)
     }
 
     @Test("ChatPersistenceManager handles special characters in messages")
-    func testSpecialCharacters() {
+    func testSpecialCharacters() async {
         let manager = createTestManager()
 
         let specialContent = "Hello 👋 世界 🌍 Test & Co. (2024) 100% 💯"
@@ -361,8 +361,8 @@ struct ChatPersistenceManagerTests {
             pendingRequestType: nil
         )
 
-        manager.save(sessionData)
-        let loadedSession = manager.loadSession(id: sessionData.id)
+        await manager.save(sessionData)
+        let loadedSession = await manager.loadSession(id: sessionData.id)
 
         #expect(loadedSession?.messages.first?.content == specialContent)
     }
@@ -386,13 +386,13 @@ struct ChatPersistenceManagerTests {
                         hasPendingRequest: false,
                         pendingRequestType: nil
                     )
-                    manager.save(sessionData)
+                    await manager.save(sessionData)
                 }
             }
         }
 
         // 驗證所有會話都被保存
-        let activeSessions = manager.loadAll()
+        let activeSessions = await manager.loadAll()
         #expect(activeSessions.count >= 10)
     }
 }
