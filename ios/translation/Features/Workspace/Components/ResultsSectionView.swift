@@ -182,8 +182,8 @@ private struct MergeToolbar: View {
                 Spacer(minLength: DS.Spacing.md)
 
                 Button {
-                    Task { [mergeAction = onMerge] in
-                        await mergeAction()
+                    Task { @MainActor in
+                        await onMerge()
                     }
                 } label: {
                     if inFlight {

@@ -47,7 +47,7 @@ final class ChatManager: ObservableObject, ChatManaging {
         Task { @MainActor [weak session] in
             guard let data = await persister.loadSession(id: sessionID) else { return }
             guard let session else { return }
-            await session.applyPersistedData(data)
+            session.applyPersistedData(data)
         }
         return session
     }

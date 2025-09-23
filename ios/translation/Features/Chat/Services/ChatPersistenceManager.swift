@@ -85,7 +85,7 @@ actor FileChatSessionStore: ChatSessionPersisting {
     func loadAll() async -> [ChatSessionData] {
         do {
             let files = try fileManager.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
-            return try files.compactMap { url in
+            return files.compactMap { url in
                 do {
                     let data = try Data(contentsOf: url)
                     return try decoder.decode(ChatSessionData.self, from: data)
