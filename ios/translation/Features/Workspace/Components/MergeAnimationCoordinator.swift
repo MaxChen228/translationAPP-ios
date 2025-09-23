@@ -92,7 +92,7 @@ final class MergeAnimationCoordinator: ObservableObject {
         flipAngle = 0
 
         withAnimation(.spring(response: 0.28, dampingFraction: 0.75)) {
-            collapseProgress = 1
+            self.collapseProgress = 1
         }
 
         Task { [weak self] in
@@ -119,7 +119,7 @@ final class MergeAnimationCoordinator: ObservableObject {
             guard isMerging, overlayContext != nil else { break }
             await MainActor.run {
                 withAnimation(.timingCurve(0.25, 0.9, 0.4, 1, duration: 0.32)) {
-                    flipAngle = (flipAngle + 180).truncatingRemainder(dividingBy: 360)
+                    self.flipAngle = (self.flipAngle + 180).truncatingRemainder(dividingBy: 360)
                 }
             }
             try? await Task.sleep(nanoseconds: 320_000_000)
@@ -128,7 +128,7 @@ final class MergeAnimationCoordinator: ObservableObject {
         }
 
         await MainActor.run {
-            isFlipping = false
+            self.isFlipping = false
         }
     }
 
@@ -154,17 +154,17 @@ final class MergeAnimationCoordinator: ObservableObject {
             guard let self else { return }
             await MainActor.run {
                 withAnimation(.easeOut(duration: 0.12)) {
-                    overlayOpacity = 0
+                    self.overlayOpacity = 0
                 }
             }
             try? await Task.sleep(nanoseconds: 140_000_000)
             await MainActor.run {
-                overlayContext = nil
-                collapseProgress = 0
-                isFlipping = false
-                overlayOpacity = 1
-                flipAngle = 0
-                hiddenIDs = []
+                self.overlayContext = nil
+                self.collapseProgress = 0
+                self.isFlipping = false
+                self.overlayOpacity = 1
+                self.flipAngle = 0
+                self.hiddenIDs = []
             }
         }
     }

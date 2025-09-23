@@ -138,11 +138,17 @@ final class SpeechEngine: NSObject, ObservableObject, AVSpeechSynthesizerDelegat
     }
 
     // MARK: - AVSpeechSynthesizerDelegate
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        guard isPlaying else { return }
-        let item = queue[currentIndex]
-        schedule(delay: item.postDelay) { [weak self] in
-            self?.advance()
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+        Task { @MainActor [weak self] in
+            guard let self, self.isPlaying else { return }
+            guard self.currentIndex < self.queue.count else {
+                self.stop()
+                return
+            }
+            let item = self.queue[self.currentIndex]
+            self.schedule(delay: item.postDelay) { [weak self] in
+                self?.advance()
+            }
         }
     }
 

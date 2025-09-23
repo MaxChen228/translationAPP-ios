@@ -182,7 +182,9 @@ private struct MergeToolbar: View {
                 Spacer(minLength: DS.Spacing.md)
 
                 Button {
-                    Task { await onMerge() }
+                    Task { [mergeAction = onMerge] in
+                        await mergeAction()
+                    }
                 } label: {
                     if inFlight {
                         ProgressView()
