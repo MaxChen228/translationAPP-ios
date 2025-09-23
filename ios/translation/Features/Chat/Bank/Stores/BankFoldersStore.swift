@@ -47,6 +47,20 @@ final class BankFoldersStore: ObservableObject {
         return names
     }
 
+    func deleteFolder(
+        _ id: UUID,
+        cascadeWith localBank: LocalBankStore,
+        progress: LocalBankProgressStore,
+        order: BankBooksOrderStore
+    ) {
+        let names = removeFolder(id)
+        for name in names {
+            localBank.remove(name)
+            progress.removeBook(name)
+            order.removeFromRoot(name)
+        }
+    }
+
     func rename(_ id: UUID, to newName: String) {
         guard let i = folders.firstIndex(where: { $0.id == id }) else { return }
         let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)

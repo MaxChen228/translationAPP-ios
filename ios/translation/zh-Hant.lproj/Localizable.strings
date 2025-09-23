@@ -345,6 +345,8 @@
 "bank.folder.count" = "共 %d 本";
 "bank.book.count" = "共 %d 題";
 "bank.confirm.deleteBook" = "確定要刪除這本題庫嗎？";
+"bank.confirm.deleteFolder.title" = "確定要刪除資料夾嗎？";
+"bank.confirm.deleteFolder.message" = "此操作會刪除資料夾以及底下 %d 個題庫本，仍要繼續嗎？";
 "bank.action.addToFolder" = "加入 %@";
 "bank.action.moveToRoot" = "移出到根";
 

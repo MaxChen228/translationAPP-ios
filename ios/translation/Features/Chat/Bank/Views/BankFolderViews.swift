@@ -48,12 +48,14 @@ struct BankFolderDetailView: View {
     @EnvironmentObject private var folders: BankFoldersStore
     @EnvironmentObject private var localBank: LocalBankStore
     @EnvironmentObject private var localProgress: LocalBankProgressStore
+    @EnvironmentObject private var bankOrder: BankBooksOrderStore
     @State private var renamingBook: LocalBankBook? = nil
     @State private var deletingBookName: String? = nil
     @State private var showDeleteConfirm: Bool = false
     @State private var error: String? = nil
     @State private var draggingBookName: String? = nil
     @State private var showRenameSheet = false
+    @State private var showFolderDeleteConfirm = false
     @Environment(\.locale) private var locale
 
     private var folder: BankFolder? { folders.folders.first(where: { $0.id == folderID }) }
@@ -131,15 +133,17 @@ struct BankFolderDetailView: View {
         .background(DS.Palette.background)
         .navigationTitle(folder?.name ?? String(localized: "nav.folder", locale: locale))
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                HStack {
-                    Button(String(localized: "action.rename", locale: locale)) { showRenameSheet = true }
-                    Button(String(localized: "action.delete", locale: locale), role: .destructive) { _ = folders.removeFolder(folderID) }
+                ToolbarItem(placement: .topBarTrailing) {
+                    HStack {
+                        Button(String(localized: "action.rename", locale: locale)) { showRenameSheet = true }
+                        Button(String(localized: "action.delete", locale: locale), role: .destructive) {
+                            showFolderDeleteConfirm = true
+                        }
+                    }
                 }
             }
-        }
-        .sheet(isPresented: $showRenameSheet) {
-            RenameSheet(name: folder?.name ?? "") { new in folders.rename(folderID, to: new) }
+            .sheet(isPresented: $showRenameSheet) {
+                RenameSheet(name: folder?.name ?? "") { new in folders.rename(folderID, to: new) }
                 .presentationDetents([.height(180)])
         }
         .sheet(item: $renamingBook) { book in
@@ -151,6 +155,22 @@ struct BankFolderDetailView: View {
                 localProgress.renameBook(from: book.name, to: trimmed)
             }
             .presentationDetents([.height(180)])
+        }
+        .confirmationDialog(
+            String(localized: "bank.confirm.deleteFolder.title", locale: locale),
+            isPresented: $showFolderDeleteConfirm,
+            titleVisibility: .visible
+        ) {
+            Button(String(localized: "action.delete", locale: locale), role: .destructive) {
+                folders.deleteFolder(folderID, cascadeWith: localBank, progress: localProgress, order: bankOrder)
+                showFolderDeleteConfirm = false
+                dismiss()
+            }
+            Button(String(localized: "action.cancel", locale: locale), role: .cancel) {
+                showFolderDeleteConfirm = false
+            }
+        } message: {
+            Text(folderDeleteMessage())
         }
         .confirmationDialog(String(localized: "bank.confirm.deleteBook", locale: locale), isPresented: $showDeleteConfirm, titleVisibility: .visible) {
             Button(String(localized: "action.delete", locale: locale), role: .destructive) {
@@ -171,5 +191,14 @@ enum BookDragPayload {
     static func decode(_ s: String) -> String? {
         guard s.hasPrefix("book:") else { return nil }
         return String(s.dropFirst("book:".count))
+    }
+}
+
+private extension BankFolderDetailView {
+    func folderDeleteMessage() -> String {
+        String.localizedStringWithFormat(
+            String(localized: "bank.confirm.deleteFolder.message", locale: locale),
+            booksInFolder.count
+        )
     }
 }

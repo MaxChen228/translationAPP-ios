@@ -365,6 +365,8 @@
 "bank.folder.count" = "%d books";
 "bank.book.count" = "%d items";
 "bank.confirm.deleteBook" = "Delete this bank?";
+"bank.confirm.deleteFolder.title" = "Delete folder?";
+"bank.confirm.deleteFolder.message" = "This will delete the folder and %d bank(s) inside. Continue?";
 "bank.action.addToFolder" = "Add to %@";
 "bank.action.moveToRoot" = "Move to root";
 

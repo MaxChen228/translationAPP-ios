@@ -22,6 +22,9 @@ struct BankBooksView: View {
     @State private var deletingBookName: String? = nil
     @State private var showDeleteConfirm: Bool = false
     @State private var showRandomSettings: Bool = false
+    @State private var folderPendingDelete: BankFolder? = nil
+    @State private var folderDeleteMessageText: String = ""
+    @State private var showFolderDeleteConfirm: Bool = false
     @Environment(\.locale) private var locale
 
     var body: some View {
@@ -46,7 +49,10 @@ struct BankBooksView: View {
                                 Haptics.medium()
                             }
                             Button(String(localized: "action.rename", locale: locale)) { renamingFolder = folder }
-                            Button(String(localized: "action.delete", locale: locale), role: .destructive) { _ = bankFolders.removeFolder(folder.id) }
+                            Button(String(localized: "action.delete", locale: locale), role: .destructive) {
+                                editController.exitEditMode()
+                                prepareFolderDeletion(folder)
+                            }
                         }
                         .onDrop(of: [.text], delegate: BookIntoFolderDropDelegate(folderID: folder.id, folders: bankFolders, editController: editController))
                         .simultaneousGesture(
@@ -200,6 +206,22 @@ struct BankBooksView: View {
             RenameSheet(name: f.name) { new in bankFolders.rename(f.id, to: new) }
                 .presentationDetents([.height(180)])
         }
+        .confirmationDialog(
+            String(localized: "bank.confirm.deleteFolder.title", locale: locale),
+            isPresented: $showFolderDeleteConfirm,
+            titleVisibility: .visible
+        ) {
+            Button(String(localized: "action.delete", locale: locale), role: .destructive) {
+                if let folder = folderPendingDelete {
+                    deleteFolder(folder)
+                }
+            }
+            Button(String(localized: "action.cancel", locale: locale), role: .cancel) {
+                cancelFolderDeletion()
+            }
+        } message: {
+            Text(folderDeleteMessageText)
+        }
         .sheet(item: $renamingBook) { book in
             RenameSheet(name: book.name) { new in
                 let trimmed = new.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -266,6 +288,32 @@ struct BankBooksView: View {
         }
 
         return pool.randomElement()
+    }
+}
+
+private extension BankBooksView {
+    func prepareFolderDeletion(_ folder: BankFolder) {
+        folderPendingDelete = folder
+        folderDeleteMessageText = folderDeleteMessage(for: folder)
+        showFolderDeleteConfirm = true
+    }
+
+    func cancelFolderDeletion() {
+        folderPendingDelete = nil
+        folderDeleteMessageText = ""
+        showFolderDeleteConfirm = false
+    }
+
+    func deleteFolder(_ folder: BankFolder) {
+        bankFolders.deleteFolder(folder.id, cascadeWith: localBank, progress: localProgress, order: bankOrder)
+        cancelFolderDeletion()
+    }
+
+    func folderDeleteMessage(for folder: BankFolder) -> String {
+        String.localizedStringWithFormat(
+            String(localized: "bank.confirm.deleteFolder.message", locale: locale),
+            folder.bookNames.count
+        )
     }
 }
 
