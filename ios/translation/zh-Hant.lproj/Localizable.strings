@@ -263,6 +263,8 @@
 "deck.untitled" = "未命名";
 "saved.empty" = "尚未儲存任何項目";
 "saved.unparsable" = "資料格式錯誤，無法讀取";
+"saved.correctExample" = "修正後示例";
+"saved.note" = "備註";
 "label.zhPrefix" = "中文：";
 "label.enOriginalPrefix" = "原句：";
 "label.enCorrectedPrefix" = "修正版：";

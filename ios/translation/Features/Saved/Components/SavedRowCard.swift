@@ -7,22 +7,15 @@ struct DecodedRecord: Identifiable, Equatable {
     let createdAt: Date
     let rawJSON: String
     let stash: SavedStash
-    let source: SavedSource
-    let correction: ErrorSavePayload?
-    let research: ResearchSavePayload?
+    let payload: KnowledgeSavePayload?
     let display: DecodedRecordDisplay
 }
 
 struct DecodedRecordDisplay: Equatable {
-    let summary: String
-    let explanation: String?
-    let zhLine: String?
-    let originalLine: String?
-    let correctedLine: String?
-    let contextTitle: String?
-    let context: String?
-    let hintBefore: String?
-    let hintAfter: String?
+    let title: String
+    let explanation: String
+    let correctExample: String
+    let note: String?
 }
 
 // MARK: - Row Card Component
@@ -60,104 +53,60 @@ struct SavedErrorRowCard: View {
     }
 
     private var summaryContent: some View {
-        Group {
-            switch row.source {
-            case .correction:
-                if let payload = row.correction {
-                    TagLabel(text: payload.error.type.displayName, color: payload.error.type.color)
-                    sourceBadge(text: "saved.source.correction", color: DS.Brand.scheme.monument)
-                    Text(row.display.summary)
-                        .dsType(DS.Font.body)
-                        .lineLimit(1)
-                        .foregroundStyle(.primary)
-                } else {
-                    parseErrorText
+        VStack(alignment: .leading, spacing: 4) {
+            if let payload = row.payload {
+                Text(payload.title)
+                    .dsType(DS.Font.body)
+                    .foregroundStyle(.primary)
+                    .lineLimit(2)
+                if let note = payload.note, !note.isEmpty {
+                    Text(note)
+                        .dsType(DS.Font.caption)
+                        .foregroundStyle(DS.Brand.scheme.classicBlue)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
+                        .background(DS.Brand.scheme.classicBlue.opacity(0.1))
+                        .clipShape(Capsule())
                 }
-            case .research:
-                if let payload = row.research {
-                    TagLabel(text: payload.type.displayName, color: payload.type.color)
-                    sourceBadge(text: "saved.source.research", color: DS.Brand.scheme.provence)
-                    Text(row.display.summary)
-                        .dsType(DS.Font.body)
-                        .lineLimit(1)
-                        .foregroundStyle(.primary)
-                } else {
-                    parseErrorText
-                }
+            } else {
+                parseErrorText
             }
         }
     }
 
     @ViewBuilder
     private var expandedContent: some View {
-        switch row.source {
-        case .correction:
-            if let payload = row.correction {
-                correctionDetail(payload)
-            } else {
-                rawJSONView
-            }
-        case .research:
-            if let payload = row.research {
-                researchDetail(payload)
-            } else {
-                rawJSONView
-            }
-        }
-    }
-
-    private func correctionDetail(_ payload: ErrorSavePayload) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if let explanation = row.display.explanation, !explanation.isEmpty {
-                Text(explanation)
-                    .dsType(DS.Font.body)
-                    .foregroundStyle(.secondary)
-            }
-            if let suggestion = payload.error.suggestion, !suggestion.isEmpty {
-                SuggestionChip(text: suggestion, color: payload.error.type.color)
-            }
-            Group {
-                if let zhLine = row.display.zhLine {
-                    Text(zhLine)
-                        .dsType(DS.Font.caption)
+        if let payload = row.payload {
+            VStack(alignment: .leading, spacing: 12) {
+                if !row.display.explanation.isEmpty {
+                    Text(row.display.explanation)
+                        .dsType(DS.Font.body, lineSpacing: 6)
                         .foregroundStyle(.secondary)
                 }
-                if let originalLine = row.display.originalLine {
-                    Text(originalLine)
-                        .dsType(DS.Font.body)
-                }
-                if let correctedLine = row.display.correctedLine {
-                    Text(correctedLine)
-                        .dsType(DS.Font.body)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
 
-            footerActions
-        }
-    }
-
-    private func researchDetail(_ payload: ResearchSavePayload) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            if let explanation = row.display.explanation {
-                Text(explanation)
-                    .dsType(DS.Font.body, lineSpacing: 6)
-                    .foregroundStyle(.secondary)
-            }
-
-            if let context = row.display.context {
                 VStack(alignment: .leading, spacing: 6) {
-                    if let contextTitle = row.display.contextTitle {
-                        Text(contextTitle)
+                    Text(String(localized: "saved.correctExample", locale: locale))
+                        .dsType(DS.Font.caption)
+                        .foregroundStyle(.secondary)
+                    Text(row.display.correctExample)
+                        .dsType(DS.Font.body)
+                        .foregroundStyle(.primary)
+                }
+
+                if let note = row.display.note, !note.isEmpty {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(String(localized: "saved.note", locale: locale))
                             .dsType(DS.Font.caption)
                             .foregroundStyle(.secondary)
+                        Text(note)
+                            .dsType(DS.Font.body)
                     }
-                    Text(context)
-                        .dsType(DS.Font.body)
                 }
-            }
 
-            footerActions
+                footerActions
+            }
+        } else {
+            rawJSONView
         }
     }
 
@@ -203,32 +152,14 @@ struct SavedErrorRowCard: View {
 
     private var parseErrorText: some View {
         Text(String(localized: "saved.unparsable", locale: locale))
-            .dsType(DS.Font.body)
+            .dsType(DS.Font.caption)
             .foregroundStyle(.secondary)
     }
 
-    private func sourceBadge(text: LocalizedStringKey, color: Color) -> some View {
-        Text(text)
-            .dsType(DS.Font.caption)
-            .padding(.horizontal, DS.Spacing.sm)
-            .padding(.vertical, DS.Spacing.sm2)
-            .background(color.opacity(0.16), in: Capsule())
-            .foregroundStyle(color)
-    }
-
-    @ViewBuilder
     private var rawJSONView: some View {
-        VStack(alignment: .leading, spacing: DS.Spacing.sm) {
-            parseErrorText
-            ScrollView(.horizontal, showsIndicators: true) {
-                Text(row.rawJSON)
-                    .font(DS.Font.monoSmall)
-                    .textSelection(.enabled)
-                    .multilineTextAlignment(.leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            footerActions
-        }
+        Text(row.rawJSON)
+            .dsType(DS.Font.caption)
+            .textSelection(.enabled)
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
-
 }

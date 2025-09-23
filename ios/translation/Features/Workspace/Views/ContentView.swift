@@ -66,31 +66,32 @@ struct ContentView: View {
                         // Separate inputs from results visually（以淡藍髮絲線）
                         DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.border))
 
-                        ResultsSectionView(
-                            res: res,
-                            inputZh: session.inputZh,
-                            inputEn: session.inputEn,
-                            highlights: session.filteredHighlights(),
+                            ResultsSectionView(
+                                res: res,
+                                inputZh: session.inputZh,
+                                inputEn: session.inputEn,
+                                highlights: session.filteredHighlights(),
                             correctedHighlights: session.filteredCorrectedHighlights(),
                             errors: session.filteredErrors(),
                             selectedErrorID: vm.binding(\.selectedErrorID),
                             filterType: vm.binding(\.filterType),
                             popoverError: vm.binding(\.popoverError),
                             mode: vm.binding(\.cardMode),
-                            applySuggestion: { session.applySuggestion(for: $0) },
-                            onSave: { item in
-                                let payload = ErrorSavePayload(
-                                    error: item,
-                                    inputEn: session.inputEn,
-                                    correctedEn: res.corrected,
-                                    inputZh: session.inputZh,
+                                applySuggestion: { session.applySuggestion(for: $0) },
+                                onSave: { item in
+                                let trimmedSuggestion = item.suggestion?.trimmingCharacters(in: .whitespacesAndNewlines)
+                                let title = (trimmedSuggestion?.isEmpty == false ? trimmedSuggestion : nil) ?? item.span
+                                savedStore.addKnowledge(
+                                    title: title,
+                                    explanation: item.explainZh,
+                                    correctExample: res.corrected,
+                                    note: nil,
                                     savedAt: Date()
                                 )
-                                savedStore.add(payload: payload)
-                            },
-                            onSavePracticeRecord: {
-                                vm.savePracticeRecord()
-                            },
+                                },
+                                onSavePracticeRecord: {
+                                    vm.savePracticeRecord()
+                                },
                             mergeController: mergeController,
                             session: session,
                             onEnterMergeMode: { vm.enterMergeMode(initialErrorID: $0) },

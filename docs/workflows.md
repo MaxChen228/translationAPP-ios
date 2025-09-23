@@ -11,7 +11,7 @@
 | 錯誤高亮及篩選 | `Features/Workspace/Utilities/Highlighter.swift`、`CorrectionSessionStore.filtered*` | 若新增錯誤類型或匹配規則，需同時更新 `ErrorType` 與此檔。 |
 | 與後端互動 | `Shared/Services/AIService.swift` | `AIServiceHTTP.correct(...)` 對應 `/correct`，處理 DTO→前端模型轉換。 |
 | 練習流程協調 | `Features/Workspace/Coordinators/PracticeSessionCoordinator.swift` | 統一題庫練習來源、下一題挑選與練習記錄存檔；需要本機 Store 參考時由此綁定。 |
-| 儲存錯誤資料 | `Features/Saved/Stores/SavedErrorsStore.swift` | `ContentView` 的 `onSave` 呼叫 `SavedErrorsStore.add`。 | 
+| 儲存知識點 | `Features/Saved/Stores/SavedErrorsStore.swift` | `ContentView` 的 `onSave` 呼叫 `SavedErrorsStore.addKnowledge`，僅保存修正後的關鍵資訊。 |
 | 錯誤合併模式 | `Features/Workspace/Coordinators/ErrorMergeController.swift`、`Features/Workspace/Components/ResultsSectionView.swift`、`Shared/Services/ErrorMergeService.swift` | `ErrorMergeController.mergeIfNeeded()` 觸發 `/correct/merge`，`ResultsSectionView` 透過 `MergeAnimationCoordinator` 呈現動畫與工具列。 |
 
 調整批改輸入/回應流程時，建議由 ViewModel 開始自底向上檢查 DTO → Store → UI，並在 `docs/patterns.md` 參考新增欄位的寫法。
@@ -22,7 +22,7 @@
 | ---- | -------- | ---- |
 | 題庫列表/複習入口 | `Features/Bank/Views/BankBooksView.swift`、`Features/Bank/Stores/LocalBankStore.swift` | 管理本機題庫結構與 UI。新增欄位需更新 `BankItem`、`LocalBankStore`。 |
 | 題庫練習流程 | `Features/Workspace/Coordinators/PracticeSessionCoordinator.swift`、`CorrectionViewModel.startLocalPractice` | `startLocalPractice` 委派 coordinator 重設輸入與提示並追蹤來源；`loadNextPractice()` 內部改由 coordinator 選擇下一題。 |
-| Saved JSON 清單 | `Features/Saved/Views/SavedJSONListSheet.swift`、`Features/Saved/Stores/SavedErrorsStore.swift` | 提供儲存錯誤列表與匯出功能。 |
+| Saved JSON 清單 | `Features/Saved/Views/SavedJSONListSheet.swift`、`Features/Saved/Stores/SavedErrorsStore.swift` | 儲存已萃取的知識點（title/explanation/correctExample/note），並提供匯出與 Deck 生成入口。 |
 | 匯出為單字卡 | `DeckService.swift` | 透過 `/make_deck` 建立新 Deck，新增欄位時同步更新 DTO。 |
 | 雲端課程列表 | `Features/Chat/Bank/Views/CloudCourseLibraryView.swift` | 從 `/cloud/courses` 取得課程摘要，支援標籤與搜尋引導。 |
 | 課程詳情與書本預覽 | `Features/Chat/Bank/Views/CloudCourseDetailView.swift`、`Features/Chat/Bank/Views/CloudCourseBookPreviewView.swift` | 顯示課程封面、介紹、子書本（`/cloud/courses/{id}`、`/cloud/courses/{id}/books/{bookId}`），可一鍵複製到本機。 |

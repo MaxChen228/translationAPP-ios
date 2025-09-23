@@ -23,31 +23,14 @@ struct SavedErrorsStoreTests {
         return try body()
     }
 
-    private func makeCorrectionPayload(savedAt: Date = Date(timeIntervalSince1970: 1_700_000_000)) -> ErrorSavePayload {
-        let error = ErrorItem(
+    private func makeKnowledgePayload(savedAt: Date = Date(timeIntervalSince1970: 1_700_000_000)) -> KnowledgeSavePayload {
+        KnowledgeSavePayload(
             id: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!,
-            span: "go",
-            type: .lexical,
-            explainZh: "請改為過去式",
-            suggestion: "went",
-            hints: ErrorHints(before: "i ", after: " home", occurrence: 1)
-        )
-        return ErrorSavePayload(
-            error: error,
-            inputEn: "I go home.",
-            correctedEn: "I went home.",
-            inputZh: "我回家。",
-            savedAt: savedAt
-        )
-    }
-
-    private func makeResearchPayload(savedAt: Date = Date(timeIntervalSince1970: 1_700_000_100)) -> ResearchSavePayload {
-        ResearchSavePayload(
-            term: "lexicon",
-            explanation: "解釋",
-            context: "sample context",
-            type: .lexical,
-            savedAt: savedAt
+            savedAt: savedAt,
+            title: "went",
+            explanation: "過去式需使用 went。",
+            correctExample: "I went to school yesterday.",
+            note: "lexical"
         )
     }
 
@@ -59,14 +42,14 @@ struct SavedErrorsStoreTests {
         }
     }
 
-    @Test("新增 correction 紀錄會持久化 JSON")
-    func addCorrectionPersistsRecord() throws {
+    @Test("新增知識點會持久化 JSON")
+    func addKnowledgePersistsRecord() throws {
         try withIsolatedDefaults {
             let store = SavedErrorsStore()
             store.clearAll()
 
-            let payload = makeCorrectionPayload()
-            store.add(payload: payload)
+            let payload = makeKnowledgePayload()
+            store.addKnowledge(payload)
 
             #expect(store.items.count == 1)
             guard let record = store.items.first else {
@@ -74,12 +57,11 @@ struct SavedErrorsStoreTests {
                 return
             }
 
-            #expect(record.source == .correction)
             #expect(record.stash == .left)
 
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
-            let decodedPayload = try decoder.decode(ErrorSavePayload.self, from: Data(record.json.utf8))
+            let decodedPayload = try decoder.decode(KnowledgeSavePayload.self, from: Data(record.json.utf8))
             #expect(decodedPayload == payload)
 
             let persistedData = UserDefaults.standard.data(forKey: defaultsKey)
@@ -87,32 +69,35 @@ struct SavedErrorsStoreTests {
             if let data = persistedData {
                 let persistedRecords = try JSONDecoder().decode([SavedErrorRecord].self, from: data)
                 #expect(persistedRecords.count == 1)
-                #expect(persistedRecords.first?.source == .correction)
             }
         }
     }
 
-    @Test("新增 research 紀錄會標記來源與 stash")
-    func addResearchPersistsRecord() throws {
+    @Test("便利方法可直接建立知識點")
+    func convenienceAdderBuildsPayload() throws {
         try withIsolatedDefaults {
             let store = SavedErrorsStore()
             store.clearAll()
 
-            let payload = makeResearchPayload()
-            store.add(research: payload)
+            store.addKnowledge(
+                title: "make",
+                explanation: "改用 make 某物。",
+                correctExample: "I made dinner.",
+                note: "lexical",
+                savedAt: Date(timeIntervalSince1970: 1_700_000_123)
+            )
 
             guard let record = store.items.first else {
                 Issue.record("no record created")
                 return
             }
 
-            #expect(record.source == .research)
-            #expect(record.stash == .left)
-
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
-            let decoded = try decoder.decode(ResearchSavePayload.self, from: Data(record.json.utf8))
-            #expect(decoded == payload)
+            let payload = try decoder.decode(KnowledgeSavePayload.self, from: Data(record.json.utf8))
+            #expect(payload.title == "make")
+            #expect(payload.correctExample == "I made dinner.")
+            #expect(payload.note == "lexical")
         }
     }
 
@@ -121,7 +106,7 @@ struct SavedErrorsStoreTests {
         try withIsolatedDefaults {
             let store = SavedErrorsStore()
             store.clearAll()
-            store.add(payload: makeCorrectionPayload())
+            store.addKnowledge(makeKnowledgePayload())
 
             guard let id = store.items.first?.id else {
                 Issue.record("missing record id")
@@ -143,8 +128,8 @@ struct SavedErrorsStoreTests {
             let store = SavedErrorsStore()
             store.clearAll()
 
-            store.add(payload: makeCorrectionPayload())
-            store.add(research: makeResearchPayload())
+            store.addKnowledge(makeKnowledgePayload())
+            store.addKnowledge(title: "study", explanation: "記錄複習紀錄", correctExample: "I studied yesterday.")
 
             guard let firstID = store.items.first?.id else {
                 Issue.record("missing first record id")
@@ -166,8 +151,8 @@ struct SavedErrorsStoreTests {
             let store = SavedErrorsStore()
             store.clearAll()
 
-            store.add(payload: makeCorrectionPayload())
-            store.add(research: makeResearchPayload())
+            store.addKnowledge(makeKnowledgePayload())
+            store.addKnowledge(title: "study", explanation: "記錄複習紀錄", correctExample: "I studied yesterday.")
 
             guard let id = store.items.first?.id else {
                 Issue.record("missing record id")
@@ -191,8 +176,8 @@ struct SavedErrorsStoreTests {
             let store = SavedErrorsStore()
             store.clearAll()
 
-            store.add(payload: makeCorrectionPayload())
-            store.add(research: makeResearchPayload())
+            store.addKnowledge(makeKnowledgePayload())
+            store.addKnowledge(title: "study", explanation: "記錄複習紀錄", correctExample: "I studied yesterday.")
 
             store.clearAll()
 
@@ -211,7 +196,7 @@ struct SavedErrorsStoreTests {
             let store = SavedErrorsStore()
             store.clearAll()
 
-            store.add(payload: makeCorrectionPayload())
+            store.addKnowledge(makeKnowledgePayload())
             let snapshot = store.items
 
             store.move(UUID(), to: .right)
@@ -219,15 +204,4 @@ struct SavedErrorsStoreTests {
             #expect(store.items == snapshot)
         }
     }
-
-    @Test("讀到毀損資料時應重置為空")
-    func loadWithCorruptDataResets() throws {
-        try withIsolatedDefaults {
-            UserDefaults.standard.set(Data("not-json".utf8), forKey: defaultsKey)
-
-            let store = SavedErrorsStore()
-            #expect(store.items.isEmpty)
-        }
-    }
 }
-

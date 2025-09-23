@@ -235,6 +235,8 @@
 "deck.untitled" = "Untitled";
 "saved.empty" = "No saved items yet";
 "saved.unparsable" = "Cannot read this data format";
+"saved.correctExample" = "Correct example";
+"saved.note" = "Notes";
 "label.zhPrefix" = "Chinese: ";
 "label.enOriginalPrefix" = "Original: ";
 "label.enCorrectedPrefix" = "Corrected: ";

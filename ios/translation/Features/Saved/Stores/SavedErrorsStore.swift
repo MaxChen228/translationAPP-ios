@@ -1,20 +1,14 @@
 import Foundation
 import SwiftUI
 
-struct ErrorSavePayload: Codable, Equatable {
-    let error: ErrorItem
-    let inputEn: String
-    let correctedEn: String
-    let inputZh: String
+/// 精煉後的知識點資料，僅保留修正後需要複習的內容。
+struct KnowledgeSavePayload: Codable, Equatable {
+    let id: UUID
     let savedAt: Date
-}
-
-struct ResearchSavePayload: Codable, Equatable {
-    let term: String
+    let title: String
     let explanation: String
-    let context: String
-    let type: ErrorType
-    let savedAt: Date
+    let correctExample: String
+    let note: String?
 }
 
 enum SavedStash: String, Codable, CaseIterable, Identifiable {
@@ -23,28 +17,21 @@ enum SavedStash: String, Codable, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
-enum SavedSource: String, Codable {
-    case correction
-    case research
-}
-
 struct SavedErrorRecord: Codable, Identifiable, Equatable {
     let id: UUID
     let createdAt: Date
     var json: String
     var stash: SavedStash = .left
-    var source: SavedSource = .correction
 
     private enum CodingKeys: String, CodingKey {
-        case id, createdAt, json, stash, source
+        case id, createdAt, json, stash
     }
 
-    init(id: UUID, createdAt: Date, json: String, stash: SavedStash, source: SavedSource) {
+    init(id: UUID, createdAt: Date, json: String, stash: SavedStash) {
         self.id = id
         self.createdAt = createdAt
         self.json = json
         self.stash = stash
-        self.source = source
     }
 
     init(from decoder: Decoder) throws {
@@ -53,7 +40,6 @@ struct SavedErrorRecord: Codable, Identifiable, Equatable {
         createdAt = try container.decode(Date.self, forKey: .createdAt)
         json = try container.decode(String.self, forKey: .json)
         stash = try container.decodeIfPresent(SavedStash.self, forKey: .stash) ?? .left
-        source = try container.decodeIfPresent(SavedSource.self, forKey: .source) ?? .correction
     }
 
     func encode(to encoder: Encoder) throws {
@@ -62,7 +48,6 @@ struct SavedErrorRecord: Codable, Identifiable, Equatable {
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(json, forKey: .json)
         try container.encode(stash, forKey: .stash)
-        try container.encode(source, forKey: .source)
     }
 }
 
@@ -74,26 +59,40 @@ final class SavedErrorsStore: ObservableObject {
         didSet { persist() }
     }
 
-    init() { load() }
+    private let encoder: JSONEncoder
 
-    func add(payload: ErrorSavePayload) {
+    init() {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
-        if let data = try? encoder.encode(payload), let json = String(data: data, encoding: .utf8) {
-            let record = SavedErrorRecord(id: UUID(), createdAt: Date(), json: json, stash: .left, source: .correction)
-            items.append(record)
-        }
+        self.encoder = encoder
+        load()
     }
 
-    func add(research payload: ResearchSavePayload) {
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
-        if let data = try? encoder.encode(payload), let json = String(data: data, encoding: .utf8) {
-            let record = SavedErrorRecord(id: UUID(), createdAt: Date(), json: json, stash: .left, source: .research)
-            items.append(record)
-        }
+    func addKnowledge(_ payload: KnowledgeSavePayload, stash: SavedStash = .left) {
+        guard let data = try? encoder.encode(payload),
+              let json = String(data: data, encoding: .utf8) else { return }
+        let record = SavedErrorRecord(id: UUID(), createdAt: Date(), json: json, stash: stash)
+        items.append(record)
+    }
+
+    func addKnowledge(
+        title: String,
+        explanation: String,
+        correctExample: String,
+        note: String? = nil,
+        savedAt: Date = Date(),
+        stash: SavedStash = .left
+    ) {
+        let payload = KnowledgeSavePayload(
+            id: UUID(),
+            savedAt: savedAt,
+            title: title,
+            explanation: explanation,
+            correctExample: correctExample,
+            note: note?.isEmpty == true ? nil : note
+        )
+        addKnowledge(payload, stash: stash)
     }
 
     func clearAll() { items = [] }

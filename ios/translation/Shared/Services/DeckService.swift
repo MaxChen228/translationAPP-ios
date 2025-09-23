@@ -2,53 +2,17 @@ import Foundation
 
 struct DeckMakeRequest: Codable {
     struct Item: Codable {
-        enum Source: String, Codable { case correction, research }
-        struct Correction: Codable {
-            let zh: String
-            let en: String
-            let corrected: String
-            let span: String?
-            let suggestion: String?
-            let explainZh: String?
-            let type: String
-        }
-        struct Research: Codable {
-            let term: String
-            let explanation: String
-            let context: String
-            let type: String
-        }
+        let en: String
+        let suggestion: String?
+        let explainZh: String
+        let note: String?
 
-        let source: Source
-        let correction: Correction?
-        let research: Research?
-
-        static func correction(_ payload: ErrorSavePayload) -> Item {
+        static func knowledge(_ payload: KnowledgeSavePayload) -> Item {
             Item(
-                source: .correction,
-                correction: Correction(
-                    zh: payload.inputZh,
-                    en: payload.inputEn,
-                    corrected: payload.correctedEn,
-                    span: payload.error.span,
-                    suggestion: payload.error.suggestion,
-                    explainZh: payload.error.explainZh,
-                    type: payload.error.type.rawValue
-                ),
-                research: nil
-            )
-        }
-
-        static func research(_ payload: ResearchSavePayload) -> Item {
-            Item(
-                source: .research,
-                correction: nil,
-                research: Research(
-                    term: payload.term,
-                    explanation: payload.explanation,
-                    context: payload.context,
-                    type: payload.type.rawValue
-                )
+                en: payload.correctExample,
+                suggestion: payload.title.isEmpty ? nil : payload.title,
+                explainZh: payload.explanation,
+                note: payload.note?.isEmpty == true ? nil : payload.note
             )
         }
     }

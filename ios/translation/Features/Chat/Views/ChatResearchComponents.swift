@@ -125,14 +125,13 @@ struct ChatResearchCard: View {
 
     private func saveItem(_ item: ChatResearchItem) {
         guard !savedItemIDs.contains(item.id) else { return }
-        let payload = ResearchSavePayload(
-            term: item.term,
+        savedStore.addKnowledge(
+            title: item.term,
             explanation: item.explanation,
-            context: item.context,
-            type: item.type,
+            correctExample: item.context,
+            note: nil,
             savedAt: Date()
         )
-        savedStore.add(research: payload)
         savedItemIDs.insert(item.id)
         Haptics.success()
         bannerCenter.show(
