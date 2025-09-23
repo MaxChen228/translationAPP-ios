@@ -26,6 +26,7 @@ struct BankBooksView: View {
     @State private var folderDeleteMessageText: String = ""
     @State private var showFolderDeleteConfirm: Bool = false
     @State private var showBulkDeleteConfirm: Bool = false
+    @State private var suppressExitTap = false
     @Environment(\.locale) private var locale
 
     private var selectedCount: Int { editController.selectedIDs.count }
@@ -79,20 +80,28 @@ struct BankBooksView: View {
                 VStack(alignment: .leading, spacing: DS.Spacing.sm2) {
                     DSSectionHeader(titleKey: "bank.local.title", accentUnderline: true)
                         .overlay(alignment: .topTrailing) {
-                            HStack(spacing: DS.Spacing.sm) {
-                                NavigationLink {
-                                    AllBankItemsView(vm: vm, onPractice: onPracticeLocal)
-                                } label: {
-                                    DSQuickActionIconGlyph(systemName: "list.bullet", shape: .circle, size: 28)
+                            VStack(alignment: .trailing, spacing: DS.Spacing.xs) {
+                                HStack(spacing: DS.Spacing.sm) {
+                                    NavigationLink {
+                                        AllBankItemsView(vm: vm, onPractice: onPracticeLocal)
+                                    } label: {
+                                        DSQuickActionIconGlyph(systemName: "list.bullet", shape: .circle, size: 28)
+                                    }
+                                    .accessibilityLabel("瀏覽所有題庫")
+                                    RandomPracticeToolbarButton { runRandomPractice() }
+                                    RandomSettingsToolbarButton {
+                                        editController.exitEditMode()
+                                        showRandomSettings = true
+                                    }
                                 }
-                                .accessibilityLabel("瀏覽所有題庫")
-                                RandomPracticeToolbarButton { runRandomPractice() }
-                                RandomSettingsToolbarButton {
-                                    editController.exitEditMode()
-                                    showRandomSettings = true
+                                .padding(.top, 2)
+
+                                if editController.isEditing, selectedCount > 0 {
+                                    BankBulkToolbar(count: selectedCount) {
+                                        showBulkDeleteConfirm = true
+                                    }
                                 }
                             }
-                            .padding(.top, 2)
                         }
                     LazyVGrid(columns: cols, spacing: DS.Spacing.sm2) {
                         // 瀏覽雲端精選（複製到本機）
@@ -157,36 +166,32 @@ struct BankBooksView: View {
                                     }
                                 }
                             }
-                            .shelfWiggle(isActive: isEditing)
-                            .shelfConditionalDrag(isEditing) {
-                                editController.beginDragging(b.name)
-                                let payload = ShelfDragPayload(
-                                    primaryID: b.name,
-                                    selectedIDs: orderedSelection(anchor: b.name, ordered: orderedRootBooks.map { $0.name })
-                                )
-                                return NSItemProvider(object: payload.encodedString() as NSString)
-                            }
-                            .onDrop(of: [.text], delegate: BankRootReorderDropDelegate(
-                                bookName: b.name,
-                                editController: editController,
-                                orderedNames: orderedRootBooks.map { $0.name },
-                                bankOrder: bankOrder
-                            ))
+                        .shelfWiggle(isActive: isEditing)
+                        .shelfConditionalDrag(isEditing) {
+                            editController.beginDragging(b.name)
+                            let payload = ShelfDragPayload(
+                                primaryID: b.name,
+                                selectedIDs: orderedSelection(anchor: b.name, ordered: orderedRootBooks.map { $0.name })
+                            )
+                            return NSItemProvider(object: payload.encodedString() as NSString)
+                        }
+                        .onDrop(of: [.text], delegate: BankRootReorderDropDelegate(
+                            bookName: b.name,
+                            editController: editController,
+                            orderedNames: orderedRootBooks.map { $0.name },
+                            bankOrder: bankOrder
+                        ))
                         .highPriorityGesture(
                             TapGesture().onEnded {
                                 if isEditing {
+                                    suppressExitTap = true
                                     editController.toggleSelection(b.name)
+                                    DispatchQueue.main.async {
+                                        suppressExitTap = false
+                                    }
                                 }
                             }
                         )
-                        }
-                    }
-                    .overlay(alignment: .topTrailing) {
-                        if editController.isEditing, selectedCount > 0 {
-                            BankBulkToolbar(count: selectedCount) {
-                                showBulkDeleteConfirm = true
-                            }
-                            .padding(.top, DS.Spacing.sm)
                         }
                     }
                 }
@@ -210,7 +215,11 @@ struct BankBooksView: View {
         .simultaneousGesture(
             TapGesture().onEnded {
                 if editController.isEditing {
-                    editController.exitEditMode()
+                    if suppressExitTap {
+                        suppressExitTap = false
+                    } else {
+                        editController.exitEditMode()
+                    }
                 }
             },
             including: .gesture
