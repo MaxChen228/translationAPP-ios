@@ -116,6 +116,10 @@ struct SavedJSONListSheet: View {
 
             Spacer(minLength: 0)
 
+            let stashTitle = activeStash == .left
+                ? String(localized: "saved.stash.left", locale: locale)
+                : String(localized: "saved.stash.right", locale: locale)
+
             HStack(spacing: 8) {
                 DSQuickActionIconButton(
                     systemName: "chevron.left",
@@ -126,16 +130,14 @@ struct SavedJSONListSheet: View {
                     size: 32
                 )
                 .disabled(activeStash == .left)
-                HStack(spacing: 4) {
-                    if activeStash == .left {
-                        Text(String(localized: "saved.stash.left", locale: locale))
-                    } else {
-                        Text(String(localized: "saved.stash.right", locale: locale))
-                    }
-                    Text("\(currentCount)")
-                }
-                .dsType(DS.Font.caption)
-                .foregroundStyle(.secondary)
+
+                Text("\(stashTitle) · \(currentCount)")
+                    .dsType(DS.Font.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                    .frame(maxWidth: .infinity)
+
                 DSQuickActionIconButton(
                     systemName: "chevron.right",
                     labelKey: "saved.switchRight",
@@ -146,6 +148,7 @@ struct SavedJSONListSheet: View {
                 )
                 .disabled(activeStash == .right)
             }
+            .frame(minWidth: 120, idealWidth: 140, maxWidth: 160)
 
             Spacer(minLength: 0)
 

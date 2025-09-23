@@ -120,11 +120,11 @@ struct SavedErrorRowCard: View {
                         didCopy = false
                     }
                 } label: {
-                    if didCopy {
-                        Label(String(localized: "action.copied", locale: locale), systemImage: "checkmark")
-                    } else {
-                        Label(String(localized: "action.copy", locale: locale), systemImage: "doc.on.doc")
-                    }
+                    let labelKey: LocalizedStringKey = didCopy ? "action.copied" : "action.copy"
+                    let systemImage = didCopy ? "checkmark" : "doc.on.doc"
+                    Label(labelKey, systemImage: systemImage)
+                        .labelStyle(.iconOnly)
+                        .accessibilityLabel(Text(labelKey))
                 }
                 .buttonStyle(DSButton(style: .secondary, size: .compact))
 
@@ -132,6 +132,8 @@ struct SavedErrorRowCard: View {
                     onEdit()
                 } label: {
                     Label(String(localized: "action.edit", locale: locale), systemImage: "square.and.pencil")
+                        .labelStyle(.iconOnly)
+                        .accessibilityLabel(Text(String(localized: "action.edit", locale: locale)))
                 }
                 .buttonStyle(DSButton(style: .secondary, size: .compact))
 
@@ -141,6 +143,8 @@ struct SavedErrorRowCard: View {
                     showDeleteConfirm = true
                 } label: {
                     Label(String(localized: "action.delete", locale: locale), systemImage: "trash")
+                        .labelStyle(.iconOnly)
+                        .accessibilityLabel(Text(String(localized: "action.delete", locale: locale)))
                 }
                 .buttonStyle(DSButton(style: .secondary, size: .compact))
                 .confirmationDialog(String(localized: "saved.delete.confirm", locale: locale), isPresented: $showDeleteConfirm, actions: {
