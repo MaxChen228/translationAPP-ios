@@ -67,6 +67,18 @@ final class WorkspaceStore: ObservableObject {
         viewModels[id] = nil
     }
 
+    func remove(ids: Set<UUID>) {
+        guard !ids.isEmpty else { return }
+        workspaces.removeAll { workspace in
+            if ids.contains(workspace.id) {
+                purgeWorkspaceData(id: workspace.id)
+                viewModels[workspace.id] = nil
+                return true
+            }
+            return false
+        }
+    }
+
     // MARK: - Reorder
     func index(of id: UUID) -> Int? {
         workspaces.firstIndex(where: { $0.id == id })
@@ -85,6 +97,26 @@ final class WorkspaceStore: ObservableObject {
     func moveWorkspace(_ dragged: UUID, before target: UUID) {
         guard let to = index(of: target) else { return }
         moveWorkspace(id: dragged, to: to)
+    }
+
+    func moveWorkspaces(ids: [UUID], before targetID: UUID?) {
+        let idSet = Set(ids)
+        guard !idSet.isEmpty else { return }
+
+        let moving = workspaces.filter { idSet.contains($0.id) }
+        guard !moving.isEmpty else { return }
+
+        workspaces.removeAll { idSet.contains($0.id) }
+
+        let insertIndex: Int
+        if let targetID, let idx = workspaces.firstIndex(where: { $0.id == targetID }) {
+            insertIndex = idx
+        } else {
+            insertIndex = workspaces.count
+        }
+
+        let clamped = max(0, min(insertIndex, workspaces.count))
+        workspaces.insert(contentsOf: moving, at: clamped)
     }
 
     func statusText(for id: UUID) -> String {

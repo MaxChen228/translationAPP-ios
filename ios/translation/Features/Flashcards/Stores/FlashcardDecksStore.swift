@@ -39,11 +39,17 @@ final class FlashcardDecksStore: ObservableObject {
     }
 
     func addCard(to deckID: UUID, card: Flashcard, at index: Int? = nil) {
-        guard let i = decks.firstIndex(where: { $0.id == deckID }) else { return }
-        if let idx = index, idx >= 0 && idx <= decks[i].cards.count {
-            decks[i].cards.insert(card, at: idx)
+        addCards(to: deckID, cards: [card], at: index)
+    }
+
+    func addCards(to deckID: UUID, cards newCards: [Flashcard], at index: Int? = nil) {
+        guard !newCards.isEmpty else { return }
+        guard let deckIndex = decks.firstIndex(where: { $0.id == deckID }) else { return }
+
+        if let idx = index, idx >= 0 && idx <= decks[deckIndex].cards.count {
+            decks[deckIndex].cards.insert(contentsOf: newCards, at: idx)
         } else {
-            decks[i].cards.append(card)
+            decks[deckIndex].cards.append(contentsOf: newCards)
         }
     }
 

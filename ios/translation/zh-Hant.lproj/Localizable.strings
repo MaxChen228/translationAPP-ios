@@ -213,6 +213,9 @@
 "chat.research.deckName.placeholder" = "輸入牌組名稱";
 "chat.research.saveDeck" = "儲存到單字卡";
 "chat.research.deckSaved" = "已儲存到單字卡";
+"chat.research.appendDeck" = "加入現有單字卡";
+"chat.research.appendDeck.title" = "選擇牌組";
+"chat.research.appendDeck.empty" = "目前沒有牌組，請先到單字卡頁面建立。";
 "chat.research.deckSummary" = "%@ • 建立於 %@";
 "chat.research.front" = "正面";
 "chat.research.back" = "背面";
@@ -283,6 +286,7 @@
 "saved.stash.left" = "左側";
 "saved.stash.right" = "右側";
 "action.delete" = "刪除";
+"action.deleteAll" = "全部刪除";
 "action.back" = "返回";
 "action.cancel" = "取消";
 "action.edit" = "編輯";
@@ -296,6 +300,9 @@
 "saved.edit.description" = "更新已儲存的 JSON 內容。";
 "saved.edit.invalid" = "JSON 格式不正確";
 "saved.edit.success" = "已更新儲存項目";
+"bulk.selectionCount" = "已選 %d 項";
+"quick.bulkDelete.confirm" = "確定要刪除選取的快速功能？";
+"workspace.bulkDelete.confirm" = "確定要刪除選取的工作區？";
 
 /* Workspace 狀態 */
 "workspace.status.loading" = "批改中…";
@@ -362,6 +369,7 @@
 "deck.cards.count" = "共 %d 張";
 "folder.decks.count" = "共 %d 個";
 "banner.deckSaved.title" = "已儲存單字卡";
+"banner.deckUpdated.title" = "已加入單字卡";
 
 /* 錯誤詳情 */
 "error.applySuggestion" = "套用建議";

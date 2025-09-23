@@ -4,6 +4,7 @@ import SwiftUI
 final class ShelfEditController<ID: Hashable>: ObservableObject {
     @Published var isEditing = false
     @Published var draggingID: ID? = nil
+    @Published var selectedIDs: Set<ID> = []
 
     func enterEditMode() {
         if !isEditing {
@@ -16,6 +17,7 @@ final class ShelfEditController<ID: Hashable>: ObservableObject {
             isEditing = false
         }
         draggingID = nil
+        selectedIDs.removeAll()
     }
 
     func beginDragging(_ id: ID) {
@@ -24,6 +26,26 @@ final class ShelfEditController<ID: Hashable>: ObservableObject {
 
     func endDragging() {
         draggingID = nil
+    }
+
+    func toggleSelection(_ id: ID) {
+        if selectedIDs.contains(id) {
+            selectedIDs.remove(id)
+        } else {
+            selectedIDs.insert(id)
+        }
+    }
+
+    func isSelected(_ id: ID) -> Bool {
+        selectedIDs.contains(id)
+    }
+
+    func setSelection(_ ids: Set<ID>) {
+        selectedIDs = ids
+    }
+
+    func clearSelection() {
+        selectedIDs.removeAll()
     }
 }
 

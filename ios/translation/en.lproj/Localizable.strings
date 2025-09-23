@@ -185,6 +185,9 @@
 "chat.research.deckName.placeholder" = "Enter a deck name";
 "chat.research.saveDeck" = "Save to Flashcards";
 "chat.research.deckSaved" = "Saved to Flashcards";
+"chat.research.appendDeck" = "Add to Existing Deck";
+"chat.research.appendDeck.title" = "Choose a Deck";
+"chat.research.appendDeck.empty" = "No decks available yet. Create one in Flashcards first.";
 "chat.research.deckSummary" = "%@ • generated %@";
 "chat.research.front" = "Front";
 "chat.research.back" = "Back";
@@ -255,6 +258,7 @@
 "saved.stash.left" = "Left";
 "saved.stash.right" = "Right";
 "action.delete" = "Delete";
+"action.deleteAll" = "Delete All";
 "action.back" = "Back";
 "action.cancel" = "Cancel";
 "action.edit" = "Edit";
@@ -275,6 +279,9 @@
 "label.completed" = "Completed";
 "a11y.copyCorrected" = "Copy corrected text";
 "a11y.scoreLabel" = "Score %d pts";
+"bulk.selectionCount" = "%d selected";
+"quick.bulkDelete.confirm" = "Delete selected quick actions?";
+"workspace.bulkDelete.confirm" = "Delete selected workspaces?";
 "deck.new" = "New Deck";
 "flashcards.mode.browse" = "Browse";
 "flashcards.mode.annotate" = "Annotate";
@@ -382,6 +389,7 @@
 "deck.cards.count" = "%d cards";
 "folder.decks.count" = "%d decks";
 "banner.deckSaved.title" = "Deck saved";
+"banner.deckUpdated.title" = "Cards added";
 "a11y.copyCorrected" = "Copy corrected text";
 "settings.flashcards.title" = "Flashcards";
 "settings.flashcards.subtitle" = "Familiarity & Reset";

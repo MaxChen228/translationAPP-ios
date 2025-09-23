@@ -33,6 +33,18 @@ final class WorkspaceHomeCoordinator: ObservableObject {
         self.router = router
         isConfigured = true
 
+        workspaceEditController.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        quickActionsEditController.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
         router.$openWorkspaceID
             .compactMap { $0 }
             .sink { [weak self] id in
@@ -50,6 +62,25 @@ final class WorkspaceHomeCoordinator: ObservableObject {
 
     func deleteWorkspace(_ id: UUID) {
         workspaceStore?.remove(id)
+        workspaceEditController.selectedIDs.remove(id)
+    }
+
+    func beginWorkspaceDragging(_ id: UUID) -> NSItemProvider {
+        workspaceEditController.beginDragging(id)
+        let ids = orderedWorkspaceSelection(anchor: id)
+        let payload = ShelfDragPayload(
+            primaryID: id.uuidString,
+            selectedIDs: ids.map { $0.uuidString }
+        )
+        return NSItemProvider(object: payload.encodedString() as NSString)
+    }
+
+    func deleteSelectedWorkspaces() {
+        guard let store = workspaceStore else { return }
+        let ids = workspaceEditController.selectedIDs
+        guard !ids.isEmpty else { return }
+        store.remove(ids: ids)
+        workspaceEditController.clearSelection()
     }
 
     func startRename(_ workspace: Workspace) {
@@ -124,10 +155,10 @@ final class WorkspaceHomeCoordinator: ObservableObject {
         guard workspaceEditController.isEditing,
               let store = workspaceStore,
               let draggingID = workspaceEditController.draggingID,
-              draggingID != targetID,
-              let from = store.index(of: draggingID),
-              let to = store.index(of: targetID) else { return }
-        store.moveWorkspace(id: draggingID, to: to > from ? to + 1 : to)
+              draggingID != targetID else { return }
+        let selection = orderedWorkspaceSelection(anchor: draggingID)
+        guard !selection.contains(targetID) else { return }
+        store.moveWorkspaces(ids: selection, before: targetID)
         Haptics.lightTick()
     }
 
@@ -144,7 +175,8 @@ final class WorkspaceHomeCoordinator: ObservableObject {
         guard workspaceEditController.isEditing,
               let store = workspaceStore,
               let draggingID = workspaceEditController.draggingID else { return false }
-        store.moveWorkspace(id: draggingID, to: store.workspaces.count)
+        let selection = orderedWorkspaceSelection(anchor: draggingID)
+        store.moveWorkspaces(ids: selection, before: nil)
         workspaceEditController.endDragging()
         Haptics.success()
         return true
@@ -167,5 +199,17 @@ final class WorkspaceHomeCoordinator: ObservableObject {
         store.localProgressStore = localProgress
         store.practiceRecordsStore = practiceRecords
         store.rebindAllStores()
+    }
+}
+
+private extension WorkspaceHomeCoordinator {
+    func orderedWorkspaceSelection(anchor: UUID) -> [UUID] {
+        let selected = workspaceEditController.selectedIDs
+        guard selected.contains(anchor), !selected.isEmpty else { return [anchor] }
+        guard let store = workspaceStore else { return [anchor] }
+        let ordered = store.workspaces.compactMap { workspace -> UUID? in
+            selected.contains(workspace.id) ? workspace.id : nil
+        }
+        return ordered.isEmpty ? [anchor] : ordered
     }
 }

@@ -50,29 +50,31 @@ DSCardTitle(
 
 #### 3. 邊框寬度（Border Width）
 ```swift
-DS.BorderWidth.hairline  // 0.5pt - 最細邊框，分隔線
-DS.BorderWidth.thin      // 1.0pt - 標準邊框
-DS.BorderWidth.regular   // 2.0pt - 強調邊框
+DS.BorderWidth.hairline  // >=0.5pt - 最細邊框，依裝置像素自動調整
+DS.BorderWidth.thin      // 0.8pt - 輕量邊框（標籤、徽章）
+DS.BorderWidth.regular   // 1.0pt - 標準邊框（輸入框、按鈕）
+DS.BorderWidth.emphatic  // 1.6pt - 強調邊框
 ```
 
 #### 4. 間距系統（Spacing）
 ```swift
-DS.Spacing.xs   // 4pt  - 極小間距
-DS.Spacing.sm2  // 6pt  - 小間距
-DS.Spacing.sm   // 8pt  - 標準小間距
-DS.Spacing.md2  // 10pt - 中間距
-DS.Spacing.md   // 12pt - 標準中間距
-DS.Spacing.lg   // 16pt - 大間距
-DS.Spacing.xl   // 20pt - 特大間距
-DS.Spacing.xxl  // 24pt - 超大間距
+DS.Spacing.xs   // 6pt  - 極小間距
+DS.Spacing.xs2  // 8pt  - 微小間距
+DS.Spacing.sm   // 10pt - 標準小間距
+DS.Spacing.sm2  // 12pt - 小至中間距
+DS.Spacing.md2  // 14pt - 中間距
+DS.Spacing.md   // 16pt - 標準中間距
+DS.Spacing.lg   // 24pt - 大間距
+DS.Spacing.xl   // 32pt - 特大間距
 ```
 
 #### 5. 圓角系統（Radius）
 ```swift
-DS.Radius.sm  // 6pt  - 小圓角（標籤、小按鈕）
-DS.Radius.md  // 10pt - 中圓角（輸入框、按鈕）
-DS.Radius.lg  // 14pt - 大圓角（卡片）
-DS.Radius.xl  // 20pt - 特大圓角（模態視窗）
+DS.Radius.xs  // 6pt  - 迷你圓角（分隔、細部元件）
+DS.Radius.sm  // 8pt  - 小圓角（標籤、小按鈕）
+DS.Radius.md  // 12pt - 中圓角（輸入框、按鈕）
+DS.Radius.md2 // 14pt - 中大圓角（模組化卡片）
+DS.Radius.lg  // 16pt - 大圓角（主要卡片、模態）
 ```
 
 #### 6. 色彩與透明度（Colors & Opacity）

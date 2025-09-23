@@ -12,6 +12,7 @@ struct QuickActionsRowView: View {
     @EnvironmentObject private var localProgress: LocalBankProgressStore
     @Environment(\.locale) private var locale
     @StateObject private var sharedChatViewModel = ChatViewModel()
+    @State private var showBulkDeleteConfirm = false
 
     var body: some View {
         let coordinator = QuickActionsCoordinator(
@@ -24,6 +25,7 @@ struct QuickActionsRowView: View {
         )
         let items = coordinator.items()
         let isEmpty = items.isEmpty
+        let selectedCount = editController.selectedIDs.count
 
         VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
             QuickActionsHeaderView(
@@ -32,6 +34,13 @@ struct QuickActionsRowView: View {
                 onToggleEditing: onToggleEditing,
                 onRequestAdd: onRequestAdd
             )
+
+            if selectedCount > 0 {
+                QuickActionsBulkToolbar(
+                    count: selectedCount,
+                    onDelete: { showBulkDeleteConfirm = true }
+                )
+            }
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
@@ -49,27 +58,82 @@ struct QuickActionsRowView: View {
                 .padding(.horizontal, 2)
                 .onDrop(of: [.text], delegate: QuickActionsClearDragDropDelegate(coordinator: coordinator))
             }
+            .contentShape(Rectangle())
+            .gesture(
+                TapGesture().onEnded {
+                    if editController.isEditing {
+                        editController.exitEditMode()
+                    }
+                },
+                including: .gesture
+            )
+        }
+        .confirmationDialog(
+            String(localized: "quick.bulkDelete.confirm", defaultValue: "確認刪除選取的快速功能？"),
+            isPresented: $showBulkDeleteConfirm,
+            titleVisibility: .visible
+        ) {
+            Button(String(localized: "action.deleteAll", defaultValue: "Delete All"), role: .destructive) {
+                let ids = editController.selectedIDs
+                coordinator.remove(ids: ids)
+                showBulkDeleteConfirm = false
+            }
+            Button(String(localized: "action.cancel", locale: locale), role: .cancel) {
+                showBulkDeleteConfirm = false
+            }
         }
     }
 
     @ViewBuilder
     private func quickActionTile(for item: QuickActionItem, coordinator: QuickActionsCoordinator) -> some View {
+        let isEditing = editController.isEditing
+        let isSelected = editController.isSelected(item.id)
+
         let baseCard = quickActionCard(for: item)
             .frame(width: DS.IconSize.entryCardWidth)
+            .shelfSelectable(isEditing: isEditing, isSelected: isSelected)
 
-        Group {
-            if editController.isEditing {
-                editingTile(baseCard: baseCard, item: item, coordinator: coordinator)
+        let tile: AnyView = {
+            if isEditing {
+                return AnyView(
+                    baseCard
+                        .contentShape(RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous))
+                        .contextMenu {
+                            Button(String(localized: "action.delete", locale: locale), role: .destructive) {
+                                coordinator.remove(item)
+                            }
+                        }
+                        .highPriorityGesture(
+                            TapGesture().onEnded {
+                                editController.toggleSelection(item.id)
+                            }
+                        )
+                )
             } else {
-                navigationTile(baseCard: baseCard, item: item, coordinator: coordinator)
+                return AnyView(
+                    coordinator.navigationLink(for: item, chatViewModel: sharedChatViewModel) {
+                        baseCard
+                    }
+                    .buttonStyle(DSCardLinkStyle())
+                    .contextMenu {
+                        Button(String(localized: "action.edit", locale: locale)) {
+                            editController.enterEditMode()
+                            Haptics.medium()
+                        }
+                        Button(String(localized: "action.delete", locale: locale), role: .destructive) {
+                            coordinator.remove(item)
+                        }
+                    }
+                )
             }
-        }
-        .shelfWiggle(isActive: editController.isEditing)
-        .shelfConditionalDrag(editController.isEditing) {
-            coordinator.beginDragging(item.id)
-        }
-        .simultaneousGesture(editController.isEditing ? TapGesture().onEnded { editController.exitEditMode() } : nil)
-        .onDrop(of: [.text], delegate: QuickActionsReorderDropDelegate(item: item, coordinator: coordinator))
+        }()
+
+        tile
+            .shelfWiggle(isActive: isEditing)
+            .shelfConditionalDrag(isEditing) {
+                coordinator.beginDragging(item.id)
+            }
+            .onDrop(of: [.text], delegate: QuickActionsReorderDropDelegate(item: item, coordinator: coordinator))
     }
 
     @ViewBuilder
@@ -88,49 +152,6 @@ struct QuickActionsRowView: View {
         }
     }
 
-    @ViewBuilder
-    private func navigationTile<Content: View>(baseCard: Content,
-                                              item: QuickActionItem,
-                                              coordinator: QuickActionsCoordinator) -> some View {
-        coordinator.navigationLink(for: item, chatViewModel: sharedChatViewModel) {
-            baseCard
-        }
-        .buttonStyle(DSCardLinkStyle())
-        .contextMenu {
-            Button(String(localized: "action.edit", locale: locale)) {
-                editController.enterEditMode()
-                Haptics.medium()
-            }
-            Button(String(localized: "action.delete", locale: locale), role: .destructive) {
-                coordinator.remove(item)
-            }
-        }
-    }
-
-    private func editingTile<Content: View>(baseCard: Content,
-                                            item: QuickActionItem,
-                                            coordinator: QuickActionsCoordinator) -> some View {
-        baseCard
-            .overlay(alignment: .topTrailing) {
-                Button(role: .destructive) {
-                    coordinator.remove(item)
-                } label: {
-                    Image(systemName: "minus.circle.fill")
-                        .font(.system(size: 20))
-                        .foregroundStyle(Color.red)
-                        .padding(6)
-                }
-                .buttonStyle(.plain)
-            }
-            .contextMenu {
-                Button(String(localized: "action.done", locale: locale)) {
-                    editController.exitEditMode()
-                }
-                Button(String(localized: "action.delete", locale: locale), role: .destructive) {
-                    coordinator.remove(item)
-                }
-            }
-    }
 }
 
 // MARK: - Subviews
@@ -154,6 +175,28 @@ private struct QuickActionsHeaderView: View {
                     .padding(.top, 4)
                 }
             }
+    }
+}
+
+private struct QuickActionsBulkToolbar: View {
+    var count: Int
+    var onDelete: () -> Void
+
+    var body: some View {
+        HStack(spacing: DS.Spacing.sm) {
+            Button(action: onDelete) {
+                Label(String(localized: "action.deleteAll", defaultValue: "Delete All"), systemImage: "trash")
+            }
+            .buttonStyle(DSButton(style: .secondary, size: .compact))
+
+            Text(String(format: String(localized: "bulk.selectionCount", defaultValue: "已選 %d 項"), count))
+                .dsType(DS.Font.caption)
+                .foregroundStyle(.secondary)
+
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 2)
+        .padding(.bottom, DS.Spacing.xs)
     }
 }
 

@@ -63,6 +63,8 @@ struct ChatResearchCard: View {
     @State private var deckName: String
     @State private var isSaving: Bool = false
     @State private var hasSaved: Bool = false
+    @State private var showDeckPicker: Bool = false
+    @State private var isAppending: Bool = false
 
     init(deck: ChatResearchDeck) {
         self.deck = deck
@@ -80,7 +82,7 @@ struct ChatResearchCard: View {
                     .dsType(DS.Font.body)
                     .foregroundStyle(.secondary)
             } else {
-                saveButton
+                actionButtons
 
                 if isExpanded {
                     VStack(alignment: .leading, spacing: DS.Spacing.sm) {
@@ -107,6 +109,10 @@ struct ChatResearchCard: View {
         )
         .shadow(color: DS.Shadow.card.color, radius: DS.Shadow.card.radius, x: DS.Shadow.card.x, y: DS.Shadow.card.y)
         .onChange(of: deck.id) { _, _ in resetState() }
+        .sheet(isPresented: $showDeckPicker) {
+            deckPicker
+                .interactiveDismissDisabled(isAppending)
+        }
     }
 
     private var header: some View {
@@ -156,6 +162,13 @@ struct ChatResearchCard: View {
         }
     }
 
+    private var actionButtons: some View {
+        VStack(spacing: DS.Spacing.sm) {
+            saveButton
+            appendButton
+        }
+    }
+
     private var saveButton: some View {
         Button {
             Task { await saveDeck() }
@@ -165,6 +178,70 @@ struct ChatResearchCard: View {
         }
         .buttonStyle(DSButton(style: hasSaved ? .secondary : .primary, size: .full))
         .disabled(isSaving || deck.cards.isEmpty || hasSaved)
+    }
+
+    private var appendButton: some View {
+        Button {
+            showDeckPicker = true
+        } label: {
+            Label(String(localized: hasSaved ? "chat.research.deckSaved" : "chat.research.appendDeck"), systemImage: hasSaved ? "checkmark.seal.fill" : "square.and.arrow.down")
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(DSButton(style: .secondary, size: .full))
+        .disabled(isSaving || isAppending || deck.cards.isEmpty || hasSaved || decksStore.decks.isEmpty)
+    }
+
+    private var deckPicker: some View {
+        NavigationStack {
+            List {
+                Section {
+                    ForEach(decksStore.decks) { persistedDeck in
+                        Button {
+                            Task { await appendDeck(to: persistedDeck) }
+                        } label: {
+                            HStack(spacing: DS.Spacing.sm) {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(persistedDeck.name)
+                                        .font(.headline)
+                                        .foregroundStyle(.primary)
+                                    Text(String(format: String(localized: "deck.cards.count", locale: locale), persistedDeck.cards.count))
+                                        .font(.footnote)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer(minLength: DS.Spacing.sm)
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundStyle(.secondary)
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(isAppending)
+                    }
+                }
+            }
+            .navigationTitle(Text(String(localized: "chat.research.appendDeck.title", locale: locale)))
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(String(localized: "action.cancel", locale: locale)) { showDeckPicker = false }
+                        .disabled(isAppending)
+                }
+            }
+            .overlay {
+                if decksStore.decks.isEmpty {
+                    VStack(spacing: DS.Spacing.sm) {
+                        Image(systemName: "tray" )
+                            .font(.system(size: 36))
+                            .foregroundStyle(.secondary)
+                        Text(String(localized: "chat.research.appendDeck.empty", locale: locale))
+                            .dsType(DS.Font.body)
+                            .multilineTextAlignment(.center)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(DS.Spacing.lg)
+                }
+            }
+        }
     }
 
     private var summaryText: String {
@@ -179,6 +256,8 @@ struct ChatResearchCard: View {
         hasSaved = false
         isSaving = false
         isExpanded = true
+        showDeckPicker = false
+        isAppending = false
     }
 
     @MainActor
@@ -196,6 +275,27 @@ struct ChatResearchCard: View {
         let subtitleCount = String(format: String(localized: "deck.cards.count", locale: locale), deck.cards.count)
         let subtitle = "\(resolvedName) • \(subtitleCount)"
         bannerCenter.show(title: String(localized: "banner.deckSaved.title", locale: locale), subtitle: subtitle)
+    }
+
+    @MainActor
+    private func appendDeck(to target: PersistedFlashcardDeck) async {
+        guard !deck.cards.isEmpty else { return }
+        guard !isAppending else { return }
+        isAppending = true
+        defer { isAppending = false }
+
+        decksStore.addCards(to: target.id, cards: deck.cards)
+        hasSaved = true
+        showDeckPicker = false
+        Haptics.success()
+
+        if let updatedDeck = decksStore.decks.first(where: { $0.id == target.id }) {
+            let subtitleCount = String(format: String(localized: "deck.cards.count", locale: locale), updatedDeck.cards.count)
+            let subtitle = "\(updatedDeck.name) • \(subtitleCount)"
+            bannerCenter.show(title: String(localized: "banner.deckUpdated.title", locale: locale), subtitle: subtitle)
+        } else {
+            bannerCenter.show(title: String(localized: "banner.deckUpdated.title", locale: locale))
+        }
     }
 }
 

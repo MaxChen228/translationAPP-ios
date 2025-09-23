@@ -94,12 +94,37 @@ final class QuickActionsStore: ObservableObject {
         items.removeAll { $0.id == id }
     }
 
+    func remove(ids: Set<UUID>) {
+        guard !ids.isEmpty else { return }
+        items.removeAll { ids.contains($0.id) }
+    }
+
     func move(from source: Int, to destination: Int) {
         guard source != destination,
               items.indices.contains(source) else { return }
         let item = items.remove(at: source)
         let idx = min(max(destination, 0), items.count)
         items.insert(item, at: idx)
+    }
+
+    func move(ids: [UUID], before targetID: UUID?) {
+        let idSet = Set(ids)
+        guard !idSet.isEmpty else { return }
+
+        let moving = items.filter { idSet.contains($0.id) }
+        guard !moving.isEmpty else { return }
+
+        items.removeAll { idSet.contains($0.id) }
+
+        let insertIndex: Int
+        if let targetID, let idx = items.firstIndex(where: { $0.id == targetID }) {
+            insertIndex = idx
+        } else {
+            insertIndex = items.count
+        }
+
+        let clampedIndex = max(0, min(insertIndex, items.count))
+        items.insert(contentsOf: moving, at: clampedIndex)
     }
 
     func index(of id: UUID) -> Int? {

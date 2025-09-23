@@ -13,22 +13,33 @@ struct QuickActionsCoordinator {
 
     func remove(_ item: QuickActionItem) {
         quickActions.remove(id: item.id)
+        editController.selectedIDs.remove(item.id)
+    }
+
+    func remove(ids: Set<UUID>) {
+        quickActions.remove(ids: ids)
+        editController.clearSelection()
     }
 
     func move(draggingID: UUID, above targetID: UUID) {
-        guard let from = quickActions.index(of: draggingID),
-              let to = quickActions.index(of: targetID) else { return }
-        quickActions.move(from: from, to: to > from ? to + 1 : to)
+        let selection = orderedSelection(for: draggingID)
+        guard !selection.contains(targetID) else { return }
+        quickActions.move(ids: selection, before: targetID)
     }
 
     func moveToEnd(draggingID: UUID) {
-        guard let from = quickActions.index(of: draggingID) else { return }
-        quickActions.move(from: from, to: quickActions.items.count)
+        let selection = orderedSelection(for: draggingID)
+        quickActions.move(ids: selection, before: nil)
     }
 
     func beginDragging(_ id: UUID) -> NSItemProvider {
         editController.beginDragging(id)
-        return NSItemProvider(object: id.uuidString as NSString)
+        let ids = orderedSelection(for: id)
+        let payload = ShelfDragPayload(
+            primaryID: id.uuidString,
+            selectedIDs: ids.map { $0.uuidString }
+        )
+        return NSItemProvider(object: payload.encodedString() as NSString)
     }
 
     func endDragging() {
@@ -71,5 +82,16 @@ struct QuickActionsCoordinator {
         case .settings:
             NavigationLink { SettingsView() } label: { content() }
         }
+    }
+}
+
+private extension QuickActionsCoordinator {
+    func orderedSelection(for anchor: UUID) -> [UUID] {
+        let selected = editController.selectedIDs
+        guard selected.contains(anchor), !selected.isEmpty else { return [anchor] }
+        let ordered = quickActions.items.compactMap { item -> UUID? in
+            selected.contains(item.id) ? item.id : nil
+        }
+        return ordered.isEmpty ? [anchor] : ordered
     }
 }

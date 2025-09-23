@@ -10,8 +10,10 @@ struct WorkspaceListView: View {
     @EnvironmentObject private var router: RouterStore
     @Environment(\.locale) private var locale
     @StateObject private var coordinator = WorkspaceHomeCoordinator()
+    @State private var showWorkspaceBulkDeleteConfirm = false
 
     private var cols: [GridItem] { [GridItem(.adaptive(minimum: 160), spacing: DS.Spacing.lg)] }
+    private var workspaceSelectedCount: Int { coordinator.workspaceEditController.selectedIDs.count }
 
     var body: some View {
         NavigationStack(path: $coordinator.navigationPath) {
@@ -54,6 +56,15 @@ struct WorkspaceListView: View {
                     // 允許拖到新增卡以移到清單尾端
                     .onDrop(of: [.text], delegate: WorkspaceAddToEndDropDelegate(coordinator: coordinator))
                     }
+                    .overlay(alignment: .topTrailing) {
+                        if workspaceSelectedCount > 0 {
+                            WorkspaceBulkToolbar(
+                                count: workspaceSelectedCount,
+                                onDelete: { showWorkspaceBulkDeleteConfirm = true }
+                            )
+                            .padding(.top, DS.Spacing.sm)
+                        }
+                    }
                 }
                 .padding(.horizontal, DS.Spacing.lg)
                 .padding(.top, DS.Spacing.lg)
@@ -62,7 +73,7 @@ struct WorkspaceListView: View {
             // 後備 drop：若使用者把項目拖到空白處或邊緣放下，確保 draggingID 能被清除
             .onDrop(of: [.text], delegate: WorkspaceClearDragDropDelegate(coordinator: coordinator))
             .contentShape(Rectangle())
-            .simultaneousGesture(
+            .gesture(
                 TapGesture().onEnded {
                     if coordinator.workspaceEditController.isEditing {
                         coordinator.workspaceEditController.exitEditMode()
@@ -101,6 +112,19 @@ struct WorkspaceListView: View {
             .sheet(isPresented: $coordinator.showQuickActionPicker) {
                 QuickActionPickerView(isPresented: $coordinator.showQuickActionPicker) { type in
                     coordinator.appendQuickAction(type)
+                }
+            }
+            .confirmationDialog(
+                String(localized: "workspace.bulkDelete.confirm", defaultValue: "Delete selected workspaces?"),
+                isPresented: $showWorkspaceBulkDeleteConfirm,
+                titleVisibility: .visible
+            ) {
+                Button(String(localized: "action.deleteAll", defaultValue: "Delete All"), role: .destructive) {
+                    coordinator.deleteSelectedWorkspaces()
+                    showWorkspaceBulkDeleteConfirm = false
+                }
+                Button(String(localized: "action.cancel", locale: locale), role: .cancel) {
+                    showWorkspaceBulkDeleteConfirm = false
                 }
             }
             .onAppear {
@@ -152,38 +176,63 @@ private struct WorkspaceItemLink: View {
     }
 
     var body: some View {
-        NavigationLink {
-            ContentView(vm: viewModel).environmentObject(savedStore)
-        } label: {
-            WorkspaceCard(name: workspace.name, statusKey: statusKey, statusColor: statusColor)
-                .contextMenu {
-                    Button(String(localized: "action.edit", locale: locale)) {
-                        editController.enterEditMode()
-                        Haptics.medium()
+        let isEditing = editController.isEditing
+        let isSelected = editController.isSelected(workspace.id)
+
+        let card = WorkspaceCard(name: workspace.name, statusKey: statusKey, statusColor: statusColor)
+            .shelfSelectable(isEditing: isEditing, isSelected: isSelected)
+
+        let tile: AnyView = {
+            if isEditing {
+                return AnyView(
+                    card
+                        .contentShape(RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous))
+                        .contextMenu {
+                            Button(String(localized: "action.rename", locale: locale)) {
+                                editController.exitEditMode()
+                                onRename()
+                            }
+                            Button(String(localized: "action.delete", locale: locale), role: .destructive) {
+                                onDelete()
+                            }
+                        }
+                        .highPriorityGesture(
+                            TapGesture().onEnded {
+                                editController.toggleSelection(workspace.id)
+                            }
+                        )
+                )
+            } else {
+                return AnyView(
+                    NavigationLink {
+                        ContentView(vm: viewModel).environmentObject(savedStore)
+                    } label: {
+                        card
                     }
-                    Button(String(localized: "action.rename", locale: locale)) {
-                        editController.exitEditMode()
-                        onRename()
+                    .buttonStyle(DSCardLinkStyle())
+                    .contextMenu {
+                        Button(String(localized: "action.edit", locale: locale)) {
+                            editController.enterEditMode()
+                            Haptics.medium()
+                        }
+                        Button(String(localized: "action.rename", locale: locale)) {
+                            editController.exitEditMode()
+                            onRename()
+                        }
+                        Button(String(localized: "action.delete", locale: locale), role: .destructive) {
+                            onDelete()
+                        }
                     }
-                    Button(String(localized: "action.delete", locale: locale), role: .destructive) {
-                        editController.exitEditMode()
-                        onDelete()
-                    }
-                }
-        }
-        .buttonStyle(DSCardLinkStyle())
-        .shelfWiggle(isActive: editController.isEditing)
-        .shelfConditionalDrag(editController.isEditing) {
-            editController.beginDragging(workspace.id)
-            return NSItemProvider(object: workspace.id.uuidString as NSString)
-        }
-        .onDrop(of: [.text], delegate: WorkspaceReorderDropDelegate(workspaceID: workspace.id, coordinator: coordinator))
-        .simultaneousGesture(
-            editController.isEditing ?
-            TapGesture().onEnded {
-                editController.exitEditMode()
-            } : nil
-        )
+                )
+            }
+        }()
+
+        tile
+            .shelfWiggle(isActive: isEditing)
+            .shelfConditionalDrag(isEditing) {
+                coordinator.beginWorkspaceDragging(workspace.id)
+            }
+            .onDrop(of: [.text], delegate: WorkspaceReorderDropDelegate(workspaceID: workspace.id, coordinator: coordinator))
     }
 }
 
@@ -232,6 +281,25 @@ private struct AddWorkspaceCard: View {
 }
 
 // 移除晶片變體：回到簡潔文本副標
+
+private struct WorkspaceBulkToolbar: View {
+    var count: Int
+    var onDelete: () -> Void
+
+    var body: some View {
+        HStack(spacing: DS.Spacing.sm) {
+            Button(action: onDelete) {
+                Label(String(localized: "action.deleteAll", defaultValue: "Delete All"), systemImage: "trash")
+            }
+            .buttonStyle(DSButton(style: .secondary, size: .compact))
+
+            Text(String(format: String(localized: "bulk.selectionCount", defaultValue: "已選 %d 項"), count))
+                .dsType(DS.Font.caption)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, DS.Spacing.sm2)
+    }
+}
 
 private struct StatusBadge: View {
     var textKey: LocalizedStringKey
