@@ -109,13 +109,11 @@ struct WorkspaceListView: View {
                     quickActions: quickActions,
                     router: router
                 )
-                // Bind stores to WorkspaceStore
-                store.localBankStore = localBank
-                store.localProgressStore = localProgress
-                store.practiceRecordsStore = practiceRecords
-                // Rebind all existing ViewModels to ensure they have the latest store references
-                store.rebindAllStores()
-                coordinator.workspaceEditController.exitEditMode()
+                coordinator.handleViewAppear(
+                    localBank: localBank,
+                    localProgress: localProgress,
+                    practiceRecords: practiceRecords
+                )
             }
         }
         // 只在 ScrollView 範圍處理後備 drop；避免多層干擾

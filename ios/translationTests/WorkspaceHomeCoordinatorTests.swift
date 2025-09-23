@@ -68,9 +68,10 @@ final class WorkspaceHomeCoordinatorTests: XCTestCase {
         let coordinator = WorkspaceHomeCoordinator()
         coordinator.configureIfNeeded(workspaceStore: store, quickActions: quickActions, router: router)
 
-        coordinator.workspaceEditController.enterEditMode()
         let firstID = store.workspaces[0].id
         let secondID = store.workspaces[1].id
+
+        coordinator.workspaceEditController.enterEditMode()
         coordinator.workspaceEditController.beginDragging(firstID)
 
         coordinator.handleWorkspaceDropEntered(targetID: secondID)
@@ -98,11 +99,47 @@ final class WorkspaceHomeCoordinatorTests: XCTestCase {
     }
 
     @MainActor
+    func testHandleViewAppearBindsWorkspaceStores() {
+        let store = WorkspaceStore(correctionRunner: StubCorrectionRunner())
+        let quickActions = makeQuickActionsStore()
+        let router = RouterStore()
+        let coordinator = WorkspaceHomeCoordinator()
+        coordinator.configureIfNeeded(workspaceStore: store, quickActions: quickActions, router: router)
+
+        let defaults = UserDefaults.standard
+        defaults.removeObject(forKey: "local.bank.books")
+        defaults.removeObject(forKey: "local.bank.progress")
+
+        let localBank = LocalBankStore()
+        let localProgress = LocalBankProgressStore()
+        let practiceRecords = makePracticeRecordsStore()
+
+        coordinator.handleViewAppear(
+            localBank: localBank,
+            localProgress: localProgress,
+            practiceRecords: practiceRecords
+        )
+
+        XCTAssertTrue(store.localBankStore === localBank)
+        XCTAssertTrue(store.localProgressStore === localProgress)
+        XCTAssertTrue(store.practiceRecordsStore === practiceRecords)
+
+        defaults.removeObject(forKey: "local.bank.books")
+        defaults.removeObject(forKey: "local.bank.progress")
+    }
+
+    @MainActor
     private func makeQuickActionsStore() -> QuickActionsStore {
         let suite = "WorkspaceHomeCoordinatorTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!
         defaults.removePersistentDomain(forName: suite)
         return QuickActionsStore(userDefaults: defaults)
+    }
+
+    @MainActor
+    private func makePracticeRecordsStore() -> PracticeRecordsStore {
+        let repository = PracticeRecordsRepository(provider: MemoryPersistenceProvider())
+        return PracticeRecordsStore(repository: repository)
     }
 }
 

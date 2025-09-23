@@ -107,6 +107,19 @@ final class WorkspaceHomeCoordinator: ObservableObject {
         }
     }
 
+    func handleViewAppear(
+        localBank: LocalBankStore,
+        localProgress: LocalBankProgressStore,
+        practiceRecords: PracticeRecordsStore
+    ) {
+        bindWorkspaceStores(
+            localBank: localBank,
+            localProgress: localProgress,
+            practiceRecords: practiceRecords
+        )
+        workspaceEditController.exitEditMode()
+    }
+
     func handleWorkspaceDropEntered(targetID: UUID) {
         guard workspaceEditController.isEditing,
               let store = workspaceStore,
@@ -142,5 +155,17 @@ final class WorkspaceHomeCoordinator: ObservableObject {
         guard workspaceEditController.isEditing else { return false }
         workspaceEditController.endDragging()
         return true
+    }
+
+    private func bindWorkspaceStores(
+        localBank: LocalBankStore,
+        localProgress: LocalBankProgressStore,
+        practiceRecords: PracticeRecordsStore
+    ) {
+        guard let store = workspaceStore else { return }
+        store.localBankStore = localBank
+        store.localProgressStore = localProgress
+        store.practiceRecordsStore = practiceRecords
+        store.rebindAllStores()
     }
 }
