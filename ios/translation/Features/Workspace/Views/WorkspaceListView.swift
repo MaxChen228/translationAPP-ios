@@ -326,7 +326,7 @@ private struct RenameWorkspaceSheet: View {
         self.onAction = onAction
     }
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: DS.Spacing.sm2) {
             Text(String(localized: "action.rename", locale: locale)).dsType(DS.Font.section)
             TextField(String(localized: "field.name", locale: locale), text: $text)
                 .textFieldStyle(.roundedBorder)
@@ -347,7 +347,7 @@ private struct RenameWorkspaceSheet: View {
                 .frame(width: DS.ButtonSize.standard)
             }
         }
-        .padding(16)
+        .padding(DS.Spacing.md)
         .background(DS.Palette.background)
     }
 }

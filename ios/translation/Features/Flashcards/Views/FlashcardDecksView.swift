@@ -9,7 +9,10 @@ struct FlashcardDecksView: View {
     @State private var renaming: PersistedFlashcardDeck? = nil
     @State private var renamingFolder: DeckFolder? = nil
     @StateObject private var editController = ShelfEditController<UUID>()
+    @State private var showBulkDeleteConfirm = false
     @Environment(\.locale) private var locale
+
+    private var selectedCount: Int { editController.selectedIDs.count }
 
     var body: some View {
         ScrollView {
@@ -70,53 +73,90 @@ struct FlashcardDecksView: View {
                     .buttonStyle(.plain)
 
                     ForEach(orderedRootDecks) { deck in
-                        NavigationLink { DeckDetailView(deckID: deck.id) } label: {
-                            ShelfTileCard(
-                                title: deck.name,
-                                subtitle: nil,
-                                countText: String(format: String(localized: "deck.cards.count", locale: locale), deck.cards.count),
-                                iconSystemName: nil,
-                                accentColor: DS.Palette.primary,
-                                showChevron: true,
-                                progress: deckProgress(deck)
-                            )
+                        let isEditing = editController.isEditing
+                        let isSelected = editController.isSelected(deck.id)
+                        let card = ShelfTileCard(
+                            title: deck.name,
+                            subtitle: nil,
+                            countText: String(format: String(localized: "deck.cards.count", locale: locale), deck.cards.count),
+                            iconSystemName: nil,
+                            accentColor: DS.Palette.primary,
+                            showChevron: true,
+                            progress: deckProgress(deck)
+                        )
+                        .shelfSelectable(isEditing: isEditing, isSelected: isSelected)
+
+                        Group {
+                            if isEditing {
+                                card
+                                    .contentShape(RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous))
+                                    .highPriorityGesture(
+                                        TapGesture().onEnded {
+                                            editController.toggleSelection(deck.id)
+                                        }
+                                    )
+                                    .contextMenu {
+                                        Button(String(localized: "action.rename", locale: locale)) {
+                                            renaming = deck
+                                        }
+                                        Button(String(localized: "action.delete", locale: locale), role: .destructive) {
+                                            decksStore.remove(deck.id)
+                                            deckOrder.removeFromOrder("deck:\(deck.id.uuidString)")
+                                        }
+                                    }
+                            } else {
+                                NavigationLink { DeckDetailView(deckID: deck.id) } label: {
+                                    card
+                                }
+                                .buttonStyle(DSCardLinkStyle())
+                                .contextMenu {
+                                    Button(String(localized: "action.edit", locale: locale)) {
+                                        editController.enterEditMode()
+                                        Haptics.medium()
+                                    }
+                                    Button(String(localized: "action.rename", locale: locale)) {
+                                        editController.exitEditMode()
+                                        renaming = deck
+                                    }
+                                    Button(String(localized: "action.delete", locale: locale), role: .destructive) {
+                                        editController.exitEditMode()
+                                        decksStore.remove(deck.id)
+                                        deckOrder.removeFromOrder("deck:\(deck.id.uuidString)")
+                                    }
+                                }
+                            }
                         }
-                        .buttonStyle(DSCardLinkStyle())
-                        .shelfWiggle(isActive: editController.isEditing)
-                        .contextMenu {
-                            Button(String(localized: "action.edit", locale: locale)) {
-                                editController.enterEditMode()
-                                Haptics.medium()
-                            }
-                            Button(String(localized: "action.rename", locale: locale)) {
-                                editController.exitEditMode()
-                                renaming = deck
-                            }
-                            Button(String(localized: "action.delete", locale: locale), role: .destructive) {
-                                editController.exitEditMode()
-                                decksStore.remove(deck.id)
-                                deckOrder.removeFromOrder("deck:\(deck.id.uuidString)")
-                            }
-                        }
-                        .shelfConditionalDrag(editController.isEditing) {
+                        .shelfWiggle(isActive: isEditing)
+                        .shelfConditionalDrag(isEditing) {
                             editController.beginDragging(deck.id)
-                            return DeckDragPayload.provider(for: deck.id)
+                            let payload = ShelfDragPayload(
+                                primaryID: deck.id.uuidString,
+                                selectedIDs: orderedSelection(anchor: deck.id, ordered: orderedRootDecks.map { $0.id })
+                                    .map { $0.uuidString }
+                            )
+                            return NSItemProvider(object: payload.encodedString() as NSString)
                         }
-                        .onDrop(of: [.text], delegate: RootDeckReorderDropDelegate(
+                        .onDrop(of: [.text], delegate: DeckRootReorderDropDelegate(
                             overDeckID: deck.id,
-                            rootIDsProvider: {
-                                let r = decksStore.decks.filter { !deckFolders.isInAnyFolder($0.id) }.map { "deck:\($0.id.uuidString)" }
-                                return deckOrder.currentOrder(rootIDs: r)
-                            },
-                            move: { id, to, root in deckOrder.move(id: id, to: to, rootIDs: root) },
-                            editController: editController
+                            editController: editController,
+                            decksStore: decksStore,
+                            deckFolders: deckFolders,
+                            deckOrder: deckOrder
                         ))
                         .simultaneousGesture(
-                            editController.isEditing ?
+                            isEditing ?
                             TapGesture().onEnded {
                                 editController.exitEditMode()
                             } : nil
                         )
+                    }
+                }
+                .overlay(alignment: .topTrailing) {
+                    if editController.isEditing, selectedCount > 0 {
+                        DeckBulkToolbar(count: selectedCount) {
+                            showBulkDeleteConfirm = true
+                        }
+                        .padding(.top, DS.Spacing.sm)
                     }
                 }
             }
@@ -147,10 +187,56 @@ struct FlashcardDecksView: View {
             RenameSheet(name: f.name) { new in deckFolders.rename(f.id, to: new) }
                 .presentationDetents([.height(180)])
         }
+        .confirmationDialog(String(localized: "deck.bulkDelete.confirm", defaultValue: "Delete selected decks?"), isPresented: $showBulkDeleteConfirm, titleVisibility: .visible) {
+            Button(String(localized: "action.deleteAll", defaultValue: "Delete All"), role: .destructive) {
+                deleteSelectedDecks()
+                showBulkDeleteConfirm = false
+            }
+            Button(String(localized: "action.cancel", locale: locale), role: .cancel) {
+                showBulkDeleteConfirm = false
+            }
+        }
+    }
+}
+
+private extension FlashcardDecksView {
+    func orderedSelection(anchor: UUID, ordered: [UUID]) -> [UUID] {
+        let selected = editController.selectedIDs
+        guard selected.contains(anchor), !selected.isEmpty else { return [anchor] }
+        let orderedMatch = ordered.filter { selected.contains($0) }
+        return orderedMatch.isEmpty ? [anchor] : orderedMatch
+    }
+
+    func deleteSelectedDecks() {
+        let ids = editController.selectedIDs
+        guard !ids.isEmpty else { return }
+        for id in ids {
+            decksStore.remove(id)
+            deckOrder.removeFromOrder("deck:\(id.uuidString)")
+        }
+        editController.clearSelection()
     }
 }
 
 // MARK: - Drag/Drop helpers（與題庫本一致的風格）
+
+private struct DeckBulkToolbar: View {
+    var count: Int
+    var onDelete: () -> Void
+
+    var body: some View {
+        HStack(spacing: DS.Spacing.sm) {
+            Button(action: onDelete) {
+                Label(String(localized: "action.deleteAll", defaultValue: "Delete All"), systemImage: "trash")
+            }
+            .buttonStyle(DSButton(style: .secondary, size: .compact))
+
+            Text(String(format: String(localized: "bulk.selectionCount", defaultValue: "已選 %d 項"), count))
+                .dsType(DS.Font.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+}
 
 private struct DeckIntoFolderDropDelegate: DropDelegate {
     let folderID: UUID
@@ -165,9 +251,20 @@ private struct DeckIntoFolderDropDelegate: DropDelegate {
         guard let p = providers.first else { editController.endDragging(); return false }
         var handled = false
         _ = p.loadObject(ofClass: NSString.self) { obj, _ in
-            if let ns = obj as? NSString, let id = DeckDragPayload.decodeDeckID(ns as String) {
-                Task { @MainActor in folders.add(deckID: id, to: folderID); Haptics.success() }
-                handled = true
+            if let ns = obj as? NSString {
+                let payload = ShelfDragPayload.decode(from: ns as String)
+                let ids = payload.selectedIDs.isEmpty ? [payload.primaryID] : payload.selectedIDs
+                let deckIDs = ids.compactMap(UUID.init(uuidString:))
+                if !deckIDs.isEmpty {
+                    Task { @MainActor in
+                        for id in deckIDs {
+                            folders.add(deckID: id, to: folderID)
+                        }
+                        editController.clearSelection()
+                        Haptics.success()
+                    }
+                    handled = true
+                }
             }
         }
         editController.endDragging()
@@ -188,31 +285,52 @@ private struct ClearDeckDragStateDropDelegate: DropDelegate {
 // DeckDragPayload is defined in DeckFolderViews.swift and reused here.
 
 // Root 層簡易換位：拖曳 deck 到另一個 deck 上方即移動到該索引。
-private struct RootDeckReorderDropDelegate: DropDelegate {
+private struct DeckRootReorderDropDelegate: DropDelegate {
     let overDeckID: UUID
-    let rootIDsProvider: () -> [String]
-    let move: (String, Int, [String]) -> Void
     let editController: ShelfEditController<UUID>
+    let decksStore: FlashcardDecksStore
+    let deckFolders: DeckFoldersStore
+    let deckOrder: DeckRootOrderStore
 
-    func validateDrop(info: DropInfo) -> Bool { true }
+    func validateDrop(info: DropInfo) -> Bool { editController.isEditing }
     func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
 
     func dropEntered(info: DropInfo) {
-        guard let dragging = editController.draggingID else { return }
-        let dragKey = "deck:\(dragging.uuidString)"
-        let targetKey = "deck:\(overDeckID.uuidString)"
-        let root = rootIDsProvider()
-        guard let from = root.firstIndex(of: dragKey), let to = root.firstIndex(of: targetKey) else { return }
-        if from != to {
-            move(dragKey, to, root)
-            Haptics.lightTick()
-        }
+        guard editController.isEditing, let dragging = editController.draggingID else { return }
+        let selection = orderedSelection(anchor: dragging)
+        guard !selection.contains(overDeckID) else { return }
+
+        let rootIDs = currentRootIDsOrdered()
+        let targetKey = key(for: overDeckID)
+        let moving = selection.map { key(for: $0) }
+        deckOrder.move(ids: moving, before: targetKey, rootIDs: rootIDs)
+        Haptics.lightTick()
     }
 
     func performDrop(info: DropInfo) -> Bool {
+        guard editController.isEditing else { return false }
         editController.endDragging()
+        Haptics.success()
         return true
     }
+
+    private func orderedSelection(anchor: UUID) -> [UUID] {
+        let selected = editController.selectedIDs
+        guard selected.contains(anchor), !selected.isEmpty else { return [anchor] }
+        let ordered = currentRootIDsOrdered().compactMap { key -> UUID? in
+            guard key.hasPrefix("deck:"), let id = UUID(uuidString: String(key.dropFirst(5))) else { return nil }
+            return selected.contains(id) ? id : nil
+        }
+        return ordered.isEmpty ? [anchor] : ordered
+    }
+
+    private func currentRootIDsOrdered() -> [String] {
+        let root = decksStore.decks.filter { !deckFolders.isInAnyFolder($0.id) }.map { key(for: $0.id) }
+        return deckOrder.currentOrder(rootIDs: root)
+    }
+
+    private func key(for id: UUID) -> String { "deck:\(id.uuidString)" }
+
 }
 
 private struct DeckCard: View {

@@ -303,6 +303,8 @@
 "bulk.selectionCount" = "已選 %d 項";
 "quick.bulkDelete.confirm" = "確定要刪除選取的快速功能？";
 "workspace.bulkDelete.confirm" = "確定要刪除選取的工作區？";
+"bank.bulkDelete.confirm" = "確定要刪除選取的題庫本？";
+"deck.bulkDelete.confirm" = "確定要刪除選取的單字卡集？";
 
 /* Workspace 狀態 */
 "workspace.status.loading" = "批改中…";

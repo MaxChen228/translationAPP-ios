@@ -282,6 +282,8 @@
 "bulk.selectionCount" = "%d selected";
 "quick.bulkDelete.confirm" = "Delete selected quick actions?";
 "workspace.bulkDelete.confirm" = "Delete selected workspaces?";
+"bank.bulkDelete.confirm" = "Delete selected books?";
+"deck.bulkDelete.confirm" = "Delete selected decks?";
 "deck.new" = "New Deck";
 "flashcards.mode.browse" = "Browse";
 "flashcards.mode.annotate" = "Annotate";

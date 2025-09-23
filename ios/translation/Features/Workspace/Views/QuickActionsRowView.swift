@@ -43,7 +43,7 @@ struct QuickActionsRowView: View {
             }
 
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
+                HStack(spacing: DS.Spacing.sm2) {
                     ForEach(items) { item in
                         quickActionTile(for: item, coordinator: coordinator)
                     }
@@ -55,7 +55,6 @@ struct QuickActionsRowView: View {
                             .onDrop(of: [.text], delegate: QuickActionsAppendDropDelegate(coordinator: coordinator))
                     }
                 }
-                .padding(.horizontal, 2)
                 .onDrop(of: [.text], delegate: QuickActionsClearDragDropDelegate(coordinator: coordinator))
             }
             .contentShape(Rectangle())

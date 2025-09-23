@@ -49,6 +49,29 @@ final class DeckRootOrderStore: ObservableObject {
         order = r + others
     }
 
+    func move(ids: [String], before targetID: String?, rootIDs: [String]) {
+        let idSet = Set(ids)
+        guard !idSet.isEmpty else { return }
+        var r = currentOrder(rootIDs: rootIDs)
+        let moving = r.filter { idSet.contains($0) }
+        guard !moving.isEmpty else { return }
+        r.removeAll { idSet.contains($0) }
+
+        let insertIndex: Int
+        if let targetID, let idx = r.firstIndex(of: targetID) {
+            insertIndex = idx
+        } else {
+            insertIndex = r.count
+        }
+
+        let clamped = max(0, min(insertIndex, r.count))
+        r.insert(contentsOf: moving, at: clamped)
+
+        let rootSet = Set(rootIDs)
+        let others = order.filter { !rootSet.contains($0) }
+        order = r + others
+    }
+
     func removeFromOrder(_ id: String) {
         order.removeAll { $0 == id }
     }
@@ -82,4 +105,3 @@ final class DeckRootOrderStore: ObservableObject {
         }
     }
 }
-

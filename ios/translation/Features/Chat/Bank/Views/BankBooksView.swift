@@ -25,7 +25,10 @@ struct BankBooksView: View {
     @State private var folderPendingDelete: BankFolder? = nil
     @State private var folderDeleteMessageText: String = ""
     @State private var showFolderDeleteConfirm: Bool = false
+    @State private var showBulkDeleteConfirm: Bool = false
     @Environment(\.locale) private var locale
+
+    private var selectedCount: Int { editController.selectedIDs.count }
 
     var body: some View {
         ScrollView {
@@ -99,28 +102,10 @@ struct BankBooksView: View {
                         .buttonStyle(.plain)
                         .disabled(editController.isEditing)
                         ForEach(orderedRootBooks) { b in
-                            NavigationLink {
-                                // Workspace 內：直接寫入當前 vm 並返回；首頁快捷入口：交由外部建立 Workspace
-                                let handler: ((BankItem, String?) -> Void)? = {
-                                if let external = self.onPracticeLocal {
-                                    return { item, tag in
-                                        dismiss()
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                                            external(b.name, item, tag)
-                                        }
-                                    }
-                                } else {
-                                    return { item, tag in
-                                        vm.bindLocalBankStores(localBank: localBank, progress: localProgress)
-                                        vm.startLocalPractice(bookName: b.name, item: item, tag: tag)
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { dismiss() }
-                                    }
-                                }
-                            }()
-                            LocalBankListView(vm: vm, bookName: b.name, onPractice: handler)
-                        } label: {
+                            let isEditing = editController.isEditing
+                            let isSelected = editController.isSelected(b.name)
                             let stats = localProgress.stats(book: b.name, totalItems: b.items.count)
-                            ShelfTileCard(
+                            let card = ShelfTileCard(
                                 title: b.name,
                                 subtitle: nil,
                                 countText: String(format: String(localized: "bank.book.count", locale: locale), b.items.count),
@@ -129,43 +114,78 @@ struct BankBooksView: View {
                                 showChevron: true,
                                 progress: (stats.total > 0 ? Double(stats.done) / Double(stats.total) : 0)
                             )
-                        }
-                        .buttonStyle(DSCardLinkStyle())
-                        .shelfWiggle(isActive: editController.isEditing)
-                        .contextMenu {
-                            Button(String(localized: "action.edit", locale: locale)) {
-                                editController.enterEditMode()
-                                Haptics.medium()
+                            .shelfSelectable(isEditing: isEditing, isSelected: isSelected)
+
+                            Group {
+                                if isEditing {
+                                    card
+                                        .contentShape(RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous))
+                                        .highPriorityGesture(
+                                            TapGesture().onEnded {
+                                                editController.toggleSelection(b.name)
+                                            }
+                                        )
+                                        .contextMenu {
+                                            Button(String(localized: "bank.action.moveToRoot", locale: locale)) { bankFolders.remove(bookName: b.name) }
+                                            Button(String(localized: "action.rename", locale: locale)) { renamingBook = b }
+                                            Button(String(localized: "action.delete", locale: locale), role: .destructive) {
+                                                deletingBookName = b.name
+                                                showDeleteConfirm = true
+                                            }
+                                        }
+                                } else {
+                                    NavigationLink {
+                                        LocalBankListView(vm: vm, bookName: b.name, onPractice: practiceHandler(for: b))
+                                    } label: {
+                                        card
+                                    }
+                                    .buttonStyle(DSCardLinkStyle())
+                                    .contextMenu {
+                                        Button(String(localized: "action.edit", locale: locale)) {
+                                            editController.enterEditMode()
+                                            Haptics.medium()
+                                        }
+                                        Button(String(localized: "action.rename", locale: locale)) {
+                                            editController.exitEditMode()
+                                            renamingBook = b
+                                        }
+                                        Button(String(localized: "action.delete", locale: locale), role: .destructive) {
+                                            editController.exitEditMode()
+                                            deletingBookName = b.name
+                                            showDeleteConfirm = true
+                                        }
+                                    }
+                                }
                             }
-                            Button(String(localized: "action.rename", locale: locale)) {
-                                editController.exitEditMode()
-                                renamingBook = b
+                            .shelfWiggle(isActive: isEditing)
+                            .shelfConditionalDrag(isEditing) {
+                                editController.beginDragging(b.name)
+                                let payload = ShelfDragPayload(
+                                    primaryID: b.name,
+                                    selectedIDs: orderedSelection(anchor: b.name, ordered: orderedRootBooks.map { $0.name })
+                                )
+                                return NSItemProvider(object: payload.encodedString() as NSString)
                             }
-                            Button(String(localized: "action.delete", locale: locale), role: .destructive) {
-                                editController.exitEditMode()
-                                deletingBookName = b.name
-                                showDeleteConfirm = true
+                            .onDrop(of: [.text], delegate: BankRootReorderDropDelegate(
+                                bookName: b.name,
+                                editController: editController,
+                                orderedNames: orderedRootBooks.map { $0.name },
+                                bankOrder: bankOrder
+                            ))
+                            .simultaneousGesture(
+                                isEditing ?
+                                TapGesture().onEnded {
+                                    editController.exitEditMode()
+                                } : nil
+                            )
+                        }
+                    }
+                    .overlay(alignment: .topTrailing) {
+                        if editController.isEditing, selectedCount > 0 {
+                            BankBulkToolbar(count: selectedCount) {
+                                showBulkDeleteConfirm = true
                             }
-                        }
-                        .shelfConditionalDrag(editController.isEditing) {
-                            editController.beginDragging(b.name)
-                            return BookDragPayload.provider(for: b.name)
-                        }
-                        .onDrop(of: [.text], delegate: ShelfReorderDropDelegate(
-                            overItemID: b.name,
-                            draggingID: Binding(
-                                get: { editController.draggingID },
-                                set: { editController.draggingID = $0 }
-                            ),
-                            indexOf: { name in bankOrder.indexInRoot(name, root: orderedRootBooks.map { $0.name }) },
-                            move: { id, to in bankOrder.moveInRoot(id: id, to: to, root: orderedRootBooks.map { $0.name }) }
-                        ))
-                        .simultaneousGesture(
-                            editController.isEditing ?
-                            TapGesture().onEnded {
-                                editController.exitEditMode()
-                            } : nil
-                        )
+                            .padding(.top, DS.Spacing.sm)
                         }
                     }
                 }
@@ -242,6 +262,51 @@ struct BankBooksView: View {
                 deletingBookName = nil
             }
             Button(String(localized: "action.cancel", locale: locale), role: .cancel) { deletingBookName = nil }
+        }
+        .confirmationDialog(String(localized: "bank.bulkDelete.confirm", defaultValue: "Delete selected books?"), isPresented: $showBulkDeleteConfirm, titleVisibility: .visible) {
+            Button(String(localized: "action.deleteAll", defaultValue: "Delete All"), role: .destructive) {
+                deleteSelectedBooks()
+                showBulkDeleteConfirm = false
+            }
+            Button(String(localized: "action.cancel", locale: locale), role: .cancel) {
+                showBulkDeleteConfirm = false
+            }
+        }
+    }
+
+    private func orderedSelection(anchor: String, ordered: [String]) -> [String] {
+        let selected = editController.selectedIDs
+        guard selected.contains(anchor), !selected.isEmpty else { return [anchor] }
+        let orderedMatch = ordered.filter { selected.contains($0) }
+        return orderedMatch.isEmpty ? [anchor] : orderedMatch
+    }
+
+    private func deleteSelectedBooks() {
+        let names = editController.selectedIDs
+        guard !names.isEmpty else { return }
+        for name in names {
+            localBank.remove(name)
+            bankFolders.remove(bookName: name)
+            localProgress.removeBook(name)
+            bankOrder.removeFromRoot(name)
+        }
+        editController.clearSelection()
+    }
+
+    private func practiceHandler(for book: LocalBankBook) -> ((BankItem, String?) -> Void)? {
+        if let external = onPracticeLocal {
+            return { item, tag in
+                dismiss()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                    external(book.name, item, tag)
+                }
+            }
+        } else {
+            return { item, tag in
+                vm.bindLocalBankStores(localBank: localBank, progress: localProgress)
+                vm.startLocalPractice(bookName: book.name, item: item, tag: tag)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { dismiss() }
+            }
         }
     }
 
@@ -332,8 +397,17 @@ private struct BookIntoFolderDropDelegate: DropDelegate {
         guard let p = providers.first else { editController.endDragging(); return false }
         var handled = false
         _ = p.loadObject(ofClass: NSString.self) { obj, _ in
-            if let ns = obj as? NSString, let name = BookDragPayload.decode(ns as String) {
-                Task { @MainActor in folders.add(bookName: name, to: folderID); Haptics.success() }
+            if let ns = obj as? NSString {
+                let payload = ShelfDragPayload.decode(from: ns as String)
+                let names = payload.selectedIDs.isEmpty ? [payload.primaryID] : payload.selectedIDs
+                guard !names.isEmpty else { return }
+                Task { @MainActor in
+                    for name in names {
+                        folders.add(bookName: name, to: folderID)
+                    }
+                    editController.clearSelection()
+                    Haptics.success()
+                }
                 handled = true
             }
         }
@@ -349,6 +423,57 @@ private struct ClearBookDragStateDropDelegate: DropDelegate {
     func performDrop(info: DropInfo) -> Bool {
         editController.endDragging()
         return true
+    }
+}
+
+private struct BankRootReorderDropDelegate: DropDelegate {
+    let bookName: String
+    let editController: ShelfEditController<String>
+    let orderedNames: [String]
+    let bankOrder: BankBooksOrderStore
+
+    func validateDrop(info: DropInfo) -> Bool { editController.isEditing }
+    func dropUpdated(info: DropInfo) -> DropProposal { DropProposal(operation: .move) }
+
+    func dropEntered(info: DropInfo) {
+        guard editController.isEditing, let dragging = editController.draggingID else { return }
+        let selection = orderedSelection(anchor: dragging)
+        guard !selection.contains(bookName) else { return }
+        bankOrder.moveInRoot(ids: selection, before: bookName, root: orderedNames)
+        Haptics.lightTick()
+    }
+
+    func performDrop(info: DropInfo) -> Bool {
+        guard editController.isEditing else { return false }
+        editController.endDragging()
+        Haptics.success()
+        return true
+    }
+
+    private func orderedSelection(anchor: String) -> [String] {
+        let selected = editController.selectedIDs
+        guard selected.contains(anchor), !selected.isEmpty else { return [anchor] }
+        let ordered = orderedNames.filter { selected.contains($0) }
+        return ordered.isEmpty ? [anchor] : ordered
+    }
+}
+
+private struct BankBulkToolbar: View {
+    var count: Int
+    var onDelete: () -> Void
+
+    var body: some View {
+        HStack(spacing: DS.Spacing.sm) {
+            Button(action: onDelete) {
+                Label(String(localized: "action.deleteAll", defaultValue: "Delete All"), systemImage: "trash")
+            }
+            .buttonStyle(DSButton(style: .secondary, size: .compact))
+
+            Text(String(format: String(localized: "bulk.selectionCount", defaultValue: "已選 %d 項"), count))
+                .dsType(DS.Font.caption)
+                .foregroundStyle(.secondary)
+        }
+        .background(Color.clear)
     }
 }
 

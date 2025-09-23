@@ -44,6 +44,29 @@ final class BankBooksOrderStore: ObservableObject {
         order = r + others
     }
 
+    func moveInRoot(ids: [String], before target: String?, root: [String]) {
+        let idSet = Set(ids)
+        guard !idSet.isEmpty else { return }
+        var r = currentRootOrder(root: root)
+        let moving = r.filter { idSet.contains($0) }
+        guard !moving.isEmpty else { return }
+        r.removeAll { idSet.contains($0) }
+
+        let insertIndex: Int
+        if let target, let idx = r.firstIndex(of: target) {
+            insertIndex = idx
+        } else {
+            insertIndex = r.count
+        }
+
+        let clamped = max(0, min(insertIndex, r.count))
+        r.insert(contentsOf: moving, at: clamped)
+
+        let rootSet = Set(root)
+        let others = order.filter { !rootSet.contains($0) }
+        order = r + others
+    }
+
     func removeFromRoot(_ name: String) {
         order.removeAll { $0 == name }
     }
