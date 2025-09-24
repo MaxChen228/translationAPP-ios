@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct ContentView: View {
     @StateObject private var vm: CorrectionViewModel
@@ -54,7 +55,12 @@ struct ContentView: View {
                     // Subtle separator to structure the page（以淡藍髮絲線）
                     DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.border))
 
-                    HintListSection(hints: session.practicedHints, isExpanded: vm.binding(\.showPracticedHints))
+                    HintListSection(
+                        hints: session.practicedHints,
+                        isExpanded: vm.binding(\.showPracticedHints),
+                        savedPredicate: savedStore.containsHint,
+                        onTapSave: { handleHintSave($0) }
+                    )
 
                     DSSectionHeader(titleKey: "content.en.title", subtitleKey: "content.en.subtitle", accentUnderline: true)
                     DSCard {
@@ -188,4 +194,25 @@ struct ContentView: View {
     }
 }
 
-#Preview { ContentView() }
+#Preview {
+    ContentView()
+        .environmentObject(SavedErrorsStore())
+        .environmentObject(BannerCenter())
+}
+
+private extension ContentView {
+    func handleHintSave(_ hint: BankHint) {
+        let categoryName = String(localized: hint.category.displayName, locale: locale)
+        let result = savedStore.addHint(hint, categoryLabel: categoryName)
+        let successTitle = String(localized: "hint.save.success", locale: locale)
+        let duplicateTitle = String(localized: "hint.save.duplicate", locale: locale)
+
+        switch result {
+        case .added:
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            bannerCenter.show(title: successTitle)
+        case .duplicate:
+            bannerCenter.show(title: duplicateTitle)
+        }
+    }
+}

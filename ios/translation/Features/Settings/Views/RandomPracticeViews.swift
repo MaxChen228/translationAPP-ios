@@ -1,19 +1,5 @@
 import SwiftUI
 
-struct RandomPracticeToolbarButton: View {
-    var action: () -> Void
-    var body: some View {
-        DSQuickActionIconButton(systemName: "die.face.5", labelKey: "bank.random.title", action: action, shape: .circle, size: 28)
-    }
-}
-
-struct RandomSettingsToolbarButton: View {
-    var onOpen: () -> Void
-    var body: some View {
-        DSQuickActionIconButton(systemName: "gearshape", labelKey: "bank.random.settings", action: onOpen, shape: .circle, size: 28)
-    }
-}
-
 struct RandomPracticeSettingsSheet: View {
     @EnvironmentObject private var settings: RandomPracticeStore
     @EnvironmentObject private var localBank: LocalBankStore

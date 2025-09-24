@@ -30,7 +30,8 @@ struct SavedErrorsStoreTests {
             title: "went",
             explanation: "過去式需使用 went。",
             correctExample: "I went to school yesterday.",
-            note: "lexical"
+            note: "lexical",
+            sourceHintID: nil
         )
     }
 
@@ -202,6 +203,24 @@ struct SavedErrorsStoreTests {
             store.move(UUID(), to: .right)
 
             #expect(store.items == snapshot)
+        }
+    }
+
+    @Test("addHint 會依提示 ID 避免重複")
+    func addHintEnforcesUniqueness() throws {
+        try withIsolatedDefaults {
+            let store = SavedErrorsStore()
+            store.clearAll()
+
+            let hint = BankHint(category: .lexical, text: "用 attach to 表示附加")
+            let label = "Lexical"
+
+            #expect(store.addHint(hint, categoryLabel: label) == .added)
+            #expect(store.containsHint(hint))
+            #expect(store.items.count == 1)
+
+            #expect(store.addHint(hint, categoryLabel: label) == .duplicate)
+            #expect(store.items.count == 1)
         }
     }
 }

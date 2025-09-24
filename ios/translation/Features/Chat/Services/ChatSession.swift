@@ -118,6 +118,23 @@ final class ChatSession: ObservableObject, Identifiable {
         }
     }
 
+    func importResearch(deck: ChatResearchDeck, source: String? = nil) {
+        researchDeck = deck
+        checklist = nil
+        state = .completed
+        errorMessage = nil
+        pendingRequestType = nil
+        hasPendingRequest = false
+
+        let locale = Locale.current
+        let template = String(localized: "chat.clipboard.message.imported", locale: locale)
+        let countText = String(format: String(localized: "deck.cards.count", locale: locale), deck.cards.count)
+        let message = String(format: template, deck.name, countText)
+        messages.append(ChatMessage(role: .assistant, content: message))
+
+        persistStateDetached()
+    }
+
     func reset() {
         messages = [ChatMessage(role: .assistant, content: String(localized: "chat.greeting"))]
         checklist = nil

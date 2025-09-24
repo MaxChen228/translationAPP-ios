@@ -9,6 +9,7 @@ struct KnowledgeSavePayload: Codable, Equatable {
     let explanation: String
     let correctExample: String
     let note: String?
+    let sourceHintID: UUID?
 }
 
 enum SavedStash: String, Codable, CaseIterable, Identifiable {
@@ -56,10 +57,14 @@ final class SavedErrorsStore: ObservableObject {
     private let defaultsKey = "saved.error.records"
 
     @Published private(set) var items: [SavedErrorRecord] = [] {
-        didSet { persist() }
+        didSet {
+            persist()
+            rebuildHintIDs()
+        }
     }
 
     private let encoder: JSONEncoder
+    private var hintIDs: Set<UUID> = []
 
     init() {
         let encoder = JSONEncoder()
@@ -82,7 +87,8 @@ final class SavedErrorsStore: ObservableObject {
         correctExample: String,
         note: String? = nil,
         savedAt: Date = Date(),
-        stash: SavedStash = .left
+        stash: SavedStash = .left,
+        sourceHintID: UUID? = nil
     ) {
         let payload = KnowledgeSavePayload(
             id: UUID(),
@@ -90,9 +96,36 @@ final class SavedErrorsStore: ObservableObject {
             title: title,
             explanation: explanation,
             correctExample: correctExample,
-            note: note?.isEmpty == true ? nil : note
+            note: note?.isEmpty == true ? nil : note,
+            sourceHintID: sourceHintID
         )
         addKnowledge(payload, stash: stash)
+    }
+
+    enum HintSaveResult { case added, duplicate }
+
+    func addHint(
+        _ hint: BankHint,
+        categoryLabel: String,
+        stash: SavedStash = .left,
+        savedAt: Date = Date()
+    ) -> HintSaveResult {
+        if hintIDs.contains(hint.id) { return .duplicate }
+        let payload = KnowledgeSavePayload(
+            id: UUID(),
+            savedAt: savedAt,
+            title: hint.text,
+            explanation: "",
+            correctExample: "",
+            note: categoryLabel,
+            sourceHintID: hint.id
+        )
+        addKnowledge(payload, stash: stash)
+        return .added
+    }
+
+    func containsHint(_ hint: BankHint) -> Bool {
+        hintIDs.contains(hint.id)
     }
 
     func clearAll() { items = [] }
@@ -137,5 +170,15 @@ final class SavedErrorsStore: ObservableObject {
         } catch {
             // ignore persist errors
         }
+    }
+
+    private func rebuildHintIDs() {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        hintIDs = Set(items.compactMap { record in
+            guard let data = record.json.data(using: .utf8),
+                  let payload = try? decoder.decode(KnowledgeSavePayload.self, from: data) else { return nil }
+            return payload.sourceHintID
+        }.compactMap { $0 })
     }
 }

@@ -9,6 +9,7 @@ struct ChatWorkspaceView: View {
     @FocusState private var isComposerFocused: Bool
     @State private var pendingAttachments: [ChatAttachment] = []
     @State private var pendingPhotoItem: PhotosPickerItem? = nil
+    @State private var showClipboardTemplate: Bool = false
 
     private enum ScrollAnchor: Hashable {
         case message(UUID)
@@ -67,6 +68,8 @@ struct ChatWorkspaceView: View {
             ZStack(alignment: .top) {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: DS.Spacing.md) {
+                        clipboardEntryCard
+
                         ForEach(viewModel.messages) { message in
                             ChatBubble(message: message)
                                 .id(ScrollAnchor.message(message.id))
@@ -131,6 +134,8 @@ struct ChatWorkspaceView: View {
                 AttachmentPreviewStrip(attachments: pendingAttachments, onRemove: removeAttachment)
             }
 
+            clipboardPreview
+
             ChatStateBadge(state: viewModel.state, isLoading: viewModel.isLoading)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -178,10 +183,38 @@ struct ChatWorkspaceView: View {
             handleSelectedPhotoItem(item)
             pendingPhotoItem = nil
         }
+        .sheet(isPresented: $showClipboardTemplate) {
+            ClipboardTemplateSheet(template: viewModel.clipboardTemplateText) {
+                viewModel.copyClipboardTemplate()
+                Haptics.lightTick()
+            }
+            .presentationDetents([.medium, .large])
+        }
+    }
+
+    @ViewBuilder
+    private var clipboardPreview: some View {
+        if viewModel.clipboardImportDeck != nil {
+            EmptyView()
+        } else {
+            switch viewModel.clipboardParseState {
+            case .notMatched:
+                EmptyView()
+            case .success(let deck):
+                ClipboardReadyCard(deck: deck, onImport: {
+                    viewModel.importClipboardDeck()
+                    Haptics.lightTick()
+                })
+            case .failure(let message):
+                ClipboardErrorCard(message: message)
+            }
+        }
     }
 
     private var canSend: Bool {
         guard !viewModel.isLoading else { return false }
+        if case .success = viewModel.clipboardParseState { return false }
+        if viewModel.clipboardImportDeck != nil { return false }
         let hasText = !viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         return hasText || !pendingAttachments.isEmpty
     }
@@ -267,11 +300,191 @@ struct ChatWorkspaceView: View {
     }
 }
 
+private extension ChatWorkspaceView {
+    private var clipboardEntryCard: some View {
+        ClipboardEntryCard(
+            deck: viewModel.clipboardImportDeck,
+            errorMessage: viewModel.clipboardImportError,
+            onLoadClipboard: {
+                viewModel.loadClipboardFromPasteboard()
+                Haptics.lightTick()
+            },
+            onImport: {
+                viewModel.importClipboardDeck()
+                Haptics.success()
+            },
+            onClear: {
+                viewModel.clearClipboardImport()
+            },
+            onTemplate: {
+                showClipboardTemplate = true
+            }
+        )
+        .transition(.opacity)
+    }
+}
 
+private struct ClipboardReadyCard: View {
+    var deck: ChatResearchDeck
+    var onImport: () -> Void
+    @Environment(\.locale) private var locale
 
+    var body: some View {
+        DSOutlineCard(fill: DS.Palette.surface) {
+            Label {
+                Text(String(localized: String.LocalizationValue("chat.clipboard.ready.title"), locale: locale))
+                    .dsType(DS.Font.section)
+            } icon: {
+                Image(systemName: "tray.and.arrow.down.fill")
+                    .foregroundStyle(DS.Palette.primary)
+            }
 
+            let countText = String(format: String(localized: String.LocalizationValue("deck.cards.count"), locale: locale), deck.cards.count)
+            Text(String(format: String(localized: String.LocalizationValue("chat.clipboard.ready.summary"), locale: locale), deck.name, countText))
+                .dsType(DS.Font.caption)
+                .foregroundStyle(.secondary)
 
+            Button(action: onImport) {
+                Text(String(localized: String.LocalizationValue("chat.clipboard.action.import"), locale: locale))
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(DSButton(style: .primary, size: .full))
+        }
+    }
+}
 
+private struct ClipboardErrorCard: View {
+    var message: String
+    @Environment(\.locale) private var locale
+
+    var body: some View {
+        DSOutlineCard(fill: DS.Palette.surface) {
+            Label {
+                Text(String(localized: String.LocalizationValue("chat.clipboard.error.title"), locale: locale))
+                    .dsType(DS.Font.section)
+            } icon: {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(DS.Palette.danger)
+            }
+
+            Text(message)
+                .dsType(DS.Font.caption)
+                .foregroundStyle(DS.Palette.danger)
+        }
+    }
+}
+
+private struct ClipboardEntryCard: View {
+    var deck: ChatResearchDeck?
+    var errorMessage: String?
+    var onLoadClipboard: () -> Void
+    var onImport: () -> Void
+    var onClear: () -> Void
+    var onTemplate: () -> Void
+    @Environment(\.locale) private var locale
+
+    var body: some View {
+        DSOutlineCard(fill: DS.Palette.surface) {
+            Label {
+                Text(String(localized: String.LocalizationValue("chat.clipboard.entry.title"), locale: locale))
+                    .dsType(DS.Font.section)
+            } icon: {
+                Image(systemName: "doc.on.clipboard")
+                    .foregroundStyle(DS.Palette.primary)
+            }
+
+            if let deck {
+                let countText = String(format: String(localized: String.LocalizationValue("deck.cards.count"), locale: locale), deck.cards.count)
+                Text(String(format: String(localized: String.LocalizationValue("chat.clipboard.ready.summary"), locale: locale), deck.name, countText))
+                    .dsType(DS.Font.caption)
+                    .foregroundStyle(.secondary)
+
+                Button(action: onImport) {
+                    Text(String(localized: String.LocalizationValue("chat.clipboard.action.importNow"), locale: locale))
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(DSButton(style: .primary, size: .full))
+
+                Button(action: onClear) {
+                    Text(String(localized: String.LocalizationValue("chat.clipboard.action.clear"), locale: locale))
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(DSButton(style: .secondary, size: .full))
+            } else if let errorMessage {
+                Text(errorMessage)
+                    .dsType(DS.Font.caption)
+                    .foregroundStyle(DS.Palette.danger)
+
+                Button(action: onLoadClipboard) {
+                    Text(String(localized: String.LocalizationValue("chat.clipboard.action.reload"), locale: locale))
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(DSButton(style: .primary, size: .full))
+
+                Button(action: onTemplate) {
+                    Text(String(localized: String.LocalizationValue("chat.clipboard.action.template"), locale: locale))
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(DSButton(style: .secondary, size: .full))
+            } else {
+                Text(String(localized: String.LocalizationValue("chat.clipboard.entry.description"), locale: locale))
+                    .dsType(DS.Font.caption)
+                    .foregroundStyle(.secondary)
+
+                Button(action: onLoadClipboard) {
+                    Text(String(localized: String.LocalizationValue("chat.clipboard.action.load"), locale: locale))
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(DSButton(style: .primary, size: .full))
+
+                Button(action: onTemplate) {
+                    Text(String(localized: String.LocalizationValue("chat.clipboard.action.template"), locale: locale))
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(DSButton(style: .secondary, size: .full))
+            }
+        }
+    }
+}
+
+private struct ClipboardTemplateSheet: View {
+    var template: String
+    var onCopy: () -> Void
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.locale) private var locale
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: DS.Spacing.sm) {
+                    Text(String(localized: String.LocalizationValue("chat.clipboard.template.instructions"), locale: locale))
+                        .dsType(DS.Font.body)
+                        .foregroundStyle(.primary)
+
+                    Text(template)
+                        .font(.system(.body, design: .monospaced))
+                        .padding()
+                        .background(DS.Palette.surfaceAlt.opacity(DS.Opacity.fill), in: RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous))
+                        .textSelection(.enabled)
+                }
+                .padding()
+            }
+            .navigationTitle(Text(String(localized: String.LocalizationValue("chat.clipboard.template.title"), locale: locale)))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(String(localized: String.LocalizationValue("chat.clipboard.template.copy"), locale: locale)) {
+                        onCopy()
+                        dismiss()
+                    }
+                }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(String(localized: "action.cancel", locale: locale)) { dismiss() }
+                }
+            }
+        }
+    }
+}
 
 
 

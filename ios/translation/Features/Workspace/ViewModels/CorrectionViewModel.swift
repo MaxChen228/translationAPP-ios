@@ -171,4 +171,7 @@ final class CorrectionViewModel: ObservableObject {
             AppLog.aiError("Merge errors failed: \(nsError.localizedDescription)")
         }
     }
+
+    // MARK: - Hint scratchpad
+
 }

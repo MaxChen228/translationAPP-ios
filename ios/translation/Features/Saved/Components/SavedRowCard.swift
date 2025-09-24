@@ -84,13 +84,15 @@ struct SavedErrorRowCard: View {
                         .foregroundStyle(.secondary)
                 }
 
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(String(localized: "saved.correctExample", locale: locale))
-                        .dsType(DS.Font.caption)
-                        .foregroundStyle(.secondary)
-                    Text(row.display.correctExample)
-                        .dsType(DS.Font.body)
-                        .foregroundStyle(.primary)
+                if !row.display.correctExample.isEmpty {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(String(localized: "saved.correctExample", locale: locale))
+                            .dsType(DS.Font.caption)
+                            .foregroundStyle(.secondary)
+                        Text(row.display.correctExample)
+                            .dsType(DS.Font.body)
+                            .foregroundStyle(.primary)
+                    }
                 }
 
                 if let note = row.display.note, !note.isEmpty {

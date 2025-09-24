@@ -3,9 +3,11 @@ import SwiftUI
 struct HintRow: View {
     var hint: BankHint
     var showCategory: Bool = true
+    var isSaved: Bool = false
+    var onTapSave: ((BankHint) -> Void)? = nil
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
+        HStack(alignment: .center, spacing: DS.Spacing.xs2) {
             if showCategory {
                 TagLabel(text: hint.category.displayName, color: hint.category.color)
             }
@@ -13,7 +15,23 @@ struct HintRow: View {
                 .dsType(DS.Font.body)
                 .foregroundStyle(.primary)
             Spacer(minLength: 0)
+            if let onTapSave {
+                Button {
+                    onTapSave(hint)
+                } label: {
+                    DSQuickActionIconGlyph(
+                        systemName: isSaved ? "checkmark.circle.fill" : "tray.and.arrow.down",
+                        shape: .circle,
+                        style: isSaved ? .filled : .outline,
+                        size: 28
+                    )
+                }
+                .buttonStyle(.plain)
+                .disabled(isSaved)
+                .accessibilityLabel(Text(isSaved ? "a11y.hint.saved" : "a11y.hint.save"))
+            }
         }
+        .animation(.easeInOut(duration: 0.18), value: isSaved)
     }
 }
 
@@ -23,6 +41,9 @@ struct HintListSection: View {
     @Binding var isExpanded: Bool
     var collapsible: Bool = true
     var showCategory: Bool = true
+
+    var savedPredicate: ((BankHint) -> Bool)? = nil
+    var onTapSave: ((BankHint) -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -69,7 +90,13 @@ struct HintListSection: View {
     private var list: some View {
         VStack(alignment: .leading, spacing: 6) {
             ForEach(hints.indices, id: \.self) { i in
-                HintRow(hint: hints[i], showCategory: showCategory)
+                let hint = hints[i]
+                HintRow(
+                    hint: hint,
+                    showCategory: showCategory,
+                    isSaved: savedPredicate?(hint) ?? false,
+                    onTapSave: onTapSave
+                )
             }
         }
         .padding(.vertical, 4)

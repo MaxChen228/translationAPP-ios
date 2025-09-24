@@ -108,13 +108,24 @@ struct BankRootBooksSection: View {
                             }
                             .accessibilityLabel("瀏覽所有題庫")
 
-                            RandomPracticeToolbarButton {
-                                runRandomPractice()
-                            }
-                            RandomSettingsToolbarButton {
-                                editController.exitEditMode()
-                                showRandomSettings()
-                            }
+                            DSQuickActionIconButton(
+                                systemName: "die.face.5",
+                                labelKey: "bank.random.title",
+                                action: { runRandomPractice() },
+                                shape: .circle,
+                                size: 28
+                            )
+
+                            DSQuickActionIconButton(
+                                systemName: "gearshape",
+                                labelKey: "bank.random.settings",
+                                action: {
+                                    editController.exitEditMode()
+                                    showRandomSettings()
+                                },
+                                shape: .circle,
+                                size: 28
+                            )
                         }
                         .padding(.top, 2)
 
