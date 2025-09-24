@@ -143,13 +143,6 @@ struct FlashcardDecksView: View {
                             deckFolders: deckFolders,
                             deckOrder: deckOrder
                         ))
-                        .highPriorityGesture(
-                            TapGesture().onEnded {
-                                if isEditing {
-                                    editController.toggleSelection(deck.id)
-                                }
-                            }
-                        )
                 }
             }
             .overlay(alignment: .topTrailing) {

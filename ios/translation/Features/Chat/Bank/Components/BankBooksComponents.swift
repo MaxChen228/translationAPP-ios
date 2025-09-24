@@ -232,13 +232,6 @@ struct BankRootBooksSection: View {
                             bankOrder: bankOrder
                         )
                     )
-                    .highPriorityGesture(
-                        TapGesture().onEnded {
-                            if isEditing {
-                                editController.toggleSelection(book.name)
-                            }
-                        }
-                    )
                 }
             }
         }
