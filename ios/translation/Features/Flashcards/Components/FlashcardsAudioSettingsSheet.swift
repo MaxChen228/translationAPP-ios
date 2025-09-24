@@ -13,7 +13,7 @@ struct FlashcardsAudioSettingsSheet: View {
             DSSectionHeader(titleText: Text("tts.title"), subtitleText: Text(summaryText()), accentUnderline: true)
 
             DSOutlineCard {
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: DS.Spacing.sm2) {
                     Text("tts.order").dsType(DS.Font.caption).foregroundStyle(.secondary)
                     Picker("tts.order", selection: Binding(get: { s.readOrder }, set: { store.settings.readOrder = $0 })) {
                         Text(ReadOrder.frontOnly.displayName).tag(ReadOrder.frontOnly)
@@ -28,7 +28,7 @@ struct FlashcardsAudioSettingsSheet: View {
 
             HStack(spacing: DS.Spacing.lg) {
                 DSOutlineCard {
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
                         HStack { Text("tts.rate").dsType(DS.Font.caption).foregroundStyle(.secondary); Spacer(); Text(String(format: "%.2fx", store.settings.rate)).dsType(DS.Font.caption).foregroundStyle(.secondary) }
                         Slider(value: Binding(get: { Double(store.settings.rate) }, set: { store.settings.rate = Float($0) }), in: 0.3...0.6)
                             .tint(DS.Palette.primary)
@@ -38,14 +38,14 @@ struct FlashcardsAudioSettingsSheet: View {
 
             HStack(spacing: DS.Spacing.lg) {
                 DSOutlineCard {
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
                         HStack { Text("tts.segmentGap").dsType(DS.Font.caption).foregroundStyle(.secondary); Spacer(); Text(String(format: "%.1fs", store.settings.segmentGap)).dsType(DS.Font.caption).foregroundStyle(.secondary) }
                         Slider(value: Binding(get: { store.settings.segmentGap }, set: { store.settings.segmentGap = $0 }), in: 0...2, step: 0.1)
                             .tint(DS.Palette.primary)
                     }
                 }
                 DSOutlineCard {
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
                         HStack { Text("tts.cardGap").dsType(DS.Font.caption).foregroundStyle(.secondary); Spacer(); Text(String(format: "%.1fs", store.settings.cardGap)).dsType(DS.Font.caption).foregroundStyle(.secondary) }
                         Slider(value: Binding(get: { store.settings.cardGap }, set: { store.settings.cardGap = $0 }), in: 0...3, step: 0.1)
                             .tint(DS.Palette.primary)
@@ -54,7 +54,7 @@ struct FlashcardsAudioSettingsSheet: View {
             }
 
             DSOutlineCard {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
                     Text("tts.variantFill").dsType(DS.Font.caption).foregroundStyle(.secondary)
                     Picker("tts.variantFill", selection: Binding(get: { store.settings.variantFill }, set: { store.settings.variantFill = $0 })) {
                         Text(VariantFill.random.displayName).tag(VariantFill.random)
@@ -72,11 +72,11 @@ struct FlashcardsAudioSettingsSheet: View {
                     dismiss()
                 }
                 .buttonStyle(DSButton(style: .primary, size: .full))
-                .frame(width: 160)
+                .frame(width: DS.IconSize.settingsSlider)
             }
         }
-        .padding(16)
-        .padding(.top, 8) // avoid top rounding clipping under sheet grabber
+        .padding(DS.Spacing.md)
+        .padding(.top, DS.Spacing.xs2) // avoid top rounding clipping under sheet grabber
         }
         .background(DS.Palette.background)
         .presentationDragIndicator(.visible)

@@ -18,13 +18,13 @@ struct GlobalAudioMiniPlayerView: View {
                             HStack(spacing: DS.Spacing.sm) {
                                 Button { globalAudio.togglePlayback() } label: {
                                     ZStack {
-                                        AudioProgressRingView(progress: progress, size: 40)
-                                        Image(systemName: (globalAudio.speechManager.isPlaying && !globalAudio.speechManager.isPaused) ? "pause.fill" : "play.fill")
-                                            .font(.system(size: 16, weight: .semibold))
-                                            .foregroundStyle(.white)
+                                        AudioProgressRingView(progress: progress, size: DS.IconSize.playButton)
+                                            Image(systemName: (globalAudio.speechManager.isPlaying && !globalAudio.speechManager.isPaused) ? "pause.fill" : "play.fill")
+                                                .font(.system(size: 16, weight: .semibold))
+                                                .foregroundStyle(.white)
                                     }
                                 }
-                                .frame(width: 40, height: 40)
+                                .frame(width: DS.IconSize.playButton, height: DS.IconSize.playButton)
                                 .background(DS.Palette.primary)
                                 .clipShape(Circle())
 
@@ -33,14 +33,14 @@ struct GlobalAudioMiniPlayerView: View {
                                         .font(.system(size: 16, weight: .medium))
                                         .foregroundStyle(DS.Palette.primary)
                                 }
-                                .frame(width: 32, height: 32)
+                                .frame(width: DS.IconSize.controlButton, height: DS.IconSize.controlButton)
 
                                 Button { globalAudio.skipToNext() } label: {
                                     Image(systemName: "forward.fill")
                                         .font(.system(size: 16, weight: .medium))
                                         .foregroundStyle(DS.Palette.primary)
                                 }
-                                .frame(width: 32, height: 32)
+                                .frame(width: DS.IconSize.controlButton, height: DS.IconSize.controlButton)
                             }
 
                             VStack(alignment: .leading, spacing: 2) {
@@ -60,12 +60,12 @@ struct GlobalAudioMiniPlayerView: View {
                                     .font(.system(size: 14, weight: .medium))
                                     .foregroundStyle(.secondary)
                             }
-                            .frame(width: 28, height: 28)
+                            .frame(width: DS.IconSize.miniPlayerClose, height: DS.IconSize.miniPlayerClose)
                         }
                         .padding(.horizontal, DS.Spacing.md)
 
                         GradientProgressBar(progress: progress)
-                            .frame(height: 4)
+                            .frame(height: DS.Metrics.miniPlayerProgressHeight)
                             .padding(.horizontal, DS.Spacing.md)
                     }
                     .padding(.vertical, DS.Spacing.sm)
@@ -99,16 +99,16 @@ struct AudioMiniPlayerView: View {
         HStack(spacing: DS.Spacing.md) {
             // Combined ring + play/pause circle button
             ZStack {
-                AudioProgressRingView(progress: progress, size: 40)
+                AudioProgressRingView(progress: progress, size: DS.IconSize.playButton)
                 Button(action: onToggle) {
                     Image(systemName: (isPlaying && !isPaused) ? "pause.fill" : "play.fill")
                 }
                 .buttonStyle(DSPrimaryCircleButton(diameter: 30))
             }
 
-            DSQuickActionIconButton(systemName: "backward.fill", labelKey: "flashcards.prev", action: onPrev, style: .outline, size: 34)
+            DSQuickActionIconButton(systemName: "backward.fill", labelKey: "flashcards.prev", action: onPrev, style: .outline, size: DS.IconSize.miniPlayerQuickAction)
 
-            DSQuickActionIconButton(systemName: "forward.fill", labelKey: "content.next", action: onNext, style: .outline, size: 34)
+            DSQuickActionIconButton(systemName: "forward.fill", labelKey: "content.next", action: onNext, style: .outline, size: DS.IconSize.miniPlayerQuickAction)
 
             Spacer()
             VStack(alignment: .trailing, spacing: 2) {
@@ -119,7 +119,7 @@ struct AudioMiniPlayerView: View {
                     .foregroundStyle(.secondary)
             }
 
-            DSQuickActionIconButton(systemName: "xmark", labelKey: "action.cancel", action: onStop, style: .outline, size: 34)
+            DSQuickActionIconButton(systemName: "xmark", labelKey: "action.cancel", action: onStop, style: .outline, size: DS.IconSize.miniPlayerQuickAction)
         }
         .padding(.horizontal, DS.Spacing.lg)
         .padding(.vertical, DS.Spacing.md)

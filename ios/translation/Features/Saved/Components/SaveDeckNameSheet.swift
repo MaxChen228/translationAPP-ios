@@ -17,7 +17,7 @@ struct SaveDeckNameSheet: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: DS.Spacing.sm2) {
             Text(String(localized: "saved.saveDeck", locale: locale))
                 .dsType(DS.Font.section)
             Text(String(localized: "saved.saveDeck.prompt", locale: locale) + " \(count)")

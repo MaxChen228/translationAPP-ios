@@ -41,7 +41,7 @@ struct ResultSwitcherCard: View {
                 .foregroundStyle(.secondary)
                 .fontWeight(.semibold)
             Spacer()
-            HStack(spacing: 12) {
+            HStack(spacing: DS.Spacing.sm2) {
                 Button { UIPasteboard.general.string = copyString } label: { Image(systemName: "doc.on.doc") }
                 ShareLink(item: copyString) { Image(systemName: "square.and.arrow.up") }
             }

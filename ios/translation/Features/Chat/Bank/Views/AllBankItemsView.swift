@@ -206,7 +206,7 @@ struct AllBankItemsView: View {
                 }
 
                 DSSeparator(color: DS.Palette.border.opacity(DS.Opacity.hairline))
-                    .frame(width: 160)
+                    .frame(width: DS.Metrics.sectionDividerWidth)
                     .padding(.top, DS.Spacing.lg)
                     .padding(.bottom, DS.Spacing.md)
                     .frame(maxWidth: .infinity, alignment: .leading)

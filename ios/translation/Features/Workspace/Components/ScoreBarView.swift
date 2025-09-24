@@ -10,7 +10,7 @@ struct ScoreBarView: View {
     }
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: DS.Spacing.sm2) {
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Capsule().fill(DS.Palette.trackHairline)
@@ -19,13 +19,13 @@ struct ScoreBarView: View {
                         .frame(width: geo.size.width * progress)
                 }
             }
-            .frame(height: 10)
+            .frame(height: DS.Metrics.progressBarHeight)
 
             VStack(alignment: .trailing, spacing: 0) {
                 Text("\(score)")
                     .font(DS.Font.serifTitle)
             }
-            .frame(minWidth: 40)
+            .frame(minWidth: DS.Metrics.scoreValueMinWidth)
         }
         .frame(maxWidth: .infinity)
         .dsAnimation(DS.AnimationToken.bouncy, value: score)

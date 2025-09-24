@@ -37,8 +37,10 @@ SwiftUI iOS App：提供中英翻譯批改、錯誤合併與高亮、Workspace �
 
 ## 連線後端（BACKEND_URL）
 App 透過 Info.plist 的 `BACKEND_URL` 讀取後端位址（由 `AppConfig` 使用）。
-- 預設值在 Build Settings 以 `INFOPLIST_KEY_BACKEND_URL` 注入。
-- 開發建議：將後端在本機啟動於 `http://127.0.0.1:8080`，或部署至雲端後填入對應 URL。
+- `INFOPLIST_KEY_BACKEND_URL` 可在 Build Settings 針對不同 configuration 注入對應 URL，或改成 `$(BACKEND_URL)` 由環境變數接手。
+- 也可在執行時以環境變數 `BACKEND_URL` 覆寫（涵蓋 Xcode scheme 或 CI pipeline）。
+- **必須**設定其中一種方式，否則 App 會顯示「後端未設定」的 Banner 並停用雲端相關功能。
+- 開發建議：本機啟動後端於 `http://127.0.0.1:8080`，或部署至雲端後填入對應 URL。
 
 統一端點說明：
 - 批改：`POST {BACKEND_URL}/correct`、`POST {BACKEND_URL}/correct/merge`

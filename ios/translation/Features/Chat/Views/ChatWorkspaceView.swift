@@ -146,7 +146,7 @@ struct ChatWorkspaceView: View {
                     Image(systemName: "paperclip")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(DS.Brand.scheme.classicBlue)
-                        .padding(10)
+                        .padding(DS.Spacing.sm)
                         .background(
                             Circle().fill(DS.Brand.scheme.babyBlue.opacity(DS.Opacity.fill))
                         )
@@ -165,8 +165,8 @@ struct ChatWorkspaceView: View {
                     Image(systemName: "paperplane.fill")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(DS.Palette.onPrimary)
-                        .padding(.vertical, 10)
-                        .padding(.horizontal, 18)
+                        .padding(.vertical, DS.Spacing.sm)
+                        .padding(.horizontal, DS.Spacing.md)
                         .background(
                             Capsule(style: .continuous)
                                 .fill(DS.Palette.primary)
@@ -485,7 +485,6 @@ private struct ClipboardTemplateSheet: View {
         }
     }
 }
-
 
 
 

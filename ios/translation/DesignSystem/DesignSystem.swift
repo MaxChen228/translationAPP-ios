@@ -7,6 +7,11 @@ enum DS {
         // Base hairline thickness; slightly thicker for better visibility on 3x
         // Previously: 1 / UIScreen.main.scale (~0.33pt on 3x). Now ensure >= 0.5pt.
         static var hairline: CGFloat { max(1 / UIScreen.main.scale, 0.5) }
+        static let progressBarHeight: CGFloat = 10
+        static let scoreValueMinWidth: CGFloat = 40
+        static let popoverMaxWidth: CGFloat = 320
+        static let sectionDividerWidth: CGFloat = 160
+        static let miniPlayerProgressHeight: CGFloat = 4
     }
     enum Spacing {
         static let xs: CGFloat = 6
@@ -255,6 +260,8 @@ enum DS {
         static let cardIcon: CGFloat = 28           // 卡片標題圖標寬度
         static let playButton: CGFloat = 40         // 播放按鈕尺寸
         static let controlButton: CGFloat = 32      // 控制按鈕尺寸
+        static let miniPlayerQuickAction: CGFloat = 34
+        static let miniPlayerClose: CGFloat = 28
         static let toolbarIcon: CGFloat = 44        // 工具列按鈕尺寸
         static let avatar: CGFloat = 72             // 頭像尺寸
         static let scoreRing: CGFloat = 96          // 分數環形圖尺寸
@@ -263,9 +270,6 @@ enum DS {
         static let indicatorSmall: CGFloat = 6      // 小指示器
         static let indicatorMedium: CGFloat = 8     // 中指示器
         static let dividerThin: CGFloat = 3         // 細分隔線寬度
-        static let progressBar: CGFloat = 10        // 進度條高度
-
-        // 佈局相關寬度
         static let entryCardWidth: CGFloat = 220    // 入口卡片寬度
         static let settingsSlider: CGFloat = 160    // 設定滑桿寬度
     }

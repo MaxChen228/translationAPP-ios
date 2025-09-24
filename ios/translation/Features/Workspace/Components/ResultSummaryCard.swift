@@ -17,9 +17,9 @@ struct ResultSummaryCard: View {
             DSCard {
                 HStack(alignment: .top, spacing: DS.Spacing.lg) {
                     ScoreRingView(score: score)
-                        .padding(6)
+                        .padding(DS.Spacing.xs)
                         .background(Circle().fill(DS.Palette.surfaceAlt))
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
                         headerActions
                         correctedText
                     }
@@ -28,7 +28,7 @@ struct ResultSummaryCard: View {
             }
         case .compactBar:
             DSCard {
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: DS.Spacing.sm2) {
                     headerActions
                     ScoreBarView(score: score)
                     correctedText
@@ -67,8 +67,8 @@ struct ResultSummaryCard: View {
             if showCopied {
                 Text(String(localized: "action.copied", locale: locale))
                     .dsType(DS.Font.caption)
-                    .padding(.vertical, 6)
-                    .padding(.horizontal, 10)
+                    .padding(.vertical, DS.Component.Badge.paddingVertical)
+                    .padding(.horizontal, DS.Component.Badge.paddingHorizontal)
                     .background(Capsule().fill(.ultraThinMaterial))
                     .transition(.move(edge: .top).combined(with: .opacity))
             }

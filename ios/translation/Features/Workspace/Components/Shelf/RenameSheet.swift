@@ -14,7 +14,7 @@ struct RenameSheet: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: DS.Spacing.sm2) {
             Text(titleKey).dsType(DS.Font.section)
             TextField(String(localized: "field.name", locale: locale), text: $text)
                 .textFieldStyle(.roundedBorder)
@@ -30,7 +30,7 @@ struct RenameSheet: View {
                 .frame(width: DS.ButtonSize.standard)
             }
         }
-        .padding(16)
+        .padding(DS.Spacing.md)
         .background(DS.Palette.background)
     }
 }

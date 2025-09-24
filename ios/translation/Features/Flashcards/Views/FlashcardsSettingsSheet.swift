@@ -12,9 +12,9 @@ struct FlashcardsSettingsSheet: View {
 
     var body: some View {
         ScrollView {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: DS.Spacing.md) {
             Text("nav.settings").dsType(DS.Font.section)
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
                 Text("flashcards.settings.mode").dsType(DS.Font.caption).foregroundStyle(.secondary)
                 Picker("flashcards.settings.mode", selection: $modeRaw) {
                     ForEach(FlashcardsReviewMode.allCases, id: \.storageValue) { m in
@@ -27,9 +27,9 @@ struct FlashcardsSettingsSheet: View {
 
             // Inline TTS settings（取代舊的入口按鈕）
             DSOutlineCard {
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: DS.Spacing.sm2) {
                     Text("tts.title").dsType(DS.Font.section)
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
                         Text("tts.order").dsType(DS.Font.caption).foregroundStyle(.secondary)
                         let s = ttsStore.settings
                         Picker("tts.order", selection: Binding(get: { s.readOrder }, set: { ttsStore.settings.readOrder = $0 })) {
@@ -43,7 +43,7 @@ struct FlashcardsSettingsSheet: View {
                     }
 
                     HStack(spacing: DS.Spacing.lg) {
-                        VStack(alignment: .leading, spacing: 8) {
+                        VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
                             HStack { Text("tts.rate").dsType(DS.Font.caption).foregroundStyle(.secondary); Spacer(); Text(String(format: "%.2fx", ttsStore.settings.rate)).dsType(DS.Font.caption).foregroundStyle(.secondary) }
                             Slider(value: Binding(get: { Double(ttsStore.settings.rate) }, set: { ttsStore.settings.rate = Float($0) }), in: 0.3...0.6)
                                 .tint(DS.Palette.primary)
@@ -51,19 +51,19 @@ struct FlashcardsSettingsSheet: View {
                     }
 
                     HStack(spacing: DS.Spacing.lg) {
-                        VStack(alignment: .leading, spacing: 8) {
+                        VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
                             HStack { Text("tts.segmentGap").dsType(DS.Font.caption).foregroundStyle(.secondary); Spacer(); Text(String(format: "%.1fs", ttsStore.settings.segmentGap)).dsType(DS.Font.caption).foregroundStyle(.secondary) }
                             Slider(value: Binding(get: { ttsStore.settings.segmentGap }, set: { ttsStore.settings.segmentGap = $0 }), in: 0...2, step: 0.1)
                                 .tint(DS.Palette.primary)
                         }
-                        VStack(alignment: .leading, spacing: 8) {
+                        VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
                             HStack { Text("tts.cardGap").dsType(DS.Font.caption).foregroundStyle(.secondary); Spacer(); Text(String(format: "%.1fs", ttsStore.settings.cardGap)).dsType(DS.Font.caption).foregroundStyle(.secondary) }
                             Slider(value: Binding(get: { ttsStore.settings.cardGap }, set: { ttsStore.settings.cardGap = $0 }), in: 0...3, step: 0.1)
                                 .tint(DS.Palette.primary)
                         }
                     }
 
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
                         Text("tts.variantFill").dsType(DS.Font.caption).foregroundStyle(.secondary)
                         Picker("tts.variantFill", selection: Binding(get: { ttsStore.settings.variantFill }, set: { ttsStore.settings.variantFill = $0 })) {
                             Text(VariantFill.random.displayName).tag(VariantFill.random)
@@ -76,7 +76,7 @@ struct FlashcardsSettingsSheet: View {
             }
 
             DSOutlineCard {
-                VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: DS.Spacing.sm) {
                     Text("settings.flashcards.reset.hint").dsType(DS.Font.caption).foregroundStyle(.secondary)
                     HStack {
                         Spacer()
@@ -84,7 +84,7 @@ struct FlashcardsSettingsSheet: View {
                             Text("settings.flashcards.resetAll")
                         }
                         .buttonStyle(DSButton(style: .secondary, size: .full))
-                        .frame(maxWidth: 220)
+                        .frame(maxWidth: DS.IconSize.entryCardWidth)
                     }
                 }
             }
@@ -92,10 +92,10 @@ struct FlashcardsSettingsSheet: View {
             HStack { Spacer()
                 Button(String(localized: "action.done", locale: locale)) { dismiss() }
                     .buttonStyle(DSButton(style: .secondary, size: .full))
-                    .frame(width: 100)
+                    .frame(width: DS.ButtonSize.medium)
             }
         }
-        .padding(16)
+        .padding(DS.Spacing.md)
         }
         .background(DS.Palette.background)
         .alert(Text("settings.flashcards.reset.confirm.title"), isPresented: $showResetConfirm) {

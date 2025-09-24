@@ -33,8 +33,8 @@ struct SavedErrorRowCard: View {
 
     var body: some View {
         DSCard(fill: DS.Palette.surface) {
-            VStack(alignment: .leading, spacing: 8) {
-                HStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
+                HStack(spacing: DS.Spacing.xs2) {
                     summaryContent
                     Spacer(minLength: 0)
                     Image(systemName: "chevron.down")
@@ -53,7 +53,7 @@ struct SavedErrorRowCard: View {
     }
 
     private var summaryContent: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: DS.Spacing.xs) {
             if let payload = row.payload {
                 Text(payload.title)
                     .dsType(DS.Font.body)
@@ -63,8 +63,8 @@ struct SavedErrorRowCard: View {
                     Text(note)
                         .dsType(DS.Font.caption)
                         .foregroundStyle(DS.Brand.scheme.classicBlue)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 4)
+                        .padding(.horizontal, DS.Component.Chip.paddingHorizontal)
+                        .padding(.vertical, DS.Component.Chip.paddingVertical)
                         .background(DS.Brand.scheme.classicBlue.opacity(0.1))
                         .clipShape(Capsule())
                 }
@@ -77,7 +77,7 @@ struct SavedErrorRowCard: View {
     @ViewBuilder
     private var expandedContent: some View {
         if let payload = row.payload {
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: DS.Spacing.sm2) {
                 if !row.display.explanation.isEmpty {
                     Text(row.display.explanation)
                         .dsType(DS.Font.body, lineSpacing: 6)
@@ -85,7 +85,7 @@ struct SavedErrorRowCard: View {
                 }
 
                 if !row.display.correctExample.isEmpty {
-                    VStack(alignment: .leading, spacing: 6) {
+                    VStack(alignment: .leading, spacing: DS.Spacing.xs) {
                         Text(String(localized: "saved.correctExample", locale: locale))
                             .dsType(DS.Font.caption)
                             .foregroundStyle(.secondary)
@@ -96,7 +96,7 @@ struct SavedErrorRowCard: View {
                 }
 
                 if let note = row.display.note, !note.isEmpty {
-                    VStack(alignment: .leading, spacing: 6) {
+                    VStack(alignment: .leading, spacing: DS.Spacing.xs) {
                         Text(String(localized: "saved.note", locale: locale))
                             .dsType(DS.Font.caption)
                             .foregroundStyle(.secondary)

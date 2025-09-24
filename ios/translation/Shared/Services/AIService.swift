@@ -35,12 +35,19 @@ enum AIServiceFactory {
 enum AppConfig {
     // Single source of truth: BACKEND_URL
     static var backendURL: URL? {
-        // Prefer runtime environment for easy override when running on device via Xcode.
-        if let s = ProcessInfo.processInfo.environment["BACKEND_URL"],
-           let u = URL(string: s), !s.isEmpty { return u }
+        // Runtime environment takes precedence so developers can override quickly when debugging.
+        if let envValue = ProcessInfo.processInfo.environment["BACKEND_URL"],
+           let url = Self.makeURL(envValue) {
+            return url
+        }
 
-        // Hardcoded fallback for production (Xcode 16 doesn't support custom INFOPLIST_KEY_*)
-        return URL(string: "https://translation-l9qi.onrender.com")
+        // Fallback to Info.plist (populated via INFOPLIST_KEY_BACKEND_URL).
+        if let plistValue = Bundle.main.object(forInfoDictionaryKey: "BACKEND_URL") as? String,
+           let url = Self.makeURL(plistValue) {
+            return url
+        }
+
+        return nil
     }
 
     // All service endpoints derive from BACKEND_URL
@@ -57,6 +64,12 @@ enum AppConfig {
     static var chatResearchURL: URL? {
         guard let base = backendURL else { return nil }
         return base.appendingPathComponent("chat/research")
+    }
+
+    private static func makeURL(_ value: String) -> URL? {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        return URL(string: trimmed)
     }
 }
 
