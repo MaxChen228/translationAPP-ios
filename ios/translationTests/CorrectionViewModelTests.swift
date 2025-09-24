@@ -143,8 +143,9 @@ private final class TestPracticeRecordsRepository: PracticeRecordsRepositoryProt
 // MARK: - Fixtures
 
 private extension BankHint {
+    static let sampleID = UUID(uuidString: "AAAAAAAA-1111-2222-3333-BBBBBBBBBBBB")!
     static var sample: BankHint {
-        BankHint(category: .lexical, text: "改成過去式")
+        BankHint(id: sampleID, category: .lexical, text: "改成過去式")
     }
 }
 
@@ -389,6 +390,7 @@ struct CorrectionViewModelTests {
 
         viewModel.loadNextPractice()
 
-        #expect(viewModel.errorMessage == String(localized: "practice.error.notLocal"))
+        let expected = String(localized: String.LocalizationValue("practice.error.notLocal"))
+        #expect(viewModel.errorMessage == expected)
     }
 }

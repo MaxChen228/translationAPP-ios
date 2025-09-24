@@ -32,7 +32,7 @@ struct ChatManagerTests {
         let manager = ChatManager(service: MockChatService(), persister: repository, backgroundCoordinator: MockBackgroundCoordinator())
 
         await waitFor {
-            manager.activeSessions[id] != nil
+            await MainActor.run { manager.activeSessions[id] != nil }
         }
 
         let restored = manager.activeSessions[id]
@@ -97,7 +97,7 @@ struct ChatManagerTests {
         let manager = ChatManager(service: service, persister: repository, backgroundCoordinator: background)
 
         await waitFor {
-            manager.activeSessions[id] != nil
+            await MainActor.run { manager.activeSessions[id] != nil }
         }
 
         await background.triggerResume()

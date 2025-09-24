@@ -11,7 +11,7 @@
 | 錯誤高亮及篩選 | `Features/Workspace/Utilities/Highlighter.swift`、`CorrectionSessionStore.filtered*` | 若新增錯誤類型或匹配規則，需同時更新 `ErrorType` 與此檔。 |
 | 與後端互動 | `Shared/Services/AIService.swift` | `AIServiceHTTP.correct(...)` 對應 `/correct`，處理 DTO→前端模型轉換。 |
 | 練習流程協調 | `Features/Workspace/Coordinators/PracticeSessionCoordinator.swift` | 統一題庫練習來源、下一題挑選與練習記錄存檔；需要本機 Store 參考時由此綁定。 |
-| 儲存知識點 | `Features/Saved/Stores/SavedErrorsStore.swift` | `ContentView` 的 `onSave` 呼叫 `SavedErrorsStore.addKnowledge`，僅保存修正後的關鍵資訊。 |
+| 儲存知識點 | `Features/Workspace/Views/ContentView.swift`、`Features/Saved/Stores/SavedErrorsStore.swift` | `ContentView.handleHintSave` 透過 `SavedErrorsStore.addHint` 將提示寫入 stash，會帶入當次中文 prompt 作為 explanation、標記 `sourceHintID` 以去重，並回寫 Banner/震動提示。 |
 | 錯誤合併模式 | `Features/Workspace/Coordinators/ErrorMergeController.swift`、`Features/Workspace/Components/ResultsSectionView.swift`、`Shared/Services/ErrorMergeService.swift` | `ErrorMergeController.mergeIfNeeded()` 觸發 `/correct/merge`，`ResultsSectionView` 透過 `MergeAnimationCoordinator` 呈現動畫與工具列。 |
 
 調整批改輸入/回應流程時，建議由 ViewModel 開始自底向上檢查 DTO → Store → UI，並在 `docs/patterns.md` 參考新增欄位的寫法。
@@ -22,7 +22,7 @@
 | ---- | -------- | ---- |
 | 題庫列表/複習入口 | `Features/Bank/Views/BankBooksView.swift`、`Features/Bank/Stores/LocalBankStore.swift` | 管理本機題庫結構與 UI。新增欄位需更新 `BankItem`、`LocalBankStore`。 |
 | 題庫練習流程 | `Features/Workspace/Coordinators/PracticeSessionCoordinator.swift`、`CorrectionViewModel.startLocalPractice` | `startLocalPractice` 委派 coordinator 重設輸入與提示並追蹤來源；`loadNextPractice()` 內部改由 coordinator 選擇下一題。 |
-| Saved JSON 清單 | `Features/Saved/Views/SavedJSONListSheet.swift`、`Features/Saved/Stores/SavedErrorsStore.swift` | 儲存已萃取的知識點（title/explanation/correctExample/note），並提供匯出與 Deck 生成入口。 |
+| Saved JSON 清單 | `Features/Saved/Views/SavedJSONListSheet.swift`、`Features/Saved/Stores/SavedErrorsStore.swift` | 資料以 `KnowledgeSavePayload` JSON 儲存（含 `savedAt`、`title`、`explanation`、`correctExample`、`note`、`sourceHintID`、`stash`）；提示匯入時 explanation 為 prompt、`note` 存放類別標籤、`correctExample` 可能留空，可從左/右 stash 調整與匯出 Deck。 |
 | 匯出為單字卡 | `DeckService.swift` | 透過 `/make_deck` 建立新 Deck，新增欄位時同步更新 DTO。 |
 | 雲端課程列表 | `Features/Chat/Bank/Views/CloudCourseLibraryView.swift` | 從 `/cloud/courses` 取得課程摘要，支援標籤與搜尋引導。 |
 | 課程詳情與書本預覽 | `Features/Chat/Bank/Views/CloudCourseDetailView.swift`、`Features/Chat/Bank/Views/CloudCourseBookPreviewView.swift` | 顯示課程封面、介紹、子書本（`/cloud/courses/{id}`、`/cloud/courses/{id}/books/{bookId}`），下載時會自動建立課程資料夾並以書本原名儲存。 |
@@ -66,6 +66,7 @@
 | 聊天 UI 與狀態 | `Features/Chat/ViewModels/ChatViewModel.swift`、`Features/Chat/Views/ChatWorkspaceView.swift` | 管理訊息列表、`state`/`checklist`、研究結果展示，並依 `AppSettingsStore` 的模型設定觸發研究。 |
 | HTTP 交握 | `Features/Chat/Services/ChatService.swift` | `ChatServiceHTTP` 會將圖片附件轉換為 base64、附上每個流程的模型設定，並對 500/422 錯誤做本地化轉換。 |
 | 研究輸出模型 | `Features/Chat/Models/ChatModels.swift` | `ChatResearchDeck` 直接封裝後端生成的牌組名稱與 `Flashcard` 列表；若後端回傳空陣列會拋錯提醒使用者補充資訊。 |
+| 剪貼簿匯入研究 Deck | `Features/Chat/ViewModels/ChatViewModel.swift`、`Shared/Parsing/ClipboardDeckParser.swift` | `ChatViewModel.importClipboardDeck` 使用 `ClipboardDeckParser` 解析 `### Translation.DeepResearch` 開頭的 JSON，驗證 deckName/cards/generatedAt 後匯入 `session.importResearch`。 |
 
 ## 7. 通知與 Banner
 

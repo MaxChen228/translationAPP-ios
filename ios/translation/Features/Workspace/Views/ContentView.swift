@@ -216,8 +216,8 @@ private extension ContentView {
         let categoryName = localizedString(for: hint.category.displayNameKey)
         let prompt = session.inputZh
         let result = savedStore.addHint(hint, categoryLabel: categoryName, prompt: prompt)
-        let successTitle = String(localized: "hint.save.success", locale: locale)
-        let duplicateTitle = String(localized: "hint.save.duplicate", locale: locale)
+        let successTitle = localizedString(for: "hint.save.success")
+        let duplicateTitle = localizedString(for: "hint.save.duplicate")
 
         switch result {
         case .added:

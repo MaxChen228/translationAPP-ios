@@ -91,7 +91,7 @@ struct ChatSessionTests {
     }
 
     @Test("ChatSession reset clears conversation state")
-    func testReset() {
+    func testReset() async {
         let repository = InMemoryChatSessionStore()
         let service = MockChatService()
         let session = ChatSession(service: service, persister: repository)
@@ -101,7 +101,19 @@ struct ChatSessionTests {
         #expect(session.messages.count == 1)
         #expect(session.messages.first?.role == .assistant)
         #expect(session.hasPendingRequest == false)
+        await waitForPersist(repository: repository, sessionID: session.id)
         let snapshot = await repository.storedSessions()
         #expect(snapshot[session.id]?.hasPendingRequest == false)
+    }
+}
+
+private extension ChatSessionTests {
+    func waitForPersist(repository: InMemoryChatSessionStore, sessionID: UUID, timeout: TimeInterval = 0.2) async {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            let snapshot = await repository.storedSessions()
+            if snapshot[sessionID] != nil { return }
+            try? await Task.sleep(nanoseconds: 5_000_000)
+        }
     }
 }
