@@ -2,35 +2,23 @@
 
 > 目的：集中列出目前仍使用硬編碼樣式的區域，提供後續 Design System 對齊的依據。
 
-## 分類與清單
+## 最新狀態（2025-09-23 更新）
+- ✅ Workspace Rename Sheet 及 Shelf Rename Sheet 改用 `DSButton(style: .*, size: .compact)`，移除手動指定寬度。
+- ✅ 雲端課程 `AsyncImage` 空態使用 `DS.Palette.placeholder` 與 `DS.Opacity.placeholder{Strong,Soft}`，避免灰色硬編碼。
+- ✅ Chat 附件邊框改為 `DS.Component.AttachmentBorder` 與 `DS.Opacity.overlayBright`，統一使用設計系統色票。
+- ✅ Calendar 連續天數徽章與 Highlight 動畫層改用 `DS.Component.HighlightLayer`、`DS.Component.CalendarBadge` 與 `DS.Opacity.highlightActive/highlightInactive`。
+- ✅ Shelf Selection Indicator 內縮、圓角與尺寸改為 `DS.Component.ShelfSelection` tokens。
 
-### 1. 間距 / 尺寸
-- `Features/Workspace/Views/WorkspaceListView.swift:347`
+### 目前待處理項目
+- 無（持續觀察新模組或第三方整合時是否出現額外硬編碼）。
 
-說明：大部分 Workspace/Saved/Flashcards/Chat 常見畫面已切換使用 `DS.Spacing`、`DS.Metrics`、`DS.ButtonSize` 等 token。剩餘 `WorkspaceListView` 相關彈窗仍需對齊。
-
-### 2. 顏色 / 透明度
-- `Features/Chat/Bank/Views/CloudCourseLibraryView.swift:94-98`
-- `Features/Chat/Bank/Views/CloudCourseDetailView.swift:132-136`
-- `Features/Chat/Views/ChatBubbleComponents.swift:307`
-- `Features/Calendar/Views/DayDetailView.swift:192-229`
-- `Shared/Utilities/HighlightAnimationController.swift:142`、`:169`、`:188`
-
-說明：多處使用 `Color.gray.opacity(...)`、`Color.white.opacity(...)` 或 `UIColor(DS.Palette.primary).withAlphaComponent(...)`。建議：導入 `DS.Palette.surfaceAlt`、新增 `DS.Palette.placeholder`、`DS.Opacity.highlightActive/Inactive` 等 token。
-
-### 3. UIKit / CALayer 常數
-- `Shared/Utilities/HighlightAnimationController.swift:139`、`:167`
-- `Features/Workspace/Components/Shelf/ShelfSelectionIndicator.swift:19`
-
-說明：層級效果仍以 `cornerRadius = 4`、`padding(4)` 控制；需要轉為 `DS.Radius` 或集中至 Utility。
-
-## 需新增的 Design System Token / 元件
-- **AsyncImage placeholder**：雲端課程圖像空態顏色。
-- **Highlight**：動畫使用的圓角、選取與未選取透明度。
-
-> 已新增：`DS.Metrics.progressBarHeight`、`scoreValueMinWidth`、`popoverMaxWidth`、`miniPlayerProgressHeight` 以及迷你播放器相關 `DS.IconSize`。後續畫面對齊時可直接使用。
+## 新增的 Design System Token / 元件
+- `DS.Palette.placeholder`
+- `DS.Opacity.highlightActive`、`DS.Opacity.highlightInactive`
+- `DS.Opacity.placeholderStrong`、`DS.Opacity.placeholderSoft`、`DS.Opacity.overlayBright`、`DS.Opacity.badgeFill`
+- `DS.Component.HighlightLayer`、`DS.Component.CalendarBadge`、`DS.Component.ShelfSelection`、`DS.Component.AttachmentBorder`
 
 ## 後續建議流程
-1. 就此清單排定批次：先處理 Workspace/Saved 彈窗，再處理 Cloud 畫面、Highlight、Mini Player。
-2. 每批調整時同步更新 token（如需新增），並補充 `AGENTS.md` / `docs/architecture.md`。
-3. 完成後重新檢查該區域並更新此文件，逐步歸零硬編碼項目。
+1. 針對新功能或 Legacy 畫面持續檢查，若發現硬編碼樣式即新增至此文件並排程處理。
+2. 當新增設計 token 時同步更新 `AGENTS.md`、`docs/architecture.md`，確保代理與開發者皆能引用正確規範。
+3. 每次批次處理完成後立即回填這份清單，避免重複調整。

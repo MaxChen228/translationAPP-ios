@@ -136,11 +136,11 @@ final class HighlightAnimationController {
             let layers = rects.map { rect -> CALayer in
                 let layer = CALayer()
                 layer.frame = rect
-                layer.cornerRadius = 4
+                layer.cornerRadius = DS.Component.HighlightLayer.cornerRadius
                 layer.masksToBounds = true
                 let isSelected = (id == selectedID)
-                let color = colorFor(id: id) ?? UIColor(DS.Palette.primary)
-                layer.backgroundColor = color.withAlphaComponent(isSelected ? 0.18 : 0.12).cgColor
+                let fill = highlightFillColor(for: colorFor(id: id), isSelected: isSelected)
+                layer.backgroundColor = fill
                 overlayView.layer.addSublayer(layer)
                 return layer
             }
@@ -164,10 +164,10 @@ final class HighlightAnimationController {
                 let layers = endRects.map { rect -> CALayer in
                     let layer = CALayer()
                     layer.frame = rect
-                    layer.cornerRadius = 4
+                    layer.cornerRadius = DS.Component.HighlightLayer.cornerRadius
                     let isSelected = (id == selectedID)
-                    let base = colorFor(id: id) ?? UIColor(DS.Palette.primary)
-                    layer.backgroundColor = base.withAlphaComponent(isSelected ? 0.18 : 0.12).cgColor
+                    let fill = highlightFillColor(for: colorFor(id: id), isSelected: isSelected)
+                    layer.backgroundColor = fill
                     layer.opacity = 0
                     overlayView.layer.addSublayer(layer)
                     return layer
@@ -184,8 +184,7 @@ final class HighlightAnimationController {
 
             // Update color/alpha for selection state (constant during animation)
             let isSelected = (id == selectedID)
-            let base = colorFor(id: id) ?? UIColor(DS.Palette.primary)
-            let fill = base.withAlphaComponent(isSelected ? 0.18 : 0.12).cgColor
+            let fill = highlightFillColor(for: colorFor(id: id), isSelected: isSelected)
 
             // matched pairs move
             if count > 0 {
@@ -244,7 +243,7 @@ final class HighlightAnimationController {
                         overlayView.layer.addSublayer(layer)
                         highlightLayers[id]?.append(layer)
                     }
-                    layer.cornerRadius = 4
+                    layer.cornerRadius = DS.Component.HighlightLayer.cornerRadius
                     layer.backgroundColor = fill
                     let target = toRects[i]
                     layer.position = CGPoint(x: target.midX, y: target.midY)
@@ -263,6 +262,12 @@ final class HighlightAnimationController {
     }
 
     // MARK: - Helper Methods
+
+    private func highlightFillColor(for candidate: UIColor?, isSelected: Bool) -> CGColor {
+        let base = candidate ?? UIColor(DS.Palette.primary)
+        let opacity = isSelected ? DS.Opacity.highlightActive : DS.Opacity.highlightInactive
+        return base.withAlphaComponent(opacity).cgColor
+    }
 
     private func colorFor(id: UUID) -> UIColor? {
         if currentShowingCorrected {

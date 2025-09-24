@@ -91,11 +91,11 @@ private struct CloudCourseSummaryCard: View {
                                 .resizable()
                                 .scaledToFill()
                         case .failure:
-                            Color.gray.opacity(0.12)
+                            DS.Palette.placeholder.opacity(DS.Opacity.placeholderStrong)
                         case .empty:
-                            Color.gray.opacity(0.05)
+                            DS.Palette.placeholder.opacity(DS.Opacity.placeholderSoft)
                         @unknown default:
-                            Color.gray.opacity(0.05)
+                            DS.Palette.placeholder.opacity(DS.Opacity.placeholderSoft)
                         }
                     }
                     .frame(height: 140)
@@ -118,7 +118,7 @@ private struct CloudCourseSummaryCard: View {
                 }
                 HStack(spacing: DS.Spacing.sm) {
                     Image(systemName: "books.vertical")
-                        .foregroundStyle(DS.Palette.primary.opacity(0.6))
+                        .foregroundStyle(DS.Palette.primary.opacity(DS.Opacity.muted))
                     Text(String(format: String(localized: "cloud.course.bookCount", locale: locale), course.bookCount))
                         .dsType(DS.Font.caption)
                         .foregroundStyle(.secondary)

@@ -87,12 +87,20 @@ enum DS {
 
     // Opacity tokens (avoid magic numbers sprinkled around)
     enum Opacity {
-        static let fill: Double = 0.12      // chip/card subtle fills
-        static let hairline: Double = 0.18  // hairline borders
-        static let border: Double = 0.35    // default outlines/separators
-        static let strong: Double = 0.45    // emphasized outlines/highlight
-        static let muted: Double = 0.60     // subdued foregrounds/status
-        static let accentLight: Double = 0.28 // accent separators/light tints
+        static let fill: Double = 0.12          // chip/card subtle fills
+        static let hairline: Double = 0.18      // hairline borders
+        static let border: Double = 0.35        // default outlines/separators
+        static let strong: Double = 0.45        // emphasized outlines/highlight
+        static let muted: Double = 0.60         // subdued foregrounds/status
+        static let accentLight: Double = 0.28   // accent separators/light tints
+
+        // Highlight overlays and placeholder surfaces
+        static let highlightActive: Double = 0.18
+        static let highlightInactive: Double = 0.12
+        static let placeholderStrong: Double = 0.12
+        static let placeholderSoft: Double = 0.05
+        static let overlayBright: Double = 0.5
+        static let badgeFill: Double = 0.65
     }
 
     enum Component {
@@ -118,6 +126,24 @@ enum DS {
             static let paddingHorizontal: CGFloat = 20
             static let paddingVertical: CGFloat = DS.Spacing.md
             static let cornerRadius: CGFloat = DS.Radius.lg
+        }
+
+        enum HighlightLayer {
+            static let cornerRadius: CGFloat = DS.Radius.sm
+        }
+
+        enum ShelfSelection {
+            static let indicatorSize: CGFloat = 24
+            static let indicatorInset: CGFloat = 4
+            static let checkmarkSize: CGFloat = 10
+        }
+
+        enum CalendarBadge {
+            static let glowBlur: CGFloat = 8
+        }
+
+        enum AttachmentBorder {
+            static let radius: CGFloat = DS.Radius.sm
         }
     }
 
@@ -158,6 +184,9 @@ enum DS {
         static var border: Color { Color(.separator) }
         static var primary: Color { Brand.scheme.classicBlue }
         static var subdued: Color { .secondary }
+        static var placeholder: Color { Color(UIColor { tc in
+            tc.userInterfaceStyle == .dark ? UIColor.systemGray4 : UIColor.systemGray5
+        }) }
         // Foreground on primary surfaces (filled buttons/icons)
         static var onPrimary: Color { Color.white }
         // Neutral/chrome color

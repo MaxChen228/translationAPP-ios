@@ -21,13 +21,13 @@ struct RenameSheet: View {
             HStack {
                 Spacer()
                 Button(String(localized: "action.cancel", locale: locale)) { dismiss() }
+                    .buttonStyle(DSButton(style: .secondary, size: .compact))
                 Button(String(localized: "action.done", locale: locale)) {
                     let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
                     if !trimmed.isEmpty { onDone(trimmed) }
                     dismiss()
                 }
-                .buttonStyle(DSButton(style: .primary, size: .full))
-                .frame(width: DS.ButtonSize.standard)
+                .buttonStyle(DSButton(style: .primary, size: .compact))
             }
         }
         .padding(DS.Spacing.md)

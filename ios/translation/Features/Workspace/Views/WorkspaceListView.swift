@@ -337,6 +337,8 @@ private struct RenameWorkspaceSheet: View {
                     onAction(.cancel)
                     dismiss()
                 }
+                .buttonStyle(DSButton(style: .secondary, size: .compact))
+
                 Button(String(localized: "action.done", locale: locale)) {
                     let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
                     if !trimmed.isEmpty {
@@ -344,8 +346,7 @@ private struct RenameWorkspaceSheet: View {
                     }
                     dismiss()
                 }
-                .buttonStyle(DSButton(style: .primary, size: .full))
-                .frame(width: DS.ButtonSize.standard)
+                .buttonStyle(DSButton(style: .primary, size: .compact))
             }
         }
         .padding(DS.Spacing.md)

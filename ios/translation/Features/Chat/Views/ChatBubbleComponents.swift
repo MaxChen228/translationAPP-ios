@@ -303,8 +303,12 @@ struct AttachmentGallery: View {
                 ForEach(attachments) { attachment in
                     AttachmentThumbnail(attachment: attachment, showRemove: false, onRemove: { _ in })
                         .overlay(
-                            RoundedRectangle(cornerRadius: DS.Radius.sm, style: .continuous)
-                                .stroke(isUser ? Color.white.opacity(0.5) : DS.Palette.border.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.hairline)
+                            RoundedRectangle(cornerRadius: DS.Component.AttachmentBorder.radius, style: .continuous)
+                                .stroke(
+                                    isUser ? DS.Palette.onPrimary.opacity(DS.Opacity.overlayBright)
+                                           : DS.Palette.border.opacity(DS.Opacity.border),
+                                    lineWidth: DS.BorderWidth.hairline
+                                )
                         )
                 }
             }

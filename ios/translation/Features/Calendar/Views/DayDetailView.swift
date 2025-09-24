@@ -189,12 +189,12 @@ private struct AnimatedStreakBadge: View {
                 .animation(.linear(duration: gradientDuration * 1.2).repeatForever(autoreverses: false), value: animateGradient)
 
             Circle()
-                .fill(Color.white.opacity(0.65))
+                .fill(DS.Palette.onPrimary.opacity(DS.Opacity.badgeFill))
                 .frame(width: badgeSize - fillInset, height: badgeSize - fillInset)
                 .overlay(
                     Circle()
-                        .fill(Color.white.opacity(0.18))
-                        .blur(radius: 8)
+                        .fill(DS.Palette.onPrimary.opacity(DS.Opacity.highlightActive))
+                        .blur(radius: DS.Component.CalendarBadge.glowBlur)
                         .frame(width: badgeSize - fillInset - 10, height: badgeSize - fillInset - 10)
                 )
 
@@ -226,7 +226,7 @@ private struct AnimatedStreakBadge: View {
             Text("\(streakDays)")
                 .font(.system(size: geo.size.width * 0.62, weight: .semibold, design: .serif))
                 .foregroundStyle(textGradient)
-                .shadow(color: Color.white.opacity(0.18), radius: 4, y: 1)
+                .shadow(color: DS.Palette.onPrimary.opacity(DS.Opacity.highlightActive), radius: 4, y: 1)
                 .frame(width: geo.size.width, height: geo.size.height)
                 .minimumScaleFactor(0.65)
                 .animation(.spring(response: 0.5, dampingFraction: 0.85), value: streakDays)

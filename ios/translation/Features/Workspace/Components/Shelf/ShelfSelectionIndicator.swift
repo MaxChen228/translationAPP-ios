@@ -16,14 +16,14 @@ struct ShelfSelectionIndicator: View {
             if isSelected {
                 Circle()
                     .fill(DS.Palette.primary)
-                    .padding(4)
+                    .padding(DS.Component.ShelfSelection.indicatorInset)
 
                 Image(systemName: "checkmark")
-                    .font(.system(size: 10, weight: .semibold))
+                    .font(.system(size: DS.Component.ShelfSelection.checkmarkSize, weight: .semibold))
                     .foregroundStyle(DS.Palette.onPrimary)
             }
         }
-        .frame(width: 24, height: 24)
+        .frame(width: DS.Component.ShelfSelection.indicatorSize, height: DS.Component.ShelfSelection.indicatorSize)
     }
 }
 
