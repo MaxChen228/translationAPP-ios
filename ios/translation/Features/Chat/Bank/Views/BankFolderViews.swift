@@ -175,9 +175,13 @@ struct BankFolderDetailView: View {
         .confirmationDialog(String(localized: "bank.confirm.deleteBook", locale: locale), isPresented: $showDeleteConfirm, titleVisibility: .visible) {
             Button(String(localized: "action.delete", locale: locale), role: .destructive) {
                 if let name = deletingBookName {
-                    localBank.remove(name)
-                    folders.remove(bookName: name)
-                    localProgress.removeBook(name)
+                    BankCascadeDeletionService.deleteBooks(
+                        [name],
+                        localBank: localBank,
+                        folders: folders,
+                        progress: localProgress,
+                        order: bankOrder
+                    )
                 }
                 deletingBookName = nil
             }
@@ -196,9 +200,9 @@ enum BookDragPayload {
 
 private extension BankFolderDetailView {
     func folderDeleteMessage() -> String {
-        String.localizedStringWithFormat(
-            String(localized: "bank.confirm.deleteFolder.message", locale: locale),
-            booksInFolder.count
+        BankDeletionMessageBuilder.folderDeleteMessage(
+            bookCount: booksInFolder.count,
+            locale: locale
         )
     }
 }

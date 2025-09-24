@@ -54,11 +54,13 @@ final class BankFoldersStore: ObservableObject {
         order: BankBooksOrderStore
     ) {
         let names = removeFolder(id)
-        for name in names {
-            localBank.remove(name)
-            progress.removeBook(name)
-            order.removeFromRoot(name)
-        }
+        BankCascadeDeletionService.deleteBooks(
+            names,
+            localBank: localBank,
+            folders: self,
+            progress: progress,
+            order: order
+        )
     }
 
     func rename(_ id: UUID, to newName: String) {
