@@ -20,6 +20,9 @@ final class FlashcardsViewModel: ObservableObject {
     @Published var sessionRightCount: Int = 0
     @Published var sessionWrongCount: Int = 0
     @Published var editingFamiliar: Bool? = nil
+    @Published var llmInstruction: String = ""
+    @Published var isGeneratingCard: Bool = false
+    @Published var llmError: String? = nil
 
     // 操作歷史，用於支援 Back 按鈕回滾標注操作
     var annotationHistory: [(cardID: UUID, previousState: Bool?, action: AnnotateFeedback)] = []
@@ -86,6 +89,8 @@ final class FlashcardsViewModel: ObservableObject {
         guard let card = session.current else { return }
         draft = card
         errorText = nil
+        llmInstruction = ""
+        llmError = nil
         DSMotion.run(DS.AnimationToken.subtle) { isEditing = true }
         session.resetShowBack()
         if let deckID, let progressStore {
@@ -99,6 +104,8 @@ final class FlashcardsViewModel: ObservableObject {
         draft = nil
         errorText = nil
         editingFamiliar = nil
+        llmInstruction = ""
+        llmError = nil
         DSMotion.run(DS.AnimationToken.subtle) { isEditing = false }
     }
 
@@ -148,5 +155,63 @@ final class FlashcardsViewModel: ObservableObject {
         session.removeCard(id: current.id)
         if let deckID { decksStore.deleteCard(from: deckID, cardID: current.id) }
         cancelEdit()
+    }
+}
+
+extension FlashcardsViewModel {
+    func generateCard(using service: FlashcardCompletionService, locale: Locale) async {
+        guard let currentDraft = draft else {
+            await MainActor.run {
+                self.llmError = FlashcardCompletionError.noDraft.errorDescription
+            }
+            return
+        }
+
+        let trimmedFront = currentDraft.front.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedFront.isEmpty else {
+            await MainActor.run {
+                self.llmError = FlashcardCompletionError.emptyFront.errorDescription
+            }
+            return
+        }
+
+        let req = FlashcardCompletionRequest(
+            card: .init(
+                front: currentDraft.front,
+                frontNote: currentDraft.frontNote,
+                back: currentDraft.back,
+                backNote: currentDraft.backNote
+            ),
+            instruction: llmInstruction.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : llmInstruction,
+            deckName: deckID.flatMap { _ in title.isEmpty ? nil : title }
+        )
+
+        await MainActor.run {
+            self.isGeneratingCard = true
+            self.llmError = nil
+        }
+
+        do {
+            let response = try await service.completeCard(req)
+            await MainActor.run {
+                self.draft?.front = response.front
+                self.draft?.frontNote = response.frontNote
+                self.draft?.back = response.back
+                self.draft?.backNote = response.backNote
+                self.isGeneratingCard = false
+            }
+        } catch {
+            let message: String
+            if let completionError = error as? FlashcardCompletionError {
+                message = completionError.errorDescription ?? error.localizedDescription
+            } else {
+                message = error.localizedDescription
+            }
+
+            await MainActor.run {
+                self.isGeneratingCard = false
+                self.llmError = message
+            }
+        }
     }
 }

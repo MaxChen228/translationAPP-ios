@@ -125,6 +125,17 @@
 "flashcards.editor.familiarity" = "熟悉度";
 "flashcards.editor.familiar" = "熟悉";
 "flashcards.editor.unfamiliar" = "不熟悉";
+"flashcards.generator.title" = "AI 自動補齊";
+"flashcards.generator.subtitle" = "根據目前輸入自動填滿卡片內容。";
+"flashcards.generator.instructionPlaceholder" = "想提醒模型的重點（可留空）";
+"flashcards.generator.action" = "一鍵生成";
+"flashcards.generator.loading" = "生成中…";
+"flashcards.generator.error.rateLimit" = "請求過於頻繁，稍後再試。";
+"flashcards.generator.error.invalidInput" = "伺服器拒絕此輸入，請調整內容。";
+"flashcards.generator.error.server" = "生成失敗（錯誤碼 %d）。";
+"flashcards.generator.error.decoding" = "無法解析 AI 回傳內容。";
+"flashcards.generator.error.noDraft" = "目前沒有可生成的卡片。";
+"flashcards.generator.error.emptyFront" = "請先輸入正面內容再生成。";
 "flashcards.status.familiar" = "熟悉";
 "flashcards.status.unfamiliar" = "不熟悉";
 "flashcards.annotate.familiar" = "熟悉";

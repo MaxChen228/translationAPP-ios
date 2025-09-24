@@ -63,6 +63,7 @@ struct WorkspaceListView: View {
                                 onDelete: { showWorkspaceBulkDeleteConfirm = true }
                             )
                             .padding(.top, DS.Spacing.sm)
+                            .padding(.trailing, DS.Spacing.sm2)
                         }
                     }
                 }

@@ -49,6 +49,24 @@ final class FlashcardsViewModelTests {
         )
     }
 
+    struct MockCompletionService: FlashcardCompletionService {
+        enum Mode {
+            case success(FlashcardCompletionResponse)
+            case failure(Error)
+        }
+
+        var mode: Mode
+
+        func completeCard(_ request: FlashcardCompletionRequest) async throws -> FlashcardCompletionResponse {
+            switch mode {
+            case .success(let response):
+                return response
+            case .failure(let error):
+                throw error
+            }
+        }
+    }
+
     @Test func flipStopsPlaybackWhenActive() async throws {
         let viewModel = makeViewModel()
         let testAudio = TestAudioController(viewModel: viewModel, active: true)
@@ -88,5 +106,41 @@ final class FlashcardsViewModelTests {
         } else {
             Issue.record("Deck ID or current card missing")
         }
+    }
+
+    @Test func generatorRequiresFront() async {
+        let viewModel = makeViewModel()
+        viewModel.beginEdit()
+        viewModel.draft?.front = "  "
+
+        await viewModel.generateCard(using: MockCompletionService(mode: .success(.init(front: "A", frontNote: nil, back: "B", backNote: nil))), locale: Locale(identifier: "en"))
+
+        #expect(viewModel.llmError == FlashcardCompletionError.emptyFront.errorDescription)
+        #expect(viewModel.isGeneratingCard == false)
+    }
+
+    @Test func generatorSuccessUpdatesDraft() async {
+        let viewModel = makeViewModel()
+        viewModel.beginEdit()
+        viewModel.draft?.front = "新聞媒體"
+        let mock = MockCompletionService(mode: .success(.init(front: "新聞媒體", frontNote: "Media", back: "news media", backNote: "")))
+
+        await viewModel.generateCard(using: mock, locale: Locale(identifier: "zh-Hant"))
+
+        #expect(viewModel.isGeneratingCard == false)
+        #expect(viewModel.draft?.back == "news media")
+        #expect(viewModel.llmError == nil)
+    }
+
+    @Test func generatorFailureSetsError() async {
+        let viewModel = makeViewModel()
+        viewModel.beginEdit()
+        viewModel.draft?.front = "新聞媒體"
+        let mock = MockCompletionService(mode: .failure(FlashcardCompletionError.rateLimited))
+
+        await viewModel.generateCard(using: mock, locale: Locale(identifier: "zh-Hant"))
+
+        #expect(viewModel.isGeneratingCard == false)
+        #expect(viewModel.llmError == FlashcardCompletionError.rateLimited.errorDescription)
     }
 }

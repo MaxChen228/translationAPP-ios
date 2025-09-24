@@ -15,8 +15,9 @@ struct FlashcardsView: View {
     }
     @Environment(\.locale) private var locale
     @Environment(\.dismiss) private var dismiss
+    private let completionService: FlashcardCompletionService
 
-    init(title: String = String(localized: "flashcards.title"), cards: [Flashcard] = FlashcardSessionStore.defaultCards, deckID: UUID? = nil, startIndex: Int = 0, startEditing: Bool = false) {
+    init(title: String = String(localized: "flashcards.title"), cards: [Flashcard] = FlashcardSessionStore.defaultCards, deckID: UUID? = nil, startIndex: Int = 0, startEditing: Bool = false, completionService: FlashcardCompletionService = FlashcardCompletionServiceFactory.makeDefault()) {
         let sessionStore = FlashcardSessionStore(cards: cards, startIndex: startIndex)
         let viewModel = FlashcardsViewModel(
             session: sessionStore,
@@ -28,6 +29,7 @@ struct FlashcardsView: View {
         _session = StateObject(wrappedValue: sessionStore)
         _viewModel = StateObject(wrappedValue: viewModel)
         _speechManager = ObservedObject(wrappedValue: viewModel.speechManager)
+        self.completionService = completionService
 
         GlobalAudioSessionManager.shared.enterActiveSession()
     }
@@ -63,17 +65,26 @@ struct FlashcardsView: View {
                                 draft: binding(\.draft),
                                 errorText: binding(\.errorText),
                                 familiaritySelection: binding(\.editingFamiliar),
+                                llmInstruction: binding(\.llmInstruction),
+                                llmError: viewModel.llmError,
+                                isGenerating: viewModel.isGeneratingCard,
+                                onGenerate: {
+                                    Task {
+                                        await viewModel.generateCard(using: completionService, locale: locale)
+                                    }
+                                },
                                 showsFamiliaritySelector: viewModel.deckID != nil,
                                 onDelete: { viewModel.showDeleteConfirm = true }
                             )
                             HStack(spacing: DS.Spacing.md) {
                                 Button(String(localized: "action.cancel", locale: locale)) { viewModel.cancelEdit() }
                                     .buttonStyle(DSButton(style: .secondary, size: .full))
+                                    .disabled(viewModel.isGeneratingCard)
                                 Button(String(localized: "action.save", locale: locale)) {
                                     viewModel.saveEdit(decksStore: decksStore, progressStore: progressStore, locale: locale)
                                 }
                                 .buttonStyle(DSButton(style: .primary, size: .full))
-                                .disabled(viewModel.validationError(locale: locale) != nil)
+                                .disabled(viewModel.validationError(locale: locale) != nil || viewModel.isGeneratingCard)
                             }
                         }
                     } else {

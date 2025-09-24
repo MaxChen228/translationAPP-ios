@@ -97,6 +97,17 @@
 "flashcards.editor.familiarity" = "Familiarity";
 "flashcards.editor.familiar" = "Familiar";
 "flashcards.editor.unfamiliar" = "Unfamiliar";
+"flashcards.generator.title" = "AI Assist";
+"flashcards.generator.subtitle" = "Use the current fields to auto-complete the card.";
+"flashcards.generator.instructionPlaceholder" = "Extra instructions for the model (optional)";
+"flashcards.generator.action" = "Fill with AI";
+"flashcards.generator.loading" = "Generating…";
+"flashcards.generator.error.rateLimit" = "Too many requests. Please try again later.";
+"flashcards.generator.error.invalidInput" = "The server rejected this input. Please adjust your text.";
+"flashcards.generator.error.server" = "Generation failed (code %d).";
+"flashcards.generator.error.decoding" = "Unable to read the AI response.";
+"flashcards.generator.error.noDraft" = "No card selected to generate.";
+"flashcards.generator.error.emptyFront" = "Please enter at least a front phrase before generating.";
 "flashcards.status.familiar" = "Familiar";
 "flashcards.status.unfamiliar" = "Unfamiliar";
 "flashcards.annotate.familiar" = "Familiar";

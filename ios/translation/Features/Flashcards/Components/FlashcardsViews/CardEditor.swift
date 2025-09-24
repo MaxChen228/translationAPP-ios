@@ -4,6 +4,10 @@ struct CardEditor: View {
     @Binding var draft: Flashcard?
     @Binding var errorText: String?
     @Binding var familiaritySelection: Bool?
+    @Binding var llmInstruction: String
+    let llmError: String?
+    let isGenerating: Bool
+    let onGenerate: () -> Void
     let showsFamiliaritySelector: Bool
     let onDelete: () -> Void
 
@@ -67,6 +71,44 @@ struct CardEditor: View {
                     Text("flashcards.editor.delete")
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
+
+                DSSeparator()
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("flashcards.generator.title")
+                        .dsType(DS.Font.body)
+                        .foregroundStyle(.primary)
+                    Text("flashcards.generator.subtitle")
+                        .dsType(DS.Font.caption)
+                        .foregroundStyle(.secondary)
+
+                    DSTextArea(
+                        text: $llmInstruction,
+                        minHeight: 80,
+                        placeholder: String(localized: "flashcards.generator.instructionPlaceholder"),
+                        disableAutocorrection: true
+                    )
+
+                    Button(action: onGenerate) {
+                        HStack(spacing: DS.Spacing.sm) {
+                            if isGenerating {
+                                ProgressView()
+                                    .progressViewStyle(.circular)
+                            }
+                            Text(isGenerating ? String(localized: "flashcards.generator.loading") : String(localized: "flashcards.generator.action"))
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(DSButton(style: .primary, size: .full))
+                    .disabled(isGenerating)
+
+                    if let llmError {
+                        Text(llmError)
+                            .font(.caption)
+                            .foregroundStyle(DS.Palette.danger)
+                    }
+                }
+                .padding(.top, DS.Spacing.sm)
 
                 if showsFamiliaritySelector {
                     DSSeparator()
