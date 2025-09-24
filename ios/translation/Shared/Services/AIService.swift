@@ -14,7 +14,14 @@ struct AICorrectionResult {
 // MARK: - Protocol
 
 protocol AIService {
-    func correct(zh: String, en: String) async throws -> AICorrectionResult
+    func correct(
+        zh: String,
+        en: String,
+        bankItemId: String?,
+        deviceId: String?,
+        hints: [BankHint]?,
+        suggestion: String?
+    ) async throws -> AICorrectionResult
 }
 
 // MARK: - Factory
@@ -79,7 +86,15 @@ final class UnavailableAIService: AIService {
     struct MissingBackendError: LocalizedError {
         var errorDescription: String? { String(localized: "error.backend.missing") }
     }
-    func correct(zh: String, en: String) async throws -> AICorrectionResult {
+
+    func correct(
+        zh: String,
+        en: String,
+        bankItemId: String?,
+        deviceId: String?,
+        hints: [BankHint]?,
+        suggestion: String?
+    ) async throws -> AICorrectionResult {
         throw MissingBackendError()
     }
 }
@@ -132,13 +147,14 @@ final class AIServiceHTTP: AIService {
         let errors: [ErrorDTO]
     }
 
-    // Backward-compatible entry (protocol requirement)
-    func correct(zh: String, en: String) async throws -> AICorrectionResult {
-        try await correct(zh: zh, en: en, bankItemId: nil, deviceId: DeviceID.current, hints: nil, suggestion: nil)
-    }
-
-    // Preferred entry with metadata for progress tracking
-    func correct(zh: String, en: String, bankItemId: String?, deviceId: String? = DeviceID.current, hints: [BankHint]? = nil, suggestion: String? = nil) async throws -> AICorrectionResult {
+    func correct(
+        zh: String,
+        en: String,
+        bankItemId: String?,
+        deviceId: String?,
+        hints: [BankHint]?,
+        suggestion: String?
+    ) async throws -> AICorrectionResult {
         var req = URLRequest(url: endpoint)
         req.httpMethod = "POST"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -147,7 +163,16 @@ final class AIServiceHTTP: AIService {
         }
         // 從設定讀取糾錯專用的 gemini model
         let model = UserDefaults.standard.string(forKey: "settings.correctionModel")
-        req.httpBody = try JSONEncoder().encode(RequestBody(zh: zh, en: en, bankItemId: bankItemId, deviceId: deviceId, hints: hintDTOs, suggestion: suggestion, model: model))
+        let body = RequestBody(
+            zh: zh,
+            en: en,
+            bankItemId: bankItemId,
+            deviceId: deviceId ?? DeviceID.current,
+            hints: hintDTOs,
+            suggestion: suggestion,
+            model: model
+        )
+        req.httpBody = try JSONEncoder().encode(body)
 
         let (data, resp) = try await session.data(for: req)
         guard let http = resp as? HTTPURLResponse, 200..<300 ~= http.statusCode else {

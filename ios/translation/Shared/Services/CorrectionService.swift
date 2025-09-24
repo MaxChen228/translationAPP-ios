@@ -26,17 +26,14 @@ struct CorrectionService: CorrectionRunning {
         hints: [BankHint]?,
         suggestion: String?
     ) async throws -> AICorrectionResult {
-        if let http = aiService as? AIServiceHTTP {
-            return try await http.correct(
-                zh: zh,
-                en: en,
-                bankItemId: bankItemId,
-                deviceId: deviceId,
-                hints: hints,
-                suggestion: suggestion
-            )
-        }
-        return try await aiService.correct(zh: zh, en: en)
+        try await aiService.correct(
+            zh: zh,
+            en: en,
+            bankItemId: bankItemId,
+            deviceId: deviceId,
+            hints: hints,
+            suggestion: suggestion
+        )
     }
 }
 
