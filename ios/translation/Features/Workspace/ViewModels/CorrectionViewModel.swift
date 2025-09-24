@@ -13,6 +13,7 @@ final class CorrectionViewModel: ObservableObject {
     @Published var focusEnSignal: Int = 0
 
     private let workspaceID: String
+    @Published private(set) var savedHintIDs: Set<UUID> = []
 
     init(
         correctionRunner: CorrectionRunning = CorrectionServiceFactory.makeDefault(),
@@ -172,6 +173,18 @@ final class CorrectionViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Hint scratchpad
+    // MARK: - Hint save markers
+
+    func markHintSaved(_ id: UUID) {
+        savedHintIDs.insert(id)
+    }
+
+    func isHintSaved(_ hint: BankHint) -> Bool {
+        savedHintIDs.contains(hint.id)
+    }
+
+    func resetHintSavedMarkers() {
+        savedHintIDs.removeAll()
+    }
 
 }

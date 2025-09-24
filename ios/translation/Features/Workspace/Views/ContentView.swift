@@ -58,7 +58,7 @@ struct ContentView: View {
                     HintListSection(
                         hints: session.practicedHints,
                         isExpanded: vm.binding(\.showPracticedHints),
-                        savedPredicate: savedStore.containsHint,
+                        savedPredicate: vm.isHintSaved,
                         onTapSave: { handleHintSave($0) }
                     )
 
@@ -191,6 +191,9 @@ struct ContentView: View {
             if vm.isLoading { LoadingOverlay() }
         }
         // legacy sheet removed; now navigates to a page via NavigationLink
+        .onDisappear {
+            vm.resetHintSavedMarkers()
+        }
     }
 }
 
@@ -220,6 +223,7 @@ private extension ContentView {
         case .added:
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
             bannerCenter.show(title: successTitle)
+            vm.markHintSaved(hint.id)
         case .duplicate:
             bannerCenter.show(title: duplicateTitle)
         }
