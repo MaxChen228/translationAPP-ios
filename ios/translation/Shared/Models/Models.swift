@@ -10,15 +10,17 @@ enum ErrorType: String, Codable, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var displayName: LocalizedStringKey {
+    var displayNameKey: String {
         switch self {
-        case .morphological: return LocalizedStringKey("error.type.morphological")
-        case .syntactic: return LocalizedStringKey("error.type.syntactic")
-        case .lexical: return LocalizedStringKey("error.type.lexical")
-        case .phonological: return LocalizedStringKey("error.type.phonological")
-        case .pragmatic: return LocalizedStringKey("error.type.pragmatic")
+        case .morphological: return "error.type.morphological"
+        case .syntactic: return "error.type.syntactic"
+        case .lexical: return "error.type.lexical"
+        case .phonological: return "error.type.phonological"
+        case .pragmatic: return "error.type.pragmatic"
         }
     }
+
+    var displayName: LocalizedStringKey { LocalizedStringKey(displayNameKey) }
 
     var color: Color {
         let b = DS.Brand.scheme

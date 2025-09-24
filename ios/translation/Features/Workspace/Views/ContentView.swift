@@ -201,8 +201,16 @@ struct ContentView: View {
 }
 
 private extension ContentView {
+    func localizedString(for key: String) -> String {
+        if let path = Bundle.main.path(forResource: locale.identifier, ofType: "lproj"),
+           let bundle = Bundle(path: path) {
+            return bundle.localizedString(forKey: key, value: nil, table: nil)
+        }
+        return NSLocalizedString(key, comment: "")
+    }
+
     func handleHintSave(_ hint: BankHint) {
-        let categoryName = String(localized: hint.category.displayName, locale: locale)
+        let categoryName = localizedString(for: hint.category.displayNameKey)
         let result = savedStore.addHint(hint, categoryLabel: categoryName)
         let successTitle = String(localized: "hint.save.success", locale: locale)
         let duplicateTitle = String(localized: "hint.save.duplicate", locale: locale)
