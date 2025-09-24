@@ -68,7 +68,16 @@ DS.Spacing.lg   // 24pt - 大間距
 DS.Spacing.xl   // 32pt - 特大間距
 ```
 
-#### 5. 圓角系統（Radius）
+#### 5. 尺寸與容器（Metrics）
+```swift
+DS.Metrics.progressBarHeight      // 標準進度條高度
+DS.Metrics.scoreValueMinWidth     // 成績數字最小寬度
+DS.Metrics.popoverMaxWidth        // 彈出視窗最大寬度
+DS.Metrics.sectionDividerWidth    // 區段分隔線預設寬度
+DS.Metrics.miniPlayerProgressHeight // 迷你播放器進度條高度
+```
+
+#### 6. 圓角系統（Radius）
 ```swift
 DS.Radius.xs  // 6pt  - 迷你圓角（分隔、細部元件）
 DS.Radius.sm  // 8pt  - 小圓角（標籤、小按鈕）
@@ -77,7 +86,7 @@ DS.Radius.md2 // 14pt - 中大圓角（模組化卡片）
 DS.Radius.lg  // 16pt - 大圓角（主要卡片、模態）
 ```
 
-#### 6. 色彩與透明度（Colors & Opacity）
+#### 7. 色彩與透明度（Colors & Opacity）
 ```swift
 // 主色系
 DS.Palette.primary        // 品牌主色
@@ -98,14 +107,14 @@ DS.Opacity.fill      // 0.08 - 填充
 DS.Opacity.strong    // 0.4  - 強調
 ```
 
-#### 7. 動畫系統（Animations）
+#### 8. 動畫系統（Animations）
 ```swift
 DS.AnimationToken.subtle   // 0.2s - 細微變化
 DS.AnimationToken.snappy   // 0.3s - 快速回饋
 DS.AnimationToken.smooth   // 0.4s - 平滑過渡
 ```
 
-#### 8. 字型系統（Typography）
+#### 9. 字型系統（Typography）
 ```swift
 DS.Font.largeTitle  // 大標題
 DS.Font.title       // 標題
