@@ -215,12 +215,18 @@ struct SavedErrorsStoreTests {
             let hint = BankHint(category: .lexical, text: "用 attach to 表示附加")
             let label = "Lexical"
 
-            #expect(store.addHint(hint, categoryLabel: label) == .added)
+            #expect(store.addHint(hint, categoryLabel: label, prompt: "原句") == .added)
             #expect(store.containsHint(hint))
             #expect(store.items.count == 1)
 
-            #expect(store.addHint(hint, categoryLabel: label) == .duplicate)
+            #expect(store.addHint(hint, categoryLabel: label, prompt: "原句") == .duplicate)
             #expect(store.items.count == 1)
+            if let record = store.items.first {
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .iso8601
+                let payload = try decoder.decode(KnowledgeSavePayload.self, from: Data(record.json.utf8))
+                #expect(payload.explanation == "原句")
+            }
         }
     }
 }

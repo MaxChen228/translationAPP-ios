@@ -107,15 +107,24 @@ final class SavedErrorsStore: ObservableObject {
     func addHint(
         _ hint: BankHint,
         categoryLabel: String,
+        prompt: String? = nil,
         stash: SavedStash = .left,
         savedAt: Date = Date()
     ) -> HintSaveResult {
         if hintIDs.contains(hint.id) { return .duplicate }
+        let trimmedPrompt = prompt?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let explanationText: String
+        if let trimmedPrompt, !trimmedPrompt.isEmpty {
+            explanationText = trimmedPrompt
+        } else {
+            explanationText = ""
+        }
+
         let payload = KnowledgeSavePayload(
             id: UUID(),
             savedAt: savedAt,
             title: hint.text,
-            explanation: "",
+            explanation: explanationText,
             correctExample: "",
             note: categoryLabel,
             sourceHintID: hint.id

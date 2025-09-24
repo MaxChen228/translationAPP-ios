@@ -211,7 +211,8 @@ private extension ContentView {
 
     func handleHintSave(_ hint: BankHint) {
         let categoryName = localizedString(for: hint.category.displayNameKey)
-        let result = savedStore.addHint(hint, categoryLabel: categoryName)
+        let prompt = session.inputZh
+        let result = savedStore.addHint(hint, categoryLabel: categoryName, prompt: prompt)
         let successTitle = String(localized: "hint.save.success", locale: locale)
         let duplicateTitle = String(localized: "hint.save.duplicate", locale: locale)
 
