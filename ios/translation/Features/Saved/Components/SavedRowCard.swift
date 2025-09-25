@@ -60,13 +60,7 @@ struct SavedErrorRowCard: View {
                     .foregroundStyle(.primary)
                     .lineLimit(2)
                 if let note = payload.note, !note.isEmpty {
-                    Text(note)
-                        .dsType(DS.Font.caption)
-                        .foregroundStyle(DS.Brand.scheme.classicBlue)
-                        .padding(.horizontal, DS.Component.Chip.paddingHorizontal)
-                        .padding(.vertical, DS.Component.Chip.paddingVertical)
-                        .background(DS.Brand.scheme.classicBlue.opacity(0.1))
-                        .clipShape(Capsule())
+                    DSTagLabel(title: note, color: DS.Brand.scheme.classicBlue)
                 }
             } else {
                 parseErrorText

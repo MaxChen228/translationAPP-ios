@@ -58,6 +58,11 @@ final class FlashcardDecksStore: ObservableObject {
         decks[i].cards.removeAll { $0.id == cardID }
     }
 
+    func replaceCards(in deckID: UUID, with cards: [Flashcard]) {
+        guard let idx = decks.firstIndex(where: { $0.id == deckID }) else { return }
+        decks[idx].cards = cards
+    }
+
     @discardableResult
     func removeCards(_ ids: Set<UUID>, from deckID: UUID) -> [Flashcard] {
         guard !ids.isEmpty, let deckIndex = decks.firstIndex(where: { $0.id == deckID }) else { return [] }

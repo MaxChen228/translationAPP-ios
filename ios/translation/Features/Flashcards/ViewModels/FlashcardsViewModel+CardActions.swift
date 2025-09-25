@@ -44,10 +44,13 @@ extension FlashcardsViewModel {
         return lines.first ?? card.back
     }
 
-    func shuffleCards() {
+    func shuffleCards(decksStore: FlashcardDecksStore? = nil) {
         guard !session.cards.isEmpty else { return }
-        let preferred = session.current?.id
-        session.shuffle(prefer: preferred)
+        session.shuffle(prefer: nil)
+        if let deckID, let store = decksStore {
+            store.replaceCards(in: deckID, with: session.cards)
+        }
+        originalCards = session.cards
         swipePreview = nil
         session.resetShowBack()
         if isAudioActive {

@@ -29,7 +29,7 @@ final class FlashcardsViewModel: ObservableObject {
 
     let title: String
     let deckID: UUID?
-    let originalCards: [Flashcard]
+    @Published var originalCards: [Flashcard]
     let startEditingOnAppear: Bool
     let session: FlashcardSessionStore
 

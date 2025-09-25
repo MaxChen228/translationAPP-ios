@@ -20,7 +20,7 @@ struct ErrorItemRow: View {
         let theme = ErrorTheme.theme(for: err.type)
         VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
             HStack(alignment: .firstTextBaseline, spacing: DS.Spacing.xs2) {
-                TagLabel(text: err.type.displayName, color: err.type.color)
+                DSTagLabel(titleKey: err.type.displayName, color: err.type.color)
                 Text(err.span)
                     .dsType(DS.Font.body)
                     .foregroundStyle(.primary)

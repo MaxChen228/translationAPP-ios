@@ -9,7 +9,7 @@ struct HintRow: View {
     var body: some View {
         HStack(alignment: .center, spacing: DS.Spacing.xs2) {
             if showCategory {
-                TagLabel(text: hint.category.displayName, color: hint.category.color)
+                DSTagLabel(titleKey: hint.category.displayName, color: hint.category.color)
             }
             Text(hint.text)
                 .dsType(DS.Font.body)
@@ -107,20 +107,6 @@ struct HintListSection: View {
                 .frame(width: max(DS.Metrics.hairline * 2, 1))
                 .padding(.vertical, 6)
         }
-    }
-}
-
-struct TagLabel: View {
-    var text: LocalizedStringKey
-    var color: Color
-    var body: some View {
-        Text(text)
-            .dsType(DS.Font.caption)
-            .padding(.vertical, 3)
-            .padding(.horizontal, 8)
-            .background(Capsule().fill(color.opacity(DS.Opacity.fill)))
-            .overlay(Capsule().stroke(color.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.thin))
-            .foregroundStyle(color)
     }
 }
 

@@ -66,7 +66,15 @@ final class FlashcardSessionStore: ObservableObject {
 
     func shuffle(prefer preferredID: UUID? = nil) {
         guard !cards.isEmpty else { return }
-        let shuffled = cards.shuffled()
+        let currentID = cards.indices.contains(index) ? cards[index].id : nil
+        var shuffled = cards.shuffled()
+        if preferredID == nil, let currentID, cards.count > 1 {
+            var attempts = 0
+            while shuffled.first?.id == currentID && attempts < 4 {
+                shuffled = cards.shuffled()
+                attempts += 1
+            }
+        }
         updateCards(shuffled, prefer: preferredID, defaultIndex: 0)
     }
 

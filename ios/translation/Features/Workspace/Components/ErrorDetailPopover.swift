@@ -8,7 +8,7 @@ struct ErrorDetailPopover: View {
     var body: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.sm2) {
             HStack(spacing: DS.Spacing.sm) {
-                TagLabel(text: err.type.displayName, color: err.type.color)
+                DSTagLabel(titleKey: err.type.displayName, color: err.type.color)
                 Text(err.span)
                     .dsType(DS.Font.bodyEmph)
             }

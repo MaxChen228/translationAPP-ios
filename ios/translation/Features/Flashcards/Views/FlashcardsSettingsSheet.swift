@@ -10,6 +10,8 @@ struct FlashcardsSettingsSheet: View {
     var onOpenAudio: (() -> Void)? = nil
     var onShuffle: (() -> Void)? = nil
     @State private var showResetConfirm: Bool = false
+    @State private var showShuffleSuccess: Bool = false
+    @State private var shuffleSpin: Bool = false
 
     var body: some View {
         ScrollView {
@@ -81,11 +83,30 @@ struct FlashcardsSettingsSheet: View {
                     Text("settings.flashcards.reset.hint").dsType(DS.Font.caption).foregroundStyle(.secondary)
                     HStack(spacing: DS.Spacing.md) {
                         Button {
+                            guard onShuffle != nil else { return }
                             onShuffle?()
                             Haptics.selection()
+                            shuffleSpin.toggle()
+                            withAnimation(DS.AnimationToken.subtle) {
+                                showShuffleSuccess = true
+                            }
                             bannerCenter.show(title: String(localized: "flashcards.shuffle.done", locale: locale))
+                            Task {
+                                try? await Task.sleep(nanoseconds: 1_200_000_000)
+                                await MainActor.run {
+                                    withAnimation(DS.AnimationToken.subtle) {
+                                        showShuffleSuccess = false
+                                    }
+                                }
+                            }
                         } label: {
-                            Text("flashcards.shuffle")
+                            Label {
+                                Text("flashcards.shuffle")
+                            } icon: {
+                                Image(systemName: "arrow.triangle.2.circlepath")
+                                    .rotationEffect(.degrees(shuffleSpin ? 360 : 0))
+                                    .animation(.easeInOut(duration: 0.65), value: shuffleSpin)
+                            }
                         }
                         .buttonStyle(DSButton(style: .secondary, size: .full))
                         .disabled(onShuffle == nil)
@@ -96,6 +117,13 @@ struct FlashcardsSettingsSheet: View {
                         .buttonStyle(DSButton(style: .secondary, size: .full))
                     }
                     .frame(maxWidth: .infinity)
+                    if showShuffleSuccess {
+                        Text(String(localized: "flashcards.shuffle.done", locale: locale))
+                            .dsType(DS.Font.caption)
+                            .foregroundStyle(DS.Palette.primary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .transition(.opacity)
+                    }
                 }
             }
 

@@ -149,7 +149,7 @@ struct FlashcardsView: View {
                 ttsStore: speechManager.ttsStore,
                 onOpenAudio: { viewModel.showAudioSheet = true },
                 onShuffle: {
-                    viewModel.shuffleCards()
+                    viewModel.shuffleCards(decksStore: decksStore)
                 }
             )
                 .presentationDetents([.large])
