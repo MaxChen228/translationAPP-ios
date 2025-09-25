@@ -106,7 +106,6 @@ final class SavedErrorsStore: ObservableObject {
 
     func addHint(
         _ hint: BankHint,
-        categoryLabel: String,
         prompt: String? = nil,
         stash: SavedStash = .left,
         savedAt: Date = Date()
@@ -126,7 +125,7 @@ final class SavedErrorsStore: ObservableObject {
             title: hint.text,
             explanation: explanationText,
             correctExample: "",
-            note: categoryLabel,
+            note: nil,
             sourceHintID: hint.id
         )
         addKnowledge(payload, stash: stash)
