@@ -75,6 +75,10 @@
 "deck.action.addCard" = "Add Card";
 "nav.deck" = "Flashcards";
 "deck.notFound" = "Deck not found";
+"deck.bulkDelete.confirm" = "Delete selected cards?";
+"deck.move.action" = "Move";
+"deck.move.title" = "Select destination deck";
+"deck.move.empty" = "No other decks available";
 "deck.summary.unfamiliar" = "Unfamiliar";
 "deck.summary.familiar" = "Familiar";
 "deck.folders.title" = "Folders";

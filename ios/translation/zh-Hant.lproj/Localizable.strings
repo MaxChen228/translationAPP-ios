@@ -103,6 +103,10 @@
 "deck.action.addCard" = "新增卡片";
 "nav.deck" = "單字卡";
 "deck.notFound" = "找不到卡片集";
+"deck.bulkDelete.confirm" = "要刪除選取的單字卡嗎？";
+"deck.move.action" = "移動";
+"deck.move.title" = "選擇目標單字卡集";
+"deck.move.empty" = "目前沒有其他單字卡集可供移動";
 "deck.summary.unfamiliar" = "不熟悉";
 "deck.summary.familiar" = "熟悉";
 "deck.folders.title" = "資料夾";

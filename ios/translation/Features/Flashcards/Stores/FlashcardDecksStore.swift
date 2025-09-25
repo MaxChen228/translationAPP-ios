@@ -58,6 +58,29 @@ final class FlashcardDecksStore: ObservableObject {
         decks[i].cards.removeAll { $0.id == cardID }
     }
 
+    @discardableResult
+    func removeCards(_ ids: Set<UUID>, from deckID: UUID) -> [Flashcard] {
+        guard !ids.isEmpty, let deckIndex = decks.firstIndex(where: { $0.id == deckID }) else { return [] }
+        let removed = decks[deckIndex].cards.filter { ids.contains($0.id) }
+        decks[deckIndex].cards.removeAll { ids.contains($0.id) }
+        return removed
+    }
+
+    @discardableResult
+    func moveCards(_ ids: [UUID], from sourceID: UUID, to targetID: UUID) -> [Flashcard] {
+        guard !ids.isEmpty, sourceID != targetID,
+              let sourceIndex = decks.firstIndex(where: { $0.id == sourceID }),
+              let targetIndex = decks.firstIndex(where: { $0.id == targetID }) else { return [] }
+
+        let idSet = Set(ids)
+        let orderedCards = decks[sourceIndex].cards.filter { idSet.contains($0.id) }
+        guard !orderedCards.isEmpty else { return [] }
+
+        decks[sourceIndex].cards.removeAll { idSet.contains($0.id) }
+        decks[targetIndex].cards.append(contentsOf: orderedCards)
+        return orderedCards
+    }
+
     func rename(_ id: UUID, to newName: String) {
         let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
