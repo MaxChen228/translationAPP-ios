@@ -184,6 +184,9 @@
 "practice.records.clear.confirm.title" = "確認清除";
 "practice.records.clear.confirm.message" = "此操作將永久刪除所有練習記錄，無法復原。";
 "practice.records.clear.confirm.action" = "確認刪除";
+"practice.records.delete.confirm.title" = "刪除練習記錄";
+"practice.records.delete.confirm.message" = "確定要刪除這筆練習記錄嗎？此操作無法復原。";
+"practice.records.delete.confirm.action" = "刪除此筆";
 
 /* 後端錯誤 */
 "error.backend.missing" = "網路無法連線，請檢查設定。";

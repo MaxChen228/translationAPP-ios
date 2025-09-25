@@ -156,6 +156,9 @@
 "practice.records.clear.confirm.title" = "Confirm Clear";
 "practice.records.clear.confirm.message" = "This will permanently delete all practice records and cannot be undone.";
 "practice.records.clear.confirm.action" = "Delete All";
+"practice.records.delete.confirm.title" = "Delete Practice Record";
+"practice.records.delete.confirm.message" = "Are you sure you want to delete this practice record? This action cannot be undone.";
+"practice.records.delete.confirm.action" = "Delete Record";
 
 /* Backend errors */
 "error.backend.missing" = "Network unavailable. Please check connection.";
