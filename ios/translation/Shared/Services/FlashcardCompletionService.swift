@@ -29,14 +29,10 @@ enum FlashcardCompletionServiceFactory {
 }
 
 final class FlashcardCompletionHTTP: FlashcardCompletionService {
-    private var baseURL: URL {
-        guard let url = AppConfig.backendURL else {
-            fatalError("BACKEND_URL missing")
-        }
-        return url
-    }
-
     func completeCard(_ request: FlashcardCompletionRequest) async throws -> FlashcardCompletionResponse {
+        guard let baseURL = AppConfig.backendURL else {
+            throw FlashcardCompletionError.backendUnavailable
+        }
         let url = baseURL.appendingPathComponent("flashcards").appendingPathComponent("complete")
         AppLog.uiInfo("[flashcards] POST /flashcards/complete")
         var req = URLRequest(url: url)
@@ -76,6 +72,7 @@ enum FlashcardCompletionError: LocalizedError {
     case networking(Error)
     case noDraft
     case emptyFront
+    case backendUnavailable
 
     var errorDescription: String? {
         switch self {
@@ -96,6 +93,8 @@ enum FlashcardCompletionError: LocalizedError {
             return String(localized: "flashcards.generator.error.noDraft")
         case .emptyFront:
             return String(localized: "flashcards.generator.error.emptyFront")
+        case .backendUnavailable:
+            return String(localized: "banner.backend.missing.subtitle")
         }
     }
 }

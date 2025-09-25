@@ -63,20 +63,28 @@ protocol CloudLibraryService {
     func search(query: String) async throws -> CloudSearchResponse
 }
 
+enum CloudLibraryError: LocalizedError {
+    case backendUnavailable
+
+    var errorDescription: String? {
+        String(localized: "banner.backend.missing.subtitle")
+    }
+}
+
 enum CloudLibraryServiceFactory {
     static func makeDefault() -> CloudLibraryService { CloudLibraryHTTP() }
 }
 
 final class CloudLibraryHTTP: CloudLibraryService {
-    private var base: URL {
-        guard let u = AppConfig.backendURL else {
-            // Methods should only be called after UI has guarded env
-            fatalError("BACKEND_URL missing")
+    private func baseURL() throws -> URL {
+        guard let url = AppConfig.backendURL else {
+            throw CloudLibraryError.backendUnavailable
         }
-        return u
+        return url
     }
 
     func fetchDecks() async throws -> [CloudDeckSummary] {
+        let base = try baseURL()
         let url = base.appendingPathComponent("cloud").appendingPathComponent("decks")
         AppLog.uiInfo("[cloud] GET /cloud/decks")
         let (data, resp) = try await URLSession.shared.data(from: url)
@@ -85,6 +93,7 @@ final class CloudLibraryHTTP: CloudLibraryService {
     }
 
     func fetchDeckDetail(id: String) async throws -> CloudDeckDetail {
+        let base = try baseURL()
         let url = base.appendingPathComponent("cloud").appendingPathComponent("decks").appendingPathComponent(id)
         AppLog.uiInfo("[cloud] GET /cloud/decks/\(id)")
         let (data, resp) = try await URLSession.shared.data(from: url)
@@ -94,6 +103,7 @@ final class CloudLibraryHTTP: CloudLibraryService {
     }
 
     func fetchCourses() async throws -> [CloudCourseSummary] {
+        let base = try baseURL()
         let url = base.appendingPathComponent("cloud").appendingPathComponent("courses")
         AppLog.uiInfo("[cloud] GET /cloud/courses")
         let (data, resp) = try await URLSession.shared.data(from: url)
@@ -102,6 +112,7 @@ final class CloudLibraryHTTP: CloudLibraryService {
     }
 
     func fetchCourseDetail(id: String) async throws -> CloudCourseDetail {
+        let base = try baseURL()
         let url = base.appendingPathComponent("cloud").appendingPathComponent("courses").appendingPathComponent(id)
         AppLog.uiInfo("[cloud] GET /cloud/courses/\(id)")
         let (data, resp) = try await URLSession.shared.data(from: url)
@@ -110,6 +121,7 @@ final class CloudLibraryHTTP: CloudLibraryService {
     }
 
     func fetchCourseBook(courseId: String, bookId: String) async throws -> CloudCourseBook {
+        let base = try baseURL()
         let url = base
             .appendingPathComponent("cloud")
             .appendingPathComponent("courses")
@@ -127,6 +139,7 @@ final class CloudLibraryHTTP: CloudLibraryService {
         guard !trimmed.isEmpty else {
             return CloudSearchResponse(query: "", courses: [], books: [])
         }
+        let base = try baseURL()
         var components = URLComponents(url: base.appendingPathComponent("cloud").appendingPathComponent("search"), resolvingAgainstBaseURL: false)
         components?.queryItems = [URLQueryItem(name: "q", value: trimmed)]
         guard let url = components?.url else { throw URLError(.badURL) }
