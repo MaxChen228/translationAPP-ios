@@ -33,4 +33,11 @@ enum Haptics {
         gen.impactOccurred()
         #endif
     }
+
+    static func selection() {
+        #if os(iOS)
+        let gen = UISelectionFeedbackGenerator()
+        gen.selectionChanged()
+        #endif
+    }
 }

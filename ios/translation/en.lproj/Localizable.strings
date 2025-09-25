@@ -440,6 +440,8 @@
 "settings.flashcards.reset.confirm.title" = "Reset all flashcards?";
 "settings.flashcards.reset.confirm.subtitle" = "This sets every card to Unfamiliar and cannot be undone.";
 "settings.flashcards.reset.done" = "Reset to Unfamiliar";
+"flashcards.shuffle" = "Shuffle";
+"flashcards.shuffle.done" = "Deck order reshuffled";
 "flashcards.round.completed" = "Round complete";
 "flashcards.session.completed" = "Session complete";
 "flashcards.emptyDeckReset.title" = "All Familiar";

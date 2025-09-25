@@ -69,8 +69,15 @@ struct FlashcardsView: View {
                                 llmError: viewModel.llmError,
                                 isGenerating: viewModel.isGeneratingCard,
                                 onGenerate: {
-                                    Task {
-                                        await viewModel.generateCard(using: completionService, locale: locale)
+                                    if AppConfig.backendURL == nil {
+                                        let title = String(localized: "banner.backend.missing.title", locale: locale)
+                                        let subtitle = String(localized: "banner.backend.missing.subtitle", locale: locale)
+                                        bannerCenter.show(title: title, subtitle: subtitle)
+                                        viewModel.llmError = FlashcardCompletionError.backendUnavailable.errorDescription
+                                    } else {
+                                        Task {
+                                            await viewModel.generateCard(using: completionService, locale: locale)
+                                        }
                                     }
                                 },
                                 showsFamiliaritySelector: viewModel.deckID != nil,
@@ -138,7 +145,13 @@ struct FlashcardsView: View {
             Button(String(localized: "action.cancel", locale: locale), role: .cancel) {}
         }
         .sheet(isPresented: binding(\.showSettings)) {
-            FlashcardsSettingsSheet(ttsStore: speechManager.ttsStore, onOpenAudio: { viewModel.showAudioSheet = true })
+            FlashcardsSettingsSheet(
+                ttsStore: speechManager.ttsStore,
+                onOpenAudio: { viewModel.showAudioSheet = true },
+                onShuffle: {
+                    viewModel.shuffleCards()
+                }
+            )
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
                 .presentationContentInteraction(.scrolls)

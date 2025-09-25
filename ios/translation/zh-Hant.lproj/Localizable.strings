@@ -439,6 +439,8 @@
 "settings.flashcards.reset.confirm.title" = "重置所有單字卡？";
 "settings.flashcards.reset.confirm.subtitle" = "此動作會把所有單字卡標記為『不熟悉』，無法復原。";
 "settings.flashcards.reset.done" = "已重置為不熟悉";
+"flashcards.shuffle" = "洗牌";
+"flashcards.shuffle.done" = "已重新隨機排序卡片";
 "flashcards.round.completed" = "本輪完成";
 "flashcards.session.completed" = "複習完成";
 "flashcards.emptyDeckReset.title" = "全部皆熟悉";

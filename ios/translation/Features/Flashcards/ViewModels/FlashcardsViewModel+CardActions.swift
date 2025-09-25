@@ -43,4 +43,15 @@ extension FlashcardsViewModel {
         let lines = PlaybackBuilder.buildBackLines(card.back, fill: speechManager.settings.variantFill)
         return lines.first ?? card.back
     }
+
+    func shuffleCards() {
+        guard !session.cards.isEmpty else { return }
+        let preferred = session.current?.id
+        session.shuffle(prefer: preferred)
+        swipePreview = nil
+        session.resetShowBack()
+        if isAudioActive {
+            audio.restartMaintainingSettings()
+        }
+    }
 }

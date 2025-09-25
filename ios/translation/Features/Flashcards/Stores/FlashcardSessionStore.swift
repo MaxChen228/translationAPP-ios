@@ -64,6 +64,12 @@ final class FlashcardSessionStore: ObservableObject {
         showBack = false
     }
 
+    func shuffle(prefer preferredID: UUID? = nil) {
+        guard !cards.isEmpty else { return }
+        let shuffled = cards.shuffled()
+        updateCards(shuffled, prefer: preferredID, defaultIndex: 0)
+    }
+
     func replaceCard(_ card: Flashcard) {
         guard let idx = cards.firstIndex(where: { $0.id == card.id }) else { return }
         cards[idx] = card

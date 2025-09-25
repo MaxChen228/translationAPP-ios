@@ -8,6 +8,7 @@ struct FlashcardsSettingsSheet: View {
     @EnvironmentObject private var bannerCenter: BannerCenter
     @ObservedObject var ttsStore: TTSSettingsStore
     var onOpenAudio: (() -> Void)? = nil
+    var onShuffle: (() -> Void)? = nil
     @State private var showResetConfirm: Bool = false
 
     var body: some View {
@@ -78,14 +79,23 @@ struct FlashcardsSettingsSheet: View {
             DSOutlineCard {
                 VStack(alignment: .leading, spacing: DS.Spacing.sm) {
                     Text("settings.flashcards.reset.hint").dsType(DS.Font.caption).foregroundStyle(.secondary)
-                    HStack {
-                        Spacer()
+                    HStack(spacing: DS.Spacing.md) {
+                        Button {
+                            onShuffle?()
+                            Haptics.selection()
+                            bannerCenter.show(title: String(localized: "flashcards.shuffle.done", locale: locale))
+                        } label: {
+                            Text("flashcards.shuffle")
+                        }
+                        .buttonStyle(DSButton(style: .secondary, size: .full))
+                        .disabled(onShuffle == nil)
+
                         Button(role: .destructive) { showResetConfirm = true } label: {
                             Text("settings.flashcards.resetAll")
                         }
                         .buttonStyle(DSButton(style: .secondary, size: .full))
-                        .frame(maxWidth: DS.IconSize.entryCardWidth)
                     }
+                    .frame(maxWidth: .infinity)
                 }
             }
 
