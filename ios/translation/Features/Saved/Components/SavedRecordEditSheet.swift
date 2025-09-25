@@ -10,40 +10,40 @@ struct SavedRecordEditSheet: View {
 
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: DS.Spacing.md) {
-                Text(String(localized: "saved.edit.description", locale: locale))
-                    .dsType(DS.Font.caption)
-                    .foregroundStyle(.secondary)
-
-                TextEditor(text: $text)
-                    .font(DS.Font.monoSmall)
-                    .frame(minHeight: 240)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous)
-                            .stroke(DS.Palette.border.opacity(DS.Opacity.border), lineWidth: DS.BorderWidth.hairline)
+            ScrollView {
+                DSEditFormCard(
+                    titleKey: "saved.edit.title",
+                    subtitleKey: "saved.edit.description",
+                    contentSpacing: DS.Spacing.md
+                ) {
+                    DSTextArea(
+                        text: $text,
+                        minHeight: 240,
+                        placeholder: "",
+                        disableAutocorrection: true
                     )
-                    .background(DS.Palette.surface)
+                    .font(DS.Font.monoSmall)
+                } footer: {
+                    HStack(spacing: DS.Spacing.md) {
+                        Button(String(localized: "action.cancel", locale: locale)) {
+                            onCancel()
+                            dismiss()
+                        }
+                        .buttonStyle(DSButton(style: .secondary, size: .full))
 
-                Spacer(minLength: 0)
+                        Button(String(localized: "action.save", locale: locale)) {
+                            onSave()
+                            dismiss()
+                        }
+                        .buttonStyle(DSButton(style: .primary, size: .full))
+                    }
+                }
             }
             .padding(.horizontal, DS.Spacing.lg)
-            .padding(.vertical, DS.Spacing.md)
+            .padding(.vertical, DS.Spacing.lg)
+            .background(DS.Palette.background)
             .navigationTitle(Text("saved.edit.title"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(String(localized: "action.cancel", locale: locale)) {
-                        onCancel()
-                        dismiss()
-                    }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(String(localized: "action.save", locale: locale)) {
-                        onSave()
-                        dismiss()
-                    }
-                }
-            }
         }
     }
 }
