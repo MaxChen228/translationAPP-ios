@@ -27,6 +27,15 @@ final class LocalBankProgressStore: ObservableObject {
         map[name] = book
     }
 
+    func markIncomplete(book name: String, itemId: String) {
+        guard var book = map[name], var rec = book[itemId] else { return }
+        if rec.completed == false { return }
+        rec.completed = false
+        rec.updatedAt = Date()
+        book[itemId] = rec
+        map[name] = book
+    }
+
     func isCompleted(book name: String, itemId: String) -> Bool {
         map[name]?[itemId]?.completed == true
     }

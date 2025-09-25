@@ -53,6 +53,13 @@ struct BankItemDetailView: View {
                                     .foregroundStyle(.secondary)
                                 Spacer()
                                 CompletionBadge(style: .filled(accent: DS.Palette.success))
+                                    .contextMenu {
+                                        Button(role: .destructive) {
+                                            localProgress.markIncomplete(book: bookName, itemId: item.id)
+                                        } label: {
+                                            Label(String(localized: "action.markIncomplete", locale: locale), systemImage: "arrow.uturn.backward")
+                                        }
+                                    }
                             }
                         }
                     }

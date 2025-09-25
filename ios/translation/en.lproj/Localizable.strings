@@ -316,6 +316,7 @@
 "deck.mock.usageLabel" = "Usage";
 "label.progress" = "Progress";
 "label.completed" = "Completed";
+"action.markIncomplete" = "Mark as incomplete";
 "a11y.copyCorrected" = "Copy corrected text";
 "a11y.scoreLabel" = "Score %d pts";
 "bulk.selectionCount" = "%d selected";

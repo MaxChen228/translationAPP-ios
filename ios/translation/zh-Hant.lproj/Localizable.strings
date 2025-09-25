@@ -421,6 +421,7 @@
 "flashcards.validator.bracketsMismatch" = "括號需成對";
 "label.progress" = "進度";
 "label.completed" = "已完成";
+"action.markIncomplete" = "標記為未完成";
 "a11y.copyCorrected" = "複製修正版";
 "a11y.scoreLabel" = "分數 %d 分";
 "deck.new" = "新單字卡集";

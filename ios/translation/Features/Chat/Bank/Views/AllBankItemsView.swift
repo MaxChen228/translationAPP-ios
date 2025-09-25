@@ -251,6 +251,13 @@ struct AllBankItemsView: View {
                     ) {
                         if isCompleted {
                             CompletionBadge()
+                                .contextMenu {
+                                    Button(role: .destructive) {
+                                        localProgress.markIncomplete(book: bookName, itemId: item.id)
+                                    } label: {
+                                        Label(String(localized: "action.markIncomplete", locale: locale), systemImage: "arrow.uturn.backward")
+                                    }
+                                }
                         } else {
                             Button {
                                 handlePractice(bookName: bookName, item: item, tag: item.tags?.first)

@@ -201,6 +201,13 @@ struct LocalBankListView: View {
                                 CompletionBadge(style: .outline(showsChevron: true, accent: DS.Palette.primary))
                             }
                             .buttonStyle(.plain)
+                            .contextMenu {
+                                Button(role: .destructive) {
+                                    localProgress.markIncomplete(book: bookName, itemId: item.id)
+                                } label: {
+                                    Label(String(localized: "action.markIncomplete", locale: locale), systemImage: "arrow.uturn.backward")
+                                }
+                            }
                         } else {
                             Button {
                                 if let onPractice {
