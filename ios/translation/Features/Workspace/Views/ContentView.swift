@@ -15,6 +15,8 @@ struct ContentView: View {
     @ObservedObject private var practice: PracticeSessionCoordinator
     @EnvironmentObject private var savedStore: SavedErrorsStore
     @EnvironmentObject private var bannerCenter: BannerCenter
+    @EnvironmentObject private var localBank: LocalBankStore
+    @EnvironmentObject private var localProgress: LocalBankProgressStore
 
     init(correctionRunner: CorrectionRunning = CorrectionServiceFactory.makeDefault()) {
         let viewModel = CorrectionViewModel(correctionRunner: correctionRunner)
@@ -43,7 +45,13 @@ struct ContentView: View {
                         DSSectionHeader(titleKey: "content.zh.title", subtitleKey: "content.zh.subtitle", accentUnderline: true)
                         Spacer()
                         NavigationLink {
-                            BankBooksView(vm: vm)
+                            BankBooksView(
+                                vm: vm,
+                                onPracticeLocal: { book, item, tag in
+                                    vm.bindLocalBankStores(localBank: localBank, progress: localProgress)
+                                    vm.startLocalPractice(bookName: book, item: item, tag: tag)
+                                }
+                            )
                         } label: {
                             DSIconLabel(textKey: "content.bank", systemName: "books.vertical")
                         }

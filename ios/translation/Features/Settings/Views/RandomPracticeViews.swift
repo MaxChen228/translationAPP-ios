@@ -13,8 +13,93 @@ struct RandomPracticeSettingsSheet: View {
         )
     }
 
+    private var bookScopeContext: (raw: Set<String>, available: Set<String>) {
+        let available = Set(localBank.books.map { $0.name })
+        let raw = settings.normalizedBookScope(with: available)
+        return (raw, available)
+    }
+
+    private var scopedBooks: [LocalBankBook] {
+        let context = bookScopeContext
+        let allowed = context.raw.isEmpty ? context.available : context.raw
+        guard !allowed.isEmpty else { return [] }
+        return localBank.books.filter { allowed.contains($0.name) }
+    }
+
+    private var hasCustomScope: Bool {
+        !bookScopeContext.raw.isEmpty && !bookScopeContext.available.isEmpty
+    }
+
+    private var bookScopeSummaryText: String {
+        let context = bookScopeContext
+        guard !context.available.isEmpty else {
+            return String(localized: "bank.random.scope.summary.empty")
+        }
+        if context.raw.isEmpty {
+            return String(localized: "bank.random.scope.summary.all")
+        }
+        return String(
+            format: String(localized: "bank.random.scope.summary.count"),
+            Int64(context.raw.count),
+            Int64(context.available.count)
+        )
+    }
+
+    private var bookScopePreviewText: String? {
+        let context = bookScopeContext
+        guard !context.available.isEmpty, !context.raw.isEmpty else { return nil }
+        let names = Array(context.raw).sorted()
+        let preview = names.prefix(3)
+        guard !preview.isEmpty else { return nil }
+        let separator = String(localized: "bank.random.scope.preview.separator")
+        let previewText = preview.joined(separator: separator)
+        let remainder = names.count - preview.count
+        if remainder <= 0 {
+            return previewText
+        }
+        return previewText + String(
+            format: String(localized: "bank.random.scope.preview.more"),
+            Int64(remainder)
+        )
+    }
+
+    private var scopeSelectorCard: some View {
+        let accent = DS.Palette.primary
+        let fillColor = hasCustomScope ? accent.opacity(DS.Opacity.fill) : nil
+        return DSOutlineCard(padding: DS.Spacing.sm2, fill: fillColor) {
+            HStack(alignment: .center, spacing: DS.Spacing.sm) {
+                Image(systemName: hasCustomScope ? "checkmark.circle" : "books.vertical")
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundStyle(hasCustomScope ? accent : .secondary)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(String(localized: "bank.random.scope.selector.title"))
+                        .dsType(DS.Font.bodyEmph)
+                        .foregroundStyle(.primary)
+
+                    Text(bookScopeSummaryText)
+                        .dsType(DS.Font.caption)
+                        .foregroundStyle(hasCustomScope ? accent : .secondary)
+
+                    if let preview = bookScopePreviewText {
+                        Text(preview)
+                            .dsType(DS.Font.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: DS.IconSize.chevronSm, weight: .semibold))
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.vertical, DS.Spacing.sm)
+        }
+    }
+
     private var tagStats: [String: Int] {
-        localBank.books
+        scopedBooks
             .flatMap { $0.items }
             .compactMap { $0.tags }
             .flatMap { $0 }
@@ -24,7 +109,7 @@ struct RandomPracticeSettingsSheet: View {
     }
 
     private var allItems: [BankItem] {
-        localBank.books.flatMap { $0.items }
+        scopedBooks.flatMap { $0.items }
     }
 
     private var difficultyStats: [(difficulty: Int, count: Int)] {
@@ -42,7 +127,7 @@ struct RandomPracticeSettingsSheet: View {
         let filterState = settings.filterState
         let selectedDifficulties = settings.selectedDifficulties
 
-        return localBank.books.reduce(into: 0) { acc, book in
+        return scopedBooks.reduce(into: 0) { acc, book in
             for item in book.items {
                 if !selectedDifficulties.isEmpty && !selectedDifficulties.contains(item.difficulty) {
                     continue
@@ -70,6 +155,13 @@ struct RandomPracticeSettingsSheet: View {
                             Text("bank.random.excludeCompleted")
                         }
                     }
+
+                    NavigationLink {
+                        RandomPracticeBookScopeView()
+                    } label: {
+                        scopeSelectorCard
+                    }
+                    .buttonStyle(.plain)
 
                     if totalItemCount > 0 {
                         VStack(alignment: .leading, spacing: DS.Spacing.xs) {

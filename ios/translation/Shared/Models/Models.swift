@@ -54,6 +54,7 @@ struct AIResponse: Codable, Equatable {
     var corrected: String
     var score: Int
     var errors: [ErrorItem]
+    var commentary: String? = nil
 }
 
 // 高亮區段（在使用者英文中的 Range 與樣式）

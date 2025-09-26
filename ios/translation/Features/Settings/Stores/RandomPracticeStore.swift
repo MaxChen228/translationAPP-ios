@@ -9,6 +9,7 @@ final class RandomPracticeStore: ObservableObject {
         static let selectedCategories = "random.selectedCategories"
         static let filterMode = "random.filterMode"
         static let selectedDifficulties = "random.selectedDifficulties"
+        static let selectedBooks = "random.selectedBooks"
     }
 
     @Published var excludeCompleted: Bool {
@@ -23,6 +24,10 @@ final class RandomPracticeStore: ObservableObject {
         didSet { persistSelectedDifficulties() }
     }
 
+    @Published var selectedBooks: Set<String> {
+        didSet { persistSelectedBooks() }
+    }
+
     private let defaults: UserDefaults
 
     init(defaults: UserDefaults = .standard) {
@@ -30,6 +35,19 @@ final class RandomPracticeStore: ObservableObject {
         self.excludeCompleted = defaults.object(forKey: StorageKey.excludeCompleted) as? Bool ?? true
         self.filterState = RandomPracticeStore.loadFilterState(defaults: defaults)
         self.selectedDifficulties = RandomPracticeStore.loadSelectedDifficulties(defaults: defaults)
+        self.selectedBooks = RandomPracticeStore.loadSelectedBooks(defaults: defaults)
+    }
+
+    func normalizedBookScope(with availableBooks: Set<String>) -> Set<String> {
+        let scope = selectedBooks.intersection(availableBooks)
+        if scope != selectedBooks {
+            selectedBooks = scope
+        }
+        return scope
+    }
+
+    func setSelectedBooks(_ newValue: Set<String>) {
+        selectedBooks = newValue
     }
 
     private func persistExcludeCompleted() {
@@ -49,6 +67,14 @@ final class RandomPracticeStore: ObservableObject {
     private func persistSelectedDifficulties() {
         let values = Array(selectedDifficulties)
         defaults.set(values, forKey: StorageKey.selectedDifficulties)
+    }
+
+    private func persistSelectedBooks() {
+        if selectedBooks.isEmpty {
+            defaults.removeObject(forKey: StorageKey.selectedBooks)
+        } else {
+            defaults.set(Array(selectedBooks), forKey: StorageKey.selectedBooks)
+        }
     }
 
     private static func loadFilterState(defaults: UserDefaults) -> TagFilterState {
@@ -76,6 +102,13 @@ final class RandomPracticeStore: ObservableObject {
 
     private static func loadSelectedDifficulties(defaults: UserDefaults) -> Set<Int> {
         if let stored = defaults.array(forKey: StorageKey.selectedDifficulties) as? [Int] {
+            return Set(stored)
+        }
+        return []
+    }
+
+    private static func loadSelectedBooks(defaults: UserDefaults) -> Set<String> {
+        if let stored = defaults.array(forKey: StorageKey.selectedBooks) as? [String] {
             return Set(stored)
         }
         return []

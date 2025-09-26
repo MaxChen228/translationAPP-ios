@@ -54,8 +54,10 @@ enum AppConfig {
             return url
         }
 
-        return nil
+        return fallbackBackendURL
     }
+
+    private static let fallbackBackendURL = URL(string: "https://translation-l9qi.onrender.com")
 
     // All service endpoints derive from BACKEND_URL
     static var correctAPIURL: URL? {
@@ -145,6 +147,7 @@ final class AIServiceHTTP: AIService {
         let corrected: String
         let score: Int
         let errors: [ErrorDTO]
+        let commentary: String?
     }
 
     func correct(
@@ -194,7 +197,13 @@ final class AIServiceHTTP: AIService {
             errors.append(ErrorItem(id: e.id ?? UUID(), span: e.span, type: type, explainZh: e.explainZh, suggestion: e.suggestion, hints: hints))
         }
 
-        let response = AIResponse(corrected: dto.corrected, score: dto.score, errors: errors)
+        let trimmedCommentary = dto.commentary?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let response = AIResponse(
+            corrected: dto.corrected,
+            score: dto.score,
+            errors: errors,
+            commentary: (trimmedCommentary?.isEmpty == false) ? trimmedCommentary : nil
+        )
 
         // Compute highlights, prefer indices if provided
         let originalHighlights = computeOriginalHighlights(en: en, dtoErrors: dto.errors)

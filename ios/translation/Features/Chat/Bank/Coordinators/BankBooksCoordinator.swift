@@ -176,8 +176,13 @@ final class BankBooksCoordinator: ObservableObject {
         let filterState = randomSettingsStore.filterState
         let selectedDifficulties = randomSettingsStore.selectedDifficulties
 
+        let availableNames = Set(localBankStore.books.map { $0.name })
+        let normalizedScope = randomSettingsStore.normalizedBookScope(with: availableNames)
+        let allowedNames = normalizedScope.isEmpty ? availableNames : normalizedScope
+        guard !allowedNames.isEmpty else { return nil }
+
         var pool: [(String, BankItem)] = []
-        for book in localBankStore.books {
+        for book in localBankStore.books where allowedNames.contains(book.name) {
             for item in book.items {
                 if !selectedDifficulties.isEmpty && !selectedDifficulties.contains(item.difficulty) {
                     continue

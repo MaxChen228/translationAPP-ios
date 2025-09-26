@@ -366,6 +366,8 @@
 "content.next" = "Next";
 "results.errors.title" = "Errors";
 "results.errors.subtitle" = "Tap items to focus highlights";
+"results.commentary.title" = "AI Feedback";
+"a11y.commentary" = "Commentary: %@";
 "results.empty" = "No errors detected.";
 "result.switcher.original" = "Original";
 
@@ -425,6 +427,21 @@
 "bank.random.eligibleCount" = "Eligible items: %lld";
 "bank.random.tags.empty.title" = "No tagged items available";
 "bank.random.tags.empty.subtitle" = "Add tags to your local bank or clear the filter to keep using random practice.";
+
+"bank.random.scope.title" = "Question Scope";
+"bank.random.scope.summary.title" = "Question Scope";
+"bank.random.scope.selector.title" = "Question Scope";
+"bank.random.scope.summary.empty" = "No books available";
+"bank.random.scope.summary.all" = "All books";
+"bank.random.scope.summary.count" = "Selected %lld / %lld books";
+"bank.random.scope.preview.separator" = ", ";
+"bank.random.scope.preview.more" = " and %lld more";
+"bank.random.scope.selectAll" = "Include all books";
+"bank.random.scope.section.folders" = "Folders";
+"bank.random.scope.section.standalone" = "Unfiled Books";
+"bank.random.scope.section.empty" = "No unfiled books";
+"bank.random.scope.empty.title" = "No local books yet";
+"bank.random.scope.empty.subtitle" = "Copy from cloud or add a new book before configuring the scope.";
 "banner.random.noneEligible" = "No qualifying items available";
 "bank.folders.empty" = "No folders";
 "bank.local.empty" = "No local banks";

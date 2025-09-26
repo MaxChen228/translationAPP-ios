@@ -59,6 +59,8 @@
 "content.next" = "下一題";
 "results.errors.title" = "錯誤列表";
 "results.errors.subtitle" = "點擊項目可聚焦對應高亮";
+"results.commentary.title" = "AI 點評";
+"a11y.commentary" = "點評：%@";
 "results.empty" = "未偵測到錯誤。";
 "result.switcher.original" = "原文";
 "result.switcher.corrected" = "修正版";
@@ -404,6 +406,21 @@
 "bank.random.eligibleCount" = "符合條件：%lld 題";
 "bank.random.tags.empty.title" = "目前沒有帶標籤的題目";
 "bank.random.tags.empty.subtitle" = "請確認本機題庫已設定標籤，或清除標籤篩選。";
+
+"bank.random.scope.title" = "出題範圍";
+"bank.random.scope.summary.title" = "出題範圍";
+"bank.random.scope.selector.title" = "出題範圍";
+"bank.random.scope.summary.empty" = "目前沒有題庫";
+"bank.random.scope.summary.all" = "全部題庫";
+"bank.random.scope.summary.count" = "已選 %lld / %lld 本";
+"bank.random.scope.preview.separator" = "、";
+"bank.random.scope.preview.more" = " 等 %lld 本";
+"bank.random.scope.selectAll" = "全部題庫";
+"bank.random.scope.section.folders" = "資料夾";
+"bank.random.scope.section.standalone" = "未分類題庫";
+"bank.random.scope.section.empty" = "目前沒有未分類題庫";
+"bank.random.scope.empty.title" = "目前沒有本機題庫";
+"bank.random.scope.empty.subtitle" = "請先從雲端複製或新增題庫，再設定出題範圍。";
 "banner.random.noneEligible" = "沒有符合條件的題目";
 "bank.folders.empty" = "尚無資料夾";
 "bank.local.empty" = "目前沒有題庫本";
