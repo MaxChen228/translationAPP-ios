@@ -367,6 +367,7 @@
 /* Workspace 狀態 */
 "workspace.status.loading" = "批改中…";
 "workspace.status.graded" = "已批改";
+"workspace.status.saved" = "已儲存";
 "workspace.status.input" = "已輸入";
 "workspace.status.empty" = "空白";
 

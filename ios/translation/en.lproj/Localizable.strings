@@ -401,6 +401,7 @@
 /* Workspace status */
 "workspace.status.loading" = "Grading…";
 "workspace.status.graded" = "Graded";
+"workspace.status.saved" = "Saved";
 "workspace.status.input" = "Input";
 "workspace.status.empty" = "Empty";
 

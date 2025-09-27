@@ -6,6 +6,7 @@ enum WorkspaceStateKey: String, CaseIterable {
     case response
     case practicedHints
     case showPracticedHints
+    case resultSaved
 }
 
 protocol WorkspaceStatePersisting {

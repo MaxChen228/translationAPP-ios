@@ -6,11 +6,13 @@ final class CorrectionSessionStore: ObservableObject {
     private let persistence: WorkspaceStatePersisting
     private let correctionRunner: CorrectionRunning
     private let workspaceID: String
+    private var isRestoringState = true
 
     @Published var inputZh: String {
         didSet {
             if inputZh != oldValue {
                 persistence.writeString(inputZh, key: .inputZh)
+                if !isRestoringState { markResultUnsaved() }
             }
         }
     }
@@ -19,6 +21,7 @@ final class CorrectionSessionStore: ObservableObject {
         didSet {
             if inputEn != oldValue {
                 persistence.writeString(inputEn, key: .inputEn)
+                if !isRestoringState { markResultUnsaved() }
             }
         }
     }
@@ -26,6 +29,8 @@ final class CorrectionSessionStore: ObservableObject {
     @Published private(set) var response: AIResponse? {
         didSet { persistResponse() }
     }
+
+    @Published private(set) var isResultSaved: Bool
 
     @Published private(set) var highlights: [Highlight]
     @Published private(set) var correctedHighlights: [Highlight]
@@ -79,6 +84,7 @@ final class CorrectionSessionStore: ObservableObject {
         }
 
         self.showPracticedHints = persistence.readBool(.showPracticedHints)
+        self.isResultSaved = persistence.readBool(.resultSaved)
         self.highlights = []
         self.correctedHighlights = []
         self.selectedErrorID = nil
@@ -91,9 +97,31 @@ final class CorrectionSessionStore: ObservableObject {
             self.correctedHighlights = Highlighter.computeHighlightsInCorrected(text: res.corrected, errors: res.errors)
             self.selectedErrorID = res.errors.first?.id
         }
+
+        isRestoringState = false
+    }
+
+    func markResultSaved() {
+        guard !isResultSaved else { return }
+        isResultSaved = true
+        persistence.writeBool(true, key: .resultSaved)
+    }
+
+    func markResultUnsaved(force: Bool = false) {
+        if force {
+            if isResultSaved {
+                isResultSaved = false
+            }
+            persistence.remove(.resultSaved)
+            return
+        }
+        guard !isRestoringState, isResultSaved else { return }
+        isResultSaved = false
+        persistence.remove(.resultSaved)
     }
 
     func resetSession() {
+        markResultUnsaved(force: true)
         inputZh = ""
         inputEn = ""
         response = nil
@@ -127,10 +155,14 @@ final class CorrectionSessionStore: ObservableObject {
         cardMode = .original
         popoverError = nil
         currentSuggestion = suggestion
+        markResultUnsaved(force: true)
     }
 
     func updateSuggestion(_ suggestion: String?) {
-        currentSuggestion = suggestion
+        if currentSuggestion != suggestion {
+            currentSuggestion = suggestion
+            if !isRestoringState { markResultUnsaved() }
+        }
     }
 
     private(set) var currentBankItemId: String?
@@ -150,6 +182,7 @@ final class CorrectionSessionStore: ObservableObject {
         guard let range = Highlighter.range(for: error, in: inputEn) else { return }
         inputEn.replaceSubrange(range, with: suggestion)
         recomputeHighlights()
+        if !isRestoringState { markResultUnsaved() }
     }
 
     func performCorrection(deviceId: String?) async throws -> AICorrectionResult {
@@ -175,6 +208,7 @@ final class CorrectionSessionStore: ObservableObject {
             correctedHighlights = Highlighter.computeHighlightsInCorrected(text: result.response.corrected, errors: result.response.errors)
         }
         selectedErrorID = result.response.errors.first?.id
+        markResultUnsaved()
         return result
     }
 
@@ -192,6 +226,7 @@ final class CorrectionSessionStore: ObservableObject {
         highlights = []
         correctedHighlights = []
         selectedErrorID = nil
+        markResultUnsaved()
     }
 
     func filteredErrors() -> [ErrorItem] {
@@ -221,6 +256,7 @@ final class CorrectionSessionStore: ObservableObject {
            merged.type != filter {
             filterType = merged.type
         }
+        markResultUnsaved()
     }
 
     private func recomputeHighlights() {

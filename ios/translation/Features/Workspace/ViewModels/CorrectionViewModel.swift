@@ -85,6 +85,7 @@ final class CorrectionViewModel: ObservableObject {
             session.inputZh = String(localized: "content.sample.zh")
         }
 
+        session.markResultUnsaved()
         isLoading = true
         errorMessage = nil
         merge.cancel()
@@ -131,6 +132,7 @@ final class CorrectionViewModel: ObservableObject {
     func savePracticeRecord() {
         do {
             let record = try practice.savePracticeRecord(currentInput: session.inputEn, response: session.response)
+            session.markResultSaved()
             NotificationCenter.default.post(name: .practiceRecordSaved, object: nil, userInfo: [
                 "score": record.score,
                 "errors": record.errors.count,

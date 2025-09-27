@@ -16,6 +16,9 @@ struct ResultSwitcherCard: View {
     var selectedErrorID: UUID?
 
     @Binding var mode: Mode
+    var commentary: String? = nil
+
+    @State private var isCommentaryExpanded: Bool = true
 
     // copy 內文：一次複製三段（依當前語言顯示前綴）
     private var copyString: String {
@@ -29,6 +32,7 @@ struct ResultSwitcherCard: View {
         DSCard {
             header
             ScoreBarView(score: score)
+            commentarySection
             contentPager
         }
     }
@@ -47,6 +51,62 @@ struct ResultSwitcherCard: View {
             }
             .buttonStyle(.plain)
         }
+    }
+
+    @ViewBuilder
+    private var commentarySection: some View {
+        let trimmed = commentary?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if !trimmed.isEmpty {
+            VStack(alignment: .leading, spacing: DS.Spacing.sm) {
+                Button {
+                    withAnimation(DS.AnimationToken.subtle) {
+                        isCommentaryExpanded.toggle()
+                    }
+                } label: {
+                    HStack(spacing: DS.Spacing.sm) {
+                        commentaryIcon
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("results.commentary.title")
+                                .dsType(DS.Font.caption)
+                                .foregroundStyle(.secondary)
+                                .textCase(nil)
+                            if !isCommentaryExpanded {
+                                Text(trimmed)
+                                    .dsType(DS.Font.body)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                            }
+                        }
+                        Spacer(minLength: 0)
+                        Image(systemName: isCommentaryExpanded ? "chevron.up" : "chevron.down")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+
+                if isCommentaryExpanded {
+                    Text(trimmed)
+                        .dsType(DS.Font.body, lineSpacing: 4)
+                        .foregroundStyle(.primary)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel(Text(String(format: String(localized: "a11y.commentary", locale: locale), trimmed)))
+        }
+    }
+
+    private var commentaryIcon: some View {
+        ZStack {
+            Circle()
+                .fill(DS.Brand.scheme.babyBlue.opacity(0.25))
+            Image(systemName: "sparkles")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(DS.Brand.scheme.classicBlue)
+        }
+        .frame(width: 28, height: 28)
     }
 
     private var contentPager: some View {

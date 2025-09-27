@@ -25,7 +25,6 @@ struct ResultsSectionView: View {
     let onCancelMerge: () -> Void
 
     @StateObject private var mergeAnimator = MergeAnimationCoordinator()
-    @State private var isCommentaryExpanded: Bool = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.lg) {
@@ -38,15 +37,9 @@ struct ResultsSectionView: View {
                 originalHighlights: highlights,
                 correctedHighlights: correctedHighlights,
                 selectedErrorID: selectedErrorID,
-                mode: $mode
+                mode: $mode,
+                commentary: res.commentary
             )
-
-            if let commentary = res.commentary, !commentary.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                ResultCommentaryView(
-                    commentary: commentary,
-                    isExpanded: $isCommentaryExpanded
-                )
-            }
 
             DSSectionHeader(titleKey: "results.errors.title", subtitleKey: "results.errors.subtitle", accentUnderline: true)
             TypeChipsView(errors: res.errors, selection: $filterType)
@@ -208,66 +201,5 @@ private struct MergeToolbar: View {
             .padding(.vertical, DS.Spacing.md)
             .background(.thinMaterial)
         }
-    }
-}
-
-private struct ResultCommentaryView: View {
-    @Environment(\.locale) private var locale
-    let commentary: String
-    @Binding var isExpanded: Bool
-
-    var body: some View {
-        DSCard {
-            VStack(alignment: .leading, spacing: DS.Spacing.sm) {
-                Button {
-                    DSMotion.run(DS.AnimationToken.subtle) {
-                        isExpanded.toggle()
-                    }
-                } label: {
-                    HStack(spacing: DS.Spacing.sm) {
-                        iconBadge
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("results.commentary.title")
-                                .dsType(DS.Font.caption)
-                                .foregroundStyle(.secondary)
-                                .textCase(nil)
-                            if !isExpanded {
-                                Text(commentary)
-                                    .dsType(DS.Font.body)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(1)
-                            }
-                        }
-                        Spacer(minLength: 0)
-                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(.secondary)
-                    }
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-
-                if isExpanded {
-                    Text(commentary)
-                        .dsType(DS.Font.body, lineSpacing: 4)
-                        .foregroundStyle(.primary)
-                        .transition(.opacity.combined(with: .move(edge: .top)))
-                }
-            }
-        }
-        .animation(.easeInOut(duration: 0.2), value: isExpanded)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(Text(String(format: String(localized: "a11y.commentary", locale: locale), commentary)))
-    }
-
-    private var iconBadge: some View {
-        ZStack {
-            Circle()
-                .fill(DS.Brand.scheme.babyBlue.opacity(0.25))
-            Image(systemName: "sparkles")
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(DS.Brand.scheme.classicBlue)
-        }
-        .frame(width: 28, height: 28)
     }
 }

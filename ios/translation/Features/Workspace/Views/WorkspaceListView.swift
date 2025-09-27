@@ -163,6 +163,7 @@ private struct WorkspaceItemLink: View {
 
     var statusKey: LocalizedStringKey {
         if viewModel.isLoading { return "workspace.status.loading" }
+        if viewModel.session.isResultSaved { return "workspace.status.saved" }
         if viewModel.session.response != nil { return "workspace.status.graded" }
         if !(viewModel.session.inputZh.isEmpty && viewModel.session.inputEn.isEmpty) { return "workspace.status.input" }
         return "workspace.status.empty"
@@ -171,6 +172,7 @@ private struct WorkspaceItemLink: View {
     var statusColor: Color {
         // 主色以藍、白、灰為基礎；完成狀態用暖色作為強調色
         if viewModel.isLoading { return DS.Palette.primary }
+        if viewModel.session.isResultSaved { return DS.Palette.success }
         if viewModel.session.response != nil { return DS.Brand.scheme.cornhusk }
         if !(viewModel.session.inputZh.isEmpty && viewModel.session.inputEn.isEmpty) { return DS.Brand.scheme.monument }
         return DS.Palette.border.opacity(DS.Opacity.muted)
