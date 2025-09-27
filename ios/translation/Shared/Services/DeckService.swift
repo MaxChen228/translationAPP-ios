@@ -2,17 +2,69 @@ import Foundation
 
 struct DeckMakeRequest: Codable {
     struct Item: Codable {
-        let en: String
-        let suggestion: String?
-        let explainZh: String
+        let title: String?
+        let explanation: String?
+        let example: String?
         let note: String?
+        let source: String?
+        let tags: [String]?
+
+        // Legacy fields retained for backward compatibility/prompt context
+        let en: String?
+        let suggestion: String?
+        let explainZh: String?
+
+        let raw: RawSnapshot?
+
+        struct RawSnapshot: Codable {
+            let id: UUID
+            let title: String
+            let explanation: String
+            let correctExample: String
+            let note: String?
+            let sourceHintID: String?
+            let savedAtISO8601: String
+        }
+
+        private static let isoFormatter: ISO8601DateFormatter = {
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            return formatter
+        }()
 
         static func knowledge(_ payload: KnowledgeSavePayload) -> Item {
-            Item(
-                en: payload.correctExample,
-                suggestion: payload.title.isEmpty ? nil : payload.title,
-                explainZh: payload.explanation,
-                note: payload.note?.isEmpty == true ? nil : payload.note
+            let trimmedTitle = payload.title.trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmedExplanation = payload.explanation.trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmedExample = payload.correctExample.trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmedNote = payload.note?.trimmingCharacters(in: .whitespacesAndNewlines)
+            let sourceTag = payload.sourceHintID == nil ? "error" : "hint"
+
+            let snapshot = RawSnapshot(
+                id: payload.id,
+                title: payload.title,
+                explanation: payload.explanation,
+                correctExample: payload.correctExample,
+                note: payload.note,
+                sourceHintID: payload.sourceHintID?.uuidString,
+                savedAtISO8601: isoFormatter.string(from: payload.savedAt)
+            )
+
+            let cleanedNote: String? = {
+                guard let trimmedNote, !trimmedNote.isEmpty else { return nil }
+                return trimmedNote
+            }()
+
+            return Item(
+                title: trimmedTitle.isEmpty ? nil : trimmedTitle,
+                explanation: trimmedExplanation.isEmpty ? nil : trimmedExplanation,
+                example: trimmedExample.isEmpty ? nil : trimmedExample,
+                note: cleanedNote,
+                source: sourceTag,
+                tags: nil,
+                en: trimmedExample.isEmpty ? nil : trimmedExample,
+                suggestion: trimmedTitle.isEmpty ? nil : trimmedTitle,
+                explainZh: trimmedExplanation.isEmpty ? nil : trimmedExplanation,
+                raw: snapshot
             )
         }
     }
