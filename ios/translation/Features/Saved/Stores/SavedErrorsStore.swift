@@ -23,16 +23,18 @@ struct SavedErrorRecord: Codable, Identifiable, Equatable {
     let createdAt: Date
     var json: String
     var stash: SavedStash = .left
+    var deckedAt: Date? = nil
 
     private enum CodingKeys: String, CodingKey {
-        case id, createdAt, json, stash
+        case id, createdAt, json, stash, deckedAt
     }
 
-    init(id: UUID, createdAt: Date, json: String, stash: SavedStash) {
+    init(id: UUID, createdAt: Date, json: String, stash: SavedStash, deckedAt: Date? = nil) {
         self.id = id
         self.createdAt = createdAt
         self.json = json
         self.stash = stash
+        self.deckedAt = deckedAt
     }
 
     init(from decoder: Decoder) throws {
@@ -41,6 +43,7 @@ struct SavedErrorRecord: Codable, Identifiable, Equatable {
         createdAt = try container.decode(Date.self, forKey: .createdAt)
         json = try container.decode(String.self, forKey: .json)
         stash = try container.decodeIfPresent(SavedStash.self, forKey: .stash) ?? .left
+        deckedAt = try container.decodeIfPresent(Date.self, forKey: .deckedAt)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -49,6 +52,7 @@ struct SavedErrorRecord: Codable, Identifiable, Equatable {
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(json, forKey: .json)
         try container.encode(stash, forKey: .stash)
+        try container.encode(deckedAt, forKey: .deckedAt)
     }
 }
 
@@ -149,6 +153,21 @@ final class SavedErrorsStore: ObservableObject {
     func move(_ id: UUID, to stash: SavedStash) {
         guard let idx = items.firstIndex(where: { $0.id == id }) else { return }
         items[idx].stash = stash
+    }
+
+    func markDecked(_ ids: [UUID], at date: Date = Date()) {
+        guard !ids.isEmpty else { return }
+        let markSet = Set(ids)
+        var mutated = false
+        for idx in items.indices {
+            if markSet.contains(items[idx].id) {
+                items[idx].deckedAt = date
+                mutated = true
+            }
+        }
+        if mutated {
+            items = items
+        }
     }
 
     func update(_ id: UUID, json: String) {

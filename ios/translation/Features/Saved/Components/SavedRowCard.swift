@@ -7,6 +7,7 @@ struct DecodedRecord: Identifiable, Equatable {
     let createdAt: Date
     let rawJSON: String
     let stash: SavedStash
+    let deckedAt: Date?
     let payload: KnowledgeSavePayload?
     let display: DecodedRecordDisplay
 }
@@ -32,7 +33,8 @@ struct SavedErrorRowCard: View {
     @Environment(\.locale) private var locale
 
     var body: some View {
-        DSCard(fill: DS.Palette.surface) {
+        let isDecked = row.deckedAt != nil
+        DSCard(fill: isDecked ? DS.Palette.success.opacity(0.12) : DS.Palette.surface) {
             VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
                 HStack(spacing: DS.Spacing.xs2) {
                     summaryContent
@@ -50,6 +52,17 @@ struct SavedErrorRowCard: View {
                 }
             }
         }
+        .overlay(alignment: .topTrailing) {
+            if row.deckedAt != nil {
+                deckedBadge()
+                    .padding(.top, DS.Spacing.xs)
+                    .padding(.trailing, DS.Spacing.xs)
+            }
+        }
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
+                .stroke(isDecked ? DS.Palette.success.opacity(0.4) : Color.clear, lineWidth: isDecked ? DS.BorderWidth.thin : 0)
+        )
     }
 
     private var summaryContent: some View {
@@ -154,6 +167,22 @@ struct SavedErrorRowCard: View {
         Text(String(localized: "saved.unparsable", locale: locale))
             .dsType(DS.Font.caption)
             .foregroundStyle(.secondary)
+    }
+
+    private func deckedBadge() -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 13, weight: .semibold))
+            Text(String(localized: "saved.decked", locale: locale))
+                .dsType(DS.Font.caption)
+        }
+        .padding(.horizontal, DS.Spacing.sm)
+        .padding(.vertical, DS.Spacing.xs)
+        .background(
+            Capsule().fill(DS.Palette.success.opacity(0.2))
+        )
+        .foregroundStyle(DS.Palette.success)
+        .accessibilityLabel(Text(String(localized: "a11y.decked", locale: locale)))
     }
 
     private var rawJSONView: some View {

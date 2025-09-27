@@ -181,6 +181,7 @@ struct SavedJSONListSheet: View {
         let effectiveName = name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? String(localized: "deck.untitled", locale: locale) : name
         let deckService = self.deckService
         let decksStore = self.decksStore
+        let savedStore = self.store
         let bannerCenter = self.bannerCenter
         let locale = self.locale
 
@@ -201,7 +202,9 @@ struct SavedJSONListSheet: View {
 
             do {
                 let (resolvedName, cards) = try await deckService.makeDeck(name: effectiveName, concepts: requestItems)
+                let recordIDs = records.map(\.id)
                 await MainActor.run {
+                    savedStore.markDecked(recordIDs)
                     _ = decksStore.add(name: resolvedName, cards: cards)
                     showSaveDeckSheet = false
                     isSaving = false
@@ -232,6 +235,7 @@ private extension SavedJSONListSheet {
                 createdAt: rec.createdAt,
                 rawJSON: rec.json,
                 stash: rec.stash,
+                deckedAt: rec.deckedAt,
                 payload: payload,
                 display: display
             )

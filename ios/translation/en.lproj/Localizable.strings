@@ -315,6 +315,8 @@
 "saved.edit.description" = "Update the saved JSON content.";
 "saved.edit.invalid" = "Invalid JSON format";
 "saved.edit.success" = "Saved item updated";
+"saved.decked" = "Decked";
+"a11y.decked" = "Card already created";
 "saved.edit.mode.picker" = "Edit Mode";
 "saved.edit.mode.form" = "Fields";
 "saved.edit.mode.json" = "JSON";

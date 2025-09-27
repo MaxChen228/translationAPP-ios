@@ -345,6 +345,8 @@
 "saved.edit.description" = "更新已儲存的 JSON 內容。";
 "saved.edit.invalid" = "JSON 格式不正確";
 "saved.edit.success" = "已更新儲存項目";
+"saved.decked" = "已製卡";
+"a11y.decked" = "此紀錄已製卡";
 "saved.edit.mode.picker" = "編輯模式";
 "saved.edit.mode.form" = "欄位";
 "saved.edit.mode.json" = "JSON";

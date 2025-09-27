@@ -22,12 +22,6 @@ struct CalendarMonth {
     let month: Int
     let days: [CalendarDay]
 
-    var monthYear: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy年M月"
-        let date = Calendar.current.date(from: DateComponents(year: year, month: month)) ?? Date()
-        return formatter.string(from: date)
-    }
 }
 
 struct DayPracticeStats {
@@ -48,5 +42,60 @@ struct DayPracticeStats {
     }
     var practiceTime: TimeInterval {
         records.map { $0.completedAt.timeIntervalSince($0.createdAt) }.reduce(0, +)
+    }
+}
+
+
+extension CalendarMonth {
+    func formattedMonthYear(locale: Locale, calendar: Calendar) -> String {
+        CalendarFormatting.monthYear(year: year, month: month, locale: locale, calendar: calendar)
+    }
+}
+
+enum CalendarFormatting {
+    static func monthYear(year: Int, month: Int, locale: Locale, calendar: Calendar) -> String {
+        var components = DateComponents()
+        components.calendar = calendar
+        components.year = year
+        components.month = month
+        components.day = 1
+
+        guard let date = components.date else { return "" }
+
+        let formatter = DateFormatter()
+        formatter.calendar = calendar
+        formatter.locale = locale
+        formatter.setLocalizedDateFormatFromTemplate("yMMMM")
+        return formatter.string(from: date)
+    }
+
+    static func monthAndDay(_ date: Date, locale: Locale, calendar: Calendar) -> (month: String, day: String) {
+        let monthFormatter = DateFormatter()
+        monthFormatter.calendar = calendar
+        monthFormatter.locale = locale
+        monthFormatter.setLocalizedDateFormatFromTemplate("MMMM")
+
+        let dayFormatter = DateFormatter()
+        dayFormatter.calendar = calendar
+        dayFormatter.locale = locale
+        dayFormatter.setLocalizedDateFormatFromTemplate("d")
+
+        let month = monthFormatter.string(from: date)
+        let day = dayFormatter.string(from: date)
+        return (month, day)
+    }
+
+    static func practiceDuration(_ interval: TimeInterval, locale: Locale) -> String? {
+        guard interval > 0 else { return nil }
+
+        let duration = Duration.seconds(interval)
+        let style = Duration.UnitsFormatStyle.units(
+            allowed: [.hours, .minutes],
+            width: .wide,
+            maximumUnitCount: 2
+        ).locale(locale)
+
+        let formatted = duration.formatted(style)
+        return formatted.isEmpty ? nil : formatted
     }
 }

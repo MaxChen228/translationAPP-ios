@@ -3,6 +3,8 @@ import SwiftUI
 struct CalendarView: View {
     @StateObject private var viewModel = CalendarViewModel()
     @EnvironmentObject private var practiceRecordsStore: PracticeRecordsStore
+    @Environment(\.locale) private var locale
+    @Environment(\.calendar) private var calendar
 
     var body: some View {
         ScrollView {
@@ -63,7 +65,7 @@ struct CalendarView: View {
 
             Spacer(minLength: DS.Spacing.md)
 
-            Text(viewModel.calendarMonth.monthYear)
+            Text(viewModel.calendarMonth.formattedMonthYear(locale: locale, calendar: calendar))
                 .dsType(DS.Font.title)
                 .fontWeight(.semibold)
 

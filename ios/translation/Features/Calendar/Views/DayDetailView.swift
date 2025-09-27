@@ -3,6 +3,17 @@ import SwiftUI
 struct DayDetailView: View {
     let stats: DayPracticeStats
 
+    @Environment(\.locale) private var locale
+    @Environment(\.calendar) private var calendar
+
+    private var monthDay: (month: String, day: String) {
+        CalendarFormatting.monthAndDay(stats.date, locale: locale, calendar: calendar)
+    }
+
+    private var practiceDurationText: String? {
+        CalendarFormatting.practiceDuration(stats.practiceTime, locale: locale)
+    }
+
     var body: some View {
         DSOutlineCard(padding: DS.Spacing.lg, fill: DS.Palette.surfaceAlt.opacity(0.25)) {
             VStack(alignment: .leading, spacing: DS.Spacing.lg) {
@@ -12,18 +23,20 @@ struct DayDetailView: View {
 
                 statsGrid
 
-                if stats.count > 1 {
+                if stats.count > 1, let durationText = practiceDurationText {
                     DSSeparator(color: DS.Palette.border.opacity(DS.Opacity.hairline))
-                    practiceTimeInfo
+                    practiceTimeInfo(durationText)
                 }
             }
         }
     }
 
     private var headerSection: some View {
-        HStack(alignment: .center, spacing: DS.Spacing.lg) {
+        let components = monthDay
+
+        return HStack(alignment: .center, spacing: DS.Spacing.lg) {
             HStack(alignment: .bottom, spacing: DS.Spacing.xs2) {
-                Text(formattedMonth)
+                Text(components.month)
                     .font(.custom(
                         DS.FontFamily.tangerineCandidates.first ?? "Tangerine-Bold",
                         size: 60
@@ -37,7 +50,7 @@ struct DayDetailView: View {
                     ))
                     .baselineOffset(8)
 
-                Text(formattedDay)
+                Text(components.day)
                     .font(.custom(
                         DS.FontFamily.tangerineCandidates.first ?? "Tangerine-Regular",
                         size: 40
@@ -94,40 +107,18 @@ struct DayDetailView: View {
         )
     }
 
-    private var practiceTimeInfo: some View {
+    private func practiceTimeInfo(_ durationText: String) -> some View {
         HStack(spacing: DS.Spacing.xs) {
             Image(systemName: "clock")
                 .dsType(DS.Font.caption)
                 .foregroundStyle(DS.Palette.subdued)
 
-            Text("總練習時間：\(formattedPracticeTime)")
+            Text("總練習時間：\(durationText)")
                 .dsType(DS.Font.caption)
                 .foregroundStyle(DS.Palette.subdued)
         }
     }
 
-    private var formattedMonth: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "M"
-        return formatter.string(from: stats.date)
-    }
-
-    private var formattedDay: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "d"
-        return formatter.string(from: stats.date)
-    }
-
-    private var formattedPracticeTime: String {
-        let minutes = Int(stats.practiceTime / 60)
-        if minutes < 60 {
-            return "\(minutes) 分鐘"
-        } else {
-            let hours = minutes / 60
-            let remainingMinutes = minutes % 60
-            return "\(hours) 小時 \(remainingMinutes) 分鐘"
-        }
-    }
 }
 
 private struct AnimatedStreakBadge: View {
