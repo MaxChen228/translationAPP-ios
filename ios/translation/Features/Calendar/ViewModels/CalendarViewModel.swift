@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import Combine
 
 @MainActor
 final class CalendarViewModel: ObservableObject {
@@ -9,6 +10,7 @@ final class CalendarViewModel: ObservableObject {
     @Published var dayStats: [Date: DayPracticeStats] = [:]
 
     private var practiceRecordsStore: PracticeRecordsStore?
+    private var recordsObservation: AnyCancellable?
     private let calendar = Calendar.current
 
     init() {
@@ -17,8 +19,17 @@ final class CalendarViewModel: ObservableObject {
     }
 
     func bindPracticeRecordsStore(_ store: PracticeRecordsStore) {
-        self.practiceRecordsStore = store
-        updateCalendar()
+        guard practiceRecordsStore !== store else { return }
+
+        practiceRecordsStore = store
+        recordsObservation?.cancel()
+        recordsObservation = store.$records
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.handleRecordsUpdated()
+            }
+
+        handleRecordsUpdated()
     }
 
     func selectDay(_ day: CalendarDay) {
@@ -43,6 +54,25 @@ final class CalendarViewModel: ObservableObject {
     private func updateCalendar() {
         calendarMonth = buildCalendarMonth(for: currentDate)
         buildDayStats()
+    }
+
+    private func handleRecordsUpdated() {
+        let previouslySelectedDate = selectedDay?.date
+
+        updateCalendar()
+
+        guard let previouslySelectedDate else {
+            if selectedDay != nil, calendarMonth.days.isEmpty {
+                selectedDay = nil
+            }
+            return
+        }
+
+        if let updatedSelection = calendarMonth.days.first(where: { calendar.isDate($0.date, inSameDayAs: previouslySelectedDate) }) {
+            selectedDay = updatedSelection.hasActivity ? updatedSelection : nil
+        } else {
+            selectedDay = nil
+        }
     }
 
     private func buildCalendarMonth(for date: Date) -> CalendarMonth {
@@ -164,4 +194,9 @@ final class CalendarViewModel: ObservableObject {
         let month = calendar.component(.month, from: date)
         return CalendarMonth(year: year, month: month, days: [])
     }
+
+    deinit {
+        recordsObservation?.cancel()
+    }
+
 }
