@@ -41,7 +41,9 @@ final class RandomPracticeStore: ObservableObject {
     func normalizedBookScope(with availableBooks: Set<String>) -> Set<String> {
         let scope = selectedBooks.intersection(availableBooks)
         if scope != selectedBooks {
-            selectedBooks = scope
+            Task { @MainActor [weak self] in
+                self?.selectedBooks = scope
+            }
         }
         return scope
     }
