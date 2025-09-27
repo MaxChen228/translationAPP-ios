@@ -18,6 +18,7 @@ struct ContentView: View {
     @EnvironmentObject private var localBank: LocalBankStore
     @EnvironmentObject private var localProgress: LocalBankProgressStore
     @EnvironmentObject private var settings: AppSettingsStore
+    @EnvironmentObject private var practiceRecords: PracticeRecordsStore
 
     init(correctionRunner: CorrectionRunning = CorrectionServiceFactory.makeDefault()) {
         let viewModel = CorrectionViewModel(correctionRunner: correctionRunner)
@@ -182,7 +183,7 @@ struct ContentView: View {
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     NavigationLink {
-                        PracticeRecordsListView()
+                        PracticeRecordsListView(store: practiceRecords)
                     } label: {
                         Image(systemName: "doc.text")
                     }
