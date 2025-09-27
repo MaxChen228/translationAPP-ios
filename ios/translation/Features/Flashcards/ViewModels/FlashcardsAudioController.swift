@@ -34,7 +34,8 @@ class FlashcardsAudioController {
             speechManager.resume()
             return
         }
-        startTTS(with: viewModel.lastTTSSettings ?? speechManager.settings)
+        let latestSettings = speechManager.settings
+        startTTS(with: latestSettings)
     }
 
     func jumpForward() {
@@ -57,7 +58,7 @@ class FlashcardsAudioController {
 
     func restartMaintainingSettings() {
         guard isActive else { return }
-        let settings = viewModel.lastTTSSettings ?? speechManager.settings
+        let settings = speechManager.settings
         speechManager.stop()
         startTTS(with: settings)
     }
