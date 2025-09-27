@@ -5,38 +5,107 @@ enum PlaybackBuilder {
     static func buildQueue(cards: [Flashcard], startIndex: Int, settings: TTSSettings) -> [SpeechItem] {
         guard !cards.isEmpty else { return [] }
         var queue: [SpeechItem] = []
-        let rate = max(0.3, min(0.6, settings.rate))
-        let sGap = settings.segmentGap
-        let cGap = settings.cardGap
+        let order = orderedFields(for: settings)
 
         for idx in startIndex..<cards.count {
             let card = cards[idx]
-            let frontText = card.front
-            let backLines = buildBackLines(card.back, fill: settings.variantFill)
+            let payloads = makeFieldPayloads(for: card, settings: settings)
+            var spokenAny = false
 
-            func addFront(isCardEnd: Bool = false) {
-                queue.append(SpeechItem(text: frontText, langCode: settings.frontLang, rate: rate, preDelay: 0, postDelay: sGap, cardIndex: idx, face: .front, isCardEnd: isCardEnd))
+            let activePayloads: [FieldPayload] = order.compactMap { field in
+                guard let payload = payloads[field] else { return nil }
+                let config = settings.fieldConfig(for: field)
+                guard config.enabled, !payload.lines.isEmpty else { return nil }
+                return payload
             }
-            func addBack(isCardEnd: Bool = false) {
-                for (i, line) in backLines.enumerated() {
-                    let post = (i == backLines.count - 1) ? 0 : sGap
-                    let isLastBack = (i == backLines.count - 1) && isCardEnd
-                    queue.append(SpeechItem(text: line, langCode: settings.backLang, rate: rate, preDelay: i == 0 ? 0 : 0, postDelay: post, cardIndex: (i == 0 && settings.readOrder == .backOnly) ? idx : (i == 0 && settings.readOrder == .backThenFront ? idx : idx), face: .back, isCardEnd: isLastBack))
+
+            guard !activePayloads.isEmpty else { continue }
+
+            for (fieldIndex, payload) in activePayloads.enumerated() {
+                let isLastField = fieldIndex == activePayloads.count - 1
+                let fieldRate = settings.resolvedRate(for: payload.field)
+                let fieldGap = settings.resolvedGap(for: payload.field)
+
+                for (lineIndex, line) in payload.lines.enumerated() {
+                    let isLastLineInField = lineIndex == payload.lines.count - 1
+                    let isCardEnd = isLastField && isLastLineInField
+                    let postDelay = isLastLineInField ? fieldGap : settings.segmentGap
+                    queue.append(
+                        SpeechItem(
+                            text: line,
+                            langCode: payload.lang,
+                            rate: fieldRate,
+                            preDelay: lineIndex == 0 ? 0 : 0,
+                            postDelay: postDelay,
+                            cardIndex: idx,
+                            face: payload.face,
+                            isCardEnd: isCardEnd
+                        )
+                    )
+                    spokenAny = true
                 }
             }
 
-            switch settings.readOrder {
-            case .frontOnly: addFront(isCardEnd: true)
-            case .backOnly: addBack(isCardEnd: true)
-            case .frontThenBack: addFront(); addBack(isCardEnd: true)
-            case .backThenFront: addBack(); queue.append(SpeechItem(text: frontText, langCode: settings.frontLang, rate: rate, preDelay: sGap, postDelay: 0, cardIndex: idx, face: .front, isCardEnd: true))
-            }
-            // card gap
-            if idx != cards.count - 1 {
-                queue.append(SpeechItem(text: "", langCode: settings.backLang, rate: rate, preDelay: cGap, postDelay: 0, cardIndex: nil, face: nil, isCardEnd: false))
+            if spokenAny && idx != cards.count - 1 {
+                queue.append(
+                    SpeechItem(
+                        text: "",
+                        langCode: settings.backLang,
+                        rate: settings.rate,
+                        preDelay: settings.cardGap,
+                        postDelay: 0,
+                        cardIndex: nil,
+                        face: nil,
+                        isCardEnd: false
+                    )
+                )
             }
         }
         return queue
+    }
+
+    private struct FieldPayload {
+        let field: TTSField
+        let lines: [String]
+        let lang: String
+        let face: SpeechFace
+    }
+
+    private static func orderedFields(for settings: TTSSettings) -> [TTSField] {
+        switch settings.readOrder {
+        case .frontOnly:
+            return [.front, .frontNote]
+        case .backOnly:
+            return [.back, .backNote]
+        case .frontThenBack:
+            return [.front, .frontNote, .back, .backNote]
+        case .backThenFront:
+            return [.back, .backNote, .front, .frontNote]
+        }
+    }
+
+    private static func makeFieldPayloads(for card: Flashcard, settings: TTSSettings) -> [TTSField: FieldPayload] {
+        var map: [TTSField: FieldPayload] = [:]
+
+        let trimmedFront = card.front.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmedFront.isEmpty {
+            map[.front] = FieldPayload(field: .front, lines: [trimmedFront], lang: settings.frontLang, face: .front)
+        }
+
+        if let note = card.frontNote?.trimmingCharacters(in: .whitespacesAndNewlines), !note.isEmpty {
+            map[.frontNote] = FieldPayload(field: .frontNote, lines: [note], lang: settings.frontLang, face: .front)
+        }
+
+        let backLines = buildBackLines(card.back, fill: settings.variantFill)
+        if !backLines.isEmpty {
+            map[.back] = FieldPayload(field: .back, lines: backLines, lang: settings.backLang, face: .back)
+        }
+
+        if let backNote = card.backNote?.trimmingCharacters(in: .whitespacesAndNewlines), !backNote.isEmpty {
+            map[.backNote] = FieldPayload(field: .backNote, lines: [backNote], lang: settings.backLang, face: .back)
+        }
+
+        return map
     }
 
     // Back variant algorithm: index-aligned combination across groups.

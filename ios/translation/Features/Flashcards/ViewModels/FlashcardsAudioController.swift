@@ -19,8 +19,8 @@ class FlashcardsAudioController {
         viewModel.lastTTSSettings = settings
     }
 
-    func speak(text: String, lang: String) {
-        let rate = speechManager.settings.rate
+    func speak(field: TTSField, text: String, lang: String) {
+        let rate = speechManager.settings.resolvedRate(for: field)
         speechManager.speak(text: text, lang: lang, rate: rate, speech: speechManager.speechEngine)
         viewModel.lastTTSSettings = speechManager.settings
     }

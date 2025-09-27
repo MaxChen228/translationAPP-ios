@@ -7,8 +7,8 @@ extension FlashcardsViewModel {
         audio.startTTS(with: settings)
     }
 
-    func speak(text: String, lang: String) {
-        audio.speak(text: text, lang: lang)
+    func speak(field: TTSField, text: String, lang: String) {
+        audio.speak(field: field, text: text, lang: lang)
     }
 
     func ttsToggle() {

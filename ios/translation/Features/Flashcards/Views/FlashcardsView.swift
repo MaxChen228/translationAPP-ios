@@ -150,6 +150,9 @@ struct FlashcardsView: View {
                 onOpenAudio: { viewModel.showAudioSheet = true },
                 onShuffle: {
                     viewModel.shuffleCards(decksStore: decksStore)
+                },
+                onDone: {
+                    viewModel.audio.restartMaintainingSettings()
                 }
             )
                 .presentationDetents([.large])

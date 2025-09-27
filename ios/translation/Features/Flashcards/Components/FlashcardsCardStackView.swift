@@ -76,17 +76,17 @@ struct FlashcardsCardStackView: View {
                     style: .outline,
                     size: 32
                 )
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                 .padding(.top, DS.Spacing.md)
                 .padding(.trailing, DS.Spacing.md)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
             }
 
             FlashcardsPlaySideButton(style: .outline, diameter: 28) {
                 if session.showBack {
                     let text = viewModel.backTextToSpeak(for: card)
-                    viewModel.speak(text: text, lang: speechManager.settings.backLang)
+                    viewModel.speak(field: .back, text: text, lang: speechManager.settings.backLang)
                 } else {
-                    viewModel.speak(text: card.front, lang: speechManager.settings.frontLang)
+                    viewModel.speak(field: .front, text: card.front, lang: speechManager.settings.frontLang)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)

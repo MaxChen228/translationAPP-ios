@@ -9,9 +9,11 @@ struct FlashcardsSettingsSheet: View {
     @ObservedObject var ttsStore: TTSSettingsStore
     var onOpenAudio: (() -> Void)? = nil
     var onShuffle: (() -> Void)? = nil
+    var onDone: (() -> Void)? = nil
     @State private var showResetConfirm: Bool = false
     @State private var showShuffleSuccess: Bool = false
     @State private var shuffleSpin: Bool = false
+    @State private var showAdvancedSettings: Bool = false
 
     var body: some View {
         ScrollView {
@@ -28,55 +30,9 @@ struct FlashcardsSettingsSheet: View {
                 Text(helpText).dsType(DS.Font.caption).foregroundStyle(.secondary)
             }
 
-            // Inline TTS settings（取代舊的入口按鈕）
-            DSOutlineCard {
-                VStack(alignment: .leading, spacing: DS.Spacing.sm2) {
-                    Text("tts.title").dsType(DS.Font.section)
-                    VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
-                        Text("tts.order").dsType(DS.Font.caption).foregroundStyle(.secondary)
-                        let s = ttsStore.settings
-                        Picker("tts.order", selection: Binding(get: { s.readOrder }, set: { ttsStore.settings.readOrder = $0 })) {
-                            Text(ReadOrder.frontOnly.displayName).tag(ReadOrder.frontOnly)
-                            Text(ReadOrder.backOnly.displayName).tag(ReadOrder.backOnly)
-                            Text(ReadOrder.frontThenBack.displayName).tag(ReadOrder.frontThenBack)
-                            Text(ReadOrder.backThenFront.displayName).tag(ReadOrder.backThenFront)
-                        }
-                        .pickerStyle(.segmented)
-                        .tint(DS.Palette.primary)
-                    }
+            FieldSettingsSection(store: ttsStore)
 
-                    HStack(spacing: DS.Spacing.lg) {
-                        VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
-                            HStack { Text("tts.rate").dsType(DS.Font.caption).foregroundStyle(.secondary); Spacer(); Text(String(format: "%.2fx", ttsStore.settings.rate)).dsType(DS.Font.caption).foregroundStyle(.secondary) }
-                            Slider(value: Binding(get: { Double(ttsStore.settings.rate) }, set: { ttsStore.settings.rate = Float($0) }), in: 0.3...0.6)
-                                .tint(DS.Palette.primary)
-                        }
-                    }
-
-                    HStack(spacing: DS.Spacing.lg) {
-                        VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
-                            HStack { Text("tts.segmentGap").dsType(DS.Font.caption).foregroundStyle(.secondary); Spacer(); Text(String(format: "%.1fs", ttsStore.settings.segmentGap)).dsType(DS.Font.caption).foregroundStyle(.secondary) }
-                            Slider(value: Binding(get: { ttsStore.settings.segmentGap }, set: { ttsStore.settings.segmentGap = $0 }), in: 0...2, step: 0.1)
-                                .tint(DS.Palette.primary)
-                        }
-                        VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
-                            HStack { Text("tts.cardGap").dsType(DS.Font.caption).foregroundStyle(.secondary); Spacer(); Text(String(format: "%.1fs", ttsStore.settings.cardGap)).dsType(DS.Font.caption).foregroundStyle(.secondary) }
-                            Slider(value: Binding(get: { ttsStore.settings.cardGap }, set: { ttsStore.settings.cardGap = $0 }), in: 0...3, step: 0.1)
-                                .tint(DS.Palette.primary)
-                        }
-                    }
-
-                    VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
-                        Text("tts.variantFill").dsType(DS.Font.caption).foregroundStyle(.secondary)
-                        Picker("tts.variantFill", selection: Binding(get: { ttsStore.settings.variantFill }, set: { ttsStore.settings.variantFill = $0 })) {
-                            Text(VariantFill.random.displayName).tag(VariantFill.random)
-                            Text(VariantFill.wrap.displayName).tag(VariantFill.wrap)
-                        }
-                        .pickerStyle(.segmented)
-                        .tint(DS.Palette.primary)
-                    }
-                }
-            }
+            AdvancedSettingsCard(store: ttsStore, isExpanded: $showAdvancedSettings, onOpenAudio: onOpenAudio)
 
             DSOutlineCard {
                 VStack(alignment: .leading, spacing: DS.Spacing.sm) {
@@ -128,7 +84,10 @@ struct FlashcardsSettingsSheet: View {
             }
 
             HStack { Spacer()
-                Button(String(localized: "action.done", locale: locale)) { dismiss() }
+                Button(String(localized: "action.done", locale: locale)) {
+                    onDone?()
+                    dismiss()
+                }
                     .buttonStyle(DSButton(style: .secondary, size: .full))
                     .frame(width: DS.ButtonSize.medium)
             }
@@ -154,5 +113,218 @@ struct FlashcardsSettingsSheet: View {
         } else {
             return String(localized: "flashcards.settings.help.browse", locale: locale)
         }
+    }
+}
+
+private struct FieldSettingsSection: View {
+    @ObservedObject var store: TTSSettingsStore
+
+    var body: some View {
+        let snapshot = store.settings
+        DSOutlineCard {
+            VStack(alignment: .leading, spacing: DS.Spacing.sm2) {
+                Text(String(localized: "tts.fieldSettings.title", defaultValue: "Field playback"))
+                    .dsType(DS.Font.section)
+                Text(String(localized: "tts.fieldSettings.subtitle", defaultValue: "Choose which parts to read and fine-tune each section."))
+                    .dsType(DS.Font.caption)
+                    .foregroundStyle(.secondary)
+                ForEach(Array(TTSField.allCases.enumerated()), id: \.element.id) { index, field in
+                    FieldSettingsRow(
+                        field: field,
+                        config: binding(for: field),
+                        globalRate: snapshot.rate,
+                        globalGap: snapshot.segmentGap
+                    )
+                    if index != TTSField.allCases.count - 1 {
+                        Divider().padding(.vertical, DS.Spacing.xs)
+                    }
+                }
+            }
+        }
+    }
+
+    private func binding(for field: TTSField) -> Binding<TTSFieldSettings> {
+        Binding(
+            get: { store.settings.fieldConfig(for: field) },
+            set: { newValue in
+                var s = store.settings
+                s.fieldSettings[field] = newValue
+                store.settings = s
+            }
+        )
+    }
+}
+
+private struct FieldSettingsRow: View {
+    let field: TTSField
+    @Binding var config: TTSFieldSettings
+    var globalRate: Float
+    var globalGap: Double
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
+            Toggle(isOn: $config.enabled) {
+                Text(field.localizedTitle)
+                    .dsType(DS.Font.bodyEmph)
+            }
+            .toggleStyle(SwitchToggleStyle(tint: DS.Palette.primary))
+
+            if config.enabled {
+                let useCustomRate = Binding<Bool>(
+                    get: { config.rateOverride != nil },
+                    set: { newValue in
+                        if newValue {
+                            config.rateOverride = config.rateOverride ?? globalRate
+                        } else {
+                            config.rateOverride = nil
+                        }
+                    }
+                )
+
+                let rateBinding = Binding<Double>(
+                    get: { Double(config.rateOverride ?? globalRate) },
+                    set: { config.rateOverride = Float($0) }
+                )
+
+                let useCustomGap = Binding<Bool>(
+                    get: { config.gapOverride != nil },
+                    set: { newValue in
+                        if newValue {
+                            config.gapOverride = config.gapOverride ?? globalGap
+                        } else {
+                            config.gapOverride = nil
+                        }
+                    }
+                )
+
+                let gapBinding = Binding<Double>(
+                    get: { config.gapOverride ?? globalGap },
+                    set: { config.gapOverride = $0 }
+                )
+
+                VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
+                    Toggle(isOn: useCustomRate) {
+                        Text(String(localized: "tts.field.customRate", defaultValue: "Custom rate"))
+                            .dsType(DS.Font.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    if useCustomRate.wrappedValue {
+                        Slider(value: rateBinding, in: 0.3...0.6)
+                            .tint(DS.Palette.primary)
+                        Text(String(format: "%.2fx", rateBinding.wrappedValue))
+                            .dsType(DS.Font.caption)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Text(String(format: String(localized: "tts.field.followGlobalRate", defaultValue: "Follow global (%.2fx)"), globalRate))
+                            .dsType(DS.Font.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Toggle(isOn: useCustomGap) {
+                        Text(String(localized: "tts.field.customGap", defaultValue: "Custom pause"))
+                            .dsType(DS.Font.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    if useCustomGap.wrappedValue {
+                        Slider(value: gapBinding, in: 0...2, step: 0.1)
+                            .tint(DS.Palette.primary)
+                        Text(String(format: "%.1fs", gapBinding.wrappedValue))
+                            .dsType(DS.Font.caption)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Text(String(format: String(localized: "tts.field.followGlobalGap", defaultValue: "Follow global (%.1fs)"), globalGap))
+                            .dsType(DS.Font.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .padding(.leading, DS.Spacing.sm)
+            }
+        }
+    }
+}
+
+private struct AdvancedSettingsCard: View {
+    @ObservedObject var store: TTSSettingsStore
+    @Binding var isExpanded: Bool
+    var onOpenAudio: (() -> Void)?
+
+    var body: some View {
+        let snapshot = store.settings
+        DSOutlineCard {
+            DisclosureGroup(isExpanded: $isExpanded) {
+                VStack(alignment: .leading, spacing: DS.Spacing.sm2) {
+                    Text(String(localized: "tts.order")).dsType(DS.Font.caption).foregroundStyle(.secondary)
+                    Picker("tts.order", selection: Binding(get: { store.settings.readOrder }, set: { store.settings.readOrder = $0 })) {
+                        ForEach(ReadOrder.allCases) { order in
+                            Text(order.displayName).tag(order)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .tint(DS.Palette.primary)
+
+                    VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
+                        HStack {
+                            Text("tts.rate").dsType(DS.Font.caption).foregroundStyle(.secondary)
+                            Spacer()
+                            Text(String(format: "%.2fx", store.settings.rate)).dsType(DS.Font.caption).foregroundStyle(.secondary)
+                        }
+                        Slider(value: Binding(get: { Double(store.settings.rate) }, set: { store.settings.rate = Float($0) }), in: 0.3...0.6)
+                            .tint(DS.Palette.primary)
+                    }
+
+                    VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
+                        HStack {
+                            Text("tts.segmentGap").dsType(DS.Font.caption).foregroundStyle(.secondary)
+                            Spacer()
+                            Text(String(format: "%.1fs", store.settings.segmentGap)).dsType(DS.Font.caption).foregroundStyle(.secondary)
+                        }
+                        Slider(value: Binding(get: { store.settings.segmentGap }, set: { store.settings.segmentGap = $0 }), in: 0...2, step: 0.1)
+                            .tint(DS.Palette.primary)
+                    }
+
+                    VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
+                        HStack {
+                            Text("tts.cardGap").dsType(DS.Font.caption).foregroundStyle(.secondary)
+                            Spacer()
+                            Text(String(format: "%.1fs", store.settings.cardGap)).dsType(DS.Font.caption).foregroundStyle(.secondary)
+                        }
+                        Slider(value: Binding(get: { store.settings.cardGap }, set: { store.settings.cardGap = $0 }), in: 0...3, step: 0.1)
+                            .tint(DS.Palette.primary)
+                    }
+
+                    VStack(alignment: .leading, spacing: DS.Spacing.xs2) {
+                        Text("tts.variantFill").dsType(DS.Font.caption).foregroundStyle(.secondary)
+                        Picker("tts.variantFill", selection: Binding(get: { store.settings.variantFill }, set: { store.settings.variantFill = $0 })) {
+                            ForEach(VariantFill.allCases) { fill in
+                                Text(fill.displayName).tag(fill)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .tint(DS.Palette.primary)
+                    }
+
+                    if let onOpenAudio {
+                        Button(String(localized: "tts.openAudioPanel", defaultValue: "Open audio controls")) {
+                            onOpenAudio()
+                        }
+                        .buttonStyle(DSButton(style: .secondary, size: .full))
+                    }
+                }
+                .padding(.top, DS.Spacing.sm)
+            } label: {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(String(localized: "tts.advanced.title", defaultValue: "Advanced playback"))
+                        .dsType(DS.Font.section)
+                    Spacer()
+                    Text(summary(from: snapshot))
+                        .dsType(DS.Font.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    private func summary(from settings: TTSSettings) -> String {
+        String(format: "%.2fx • %.1fs", settings.rate, settings.segmentGap)
     }
 }
