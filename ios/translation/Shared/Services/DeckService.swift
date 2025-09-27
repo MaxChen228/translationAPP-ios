@@ -98,12 +98,27 @@ final class DeckServiceHTTP: DeckService {
         return comps.url ?? correct.deletingLastPathComponent().appendingPathComponent("make_deck")
     }
 
+    private static func makeSession() -> URLSession {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 600
+        config.timeoutIntervalForResource = 1200
+        config.waitsForConnectivity = true
+        return URLSession(configuration: config)
+    }
+
+    private let session: URLSession
+
+    init(session: URLSession = DeckServiceHTTP.makeSession()) {
+        self.session = session
+    }
+
     func makeDeck(name: String, items: [DeckMakeRequest.Item]) async throws -> (name: String, cards: [Flashcard]) {
         let model = UserDefaults.standard.string(forKey: "settings.deckGenerationModel")
         let req = DeckMakeRequest(name: name, items: items, model: model)
         var urlReq = URLRequest(url: try endpointURL())
         urlReq.httpMethod = "POST"
         urlReq.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlReq.timeoutInterval = 1200
         do {
             let enc = JSONEncoder()
             enc.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
@@ -116,7 +131,7 @@ final class DeckServiceHTTP: DeckService {
             AppLog.aiError("make_deck encode request failed: \(error.localizedDescription)")
             throw error
         }
-        let (data, resp) = try await URLSession.shared.data(for: urlReq)
+        let (data, resp) = try await session.data(for: urlReq)
         guard let http = resp as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
             let code = (resp as? HTTPURLResponse)?.statusCode ?? -1
             if let s = String(data: data, encoding: .utf8) { AppLog.aiError("make_deck http \(code) body:\n\(s)") }
