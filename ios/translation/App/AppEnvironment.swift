@@ -23,6 +23,7 @@ final class AppEnvironment: ObservableObject {
     let globalAudio = GlobalAudioSessionManager.shared
     let correctionService: CorrectionRunning
     let workspaceStore: WorkspaceStore
+    let calendarMetrics = CalendarMetricsPreferencesStore()
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -203,5 +204,6 @@ private extension View {
             .environmentObject(env.randomSettings)
             .environmentObject(env.globalAudio)
             .environmentObject(env.workspaceStore)
+            .environmentObject(env.calendarMetrics)
     }
 }

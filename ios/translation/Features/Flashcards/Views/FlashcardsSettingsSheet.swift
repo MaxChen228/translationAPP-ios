@@ -7,7 +7,6 @@ struct FlashcardsSettingsSheet: View {
     @EnvironmentObject private var progressStore: FlashcardProgressStore
     @EnvironmentObject private var bannerCenter: BannerCenter
     @ObservedObject var ttsStore: TTSSettingsStore
-    var onOpenAudio: (() -> Void)? = nil
     var onShuffle: (() -> Void)? = nil
     var onDone: (() -> Void)? = nil
     @State private var showResetConfirm: Bool = false
@@ -32,7 +31,7 @@ struct FlashcardsSettingsSheet: View {
 
             FieldSettingsSection(store: ttsStore)
 
-            AdvancedSettingsCard(store: ttsStore, isExpanded: $showAdvancedSettings, onOpenAudio: onOpenAudio)
+            AdvancedSettingsCard(store: ttsStore, isExpanded: $showAdvancedSettings)
 
             DSOutlineCard {
                 VStack(alignment: .leading, spacing: DS.Spacing.sm) {
@@ -246,7 +245,6 @@ private struct FieldSettingsRow: View {
 private struct AdvancedSettingsCard: View {
     @ObservedObject var store: TTSSettingsStore
     @Binding var isExpanded: Bool
-    var onOpenAudio: (() -> Void)?
 
     var body: some View {
         let snapshot = store.settings
@@ -303,12 +301,6 @@ private struct AdvancedSettingsCard: View {
                         .tint(DS.Palette.primary)
                     }
 
-                    if let onOpenAudio {
-                        Button(String(localized: "tts.openAudioPanel", defaultValue: "Open audio controls")) {
-                            onOpenAudio()
-                        }
-                        .buttonStyle(DSButton(style: .secondary, size: .full))
-                    }
                 }
                 .padding(.top, DS.Spacing.sm)
             } label: {

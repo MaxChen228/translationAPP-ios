@@ -147,7 +147,6 @@ struct FlashcardsView: View {
         .sheet(isPresented: binding(\.showSettings)) {
             FlashcardsSettingsSheet(
                 ttsStore: speechManager.ttsStore,
-                onOpenAudio: { viewModel.showAudioSheet = true },
                 onShuffle: {
                     viewModel.shuffleCards(decksStore: decksStore)
                 },
@@ -158,12 +157,6 @@ struct FlashcardsView: View {
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
                 .presentationContentInteraction(.scrolls)
-        }
-        .sheet(isPresented: binding(\.showAudioSheet)) {
-            FlashcardsAudioSettingsSheet(store: speechManager.ttsStore) { settings in
-                viewModel.startTTS(with: settings)
-            }
-            .presentationDetents([.height(360)])
         }
         .alert(Text("flashcards.emptyDeckReset.title"), isPresented: binding(\.showEmptyResetConfirm)) {
             Button(String(localized: "flashcards.emptyDeckReset.cancel", locale: locale), role: .cancel) { dismiss() }

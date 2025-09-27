@@ -10,7 +10,6 @@ final class FlashcardsViewModel: ObservableObject {
     @Published var dragX: CGFloat = 0
     @Published var swipePreview: AnnotateFeedback? = nil
     @Published var showSettings: Bool = false
-    @Published var showAudioSheet: Bool = false
     @Published var lastTTSSettings: TTSSettings? = nil
     @Published var currentBackComposed: String = ""
     @Published var currentBackComposedCardID: UUID? = nil
