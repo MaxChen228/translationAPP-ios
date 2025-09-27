@@ -2,75 +2,40 @@ import Foundation
 
 struct DeckMakeRequest: Codable {
     struct Item: Codable {
-        let title: String?
-        let explanation: String?
-        let example: String?
+        let i: Int
+        let concept: String
+        let zh: String?
+        let en: String?
         let note: String?
         let source: String?
-        let tags: [String]?
 
-        // Legacy fields retained for backward compatibility/prompt context
-        let en: String?
-        let suggestion: String?
-        let explainZh: String?
-
-        let raw: RawSnapshot?
-
-        struct RawSnapshot: Codable {
-            let id: UUID
-            let title: String
-            let explanation: String
-            let correctExample: String
-            let note: String?
-            let sourceHintID: String?
-            let savedAtISO8601: String
-        }
-
-        private static let isoFormatter: ISO8601DateFormatter = {
-            let formatter = ISO8601DateFormatter()
-            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-            return formatter
-        }()
-
-        static func knowledge(_ payload: KnowledgeSavePayload) -> Item {
+        static func knowledge(_ payload: KnowledgeSavePayload, index: Int) -> Item {
             let trimmedTitle = payload.title.trimmingCharacters(in: .whitespacesAndNewlines)
             let trimmedExplanation = payload.explanation.trimmingCharacters(in: .whitespacesAndNewlines)
             let trimmedExample = payload.correctExample.trimmingCharacters(in: .whitespacesAndNewlines)
             let trimmedNote = payload.note?.trimmingCharacters(in: .whitespacesAndNewlines)
+
+            let candidateConcepts = [trimmedTitle, trimmedExample, trimmedExplanation]
+            let concept = candidateConcepts.first(where: { !$0.isEmpty }) ?? "Concept \(index)"
             let sourceTag = payload.sourceHintID == nil ? "error" : "hint"
 
-            let snapshot = RawSnapshot(
-                id: payload.id,
-                title: payload.title,
-                explanation: payload.explanation,
-                correctExample: payload.correctExample,
-                note: payload.note,
-                sourceHintID: payload.sourceHintID?.uuidString,
-                savedAtISO8601: isoFormatter.string(from: payload.savedAt)
-            )
-
-            let cleanedNote: String? = {
-                guard let trimmedNote, !trimmedNote.isEmpty else { return nil }
-                return trimmedNote
-            }()
+            let zhValue = trimmedExplanation.isEmpty ? nil : trimmedExplanation
+            let enValue = trimmedExample.isEmpty ? nil : trimmedExample
+            let noteValue = (trimmedNote?.isEmpty == false) ? trimmedNote : nil
 
             return Item(
-                title: trimmedTitle.isEmpty ? nil : trimmedTitle,
-                explanation: trimmedExplanation.isEmpty ? nil : trimmedExplanation,
-                example: trimmedExample.isEmpty ? nil : trimmedExample,
-                note: cleanedNote,
-                source: sourceTag,
-                tags: nil,
-                en: trimmedExample.isEmpty ? nil : trimmedExample,
-                suggestion: trimmedTitle.isEmpty ? nil : trimmedTitle,
-                explainZh: trimmedExplanation.isEmpty ? nil : trimmedExplanation,
-                raw: snapshot
+                i: index,
+                concept: concept,
+                zh: zhValue,
+                en: enValue,
+                note: noteValue,
+                source: sourceTag
             )
         }
     }
 
     let name: String
-    let items: [Item]
+    let concepts: [Item]
     let model: String?
 }
 
@@ -83,7 +48,7 @@ struct DeckCardDTO: Codable {
 struct DeckMakeResponse: Codable { let name: String; let cards: [DeckCardDTO] }
 
 protocol DeckService {
-    func makeDeck(name: String, items: [DeckMakeRequest.Item]) async throws -> (name: String, cards: [Flashcard])
+    func makeDeck(name: String, concepts: [DeckMakeRequest.Item]) async throws -> (name: String, cards: [Flashcard])
 }
 
 enum DeckServiceFactory {
@@ -112,9 +77,9 @@ final class DeckServiceHTTP: DeckService {
         self.session = session
     }
 
-    func makeDeck(name: String, items: [DeckMakeRequest.Item]) async throws -> (name: String, cards: [Flashcard]) {
+    func makeDeck(name: String, concepts: [DeckMakeRequest.Item]) async throws -> (name: String, cards: [Flashcard]) {
         let model = UserDefaults.standard.string(forKey: "settings.deckGenerationModel")
-        let req = DeckMakeRequest(name: name, items: items, model: model)
+        let req = DeckMakeRequest(name: name, concepts: concepts, model: model)
         var urlReq = URLRequest(url: try endpointURL())
         urlReq.httpMethod = "POST"
         urlReq.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -142,7 +107,7 @@ final class DeckServiceHTTP: DeckService {
         }
         let dto = try JSONDecoder().decode(DeckMakeResponse.self, from: data)
         let cards = dto.cards.map { Flashcard(front: $0.front, back: $0.back, frontNote: $0.frontNote, backNote: $0.backNote) }
-        AppLog.aiInfo("make_deck name=\(dto.name) items_in=\(items.count) cards_out=\(cards.count)")
+        AppLog.aiInfo("make_deck name=\(dto.name) concepts_in=\(concepts.count) cards_out=\(cards.count)")
         return (dto.name, cards)
     }
 }

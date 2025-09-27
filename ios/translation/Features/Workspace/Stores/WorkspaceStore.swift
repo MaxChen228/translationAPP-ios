@@ -22,6 +22,24 @@ final class WorkspaceStore: ObservableObject {
     weak var localBankStore: LocalBankStore?
     weak var localProgressStore: LocalBankProgressStore?
     weak var practiceRecordsStore: PracticeRecordsStore?
+    var randomPracticeStore: RandomPracticeStore? {
+        didSet {
+            if oldValue !== randomPracticeStore {
+                for vm in viewModels.values {
+                    bindRandomPractice(to: vm)
+                }
+            }
+        }
+    }
+    var settingsStore: AppSettingsStore? {
+        didSet {
+            if oldValue !== settingsStore {
+                for vm in viewModels.values {
+                    bindSettings(to: vm)
+                }
+            }
+        }
+    }
 
     init(correctionRunner: CorrectionRunning = CorrectionServiceFactory.makeDefault()) {
         self.correctionRunner = correctionRunner
@@ -37,6 +55,8 @@ final class WorkspaceStore: ObservableObject {
         let vm = CorrectionViewModel(correctionRunner: correctionRunner, workspaceID: id.uuidString)
 
         bindStores(to: vm)
+        bindSettings(to: vm)
+        bindRandomPractice(to: vm)
         viewModels[id] = vm
         return vm
     }
@@ -50,6 +70,8 @@ final class WorkspaceStore: ObservableObject {
         let vm = CorrectionViewModel(correctionRunner: correctionRunner, workspaceID: ws.id.uuidString)
 
         bindStores(to: vm)
+        bindSettings(to: vm)
+        bindRandomPractice(to: vm)
         viewModels[ws.id] = vm
         return ws
     }
@@ -127,6 +149,14 @@ final class WorkspaceStore: ObservableObject {
         return String(localized: "workspace.status.empty")
     }
 
+    func rebindAllStores() {
+        for vm in viewModels.values {
+            bindStores(to: vm)
+            bindSettings(to: vm)
+            bindRandomPractice(to: vm)
+        }
+    }
+
     // MARK: - Store binding
     private func bindStores(to vm: CorrectionViewModel) {
         if let localBank = localBankStore, let localProgress = localProgressStore {
@@ -137,9 +167,15 @@ final class WorkspaceStore: ObservableObject {
         }
     }
 
-    func rebindAllStores() {
-        for vm in viewModels.values {
-            bindStores(to: vm)
+    private func bindSettings(to vm: CorrectionViewModel) {
+        if let settingsStore {
+            vm.bindSettings(settingsStore)
+        }
+    }
+
+    private func bindRandomPractice(to vm: CorrectionViewModel) {
+        if let randomPracticeStore {
+            vm.bindRandomPracticeStore(randomPracticeStore)
         }
     }
 

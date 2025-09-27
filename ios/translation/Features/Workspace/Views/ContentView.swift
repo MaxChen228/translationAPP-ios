@@ -17,6 +17,7 @@ struct ContentView: View {
     @EnvironmentObject private var bannerCenter: BannerCenter
     @EnvironmentObject private var localBank: LocalBankStore
     @EnvironmentObject private var localProgress: LocalBankProgressStore
+    @EnvironmentObject private var settings: AppSettingsStore
 
     init(correctionRunner: CorrectionRunning = CorrectionServiceFactory.makeDefault()) {
         let viewModel = CorrectionViewModel(correctionRunner: correctionRunner)
@@ -80,19 +81,19 @@ struct ContentView: View {
                         // Separate inputs from results visually（以淡藍髮絲線）
                         DSSeparator(color: DS.Brand.scheme.babyBlue.opacity(DS.Opacity.border))
 
-                            ResultsSectionView(
-                                res: res,
-                                inputZh: session.inputZh,
-                                inputEn: session.inputEn,
-                                highlights: session.filteredHighlights(),
+                        ResultsSectionView(
+                            res: res,
+                            inputZh: session.inputZh,
+                            inputEn: session.inputEn,
+                            highlights: session.filteredHighlights(),
                             correctedHighlights: session.filteredCorrectedHighlights(),
                             errors: session.filteredErrors(),
                             selectedErrorID: vm.binding(\.selectedErrorID),
                             filterType: vm.binding(\.filterType),
                             popoverError: vm.binding(\.popoverError),
                             mode: vm.binding(\.cardMode),
-                                applySuggestion: { session.applySuggestion(for: $0) },
-                                onSave: { item in
+                            applySuggestion: { session.applySuggestion(for: $0) },
+                            onSave: { item in
                                 let trimmedSuggestion = item.suggestion?.trimmingCharacters(in: .whitespacesAndNewlines)
                                 let title = (trimmedSuggestion?.isEmpty == false ? trimmedSuggestion : nil) ?? item.span
                                 savedStore.addKnowledge(
@@ -102,10 +103,11 @@ struct ContentView: View {
                                     note: nil,
                                     savedAt: Date()
                                 )
-                                },
-                                onSavePracticeRecord: {
-                                    vm.savePracticeRecord()
-                                },
+                            },
+                            onSavePracticeRecord: {
+                                vm.savePracticeRecord()
+                            },
+                            autoSaveEnabled: settings.autoSavePracticeRecords,
                             mergeController: mergeController,
                             session: session,
                             onEnterMergeMode: { vm.enterMergeMode(initialErrorID: $0) },
@@ -146,7 +148,7 @@ struct ContentView: View {
                                 vm.loadNextPractice()
                                 focused = .en
                             } label: {
-                                DSIconLabel(textKey: "content.next", systemName: "arrow.right.circle.fill")
+                                DSIconLabel(textKey: "bank.random.title", systemName: "die.face.5")
                                     .lineLimit(1)
                                     .minimumScaleFactor(0.9)
                             }

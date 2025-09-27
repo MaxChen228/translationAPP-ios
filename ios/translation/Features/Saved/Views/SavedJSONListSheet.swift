@@ -191,14 +191,16 @@ struct SavedJSONListSheet: View {
             decoder.dateDecodingStrategy = .iso8601
             var requestItems: [DeckMakeRequest.Item] = []
             requestItems.reserveCapacity(records.count)
+            var nextIndex = 1
             for rec in records {
                 guard let data = rec.json.data(using: .utf8),
                       let payload = try? decoder.decode(KnowledgeSavePayload.self, from: data) else { continue }
-                requestItems.append(.knowledge(payload))
+                requestItems.append(.knowledge(payload, index: nextIndex))
+                nextIndex += 1
             }
 
             do {
-                let (resolvedName, cards) = try await deckService.makeDeck(name: effectiveName, items: requestItems)
+                let (resolvedName, cards) = try await deckService.makeDeck(name: effectiveName, concepts: requestItems)
                 await MainActor.run {
                     _ = decksStore.add(name: resolvedName, cards: cards)
                     showSaveDeckSheet = false

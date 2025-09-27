@@ -45,6 +45,8 @@ final class AppEnvironment: ObservableObject {
         workspaceStore.localBankStore = localBank
         workspaceStore.localProgressStore = localProgress
         workspaceStore.practiceRecordsStore = practiceRecords
+        workspaceStore.randomPracticeStore = randomSettings
+        workspaceStore.settingsStore = settings
         workspaceStore.rebindAllStores()
         settings.objectWillChange
             .sink { [weak self] _ in self?.objectWillChange.send() }

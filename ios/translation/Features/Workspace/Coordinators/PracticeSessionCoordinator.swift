@@ -34,6 +34,7 @@ final class PracticeSessionCoordinator: ObservableObject {
     private weak var localBankStore: LocalBankStore?
     private weak var localProgressStore: LocalBankProgressStore?
     private weak var practiceRecordsStore: PracticeRecordsStore?
+    private weak var randomPracticeStore: RandomPracticeStore?
     private var practiceStartTime: Date? = nil
 
     init(session: CorrectionSessionStore) {
@@ -47,6 +48,10 @@ final class PracticeSessionCoordinator: ObservableObject {
 
     func setPracticeRecordsStore(_ store: PracticeRecordsStore?) {
         self.practiceRecordsStore = store
+    }
+
+    func setRandomPracticeStore(_ store: RandomPracticeStore?) {
+        self.randomPracticeStore = store
     }
 
     func startLocalPractice(bookName: String, item: BankItem, tag: String?) {
@@ -70,23 +75,13 @@ final class PracticeSessionCoordinator: ObservableObject {
     }
 
     func loadNextPractice() throws {
-        guard case .local(let bookName) = practiceSource else {
-            throw PracticeError.notLocal
-        }
-        guard let bank = localBankStore, let progress = localProgressStore else {
-            throw PracticeError.storeMissing
-        }
-
-        let items = bank.items(in: bookName)
-        let next = items.first(where: { item in
-            item.id != currentBankItemId && !progress.isCompleted(book: bookName, itemId: item.id)
-        }) ?? items.first(where: { !progress.isCompleted(book: bookName, itemId: $0.id) })
-
-        guard let candidate = next else {
-            throw PracticeError.noneRemaining
+        if let randomPick = pickRandomPracticeItem() {
+            let (bookName, item) = randomPick
+            startLocalPractice(bookName: bookName, item: item, tag: item.tags?.first)
+            return
         }
 
-        startLocalPractice(bookName: bookName, item: candidate, tag: candidate.tags?.first)
+        try loadSequentialFallback()
     }
 
     func savePracticeRecord(currentInput: String, response: AIResponse?) throws -> PracticeRecord {
@@ -130,5 +125,65 @@ final class PracticeSessionCoordinator: ObservableObject {
         }
 
         return record
+    }
+}
+
+private extension PracticeSessionCoordinator {
+    func loadSequentialFallback() throws {
+        guard case .local(let bookName) = practiceSource else {
+            throw PracticeError.notLocal
+        }
+        guard let bank = localBankStore, let progress = localProgressStore else {
+            throw PracticeError.storeMissing
+        }
+
+        let items = bank.items(in: bookName)
+        let next = items.first(where: { item in
+            item.id != currentBankItemId && !progress.isCompleted(book: bookName, itemId: item.id)
+        }) ?? items.first(where: { !progress.isCompleted(book: bookName, itemId: $0.id) })
+
+        guard let candidate = next else {
+            throw PracticeError.noneRemaining
+        }
+
+        startLocalPractice(bookName: bookName, item: candidate, tag: candidate.tags?.first)
+    }
+
+    func pickRandomPracticeItem() -> (String, BankItem)? {
+        guard let randomPracticeStore,
+              let bank = localBankStore,
+              let progress = localProgressStore else {
+            return nil
+        }
+
+        let availableNames = Set(bank.books.map { $0.name })
+        let normalizedScope = randomPracticeStore.normalizedBookScope(with: availableNames)
+        let allowedNames = normalizedScope.isEmpty ? availableNames : normalizedScope
+        guard !allowedNames.isEmpty else { return nil }
+
+        var pool: [(String, BankItem)] = []
+
+        for book in bank.books where allowedNames.contains(book.name) {
+            for item in book.items {
+                if randomPracticeStore.excludeCompleted,
+                   progress.isCompleted(book: book.name, itemId: item.id) {
+                    continue
+                }
+
+                if !randomPracticeStore.selectedDifficulties.isEmpty,
+                   !randomPracticeStore.selectedDifficulties.contains(item.difficulty) {
+                    continue
+                }
+
+                if randomPracticeStore.filterState.hasActiveFilters {
+                    guard let tags = item.tags, !tags.isEmpty else { continue }
+                    guard randomPracticeStore.filterState.matches(tags: tags) else { continue }
+                }
+
+                pool.append((book.name, item))
+            }
+        }
+
+        return pool.randomElement()
     }
 }

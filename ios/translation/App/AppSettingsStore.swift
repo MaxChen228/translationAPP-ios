@@ -5,6 +5,7 @@ import SwiftUI
 final class AppSettingsStore: ObservableObject {
     private let keyBanner = "settings.bannerSeconds"
     private let keyLang = "settings.language"
+    private let keyAutoSavePractice = "settings.autoSavePracticeRecords"
 
     // Individual model settings
     private let keyCorrectionModel = "settings.correctionModel"
@@ -17,6 +18,10 @@ final class AppSettingsStore: ObservableObject {
     }
     @Published var language: String {
         didSet { UserDefaults.standard.set(language, forKey: keyLang) }
+    }
+
+    @Published var autoSavePracticeRecords: Bool {
+        didSet { UserDefaults.standard.set(autoSavePracticeRecords, forKey: keyAutoSavePractice) }
     }
 
     // Individual AI model settings
@@ -59,6 +64,7 @@ final class AppSettingsStore: ObservableObject {
         let sec = ud.object(forKey: keyBanner) as? Double ?? 2.0
         bannerSeconds = max(0.5, min(10.0, sec))
         language = (ud.string(forKey: keyLang) ?? "zh")
+        autoSavePracticeRecords = ud.object(forKey: keyAutoSavePractice) as? Bool ?? false
 
         // Initialize individual model settings with smart defaults
         correctionModel = AppSettingsStore.validatedModel(ud.string(forKey: keyCorrectionModel), fallback: "gemini-2.5-flash")  // Default to mid-tier speed/quality

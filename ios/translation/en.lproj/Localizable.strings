@@ -475,6 +475,10 @@
 "settings.flashcards.reset.confirm.title" = "Reset all flashcards?";
 "settings.flashcards.reset.confirm.subtitle" = "This sets every card to Unfamiliar and cannot be undone.";
 "settings.flashcards.reset.done" = "Reset to Unfamiliar";
+"settings.practice.title" = "Practice Records";
+"settings.practice.subtitle" = "Choose how graded sessions are stored";
+"settings.practice.autoSave.title" = "Auto-save practice records";
+"settings.practice.autoSave.caption" = "Automatically store each correction result and hide the save button.";
 "flashcards.shuffle" = "Shuffle";
 "flashcards.shuffle.done" = "Deck order reshuffled";
 "flashcards.round.completed" = "Round complete";

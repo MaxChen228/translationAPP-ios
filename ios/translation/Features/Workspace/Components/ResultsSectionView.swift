@@ -16,6 +16,7 @@ struct ResultsSectionView: View {
     let applySuggestion: (ErrorItem) -> Void
     let onSave: (ErrorItem) -> Void
     let onSavePracticeRecord: () -> Void
+    let autoSaveEnabled: Bool
 
     @ObservedObject var mergeController: ErrorMergeController
     @ObservedObject var session: CorrectionSessionStore
@@ -95,18 +96,20 @@ struct ResultsSectionView: View {
                 }
             }
 
-            Button {
-                onSavePracticeRecord()
-            } label: {
-                Label {
-                    Text("practice.save.record")
-                } icon: {
-                    Image(systemName: "square.and.arrow.down")
+            if !autoSaveEnabled {
+                Button {
+                    onSavePracticeRecord()
+                } label: {
+                    Label {
+                        Text("practice.save.record")
+                    } icon: {
+                        Image(systemName: "square.and.arrow.down")
+                    }
                 }
+                .buttonStyle(DSButton(style: .secondary, size: .full))
+                .frame(maxWidth: .infinity)
+                .disabled(mergeController.isMergeMode)
             }
-            .buttonStyle(DSButton(style: .secondary, size: .full))
-            .frame(maxWidth: .infinity)
-            .disabled(mergeController.isMergeMode)
         }
         .padding(.bottom, mergeController.isMergeMode ? DS.Spacing.xl : 0)
         .overlay(alignment: .bottom) {

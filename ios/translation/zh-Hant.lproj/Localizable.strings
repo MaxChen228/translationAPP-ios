@@ -474,6 +474,10 @@
 "settings.flashcards.reset.confirm.title" = "重置所有單字卡？";
 "settings.flashcards.reset.confirm.subtitle" = "此動作會把所有單字卡標記為『不熟悉』，無法復原。";
 "settings.flashcards.reset.done" = "已重置為不熟悉";
+"settings.practice.title" = "練習紀錄";
+"settings.practice.subtitle" = "控制批改結果的儲存方式";
+"settings.practice.autoSave.title" = "批改後自動儲存紀錄";
+"settings.practice.autoSave.caption" = "批改完成後自動保存紀錄並隱藏手動儲存按鈕。";
 "flashcards.shuffle" = "洗牌";
 "flashcards.shuffle.done" = "已重新隨機排序卡片";
 "flashcards.round.completed" = "本輪完成";

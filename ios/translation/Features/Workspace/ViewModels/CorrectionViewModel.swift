@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 import OSLog
+import Combine
 
 @MainActor
 final class CorrectionViewModel: ObservableObject {
@@ -14,6 +15,8 @@ final class CorrectionViewModel: ObservableObject {
 
     private let workspaceID: String
     @Published private(set) var savedHintIDs: Set<UUID> = []
+    private var settingsCancellable: AnyCancellable? = nil
+    private var autoSavePracticeRecords: Bool = false
 
     init(
         correctionRunner: CorrectionRunning = CorrectionServiceFactory.makeDefault(),
@@ -51,6 +54,10 @@ final class CorrectionViewModel: ObservableObject {
 
     func bindPracticeRecordsStore(_ store: PracticeRecordsStore) {
         practice.setPracticeRecordsStore(store)
+    }
+
+    func bindRandomPracticeStore(_ store: RandomPracticeStore) {
+        practice.setRandomPracticeStore(store)
     }
 
     // MARK: - Focus helpers
@@ -96,6 +103,9 @@ final class CorrectionViewModel: ObservableObject {
                 AppEventKeys.score: result.response.score,
                 AppEventKeys.errors: result.response.errors.count,
             ])
+            if autoSavePracticeRecords, practice.practiceSource != nil {
+                savePracticeRecord()
+            }
         } catch {
             let nsError = error as NSError
             errorMessage = nsError.localizedDescription
@@ -187,6 +197,15 @@ final class CorrectionViewModel: ObservableObject {
 
     func resetHintSavedMarkers() {
         savedHintIDs.removeAll()
+    }
+
+    func bindSettings(_ settings: AppSettingsStore) {
+        settingsCancellable = settings.$autoSavePracticeRecords
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] value in
+                self?.autoSavePracticeRecords = value
+            }
+        autoSavePracticeRecords = settings.autoSavePracticeRecords
     }
 
 }

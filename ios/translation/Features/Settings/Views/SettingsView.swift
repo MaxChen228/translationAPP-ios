@@ -22,6 +22,21 @@ struct SettingsView: View {
                     }
                 }
 
+                DSSectionHeader(titleKey: "settings.practice.title", subtitleKey: "settings.practice.subtitle", accentUnderline: true)
+                DSOutlineCard {
+                    Toggle(isOn: Binding(get: { settings.autoSavePracticeRecords }, set: { settings.autoSavePracticeRecords = $0 })) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("settings.practice.autoSave.title")
+                                .dsType(DS.Font.body)
+                                .foregroundStyle(.primary)
+                            Text("settings.practice.autoSave.caption")
+                                .dsType(DS.Font.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .toggleStyle(SwitchToggleStyle(tint: DS.Palette.primary))
+                }
+
                 DSSectionHeader(titleKey: "settings.banner.title", subtitleKey: "settings.banner.subtitle", accentUnderline: true)
                 DSOutlineCard {
                     VStack(alignment: .leading, spacing: 10) {

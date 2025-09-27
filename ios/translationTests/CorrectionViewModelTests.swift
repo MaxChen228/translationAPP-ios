@@ -258,8 +258,9 @@ struct PracticeSessionCoordinatorTests {
         #expect(coordinator.currentPracticeTag == "custom")
     }
 
-    @Test("loadNextPractice selects next unfinished item")
-    func loadNextPracticeSelectsNext() {
+    @Test("loadNextPractice respects random practice filters")
+    @MainActor
+    func loadNextPracticeUsesRandomFilters() {
         UserDefaults.standard.removeObject(forKey: "local.bank.books")
         UserDefaults.standard.removeObject(forKey: "local.bank.progress")
 
@@ -272,6 +273,13 @@ struct PracticeSessionCoordinatorTests {
         let bankStore = LocalBankStore()
         let progressStore = LocalBankProgressStore()
         coordinator.setLocalStores(localBank: bankStore, progress: progressStore)
+
+        let suiteName = "test.random.\(UUID().uuidString)"
+        let randomDefaults = UserDefaults(suiteName: suiteName)!
+        randomDefaults.removePersistentDomain(forName: suiteName)
+        let randomStore = RandomPracticeStore(defaults: randomDefaults)
+        randomStore.setSelectedBooks(["Book"])
+        coordinator.setRandomPracticeStore(randomStore)
 
         let first = BankItem.make(id: "first")
         let second = BankItem.make(id: "second")
